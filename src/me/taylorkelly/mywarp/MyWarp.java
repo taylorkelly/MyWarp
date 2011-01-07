@@ -14,7 +14,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 public class MyWarp extends JavaPlugin{
 	private WMPlayerListener playerListener;
 	public final static String name = "MyWarp";
-	public final static String version = "1.0";
+	public final static String version = "1.1";
 	public MyWarp(PluginLoader pluginLoader, Server instance, PluginDescriptionFile desc, File plugin, ClassLoader cLoader) {
 		super(pluginLoader, instance, desc, plugin, cLoader);
 	}

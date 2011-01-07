@@ -53,6 +53,24 @@ public class Warp {
 		this.permissions = new ArrayList<String>();
 		this.welcomeMessage = "Welcome to '" + name + "'";
 	}
+	
+	public Warp(String name, Location location) {
+		this.index = nextIndex;
+		nextIndex++;
+		this.name = name;
+		this.creator = "No Player";
+		//TODO better world handling
+		this.world = 0;
+		this.x = location.getBlockX();
+		this.y = location.getBlockY();
+		this.z = location.getBlockZ();
+		this.yaw = Math.round(location.getYaw());
+		this.pitch = Math.round(location.getPitch());
+		this.publicAll = true;
+		this.permissions = new ArrayList<String>();
+		this.welcomeMessage = "Welcome to '" + name + "'";
+	}
+	
 
 	private ArrayList<String> processList(String permissions) {
 		String[] names = permissions.split(",");

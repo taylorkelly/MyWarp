@@ -26,6 +26,10 @@ public class WarpList {
 			player.sendMessage("Use: " + Color.RED + "/warp private " + name);
 		}
 	}
+	
+	public void blindAdd(Warp warp) {
+		warpList.put(warp.name, warp);
+	}
 
 	public void warpTo(String name, Player player) {
 		if (warpList.containsKey(name)) {

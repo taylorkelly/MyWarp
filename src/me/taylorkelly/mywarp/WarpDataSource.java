@@ -14,7 +14,7 @@ import java.util.logging.Logger;
 
 
 public class WarpDataSource {
-	private final static String DATABASE = "jdbc:sqlite:" + MyWarp.name + File.separator + "warps.db";
+	public final static String DATABASE = "jdbc:sqlite:" + MyWarp.name + File.separator + "warps.db";
 	private final static String WARP_TABLE = "CREATE TABLE `warpTable` (" + "`id` INTEGER PRIMARY KEY," + "`name` varchar(32) NOT NULL DEFAULT 'warp',"
 			+ "`creator` varchar(32) NOT NULL DEFAULT 'Player'," + "`world` tinyint NOT NULL DEFAULT '0'," + "`x` int NOT NULL DEFAULT '0',"
 			+ "`y` tinyint NOT NULL DEFAULT '0'," + "`z` int NOT NULL DEFAULT '0'," + "`yaw` smallint NOT NULL DEFAULT '0'," + "`pitch` smallint NOT NULL DEFAULT '0'," + "`publicAll` boolean NOT NULL DEFAULT '1',"
@@ -139,7 +139,6 @@ public class WarpDataSource {
 	public static void addWarp(Warp warp) {
 		Connection conn = null;
 		PreparedStatement ps = null;
-		ResultSet set = null;
 		Logger log = Logger.getLogger("Minecraft");
 		try {
 			Class.forName("org.sqlite.JDBC");  
@@ -167,9 +166,6 @@ public class WarpDataSource {
 			try {
 				if (ps != null) {
 					ps.close();
-				}
-				if (set != null) {
-					set.close();
 				}
 				if (conn != null)
 					conn.close();

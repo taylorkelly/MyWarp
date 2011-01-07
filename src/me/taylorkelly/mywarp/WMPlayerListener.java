@@ -7,10 +7,12 @@ import org.bukkit.event.player.PlayerListener;
 import org.bukkit.plugin.Plugin;
 
 public class WMPlayerListener extends PlayerListener{
+	private boolean warning;
 	private Plugin plugin;
 	private WarpList warpList;
 	
 	public WMPlayerListener(Plugin plugin, WarpList warpList) {
+		warning = false;
 		this.plugin = plugin;
 		this.warpList = warpList;
 	}
@@ -23,9 +25,22 @@ public class WMPlayerListener extends PlayerListener{
 		if (split[0].equalsIgnoreCase("/warp")) {
 			event.setCancelled(true);
 			/**
+			 * /warp convert
+			 */
+			if (split.length == 2 && split[1].equalsIgnoreCase("convert")) {
+				if(!warning) {
+					player.sendMessage(Color.RED + "Warning: " + Color.WHITE + "Only use a copy of warps.txt.");
+					player.sendMessage("This will delete the warps.txt it uses");
+					player.sendMessage("Use " + Color.RED + "'/warp convert'" + Color.WHITE + " again to confirm.");
+					warning = true;
+				} else {
+					Converter.convert(player, plugin.getServer(), warpList);
+					warning = false;
+				}
+			/**
 			 * /warp create <name>
 			 */
-			if (split.length > 2 && split[1].equalsIgnoreCase("create")) {
+			} else if (split.length > 2 && split[1].equalsIgnoreCase("create")) {
 				String name = "";
 				for(int i = 2; i < split.length; i++) {
 					name += split[i];
