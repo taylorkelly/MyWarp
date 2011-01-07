@@ -14,7 +14,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 public class MyWarp extends JavaPlugin{
 	private WMPlayerListener playerListener;
 	public final static String name = "MyWarp";
-	public final static String version = "1.1";
+	public final static String version = "1.2";
 	public MyWarp(PluginLoader pluginLoader, Server instance, PluginDescriptionFile desc, File plugin, ClassLoader cLoader) {
 		super(pluginLoader, instance, desc, plugin, cLoader);
 	}
@@ -26,18 +26,21 @@ public class MyWarp extends JavaPlugin{
 	public void onEnable() {
 		Logger log = Logger.getLogger("Minecraft");
 
-		if (!new File(name).exists()) {
-			try {
-				(new File(name)).mkdir();
-			} catch (Exception e) {
-				log.log(Level.SEVERE, "[MYWARP]: Unable to create MyWarp/ directory");
-			}
+		if(new File("MyWarp").exists() && new File("MyWarp", "warps.db").exists()) {
+			updateFiles();
 		}
 		
 		WarpList warpList = new WarpList(getServer());
 		playerListener = new WMPlayerListener(this, warpList);
 		getServer().getPluginManager().registerEvent(Event.Type.PLAYER_COMMAND, playerListener, Priority.Normal, this);	
 		log.info(name + " " + version + " enabled");
+	}
+
+	private void updateFiles() {
+		File file = new File("MyWarp", "warps.db");
+		File folder = new File("MyWarp");
+		file.renameTo(new File("homes-warps.db"));
+		folder.delete();
 	}
 
 }
