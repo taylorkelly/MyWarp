@@ -1,6 +1,11 @@
 package me.taylorkelly.mywarp;
 
+import java.text.Collator;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.List;
 
 import org.bukkit.*;
 
@@ -147,5 +152,57 @@ public class WarpList {
 		} else {
 			player.sendMessage(Color.RED + "No such warp '" + name + "'");
 		}
+	}
+	
+	public ArrayList<Warp> getSortedWarps(Player player, int start, int size) {
+		ArrayList<Warp> ret = new ArrayList<Warp>();
+		List<String> names = new ArrayList<String>(warpList.keySet());
+		Collator collator = Collator.getInstance();
+	    collator.setStrength(Collator.SECONDARY);
+		Collections.sort(names, collator);
+		
+		int index = 0;
+		int currentCount = 0;
+		while(index < names.size() && ret.size() < size) {
+			String currName = names.get(index);
+			Warp warp = warpList.get(currName);
+			if(warp.playerCanWarp(player.getName())) {
+				if(currentCount >= start) {
+					ret.add(warp);
+				} else {
+					currentCount++;
+				}
+			}
+			index++;
+		}
+		return ret;
+	}
+	
+	public int getSize() {
+		return warpList.size();
+	}
+	
+	
+	public MatchList getMatches(String name, Player player) {
+		ArrayList<Warp> exactMatches = new ArrayList<Warp>();
+		ArrayList<Warp> matches = new ArrayList<Warp>();
+		
+		List<String> names = new ArrayList<String>(warpList.keySet());
+		Collator collator = Collator.getInstance();
+	    collator.setStrength(Collator.SECONDARY);
+		Collections.sort(names, collator);
+		
+		for(int i = 0; i < names.size(); i++) {
+			String currName = names.get(i);
+			Warp warp = warpList.get(currName);
+			if(warp.playerCanWarp(player.getName())) {
+				if(warp.name.equalsIgnoreCase(name)) {
+					exactMatches.add(warp);
+				} else if(warp.name.toLowerCase().contains(name.toLowerCase())) {
+					matches.add(warp);
+				}				
+			}	
+		}
+		return new MatchList(exactMatches, matches);
 	}
 }
