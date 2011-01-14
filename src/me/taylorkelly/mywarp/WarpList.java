@@ -21,14 +21,14 @@ public class WarpList {
 
 	public void addWarp(String name, Player player) {
 		if (warpList.containsKey(name)) {
-			player.sendMessage(Color.RED + "Warp called '" + name + "' already exists.");
+			player.sendMessage(ChatColor.RED + "Warp called '" + name + "' already exists.");
 		} else {
 			Warp warp = new Warp(name, player);
 			warpList.put(name, warp);
 			WarpDataSource.addWarp(warp);
-			player.sendMessage(Color.AQUA + "Successfully created '" + name + "'");
+			player.sendMessage(ChatColor.AQUA + "Successfully created '" + name + "'");
 			player.sendMessage("If you'd like to privatize it,");
-			player.sendMessage("Use: " + Color.RED + "/warp private " + name);
+			player.sendMessage("Use: " + ChatColor.RED + "/warp private " + name);
 		}
 	}
 	
@@ -41,12 +41,12 @@ public class WarpList {
 			Warp warp = warpList.get(name);
 			if (warp.playerCanWarp(player.getName())) {
 				warp.warp(player);
-				player.sendMessage(Color.AQUA + warp.welcomeMessage);
+				player.sendMessage(ChatColor.AQUA + warp.welcomeMessage);
 			} else {
-				player.sendMessage(Color.RED + "You do not have permission to warp to '" + name + "'");
+				player.sendMessage(ChatColor.RED + "You do not have permission to warp to '" + name + "'");
 			}
 		} else {
-			player.sendMessage(Color.RED + "No such warp '" + name + "'");
+			player.sendMessage(ChatColor.RED + "No such warp '" + name + "'");
 		}
 	}
 
@@ -56,12 +56,12 @@ public class WarpList {
 			if (warp.playerIsCreator(player.getName())) {
 				warpList.remove(name);
 				WarpDataSource.deleteWarp(warp);
-				player.sendMessage(Color.AQUA + "You have deleted '" + name + "'");
+				player.sendMessage(ChatColor.AQUA + "You have deleted '" + name + "'");
 			} else {
-				player.sendMessage(Color.RED + "You do not have permission to delete '" + name + "'");
+				player.sendMessage(ChatColor.RED + "You do not have permission to delete '" + name + "'");
 			}
 		} else {
-			player.sendMessage(Color.RED + "No such warp '" + name + "'");
+			player.sendMessage(ChatColor.RED + "No such warp '" + name + "'");
 		}
 	}
 
@@ -71,14 +71,14 @@ public class WarpList {
 			if (warp.playerIsCreator(player.getName())) {
 				warp.publicAll = false;
 				WarpDataSource.publicizeWarp(warp, false);
-				player.sendMessage(Color.AQUA + "You have privatized '" + name + "'");
+				player.sendMessage(ChatColor.AQUA + "You have privatized '" + name + "'");
 				player.sendMessage("If you'd like to invite others to it,");
-				player.sendMessage("Use: " + Color.RED + "/warp invite <player> " + name);
+				player.sendMessage("Use: " + ChatColor.RED + "/warp invite <player> " + name);
 			} else {
-				player.sendMessage(Color.RED + "You do not have permission to privatize '" + name + "'");
+				player.sendMessage(ChatColor.RED + "You do not have permission to privatize '" + name + "'");
 			}
 		} else {
-			player.sendMessage(Color.RED + "No such warp '" + name + "'");
+			player.sendMessage(ChatColor.RED + "No such warp '" + name + "'");
 		}
 	}
 
@@ -87,27 +87,27 @@ public class WarpList {
 			Warp warp = warpList.get(name);
 			if (warp.playerIsCreator(player.getName())) {
 				if (warp.playerIsInvited(inviteeName)) {
-					player.sendMessage(Color.RED + inviteeName + " is already invited to this warp.");
+					player.sendMessage(ChatColor.RED + inviteeName + " is already invited to this warp.");
 				} else if(warp.playerIsCreator(inviteeName)) {
-					player.sendMessage(Color.RED + inviteeName + " is the creator, of course he's the invited!");
+					player.sendMessage(ChatColor.RED + inviteeName + " is the creator, of course he's the invited!");
 				}else {
 					warp.invite(inviteeName);
 					WarpDataSource.updatePermissions(warp);
-					player.sendMessage(Color.AQUA + "You have invited " + inviteeName + " to '" + name + "'");
+					player.sendMessage(ChatColor.AQUA + "You have invited " + inviteeName + " to '" + name + "'");
 					if (warp.publicAll) {
-						player.sendMessage(Color.RED + "But '" + name + "' is still public.");
+						player.sendMessage(ChatColor.RED + "But '" + name + "' is still public.");
 					}
 					Player match = server.getPlayer(inviteeName);
 					if (match != null) {
-						match.sendMessage(Color.AQUA + "You've been invited to warp '" + name + "' by " + player.getName());
-						match.sendMessage("Use: " + Color.RED + "/warp " + name + Color.WHITE + " to warp to it.");
+						match.sendMessage(ChatColor.AQUA + "You've been invited to warp '" + name + "' by " + player.getName());
+						match.sendMessage("Use: " + ChatColor.RED + "/warp " + name + ChatColor.WHITE + " to warp to it.");
 					}
 				}
 			} else {
-				player.sendMessage(Color.RED + "You do not have permission to invite players to '" + name + "'");
+				player.sendMessage(ChatColor.RED + "You do not have permission to invite players to '" + name + "'");
 			}
 		} else {
-			player.sendMessage(Color.RED + "No such warp '" + name + "'");
+			player.sendMessage(ChatColor.RED + "No such warp '" + name + "'");
 		}
 	}
 
@@ -117,12 +117,12 @@ public class WarpList {
 			if (warp.playerIsCreator(player.getName())) {
 				warp.publicAll = true;
 				WarpDataSource.publicizeWarp(warp, true);
-				player.sendMessage(Color.AQUA + "You have publicized '" + name + "'");
+				player.sendMessage(ChatColor.AQUA + "You have publicized '" + name + "'");
 			} else {
-				player.sendMessage(Color.RED + "You do not have permission to publicize '" + name + "'");
+				player.sendMessage(ChatColor.RED + "You do not have permission to publicize '" + name + "'");
 			}
 		} else {
-			player.sendMessage(Color.RED + "No such warp '" + name + "'");
+			player.sendMessage(ChatColor.RED + "No such warp '" + name + "'");
 		}
 	}
 
@@ -131,26 +131,26 @@ public class WarpList {
 			Warp warp = warpList.get(name);
 			if (warp.playerIsCreator(player.getName())) {
 				if (!warp.playerIsInvited(inviteeName)) {
-					player.sendMessage(Color.RED + inviteeName + " is not invited to this warp.");
+					player.sendMessage(ChatColor.RED + inviteeName + " is not invited to this warp.");
 				} else if (warp.playerIsCreator(inviteeName)) {
-					player.sendMessage(Color.RED + "You can't uninvite yourself. You're the creator!");
+					player.sendMessage(ChatColor.RED + "You can't uninvite yourself. You're the creator!");
 				} else {
 					warp.uninvite(inviteeName);
 					WarpDataSource.updatePermissions(warp);
-					player.sendMessage(Color.AQUA + "You have uninvited " + inviteeName + " from '" + name + "'");
+					player.sendMessage(ChatColor.AQUA + "You have uninvited " + inviteeName + " from '" + name + "'");
 					if (warp.publicAll) {
-						player.sendMessage(Color.RED + "But '" + name + "' is still public.");
+						player.sendMessage(ChatColor.RED + "But '" + name + "' is still public.");
 					}
 					Player match = server.getPlayer(inviteeName);
 					if (match != null) {
-						match.sendMessage(Color.RED + "You've been uninvited to warp '" + name + "' by " + player.getName() + ". Sorry.");
+						match.sendMessage(ChatColor.RED + "You've been uninvited to warp '" + name + "' by " + player.getName() + ". Sorry.");
 					}
 				}
 			} else {
-				player.sendMessage(Color.RED + "You do not have permission to uninvite players from '" + name + "'");
+				player.sendMessage(ChatColor.RED + "You do not have permission to uninvite players from '" + name + "'");
 			}
 		} else {
-			player.sendMessage(Color.RED + "No such warp '" + name + "'");
+			player.sendMessage(ChatColor.RED + "No such warp '" + name + "'");
 		}
 	}
 	

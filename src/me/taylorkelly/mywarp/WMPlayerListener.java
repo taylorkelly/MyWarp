@@ -1,6 +1,6 @@
 package me.taylorkelly.mywarp;
 
-import org.bukkit.Color;
+import org.bukkit.ChatColor;
 import org.bukkit.Player;
 import org.bukkit.event.player.PlayerChatEvent;
 import org.bukkit.event.player.PlayerListener;
@@ -29,9 +29,9 @@ public class WMPlayerListener extends PlayerListener {
 			 */
 			if (split.length == 2 && split[1].equalsIgnoreCase("convert")) {
 				if (!warning) {
-					player.sendMessage(Color.RED + "Warning: " + Color.WHITE + "Only use a copy of warps.txt.");
+					player.sendMessage(ChatColor.RED + "Warning: " + ChatColor.WHITE + "Only use a copy of warps.txt.");
 					player.sendMessage("This will delete the warps.txt it uses");
-					player.sendMessage("Use " + Color.RED + "'/warp convert'" + Color.WHITE + " again to confirm.");
+					player.sendMessage("Use " + ChatColor.RED + "'/warp convert'" + ChatColor.WHITE + " again to confirm.");
 					warning = true;
 				} else {
 					Converter.convert(player, plugin.getServer(), warpList);
@@ -47,10 +47,10 @@ public class WMPlayerListener extends PlayerListener {
 				if(split.length == 3) {
 					int page = Integer.parseInt(split[2]);
 					if(page < 1) {
-						player.sendMessage(Color.RED + "Page number can't be below 1.");
+						player.sendMessage(ChatColor.RED + "Page number can't be below 1.");
 						return;
 					} else if(page > lister.getMaxPages()) {
-						player.sendMessage(Color.RED + "There are only " + lister.getMaxPages() + " pages of warps");
+						player.sendMessage(ChatColor.RED + "There are only " + lister.getMaxPages() + " pages of warps");
 						return;
 					}
 					lister.setPage(page);
@@ -168,7 +168,7 @@ public class WMPlayerListener extends PlayerListener {
 				warpList.warpTo(name, player);
 			} else {
 				// TODO help?
-				player.sendMessage(Color.RED + "Invalid /warp command");
+				player.sendMessage(ChatColor.RED + "Invalid /warp command");
 			}
 		}
 	}

@@ -3,7 +3,7 @@ package me.taylorkelly.mywarp;
 import java.util.ArrayList;
 
 import org.angelsl.minecraft.randomshit.fontwidth.MinecraftFontWidthCalculator;
-import org.bukkit.Color;
+import org.bukkit.ChatColor;
 import org.bukkit.Player;
 
 public class Lister {
@@ -33,7 +33,7 @@ public class Lister {
 
 	public void list() {
 		String intro = "-------------------- Page " + page + "/" + maxPages + " --------------------";
-		player.sendMessage(Color.YELLOW + intro);
+		player.sendMessage(ChatColor.YELLOW + intro);
 		for(Warp warp: sortedWarps) {
 			String name = warp.name;
 			String creator = (warp.creator.equalsIgnoreCase(player.getName()))?"you":warp.creator;
@@ -42,11 +42,11 @@ public class Lister {
 			int z = warp.z;
 			String color;
 			if(warp.playerIsCreator(player.getName())) {
-				color = Color.AQUA.toString();
+				color = ChatColor.AQUA.toString();
 			} else if(warp.publicAll) {
-				color = Color.GREEN.toString();
+				color = ChatColor.GREEN.toString();
 			} else {
-				color = Color.RED.toString();
+				color = ChatColor.RED.toString();
 			}
 			
 		
@@ -58,9 +58,9 @@ public class Lister {
 			
 			int nameLength = MinecraftFontWidthCalculator.getStringWidth(name);
 			if(left > nameLength) {
-				name = "'" + name + "'" + Color.WHITE + creatorString  + whitespace(left - nameLength);
+				name = "'" + name + "'" + ChatColor.WHITE + creatorString  + whitespace(left - nameLength);
 			} else if (left < nameLength) {
-				name = "'" + substring(name, left) + "'" + Color.WHITE + creatorString;
+				name = "'" + substring(name, left) + "'" + ChatColor.WHITE + creatorString;
 			}
 
 			player.sendMessage(color + name + location);

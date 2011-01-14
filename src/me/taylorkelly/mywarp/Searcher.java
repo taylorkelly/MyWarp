@@ -3,7 +3,7 @@ package me.taylorkelly.mywarp;
 import java.util.ArrayList;
 
 import org.angelsl.minecraft.randomshit.fontwidth.MinecraftFontWidthCalculator;
-import org.bukkit.Color;
+import org.bukkit.ChatColor;
 import org.bukkit.Player;
 
 public class Searcher {
@@ -34,42 +34,42 @@ public class Searcher {
 	public void search() {
 
 		if (exactMatches.size() == 0 && matches.size() == 0) {
-			player.sendMessage(Color.RED + "No warp matches for search: " + Color.GRAY + query);
+			player.sendMessage(ChatColor.RED + "No warp matches for search: " + ChatColor.GRAY + query);
 		} else {
 			if (exactMatches.size() > 0) {
-				player.sendMessage(Color.YELLOW + "Exact matches for search: " + Color.GRAY + query);
+				player.sendMessage(ChatColor.YELLOW + "Exact matches for search: " + ChatColor.GRAY + query);
 				for (Warp warp : exactMatches) {
 					String color;
 					if (warp.playerIsCreator(player.getName())) {
-						color = Color.AQUA.toString();
+						color = ChatColor.AQUA.toString();
 					} else if (warp.publicAll) {
-						color = Color.GREEN.toString();
+						color = ChatColor.GREEN.toString();
 					} else {
-						color = Color.RED.toString();
+						color = ChatColor.RED.toString();
 					}
 					String creator = (warp.creator.equalsIgnoreCase(player.getName())) ? "you" : warp.creator;
 					int x = warp.x;
 					int y = warp.y;
 					int z = warp.z;
-					player.sendMessage(color + "'" + warp.name + "'" + Color.WHITE + " by " + creator + " @(" + x + ", " + y + ", " + z + ")");
+					player.sendMessage(color + "'" + warp.name + "'" + ChatColor.WHITE + " by " + creator + " @(" + x + ", " + y + ", " + z + ")");
 				}
 			}
 			if (matches.size() > 0) {
-				player.sendMessage(Color.YELLOW + "Partial matches for search: " + Color.GRAY + query);
+				player.sendMessage(ChatColor.YELLOW + "Partial matches for search: " + ChatColor.GRAY + query);
 				for (Warp warp : matches) {
 					String color;
 					if (warp.playerIsCreator(player.getName())) {
-						color = Color.AQUA.toString();
+						color = ChatColor.AQUA.toString();
 					} else if (warp.publicAll) {
-						color = Color.GREEN.toString();
+						color = ChatColor.GREEN.toString();
 					} else {
-						color = Color.RED.toString();
+						color = ChatColor.RED.toString();
 					}
 					String creator = (warp.creator.equalsIgnoreCase(player.getName())) ? "you" : warp.creator;
 					int x = warp.x;
 					int y = warp.y;
 					int z = warp.z;
-					player.sendMessage(color + "'" + warp.name + "'" + Color.WHITE + " by " + creator + " @(" + x + ", " + y + ", " + z + ")");
+					player.sendMessage(color + "'" + warp.name + "'" + ChatColor.WHITE + " by " + creator + " @(" + x + ", " + y + ", " + z + ")");
 				}
 			}
 		}

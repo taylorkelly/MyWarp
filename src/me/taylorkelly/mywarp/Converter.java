@@ -63,11 +63,11 @@ public class Converter {
 			file.delete();
 			player.sendMessage("Successfully imported " + size + " warps.");
 		} catch (FileNotFoundException e) {
-			player.sendMessage(Color.RED + "Error: 'warps.txt' doesn't exist.");
+			player.sendMessage(ChatColor.RED + "Error: 'warps.txt' doesn't exist.");
 		} catch (ClassNotFoundException e) {
-			player.sendMessage(Color.RED + "Error: Cannot find SQLite library");
+			player.sendMessage(ChatColor.RED + "Error: Cannot find SQLite library");
 		} catch (SQLException e) {
-			player.sendMessage(Color.RED + "Error: SQLite Exception");
+			player.sendMessage(ChatColor.RED + "Error: SQLite Exception");
 		} finally {
 			try {
 				if (ps != null) {
@@ -76,7 +76,7 @@ public class Converter {
 				if (conn != null)
 					conn.close();
 			} catch (SQLException ex) {
-				player.sendMessage(Color.RED + "Error: SQLite Exception (on close)");
+				player.sendMessage(ChatColor.RED + "Error: SQLite Exception (on close)");
 			}
 		}
 	}
