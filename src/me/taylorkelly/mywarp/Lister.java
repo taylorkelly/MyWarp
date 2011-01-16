@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 import org.angelsl.minecraft.randomshit.fontwidth.MinecraftFontWidthCalculator;
 import org.bukkit.ChatColor;
-import org.bukkit.Player;
+import org.bukkit.entity.Player;
 
 public class Lister {
 	private WarpList warpList;

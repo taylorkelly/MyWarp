@@ -1,7 +1,6 @@
 package me.taylorkelly.mywarp;
 
 import java.io.File;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.bukkit.Server;
@@ -15,8 +14,8 @@ public class MyWarp extends JavaPlugin{
 	private WMPlayerListener playerListener;
 	public final String name = this.getDescription().getName();
 	public final String version = this.getDescription().getVersion();
-	public MyWarp(PluginLoader pluginLoader, Server instance, PluginDescriptionFile desc, File plugin, ClassLoader cLoader) {
-		super(pluginLoader, instance, desc, plugin, cLoader);
+	public MyWarp(PluginLoader pluginLoader, Server instance, PluginDescriptionFile desc, File directory, File plugin, ClassLoader cLoader) {
+		super(pluginLoader, instance, desc, directory, plugin, cLoader);
 	}
 
 	@Override

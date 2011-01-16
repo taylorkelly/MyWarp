@@ -1,7 +1,7 @@
 package me.taylorkelly.mywarp;
 
 import org.bukkit.ChatColor;
-import org.bukkit.Player;
+import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerChatEvent;
 import org.bukkit.event.player.PlayerListener;
 import org.bukkit.plugin.Plugin;
@@ -159,7 +159,11 @@ public class WMPlayerListener extends PlayerListener {
 			} else if (split.length > 1) {
 				// TODO ChunkLoading
 				String name = "";
-				for (int i = 1; i < split.length; i++) {
+				int start = 1;
+				if (split[1].equalsIgnoreCase("to") && split.length > 2) {
+					start++;
+				}
+				for (int i = start; i < split.length; i++) {
 					name += split[i];
 					if (i + 1 < split.length)
 						name += " ";

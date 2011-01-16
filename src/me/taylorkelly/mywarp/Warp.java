@@ -2,7 +2,9 @@ package me.taylorkelly.mywarp;
 
 import java.util.ArrayList;
 
-import org.bukkit.*;
+import org.bukkit.Location;
+import org.bukkit.World;
+import org.bukkit.entity.Player;
 
 public class Warp {
 	public int index;
