@@ -26,7 +26,7 @@ public class WarpList {
 					+ "' already exists.");
 		} else {
 			Warp warp = new Warp(name, player);
-			warpList.put(name, warp);
+			warpList.put(name.toLowerCase(), warp);
 			WarpDataSource.addWarp(warp);
 			player.sendMessage(ChatColor.AQUA + "Successfully created '" + name
 					+ "'");
@@ -37,12 +37,12 @@ public class WarpList {
 	}
 
 	public void blindAdd(Warp warp) {
-		warpList.put(warp.name, warp);
+		warpList.put(warp.name.toLowerCase(), warp);
 	}
 
 	public void warpTo(String name, Player player) {
-		if (warpList.containsKey(name)) {
-			Warp warp = warpList.get(name);
+		if (warpList.containsKey(name.toLowerCase())) {
+			Warp warp = warpList.get(name.toLowerCase());
 			if (warp.playerCanWarp(player.getName())) {
 				warp.warp(player);
 				player.sendMessage(ChatColor.AQUA + warp.welcomeMessage);

@@ -62,7 +62,7 @@ public class WarpDataSource {
 				String welcomeMessage = set.getString("welcomeMessage");
 				Warp warp = new Warp(index, name, creator, world, x, y, z, yaw,
 						pitch, publicAll, permissions, welcomeMessage);
-				ret.put(name, warp);
+				ret.put(name.toLowerCase(), warp);
 			}
 			log.info("[MYWARP]: " + size + " warps loaded");
 		} catch (SQLException ex) {
