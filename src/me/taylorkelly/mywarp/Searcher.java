@@ -47,9 +47,9 @@ public class Searcher {
 						color = ChatColor.RED.toString();
 					}
 					String creator = (warp.creator.equalsIgnoreCase(player.getName())) ? "you" : warp.creator;
-					int x = warp.x;
-					int y = warp.y;
-					int z = warp.z;
+					int x = (int) Math.round(warp.x);
+					int y = (int) Math.round(warp.y);
+					int z = (int) Math.round(warp.z);
 					player.sendMessage(color + "'" + warp.name + "'" + ChatColor.WHITE + " by " + creator + " @(" + x + ", " + y + ", " + z + ")");
 				}
 			}
@@ -65,9 +65,9 @@ public class Searcher {
 						color = ChatColor.RED.toString();
 					}
 					String creator = (warp.creator.equalsIgnoreCase(player.getName())) ? "you" : warp.creator;
-					int x = warp.x;
-					int y = warp.y;
-					int z = warp.z;
+					int x = (int) Math.round(warp.x);
+					int y = (int) Math.round(warp.y);
+					int z = (int) Math.round(warp.z);
 					player.sendMessage(color + "'" + warp.name + "'" + ChatColor.WHITE + " by " + creator + " @(" + x + ", " + y + ", " + z + ")");
 				}
 			}

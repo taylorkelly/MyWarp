@@ -59,9 +59,9 @@ public class Lister {
 		for(Warp warp: sortedWarps) {
 			String name = warp.name;
 			String creator = (warp.creator.equalsIgnoreCase(player.getName()))?"you":warp.creator;
-			int x = warp.x;
-			int y = warp.y;
-			int z = warp.z;
+			int x = (int) Math.round(warp.x);
+			int y = (int) Math.round(warp.y);
+			int z = (int) Math.round(warp.z);
 			String color;
 			if(warp.playerIsCreator(player.getName())) {
 				color = ChatColor.AQUA.toString();

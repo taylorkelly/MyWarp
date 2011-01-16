@@ -51,9 +51,9 @@ public class Converter {
 				ps.setString(2, warp.name);
 				ps.setString(3, warp.creator);
 				ps.setInt(4, warp.world);
-				ps.setInt(5, warp.x);
-				ps.setInt(6, warp.y);
-				ps.setInt(7, warp.z);
+				ps.setDouble(5, warp.x);
+				ps.setDouble(6, warp.y);
+				ps.setDouble(7, warp.z);
 				ps.setInt(8, warp.yaw);
 				ps.setInt(9, warp.pitch);
 				ps.setBoolean(10, warp.publicAll);
