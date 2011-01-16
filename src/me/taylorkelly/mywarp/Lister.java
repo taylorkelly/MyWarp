@@ -31,8 +31,30 @@ public class Lister {
 		sortedWarps = warpList.getSortedWarps(player, start, WARPS_PER_PAGE);
 	}
 
+	private int getWidth(int number, int base) {
+		int width = 1;
+		while (number >= base) {
+			number /= base;
+			width++;
+		}
+		return width;
+	}
+	
 	public void list() {
-		String intro = "-------------------- Page " + page + "/" + maxPages + " --------------------";
+		// Generate header with the same length every time
+		String intro = "";
+		int width = 20 - this.getWidth(page, 10);
+		while (width > 0) {
+			intro += "-";
+			width--;
+		}
+		intro += " Page " + page + "/" + maxPages + " ";
+		width = 20 - this.getWidth(maxPages, 10);
+		while (width > 0) {
+			intro += "-";
+			width--;
+		}
+		
 		player.sendMessage(ChatColor.YELLOW + intro);
 		for(Warp warp: sortedWarps) {
 			String name = warp.name;
