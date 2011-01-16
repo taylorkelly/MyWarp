@@ -16,8 +16,8 @@ import java.util.logging.Logger;
 public class WarpDataSource {
 	public final static String DATABASE = "jdbc:sqlite:homes-warps.db";
 	private final static String WARP_TABLE = "CREATE TABLE `warpTable` (" + "`id` INTEGER PRIMARY KEY," + "`name` varchar(32) NOT NULL DEFAULT 'warp',"
-			+ "`creator` varchar(32) NOT NULL DEFAULT 'Player'," + "`world` tinyint NOT NULL DEFAULT '0'," + "`x` int NOT NULL DEFAULT '0',"
-			+ "`y` tinyint NOT NULL DEFAULT '0'," + "`z` int NOT NULL DEFAULT '0'," + "`yaw` smallint NOT NULL DEFAULT '0'," + "`pitch` smallint NOT NULL DEFAULT '0'," + "`publicAll` boolean NOT NULL DEFAULT '1',"
+			+ "`creator` varchar(32) NOT NULL DEFAULT 'Player'," + "`world` tinyint NOT NULL DEFAULT '0'," + "`x` DOUBLE NOT NULL DEFAULT '0',"
+			+ "`y` tinyint NOT NULL DEFAULT '0'," + "`z` DOUBLE NOT NULL DEFAULT '0'," + "`yaw` smallint NOT NULL DEFAULT '0'," + "`pitch` smallint NOT NULL DEFAULT '0'," + "`publicAll` boolean NOT NULL DEFAULT '1',"
 			+ "`permissions` varchar(150) NOT NULL DEFAULT ''," + "`welcomeMessage` varchar(100) NOT NULL DEFAULT ''" +");";
 
 	public static void initialize() {
@@ -149,9 +149,9 @@ public class WarpDataSource {
         	ps.setString(2, warp.name);
         	ps.setString(3, warp.creator);
         	ps.setInt(4, warp.world);
-        	ps.setInt(5, warp.x);
+        	ps.setDouble(5, warp.x);
         	ps.setInt(6, warp.y);
-          	ps.setInt(7, warp.z);
+          	ps.setDouble(7, warp.z);
         	ps.setInt(8, warp.yaw);
         	ps.setInt(9, warp.pitch);
         	ps.setBoolean(10, warp.publicAll);
@@ -269,5 +269,37 @@ public class WarpDataSource {
 			}
 		}
 	}
+
+    public static void updateCreator(Warp warp) {
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet set = null;
+        Logger log = Logger.getLogger("Minecraft");
+        try {
+            Class.forName("org.sqlite.JDBC");  
+            conn = DriverManager.getConnection(DATABASE);
+            ps = conn.prepareStatement("UPDATE warpTable SET creator = ? WHERE id = ?");
+            ps.setString(1, warp.creator);
+            ps.setInt(2, warp.index);
+            ps.executeUpdate();
+        } catch (SQLException ex) {
+            log.log(Level.SEVERE, "[MYWARP]: Warp Creator Exception", ex);
+        } catch (ClassNotFoundException e) {
+            log.log(Level.SEVERE, "[MYWARP]: Error loading org.sqlite.JDBC");
+        } finally {
+            try {
+                if (ps != null) {
+                    ps.close();
+                }
+                if (set != null) {
+                    set.close();
+                }
+                if (conn != null)
+                    conn.close();
+            } catch (SQLException ex) {
+                log.log(Level.SEVERE, "[MYWARP]: Warp Creator Exception (on close)", ex);
+            }
+        }
+    }
 
 }

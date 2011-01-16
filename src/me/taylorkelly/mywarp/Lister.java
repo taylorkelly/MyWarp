@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 import org.angelsl.minecraft.randomshit.fontwidth.MinecraftFontWidthCalculator;
 import org.bukkit.ChatColor;
-import org.bukkit.Player;
+import org.bukkit.entity.Player;
 
 public class Lister {
 	private WarpList warpList;
@@ -37,9 +37,9 @@ public class Lister {
 		for(Warp warp: sortedWarps) {
 			String name = warp.name;
 			String creator = (warp.creator.equalsIgnoreCase(player.getName()))?"you":warp.creator;
-			int x = warp.x;
+			int x = (int) Math.round(warp.x);
 			int y = warp.y;
-			int z = warp.z;
+			int z = (int) Math.round(warp.z);
 			String color;
 			if(warp.playerIsCreator(player.getName())) {
 				color = ChatColor.AQUA.toString();

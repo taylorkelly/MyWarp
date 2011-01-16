@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 import org.angelsl.minecraft.randomshit.fontwidth.MinecraftFontWidthCalculator;
 import org.bukkit.ChatColor;
-import org.bukkit.Player;
+import org.bukkit.entity.Player;
 
 public class Searcher {
 	private WarpList warpList;
@@ -48,9 +48,9 @@ public class Searcher {
 						color = ChatColor.RED.toString();
 					}
 					String creator = (warp.creator.equalsIgnoreCase(player.getName())) ? "you" : warp.creator;
-					int x = warp.x;
+					int x = (int) Math.round(warp.x);
 					int y = warp.y;
-					int z = warp.z;
+					int z = (int) Math.round(warp.z);
 					player.sendMessage(color + "'" + warp.name + "'" + ChatColor.WHITE + " by " + creator + " @(" + x + ", " + y + ", " + z + ")");
 				}
 			}
@@ -66,9 +66,9 @@ public class Searcher {
 						color = ChatColor.RED.toString();
 					}
 					String creator = (warp.creator.equalsIgnoreCase(player.getName())) ? "you" : warp.creator;
-					int x = warp.x;
-					int y = warp.y;
-					int z = warp.z;
+                    int x = (int) Math.round(warp.x);
+                    int y = warp.y;
+                    int z = (int) Math.round(warp.z);
 					player.sendMessage(color + "'" + warp.name + "'" + ChatColor.WHITE + " by " + creator + " @(" + x + ", " + y + ", " + z + ")");
 				}
 			}

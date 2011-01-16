@@ -15,8 +15,8 @@ public class MyWarp extends JavaPlugin{
 	private WMPlayerListener playerListener;
 	public final String name = this.getDescription().getName();
 	public final String version = this.getDescription().getVersion();
-	public MyWarp(PluginLoader pluginLoader, Server instance, PluginDescriptionFile desc, File plugin, ClassLoader cLoader) {
-		super(pluginLoader, instance, desc, plugin, cLoader);
+	public MyWarp(PluginLoader pluginLoader, Server instance, PluginDescriptionFile desc, File folder, File plugin, ClassLoader cLoader) {
+		super(pluginLoader, instance, desc, folder, plugin, cLoader);
 	}
 
 	@Override

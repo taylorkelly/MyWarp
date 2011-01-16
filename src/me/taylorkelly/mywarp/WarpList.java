@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import org.bukkit.*;
+import org.bukkit.entity.Player;
 
 public class WarpList {
 	private HashMap<String, Warp> warpList;
@@ -53,7 +54,7 @@ public class WarpList {
 	public void deleteWarp(String name, Player player) {
 		if (warpList.containsKey(name)) {
 			Warp warp = warpList.get(name);
-			if (warp.playerIsCreator(player.getName())) {
+			if (warp.playerCanModify(player)) {
 				warpList.remove(name);
 				WarpDataSource.deleteWarp(warp);
 				player.sendMessage(ChatColor.AQUA + "You have deleted '" + name + "'");
@@ -68,7 +69,7 @@ public class WarpList {
 	public void privatize(String name, Player player) {
 		if (warpList.containsKey(name)) {
 			Warp warp = warpList.get(name);
-			if (warp.playerIsCreator(player.getName())) {
+			if (warp.playerCanModify(player)) {
 				warp.publicAll = false;
 				WarpDataSource.publicizeWarp(warp, false);
 				player.sendMessage(ChatColor.AQUA + "You have privatized '" + name + "'");
@@ -85,7 +86,7 @@ public class WarpList {
 	public void invite(String name, Player player, String inviteeName) {
 		if (warpList.containsKey(name)) {
 			Warp warp = warpList.get(name);
-			if (warp.playerIsCreator(player.getName())) {
+			if (warp.playerCanModify(player)) {
 				if (warp.playerIsInvited(inviteeName)) {
 					player.sendMessage(ChatColor.RED + inviteeName + " is already invited to this warp.");
 				} else if(warp.playerIsCreator(inviteeName)) {
@@ -114,7 +115,7 @@ public class WarpList {
 	public void publicize(String name, Player player) {
 		if (warpList.containsKey(name)) {
 			Warp warp = warpList.get(name);
-			if (warp.playerIsCreator(player.getName())) {
+			if (warp.playerCanModify(player)) {
 				warp.publicAll = true;
 				WarpDataSource.publicizeWarp(warp, true);
 				player.sendMessage(ChatColor.AQUA + "You have publicized '" + name + "'");
@@ -129,7 +130,7 @@ public class WarpList {
 	public void uninvite(String name, Player player, String inviteeName) {
 		if (warpList.containsKey(name)) {
 			Warp warp = warpList.get(name);
-			if (warp.playerIsCreator(player.getName())) {
+			if (warp.playerCanModify(player)) {
 				if (!warp.playerIsInvited(inviteeName)) {
 					player.sendMessage(ChatColor.RED + inviteeName + " is not invited to this warp.");
 				} else if (warp.playerIsCreator(inviteeName)) {
@@ -205,4 +206,27 @@ public class WarpList {
 		}
 		return new MatchList(exactMatches, matches);
 	}
+
+    public void give(String name, Player player, String giveeName) {
+        if (warpList.containsKey(name)) {
+            Warp warp = warpList.get(name);
+            if (warp.playerCanModify(player)) {
+                 if (warp.playerIsCreator(giveeName)) {
+                    player.sendMessage(ChatColor.RED + giveeName + " is already the owner.");
+                } else {
+                    warp.setCreator(giveeName);
+                    WarpDataSource.updateCreator(warp);
+                    player.sendMessage(ChatColor.AQUA + "You have given '" + name + "' to " + giveeName);
+                    Player match = server.getPlayer(giveeName);
+                    if (match != null) {
+                        match.sendMessage(ChatColor.AQUA + "You've been given '" + name + "' by " + player.getName());
+                    }
+                }
+            } else {
+                player.sendMessage(ChatColor.RED + "You do not have permission to uninvite players from '" + name + "'");
+            }
+        } else {
+            player.sendMessage(ChatColor.RED + "No such warp '" + name + "'");
+        }
+    }
 }
