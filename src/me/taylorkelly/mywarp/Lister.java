@@ -18,17 +18,18 @@ public class Lister {
 
 	public Lister(WarpList warpList) {
 		this.warpList = warpList;
-		maxPages = (int)Math.ceil(warpList.getSize()/(double)WARPS_PER_PAGE);
+		this.maxPages = (int)Math.ceil(warpList.getSize()/(double)WARPS_PER_PAGE);
 	}
 
 	public void addPlayer(Player player) {
 		this.player = player;
+		this.maxPages = (int) Math.ceil(this.warpList.getSize(player) / (double) WARPS_PER_PAGE);
 	}
 
 	public void setPage(int page) {
 		this.page = page;
 		int start = (page-1)*WARPS_PER_PAGE;
-		sortedWarps = warpList.getSortedWarps(player, start, WARPS_PER_PAGE);
+		this.sortedWarps = warpList.getSortedWarps(player, start, WARPS_PER_PAGE);
 	}
 
 	private int getWidth(int number, int base) {

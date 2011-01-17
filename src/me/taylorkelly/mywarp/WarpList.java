@@ -213,6 +213,21 @@ public class WarpList {
 	public int getSize() {
 		return warpList.size();
 	}
+	
+	/**
+	 * Returns the number of warps the player can modify.
+	 * @param player The given player.
+	 * @return The number of warps the player can modify.
+	 */
+	public int getSize(Player player) {
+		int size = 0;
+		for (Warp warp : this.warpList.values()) {
+			if (warp.playerCanModify(player)) {
+				size++;
+			}
+		}
+		return size;
+	}
 
 	public MatchList getMatches(String name, Player player) {
 		ArrayList<Warp> exactMatches = new ArrayList<Warp>();
