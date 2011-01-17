@@ -101,7 +101,7 @@ public class Lister {
 	}
 
 	public int getMaxPages() {
-		return maxPages;
+		return this.maxPages;
 	}
 	
 	public String whitespace(int length) {

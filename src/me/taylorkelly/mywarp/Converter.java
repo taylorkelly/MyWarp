@@ -45,6 +45,7 @@ public class Converter {
 				World world = server.getWorlds()[0];
 				Location location = new Location(world, x, y, z, (float) yaw, (float) pitch);
 				Warp warp = new Warp(name, location);
+				warp.setCreator(player.getName());
 				lister.blindAdd(warp);
 
 				ps.setInt(1, warp.index);
