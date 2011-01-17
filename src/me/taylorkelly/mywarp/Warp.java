@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import org.bukkit.Location;
 import org.bukkit.World;
+import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 
 public class Warp {
@@ -132,8 +133,8 @@ public class Warp {
 	public boolean playerCanModify(Player player) {
 		if (creator.equals(player.getName()))
 			return true;
-//		if (((CraftPlayer) player).isOp())
-//			return true;
+		if (((CraftPlayer) player).isOp())
+			return true;
 		return false;
 	}
 
