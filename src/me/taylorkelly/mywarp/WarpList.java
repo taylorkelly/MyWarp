@@ -21,11 +21,12 @@ public class WarpList {
 	}
 
 	public void addWarp(String name, Player player) {
-		if (warpList.containsKey(name)) {
+		Warp warp = warpList.get(name.toLowerCase());
+		if (warp != null) {
 			player.sendMessage(ChatColor.RED + "Warp called '" + name
-					+ "' already exists.");
+					+ "' already exists (" + warp.name + ").");
 		} else {
-			Warp warp = new Warp(name, player);
+			warp = new Warp(name, player);
 			warpList.put(name.toLowerCase(), warp);
 			WarpDataSource.addWarp(warp);
 			player.sendMessage(ChatColor.AQUA + "Successfully created '" + name
