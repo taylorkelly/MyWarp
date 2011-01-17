@@ -98,9 +98,9 @@ public class Warp {
 	}
 
 	public boolean playerCanWarp(String player) {
-		if (creator.equals(player))
+		if (this.creator.equals(player))
 			return true;
-		if (permissions.contains(player))
+		if (this.permissions.contains(player))
 			return true;
 		return publicAll;
 	}

@@ -65,8 +65,10 @@ public class WarpList {
 				player.sendMessage(ChatColor.AQUA + "You have deleted '" + name
 						+ "'");
 			} else {
-				player.sendMessage(ChatColor.RED
-						+ "You do not have permission to delete '" + name + "'");
+				player
+						.sendMessage(ChatColor.RED
+								+ "You do not have permission to delete '"
+								+ name + "'");
 			}
 		} else {
 			player.sendMessage(ChatColor.RED + "No such warp '" + name + "'");
@@ -158,8 +160,9 @@ public class WarpList {
 					player.sendMessage(ChatColor.RED + inviteeName
 							+ " is not invited to this warp.");
 				} else if (warp.playerIsCreator(inviteeName)) {
-					player.sendMessage(ChatColor.RED
-							+ "You can't uninvite yourself. You're the creator!");
+					player
+							.sendMessage(ChatColor.RED
+									+ "You can't uninvite yourself. You're the creator!");
 				} else {
 					warp.uninvite(inviteeName);
 					WarpDataSource.updatePermissions(warp);
@@ -177,9 +180,10 @@ public class WarpList {
 					}
 				}
 			} else {
-				player.sendMessage(ChatColor.RED
-						+ "You do not have permission to uninvite players from '"
-						+ name + "'");
+				player
+						.sendMessage(ChatColor.RED
+								+ "You do not have permission to uninvite players from '"
+								+ name + "'");
 			}
 		} else {
 			player.sendMessage(ChatColor.RED + "No such warp '" + name + "'");
@@ -213,16 +217,19 @@ public class WarpList {
 	public int getSize() {
 		return warpList.size();
 	}
-	
+
 	/**
 	 * Returns the number of warps the player can modify.
-	 * @param player The given player.
+	 * 
+	 * @param player
+	 *            The given player.
 	 * @return The number of warps the player can modify.
 	 */
 	public int getSize(Player player) {
 		int size = 0;
 		for (Warp warp : this.warpList.values()) {
-			if (warp.playerCanModify(player)) {
+			if (warp.playerCanModify(player)
+					|| warp.playerCanWarp(player.getName())) {
 				size++;
 			}
 		}
@@ -272,9 +279,10 @@ public class WarpList {
 					}
 				}
 			} else {
-				player.sendMessage(ChatColor.RED
-						+ "You do not have permission to uninvite players from '"
-						+ name + "'");
+				player
+						.sendMessage(ChatColor.RED
+								+ "You do not have permission to uninvite players from '"
+								+ name + "'");
 			}
 		} else {
 			player.sendMessage(ChatColor.RED + "No such warp '" + name + "'");
