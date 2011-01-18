@@ -143,4 +143,8 @@ public class Warp {
 	public void setCreator(String giveeName) {
 		this.creator = giveeName;
 	}
+	
+	public void setMessage(String message) {
+		this.welcomeMessage = message;
+	}
 }

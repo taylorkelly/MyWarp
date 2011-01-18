@@ -21,18 +21,16 @@ public class WMPlayerListener extends PlayerListener {
 	}
 
 	public void onPlayerCommand(PlayerChatEvent event) {
-		String[] split = event.getMessage().split(" ");
 		Player player = event.getPlayer();
-		
-		
+		String[] values = parseLine(event.getMessage());		
 
 		// TODO permissions
-		if (split[0].equalsIgnoreCase("/warp")) {
+		if (values[0].equalsIgnoreCase("/warp")) {
 			event.setCancelled(true);
 			/**
 			 * /warp convert
 			 */
-			if (split.length == 2 && split[1].equalsIgnoreCase("convert")) {
+			if (values.length == 2 && values[1].equalsIgnoreCase("convert")) {
 				if (!warning) {
 					player.sendMessage(ChatColor.RED + "Warning: " + ChatColor.WHITE + "Only use a copy of warps.txt.");
 					player.sendMessage("This will delete the warps.txt it uses");
@@ -46,13 +44,13 @@ public class WMPlayerListener extends PlayerListener {
 				/**
 				 * /warp list or /warp list #
 				 */
-			} else if ((split.length == 2 || (split.length == 3 && isInteger(split[2])))
-					&& (split[1].equalsIgnoreCase("list") || split[1].equalsIgnoreCase("ls"))) {
+			} else if ((values.length == 2 || (values.length == 3 && isInteger(values[2])))
+					&& (values[1].equalsIgnoreCase("list") || values[1].equalsIgnoreCase("ls"))) {
 				Lister lister = new Lister(warpList);
 				lister.addPlayer(player);
 
-				if (split.length == 3) {
-					int page = Integer.parseInt(split[2]);
+				if (values.length == 3) {
+					int page = Integer.parseInt(values[2]);
 					if (page < 1) {
 						player.sendMessage(ChatColor.RED + "Page number can't be below 1.");
 						return;
@@ -70,11 +68,11 @@ public class WMPlayerListener extends PlayerListener {
 				/**
 				 * /warp search <name>
 				 */
-			} else if (split.length > 2 && (split[1].equalsIgnoreCase("search"))) {
+			} else if (values.length > 2 && (values[1].equalsIgnoreCase("search"))) {
 				String name = "";
-				for (int i = 2; i < split.length; i++) {
-					name += split[i];
-					if (i + 1 < split.length)
+				for (int i = 2; i < values.length; i++) {
+					name += values[i];
+					if (i + 1 < values.length)
 						name += " ";
 				}
 
@@ -85,25 +83,25 @@ public class WMPlayerListener extends PlayerListener {
 				/**
 				 * /warp create <name>
 				 */
-			} else if (split.length > 2
-					&& (split[1].equalsIgnoreCase("create") || split[1].equalsIgnoreCase("createp")
-							|| split[1].equals("+") || split[1].equalsIgnoreCase("+p"))) {
+			} else if (values.length > 2
+					&& (values[1].equalsIgnoreCase("create") || values[1].equalsIgnoreCase("createp")
+							|| values[1].equals("+") || values[1].equalsIgnoreCase("+p"))) {
 				String name = "";
-				for (int i = 2; i < split.length; i++) {
-					name += split[i];
-					if (i + 1 < split.length)
+				for (int i = 2; i < values.length; i++) {
+					name += values[i];
+					if (i + 1 < values.length)
 						name += " ";
 				}
 
-				warpList.addWarp(name, player, split[1].equalsIgnoreCase("createp") || split[1].equalsIgnoreCase("+p"));
+				warpList.addWarp(name, player, values[1].equalsIgnoreCase("createp") || values[1].equalsIgnoreCase("+p"));
 				/**
 				 * /warp delete <name>
 				 */
-			} else if (split.length > 2 && (split[1].equalsIgnoreCase("delete") || split[1].equals("-"))) {
+			} else if (values.length > 2 && (values[1].equalsIgnoreCase("delete") || values[1].equals("-"))) {
 				String name = "";
-				for (int i = 2; i < split.length; i++) {
-					name += split[i];
-					if (i + 1 < split.length)
+				for (int i = 2; i < values.length; i++) {
+					name += values[i];
+					if (i + 1 < values.length)
 						name += " ";
 				}
 
@@ -111,11 +109,11 @@ public class WMPlayerListener extends PlayerListener {
 				/**
 				 * /warp private <name>
 				 */
-			} else if (split.length > 2 && split[1].equalsIgnoreCase("private")) {
+			} else if (values.length > 2 && values[1].equalsIgnoreCase("private")) {
 				String name = "";
-				for (int i = 2; i < split.length; i++) {
-					name += split[i];
-					if (i + 1 < split.length)
+				for (int i = 2; i < values.length; i++) {
+					name += values[i];
+					if (i + 1 < values.length)
 						name += " ";
 				}
 
@@ -123,11 +121,11 @@ public class WMPlayerListener extends PlayerListener {
 				/**
 				 * /warp public <name>
 				 */
-			} else if (split.length > 2 && split[1].equalsIgnoreCase("public")) {
+			} else if (values.length > 2 && values[1].equalsIgnoreCase("public")) {
 				String name = "";
-				for (int i = 2; i < split.length; i++) {
-					name += split[i];
-					if (i + 1 < split.length)
+				for (int i = 2; i < values.length; i++) {
+					name += values[i];
+					if (i + 1 < values.length)
 						name += " ";
 				}
 
@@ -135,15 +133,15 @@ public class WMPlayerListener extends PlayerListener {
 				/**
 				 * /warp give <player> <name>
 				 */
-			} else if (split.length > 3 && split[1].equalsIgnoreCase("give")) {
-				Player givee = plugin.getServer().getPlayer(split[2]);
+			} else if (values.length > 3 && values[1].equalsIgnoreCase("give")) {
+				Player givee = plugin.getServer().getPlayer(values[2]);
 				// TODO Change to matchPlayer
-				String giveeName = (givee == null) ? split[2] : givee.getName();
+				String giveeName = (givee == null) ? values[2] : givee.getName();
 
 				String name = "";
-				for (int i = 3; i < split.length; i++) {
-					name += split[i];
-					if (i + 1 < split.length)
+				for (int i = 3; i < values.length; i++) {
+					name += values[i];
+					if (i + 1 < values.length)
 						name += " ";
 				}
 
@@ -152,15 +150,15 @@ public class WMPlayerListener extends PlayerListener {
 				/**
 				 * /warp invite <player> <name>
 				 */
-			} else if (split.length > 3 && split[1].equalsIgnoreCase("invite")) {
-				Player invitee = plugin.getServer().getPlayer(split[2]);
+			} else if (values.length > 3 && values[1].equalsIgnoreCase("invite")) {
+				Player invitee = plugin.getServer().getPlayer(values[2]);
 				// TODO Change to matchPlayer
-				String inviteeName = (invitee == null) ? split[2] : invitee.getName();
+				String inviteeName = (invitee == null) ? values[2] : invitee.getName();
 
 				String name = "";
-				for (int i = 3; i < split.length; i++) {
-					name += split[i];
-					if (i + 1 < split.length)
+				for (int i = 3; i < values.length; i++) {
+					name += values[i];
+					if (i + 1 < values.length)
 						name += " ";
 				}
 
@@ -168,15 +166,15 @@ public class WMPlayerListener extends PlayerListener {
 				/**
 				 * /warp uninvite <player> <name>
 				 */
-			} else if (split.length > 3 && split[1].equalsIgnoreCase("uninvite")) {
-				Player invitee = plugin.getServer().getPlayer(split[2]);
+			} else if (values.length > 3 && values[1].equalsIgnoreCase("uninvite")) {
+				Player invitee = plugin.getServer().getPlayer(values[2]);
 				// TODO Change to matchPlayer
-				String inviteeName = (invitee == null) ? split[2] : invitee.getName();
+				String inviteeName = (invitee == null) ? values[2] : invitee.getName();
 
 				String name = "";
-				for (int i = 3; i < split.length; i++) {
-					name += split[i];
-					if (i + 1 < split.length)
+				for (int i = 3; i < values.length; i++) {
+					name += values[i];
+					if (i + 1 < values.length)
 						name += " ";
 				}
 
@@ -184,7 +182,7 @@ public class WMPlayerListener extends PlayerListener {
 				/**
 				 * /warp help
 				 */
-			} else if (split.length == 2 && (split[1].equalsIgnoreCase("help") || split[1].equalsIgnoreCase("?"))) {
+			} else if (values.length == 2 && (values[1].equalsIgnoreCase("help") || values[1].equalsIgnoreCase("?"))) {
 				List<String> messages = new ArrayList<String>();
 				messages.add(ChatColor.RED + "-------------------- " + ChatColor.WHITE + "/WARP HELP" + ChatColor.RED
 						+ " --------------------");
@@ -212,22 +210,31 @@ public class WMPlayerListener extends PlayerListener {
 						+ ChatColor.GRAY + "<name>" + ChatColor.WHITE + " public");
 				messages.add(ChatColor.RED + "/warp private <name>" + ChatColor.WHITE + "  -  Makes warp "
 						+ ChatColor.GRAY + "<name>" + ChatColor.WHITE + " private");
+				messages.add(ChatColor.RED + "/warp message <name> <message>" + ChatColor.WHITE + "  -  Sets the welcome message of warp "
+						+ ChatColor.GRAY + "<name>" + ChatColor.WHITE + " to " + ChatColor.GRAY + "<message>" + ChatColor.WHITE);
 				for (String message : messages) {
 					player.sendMessage(message);
 				}
-				/**
+				/*
+				 * /warp message <name> <message> 
+				 */
+			} else if (values.length == 4 && (values[1].equalsIgnoreCase("message") || values[1].equalsIgnoreCase("msg"))) {
+				
+				
+				warpList.setMessage(values[2], player, values[3]);
+				/*
 				 * /warp <name>
 				 */
-			} else if (split.length > 1) {
+			} else if (values.length > 1) {
 				// TODO ChunkLoading
 				String name = "";
 				int start = 1;
-				if (split[1].equalsIgnoreCase("to") && split.length > 2) {
+				if (values[1].equalsIgnoreCase("to") && values.length > 2) {
 					start++;
 				}
-				for (int i = start; i < split.length; i++) {
-					name += split[i];
-					if (i + 1 < split.length)
+				for (int i = start; i < values.length; i++) {
+					name += values[i];
+					if (i + 1 < values.length)
 						name += " ";
 				}
 
@@ -237,6 +244,79 @@ public class WMPlayerListener extends PlayerListener {
 				player.sendMessage(ChatColor.RED + "Invalid /warp command");
 			}
 		}
+	}
+	
+	/**
+	 * Parses a command line. Reads the two first commands like "split" and the
+	 * following with quotes/escaping.
+	 * 
+	 * <ul>
+	 *   <li>Example 1:
+	 *     <ul>
+	 *       <li>/warp create "hello world"</li>
+	 *       <li>/warp create hello\ world</li>
+	 *     </ul>
+	 *   produces:
+	 *     <ol>
+	 *       <li>/warp</li>
+	 *       <li>create</li>
+	 *       <li>hello world</li>
+	 *     </ol>
+	 *   </li>
+	 * </ul>
+	 * @param line The command line.
+	 * @return The parsed segments.
+	 */
+	public static String[] parseLine(String line) {
+		boolean quoted = false;
+		boolean escaped = false;
+		int lastStart = 0;
+		int word = 0;
+		String value = "";
+		List<String> values = new ArrayList<String>(2);
+		for (int i = 0; i < line.length(); i++) {
+			char c = line.charAt(i);
+			if (word < 2) {
+				if (c == ' ') {
+					values.add(value);
+					value = "";
+					word++;
+				} else {
+					value += c;
+				}
+			} else {
+				if (escaped) {
+					value += c;
+					escaped = false;
+				} else {
+					switch (c) {
+					case '"' :
+						quoted = !quoted;
+						break;
+					case '\\' :
+						escaped = true;
+						break;
+					case ' ' :
+						if (!quoted) {
+							if (lastStart < i) {
+								values.add(value);
+								value = "";
+								word++;
+							}
+							lastStart = i + 1;
+							break;
+						}
+					default :
+						value += c;
+						break;
+					}
+				}
+			}
+		}
+		if (!value.isEmpty()) {
+			values.add(value);
+		}
+		return values.toArray(new String[0]);
 	}
 
 	public static boolean isInteger(String string) {
