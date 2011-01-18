@@ -276,6 +276,21 @@ public class WarpList {
 		}
 	}
 	
+	public void update(String name, Player player) {
+		Warp warp = this.getWarp(name);
+		if (warp != null) {
+			if (warp.playerCanModify(player)) {
+				warp.update(player);
+				WarpDataSource.updateWarp(warp);
+			} else {
+				player.sendMessage(ChatColor.RED + "You do not have permission to change the position from '" + name
+						+ "'");				
+			}
+		} else {
+			player.sendMessage(ChatColor.RED + "No such warp '" + name + "'");
+		}		
+	}
+	
 	public boolean warpExists(String name) {
 		return this.warpList.containsKey(name.toLowerCase());
 	}

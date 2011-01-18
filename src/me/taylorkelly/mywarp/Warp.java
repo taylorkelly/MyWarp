@@ -114,6 +114,14 @@ public class Warp {
 		player.teleportTo(location);
 	}
 
+	public void update(Player player) {
+		this.x = player.getLocation().getX();
+		this.y = player.getLocation().getBlockY()	;
+		this.z = player.getLocation().getZ();
+		this.yaw = Math.round(player.getLocation().getYaw()) % 360;
+		this.pitch = Math.round(player.getLocation().getPitch()) % 360;		
+	}
+	
 	public boolean playerIsCreator(String name) {
 		if (creator.equals(name))
 			return true;
