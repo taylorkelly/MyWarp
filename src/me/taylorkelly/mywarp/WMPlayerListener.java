@@ -162,7 +162,7 @@ public class WMPlayerListener extends PlayerListener {
 						+ ChatColor.GRAY + "<name>" + ChatColor.WHITE + " private");
 				messages.add(ChatColor.RED + "/warp message <name> <message>" + ChatColor.WHITE
 						+ "  -  Sets the welcome message of warp " + ChatColor.GRAY + "<name>" + ChatColor.WHITE
-						+ " to " + ChatColor.GRAY + "<message>" + ChatColor.WHITE);
+						+ " to " + ChatColor.GRAY + "<message>");
 				for (String message : messages) {
 					player.sendMessage(message);
 				}
@@ -185,7 +185,7 @@ public class WMPlayerListener extends PlayerListener {
 				this.warpList.warpTo(concatArray(values, start), player, start == 1);
 			} else {
 				// TODO help?
-				player.sendMessage(ChatColor.RED + "Invalid /warp command!" + ChatColor.WHITE + "Use " + ChatColor.RED
+				player.sendMessage(ChatColor.RED + "Invalid /warp command! " + ChatColor.WHITE + "Use " + ChatColor.RED
 						+ "/warp help " + ChatColor.WHITE + "for help.");
 			}
 		}
