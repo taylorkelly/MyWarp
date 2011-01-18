@@ -48,7 +48,7 @@ public class WarpList {
 	public void warpTo(String name, Player player) {
 		if (warpList.containsKey(name.toLowerCase())) {
 			Warp warp = warpList.get(name.toLowerCase());
-			if (warp.playerCanWarp(player.getName())) {
+			if (warp.playerCanWarp(player)) {
 				warp.warp(player);
 				player.sendMessage(ChatColor.AQUA + warp.welcomeMessage);
 			} else {
@@ -207,7 +207,7 @@ public class WarpList {
 		while (index < names.size() && ret.size() < size) {
 			String currName = names.get(index);
 			Warp warp = warpList.get(currName);
-			if (warp.playerCanWarp(player.getName())) {
+			if (warp.playerCanWarp(player)) {
 				if (currentCount >= start) {
 					ret.add(warp);
 				} else {
@@ -234,7 +234,7 @@ public class WarpList {
 		int size = 0;
 		for (Warp warp : this.warpList.values()) {
 			if (warp.playerCanModify(player)
-					|| warp.playerCanWarp(player.getName())) {
+					|| warp.playerCanWarp(player)) {
 				size++;
 			}
 		}
@@ -253,7 +253,7 @@ public class WarpList {
 		for (int i = 0; i < names.size(); i++) {
 			String currName = names.get(i);
 			Warp warp = warpList.get(currName);
-			if (warp.playerCanWarp(player.getName())) {
+			if (warp.playerCanWarp(player)) {
 				if (warp.name.equalsIgnoreCase(name)) {
 					exactMatches.add(warp);
 				} else if (warp.name.toLowerCase().contains(name.toLowerCase())) {

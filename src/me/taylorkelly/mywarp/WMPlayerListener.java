@@ -15,7 +15,7 @@ public class WMPlayerListener extends PlayerListener {
 	private WarpList warpList;
 
 	public WMPlayerListener(Plugin plugin, WarpList warpList) {
-		warning = false;
+		this.warning = false;
 		this.plugin = plugin;
 		this.warpList = warpList;
 	}
@@ -23,6 +23,8 @@ public class WMPlayerListener extends PlayerListener {
 	public void onPlayerCommand(PlayerChatEvent event) {
 		String[] split = event.getMessage().split(" ");
 		Player player = event.getPlayer();
+		
+		
 
 		// TODO permissions
 		if (split[0].equalsIgnoreCase("/warp")) {
@@ -191,6 +193,8 @@ public class WMPlayerListener extends PlayerListener {
 				messages.add(ChatColor.RED + "/warp <name>" + ChatColor.WHITE + "  -  Warp to " + ChatColor.GRAY
 						+ "<name>");
 				messages.add(ChatColor.RED + "/warp create/+ <name>" + ChatColor.WHITE + "  -  Create warp "
+						+ ChatColor.GRAY + "<name>");
+				messages.add(ChatColor.RED + "/warp createp/+p <name>" + ChatColor.WHITE + "  -  Create private warp "
 						+ ChatColor.GRAY + "<name>");
 				messages.add(ChatColor.RED + "/warp delete/- <name>" + ChatColor.WHITE + "  -  Delete warp "
 						+ ChatColor.GRAY + "<name>");
