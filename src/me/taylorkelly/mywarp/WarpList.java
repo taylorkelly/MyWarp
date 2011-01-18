@@ -269,6 +269,7 @@ public class WarpList {
 		if (warp != null) {
 			if (warp.playerCanModify(player)) {
 				warp.setMessage(message);
+				WarpDataSource.updateMessage(warp);
 				player.sendMessage(ChatColor.AQUA + "You have set the welcome message for '" + name + "'");
 				player.sendMessage(message);
 			} else {

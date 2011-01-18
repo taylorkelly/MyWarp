@@ -216,15 +216,14 @@ public class WMPlayerListener extends PlayerListener {
 					+ "<name>");
 			lines.add(ChatColor.RED + "/warp list/ls <#>" + ChatColor.WHITE + "  -  Views warp page " + ChatColor.GRAY
 					+ "<#>");
-			lines.add(ChatColor.RED + "/warp update/* <name>" + ChatColor.WHITE + "  -  Updates the position of warp "
+			lines.add(ChatColor.RED + "/warp update/* <name>" + ChatColor.WHITE + "  -  Updates position of "
 					+ ChatColor.GRAY + "<name>");
 			lines.add(ChatColor.RED + "/warp search <query>" + ChatColor.WHITE + "  -  Search for " + ChatColor.GRAY
 					+ "<query>");
 			break;
 		case 2:
 			lines.add(ChatColor.RED + "/warp message/msg <name> <message>" + ChatColor.WHITE
-					+ "  -  Change message of " + ChatColor.GRAY + "<name>" + ChatColor.WHITE + " to " + ChatColor.GRAY
-					+ "<message>");
+					+ "  -  Sets message");
 			lines.add(ChatColor.RED + "/warp give <player> <name>" + ChatColor.WHITE + "  -  Give " + ChatColor.GRAY
 					+ "<player>" + ChatColor.WHITE + " your " + ChatColor.GRAY + "<name>");
 			lines.add(ChatColor.RED + "/warp invite <player> <name>" + ChatColor.WHITE + "  -  Invite "
@@ -322,6 +321,64 @@ public class WMPlayerListener extends PlayerListener {
 						break;
 					}
 				}
+			}
+		}
+		if (!value.isEmpty()) {
+			values.add(value);
+		}
+		return values.toArray(new String[0]);
+	}
+	
+	public static String[] parseLine(String[] line) {
+		boolean quoted = false;
+		boolean escaped = false;
+		int lastStart = 0;
+		int offset = 0;
+		int word = 0;
+		String value = "";
+		
+		List<String> values = new ArrayList<String>();
+		// Skip first (is only command)
+		values.add(line[0]);
+		for (int i = 1; i < line.length; i++) {
+			for (int j = 0; j < line[i].length(); j++) {
+				char c = line[i].charAt(j);
+				if (escaped) {
+					value += c;
+					escaped = false;
+				} else {
+					switch (c) {
+					case '"':
+						quoted = !quoted;
+						break;
+					case '\\':
+						escaped = true;
+						break;
+					case ' ':
+						if (!quoted) {
+							if (lastStart < i) {
+								values.add(value);
+								value = "";
+								word++;
+							}
+							lastStart = i + 1;
+							break;
+						}
+					default:
+						value += c;
+						break;
+					}
+				}
+			}
+			offset += line[i].length();
+			if (quoted || escaped) {
+				value += " ";
+				escaped = false;
+			} else {
+				values.add(value);
+				value = "";
+				word++;
+				lastStart = offset;
 			}
 		}
 		if (!value.isEmpty()) {
