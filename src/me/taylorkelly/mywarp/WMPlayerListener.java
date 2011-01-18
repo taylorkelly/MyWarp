@@ -22,7 +22,7 @@ public class WMPlayerListener extends PlayerListener {
 
 	public void onPlayerCommand(PlayerChatEvent event) {
 		Player player = event.getPlayer();
-		String[] values = parseLine(event.getMessage());		
+		String[] values = parseLine(event.getMessage());
 
 		// TODO permissions
 		if (values[0].equalsIgnoreCase("/warp")) {
@@ -69,16 +69,10 @@ public class WMPlayerListener extends PlayerListener {
 				 * /warp search <name>
 				 */
 			} else if (values.length > 2 && (values[1].equalsIgnoreCase("search"))) {
-				String name = "";
-				for (int i = 2; i < values.length; i++) {
-					name += values[i];
-					if (i + 1 < values.length)
-						name += " ";
-				}
 
 				Searcher searcher = new Searcher(warpList);
 				searcher.addPlayer(player);
-				searcher.setQuery(name);
+				searcher.setQuery(concatArray(values, 2));
 				searcher.search();
 				/**
 				 * /warp create <name>
@@ -86,50 +80,27 @@ public class WMPlayerListener extends PlayerListener {
 			} else if (values.length > 2
 					&& (values[1].equalsIgnoreCase("create") || values[1].equalsIgnoreCase("createp")
 							|| values[1].equals("+") || values[1].equalsIgnoreCase("+p"))) {
-				String name = "";
-				for (int i = 2; i < values.length; i++) {
-					name += values[i];
-					if (i + 1 < values.length)
-						name += " ";
-				}
 
-				warpList.addWarp(name, player, values[1].equalsIgnoreCase("createp") || values[1].equalsIgnoreCase("+p"));
+				warpList.addWarp(concatArray(values, 2), player, values[1].equalsIgnoreCase("createp")
+						|| values[1].equalsIgnoreCase("+p"));
 				/**
 				 * /warp delete <name>
 				 */
 			} else if (values.length > 2 && (values[1].equalsIgnoreCase("delete") || values[1].equals("-"))) {
-				String name = "";
-				for (int i = 2; i < values.length; i++) {
-					name += values[i];
-					if (i + 1 < values.length)
-						name += " ";
-				}
 
-				warpList.deleteWarp(name, player);
+				warpList.deleteWarp(concatArray(values, 2), player);
 				/**
 				 * /warp private <name>
 				 */
 			} else if (values.length > 2 && values[1].equalsIgnoreCase("private")) {
-				String name = "";
-				for (int i = 2; i < values.length; i++) {
-					name += values[i];
-					if (i + 1 < values.length)
-						name += " ";
-				}
 
-				warpList.privatize(name, player);
+				warpList.privatize(concatArray(values, 2), player);
 				/**
 				 * /warp public <name>
 				 */
 			} else if (values.length > 2 && values[1].equalsIgnoreCase("public")) {
-				String name = "";
-				for (int i = 2; i < values.length; i++) {
-					name += values[i];
-					if (i + 1 < values.length)
-						name += " ";
-				}
 
-				warpList.publicize(name, player);
+				warpList.publicize(concatArray(values, 2), player);
 				/**
 				 * /warp give <player> <name>
 				 */
@@ -138,14 +109,7 @@ public class WMPlayerListener extends PlayerListener {
 				// TODO Change to matchPlayer
 				String giveeName = (givee == null) ? values[2] : givee.getName();
 
-				String name = "";
-				for (int i = 3; i < values.length; i++) {
-					name += values[i];
-					if (i + 1 < values.length)
-						name += " ";
-				}
-
-				warpList.give(name, player, giveeName);
+				warpList.give(concatArray(values, 3), player, giveeName);
 
 				/**
 				 * /warp invite <player> <name>
@@ -154,15 +118,8 @@ public class WMPlayerListener extends PlayerListener {
 				Player invitee = plugin.getServer().getPlayer(values[2]);
 				// TODO Change to matchPlayer
 				String inviteeName = (invitee == null) ? values[2] : invitee.getName();
-
-				String name = "";
-				for (int i = 3; i < values.length; i++) {
-					name += values[i];
-					if (i + 1 < values.length)
-						name += " ";
-				}
-
-				warpList.invite(name, player, inviteeName);
+				
+				warpList.invite(concatArray(values, 3), player, inviteeName);
 				/**
 				 * /warp uninvite <player> <name>
 				 */
@@ -171,14 +128,7 @@ public class WMPlayerListener extends PlayerListener {
 				// TODO Change to matchPlayer
 				String inviteeName = (invitee == null) ? values[2] : invitee.getName();
 
-				String name = "";
-				for (int i = 3; i < values.length; i++) {
-					name += values[i];
-					if (i + 1 < values.length)
-						name += " ";
-				}
-
-				warpList.uninvite(name, player, inviteeName);
+				warpList.uninvite(concatArray(values, 3), player, inviteeName);
 				/**
 				 * /warp help
 				 */
@@ -210,61 +160,68 @@ public class WMPlayerListener extends PlayerListener {
 						+ ChatColor.GRAY + "<name>" + ChatColor.WHITE + " public");
 				messages.add(ChatColor.RED + "/warp private <name>" + ChatColor.WHITE + "  -  Makes warp "
 						+ ChatColor.GRAY + "<name>" + ChatColor.WHITE + " private");
-				messages.add(ChatColor.RED + "/warp message <name> <message>" + ChatColor.WHITE + "  -  Sets the welcome message of warp "
-						+ ChatColor.GRAY + "<name>" + ChatColor.WHITE + " to " + ChatColor.GRAY + "<message>" + ChatColor.WHITE);
+				messages.add(ChatColor.RED + "/warp message <name> <message>" + ChatColor.WHITE
+						+ "  -  Sets the welcome message of warp " + ChatColor.GRAY + "<name>" + ChatColor.WHITE
+						+ " to " + ChatColor.GRAY + "<message>" + ChatColor.WHITE);
 				for (String message : messages) {
 					player.sendMessage(message);
 				}
 				/*
-				 * /warp message <name> <message> 
+				 * /warp message <name> <message>
 				 */
-			} else if (values.length == 4 && (values[1].equalsIgnoreCase("message") || values[1].equalsIgnoreCase("msg"))) {
-				
-				
-				warpList.setMessage(values[2], player, values[3]);
+			} else if (values.length == 4
+					&& (values[1].equalsIgnoreCase("message") || values[1].equalsIgnoreCase("msg"))) {
+
+				this.warpList.setMessage(values[2], player, values[3]);
 				/*
 				 * /warp <name>
 				 */
 			} else if (values.length > 1) {
 				// TODO ChunkLoading
-				String name = "";
 				int start = 1;
 				if (values[1].equalsIgnoreCase("to") && values.length > 2) {
 					start++;
 				}
-				for (int i = start; i < values.length; i++) {
-					name += values[i];
-					if (i + 1 < values.length)
-						name += " ";
-				}
-
-				warpList.warpTo(name, player);
+				this.warpList.warpTo(concatArray(values, start), player, start == 1);
 			} else {
 				// TODO help?
-				player.sendMessage(ChatColor.RED + "Invalid /warp command");
+				player.sendMessage(ChatColor.RED + "Invalid /warp command!" + ChatColor.WHITE + "Use " + ChatColor.RED
+						+ "/warp help " + ChatColor.WHITE + "for help.");
 			}
 		}
 	}
-	
+
+	public static String concatArray(String[] array, int start) {
+		String result = "";
+		for (int i = start; i < array.length; i++) {
+			result += array[i];
+			if (i + 1 < array.length)
+				result += " ";
+		}
+		return result;
+	}
+
 	/**
 	 * Parses a command line. Reads the two first commands like "split" and the
 	 * following with quotes/escaping.
 	 * 
 	 * <ul>
-	 *   <li>Example 1:
-	 *     <ul>
-	 *       <li>/warp create "hello world"</li>
-	 *       <li>/warp create hello\ world</li>
-	 *     </ul>
-	 *   produces:
-	 *     <ol>
-	 *       <li>/warp</li>
-	 *       <li>create</li>
-	 *       <li>hello world</li>
-	 *     </ol>
-	 *   </li>
+	 * <li>Example 1:
+	 * <ul>
+	 * <li>/warp create "hello world"</li>
+	 * <li>/warp create hello\ world</li>
 	 * </ul>
-	 * @param line The command line.
+	 * produces:
+	 * <ol>
+	 * <li>/warp</li>
+	 * <li>create</li>
+	 * <li>hello world</li>
+	 * </ol>
+	 * </li>
+	 * </ul>
+	 * 
+	 * @param line
+	 *            The command line.
 	 * @return The parsed segments.
 	 */
 	public static String[] parseLine(String line) {
@@ -290,13 +247,13 @@ public class WMPlayerListener extends PlayerListener {
 					escaped = false;
 				} else {
 					switch (c) {
-					case '"' :
+					case '"':
 						quoted = !quoted;
 						break;
-					case '\\' :
+					case '\\':
 						escaped = true;
 						break;
-					case ' ' :
+					case ' ':
 						if (!quoted) {
 							if (lastStart < i) {
 								values.add(value);
@@ -306,7 +263,7 @@ public class WMPlayerListener extends PlayerListener {
 							lastStart = i + 1;
 							break;
 						}
-					default :
+					default:
 						value += c;
 						break;
 					}

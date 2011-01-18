@@ -21,12 +21,12 @@ public class WarpList {
 	}
 
 	public void addWarp(String name, Player player, boolean privateWarp) {
-		Warp warp = warpList.get(name.toLowerCase());
+		Warp warp = this.getWarp(name);
 		if (warp != null) {
 			player.sendMessage(ChatColor.RED + "Warp called '" + name + "' already exists (" + warp.name + ").");
 		} else {
 			warp = new Warp(name, player);
-			warpList.put(name.toLowerCase(), warp);
+			this.warpList.put(name.toLowerCase(), warp);
 			WarpDataSource.addWarp(warp);
 			player.sendMessage(ChatColor.AQUA + "Successfully created '" + name + "'");
 			if (privateWarp) {
@@ -42,9 +42,9 @@ public class WarpList {
 		warpList.put(warp.name.toLowerCase(), warp);
 	}
 
-	public void warpTo(String name, Player player) {
-		if (warpList.containsKey(name.toLowerCase())) {
-			Warp warp = warpList.get(name.toLowerCase());
+	public void warpTo(String name, Player player, boolean toAlternative) {
+		Warp warp = this.getWarp(name);
+		if (warp != null) {
 			if (warp.playerCanWarp(player)) {
 				warp.warp(player);
 				player.sendMessage(ChatColor.AQUA + warp.welcomeMessage);
@@ -53,12 +53,15 @@ public class WarpList {
 			}
 		} else {
 			player.sendMessage(ChatColor.RED + "No such warp '" + name + "'");
+			if (this.warpExists("to " + name) && toAlternative) {
+				player.sendMessage("Did you mean '" + ChatColor.AQUA + "to " + name + ChatColor.WHITE + "'?");				
+			}
 		}
 	}
 
 	public void deleteWarp(String name, Player player) {
-		if (warpList.containsKey(name.toLowerCase())) {
-			Warp warp = warpList.get(name.toLowerCase());
+		Warp warp = this.getWarp(name);
+		if (warp != null) {
 			if (warp.playerCanModify(player)) {
 				warpList.remove(name);
 				WarpDataSource.deleteWarp(warp);
@@ -72,8 +75,8 @@ public class WarpList {
 	}
 
 	public void privatize(String name, Player player) {
-		if (warpList.containsKey(name.toLowerCase())) {
-			Warp warp = warpList.get(name.toLowerCase());
+		Warp warp = this.getWarp(name);
+		if (warp != null) {
 			if (warp.playerCanModify(player)) {
 				warp.publicAll = false;
 				WarpDataSource.publicizeWarp(warp, false);
@@ -89,8 +92,8 @@ public class WarpList {
 	}
 
 	public void invite(String name, Player player, String inviteeName) {
-		if (warpList.containsKey(name.toLowerCase())) {
-			Warp warp = warpList.get(name.toLowerCase());
+		Warp warp = this.getWarp(name);
+		if (warp != null) {
 			if (warp.playerCanModify(player)) {
 				if (warp.playerIsInvited(inviteeName)) {
 					player.sendMessage(ChatColor.RED + inviteeName + " is already invited to this warp.");
@@ -120,8 +123,8 @@ public class WarpList {
 	}
 
 	public void publicize(String name, Player player) {
-		if (warpList.containsKey(name.toLowerCase())) {
-			Warp warp = warpList.get(name.toLowerCase());
+		Warp warp = this.getWarp(name);
+		if (warp != null) {
 			if (warp.playerCanModify(player)) {
 				warp.publicAll = true;
 				WarpDataSource.publicizeWarp(warp, true);
@@ -135,8 +138,8 @@ public class WarpList {
 	}
 
 	public void uninvite(String name, Player player, String inviteeName) {
-		if (warpList.containsKey(name.toLowerCase())) {
-			Warp warp = warpList.get(name.toLowerCase());
+		Warp warp = this.getWarp(name);
+		if (warp != null) {
 			if (warp.playerCanModify(player)) {
 				if (!warp.playerIsInvited(inviteeName)) {
 					player.sendMessage(ChatColor.RED + inviteeName + " is not invited to this warp.");
@@ -234,8 +237,8 @@ public class WarpList {
 	}
 
 	public void give(String name, Player player, String giveeName) {
-		if (warpList.containsKey(name.toLowerCase())) {
-			Warp warp = warpList.get(name.toLowerCase());
+		Warp warp = this.getWarp(name);
+		if (warp != null) {
 			if (warp.playerCanModify(player)) {
 				if (warp.playerIsCreator(giveeName)) {
 					player.sendMessage(ChatColor.RED + giveeName + " is already the owner.");
@@ -258,8 +261,8 @@ public class WarpList {
 	}
 
 	public void setMessage(String name, Player player, String message) {
-		if (this.warpList.containsKey(name.toLowerCase())) {
-			Warp warp = this.warpList.get(name.toLowerCase());
+		Warp warp = this.getWarp(name);
+		if (warp != null) {
 			if (warp.playerCanModify(player)) {
 				warp.setMessage(message);
 				player.sendMessage(ChatColor.AQUA + "You have set the welcome message for '" + name + "'");
@@ -271,5 +274,13 @@ public class WarpList {
 		} else {
 			player.sendMessage(ChatColor.RED + "No such warp '" + name + "'");
 		}
+	}
+	
+	public boolean warpExists(String name) {
+		return this.warpList.containsKey(name.toLowerCase());
+	}
+	
+	public Warp getWarp(String name) {
+		return this.warpList.get(name.toLowerCase());
 	}
 }
