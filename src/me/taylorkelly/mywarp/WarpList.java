@@ -20,7 +20,7 @@ public class WarpList {
 		warpList = WarpDataSource.getMap();
 	}
 
-	public void addWarp(String name, Player player) {
+	public void addWarp(String name, Player player, boolean privateWarp) {
 		Warp warp = warpList.get(name.toLowerCase());
 		if (warp != null) {
 			player.sendMessage(ChatColor.RED + "Warp called '" + name
@@ -31,9 +31,13 @@ public class WarpList {
 			WarpDataSource.addWarp(warp);
 			player.sendMessage(ChatColor.AQUA + "Successfully created '" + name
 					+ "'");
-			player.sendMessage("If you'd like to privatize it,");
-			player.sendMessage("Use: " + ChatColor.RED + "/warp private "
-					+ name);
+			if (privateWarp) {
+				this.privatize(name, player);
+			} else {
+				player.sendMessage("If you'd like to privatize it,");
+				player.sendMessage("Use: " + ChatColor.RED + "/warp private "
+						+ name);
+			}
 		}
 	}
 

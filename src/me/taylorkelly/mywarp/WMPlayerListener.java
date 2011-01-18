@@ -32,9 +32,12 @@ public class WMPlayerListener extends PlayerListener {
 			 */
 			if (split.length == 2 && split[1].equalsIgnoreCase("convert")) {
 				if (!warning) {
-					player.sendMessage(ChatColor.RED + "Warning: "
-							+ ChatColor.WHITE + "Only use a copy of warps.txt.");
-					player.sendMessage("This will delete the warps.txt it uses");
+					player
+							.sendMessage(ChatColor.RED + "Warning: "
+									+ ChatColor.WHITE
+									+ "Only use a copy of warps.txt.");
+					player
+							.sendMessage("This will delete the warps.txt it uses");
 					player.sendMessage("Use " + ChatColor.RED
 							+ "'/warp convert'" + ChatColor.WHITE
 							+ " again to confirm.");
@@ -85,7 +88,9 @@ public class WMPlayerListener extends PlayerListener {
 				/**
 				 * /warp create <name>
 				 */
-			} else if (split.length > 2 && split[1].equalsIgnoreCase("create")) {
+			} else if (split.length > 2
+					&& (split[1].equalsIgnoreCase("create") || split[1]
+							.equalsIgnoreCase("createp"))) {
 				String name = "";
 				for (int i = 2; i < split.length; i++) {
 					name += split[i];
@@ -93,7 +98,8 @@ public class WMPlayerListener extends PlayerListener {
 						name += " ";
 				}
 
-				warpList.addWarp(name, player);
+				warpList.addWarp(name, player, split[1]
+						.equalsIgnoreCase("createp"));
 				/**
 				 * /warp delete <name>
 				 */
