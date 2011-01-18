@@ -68,6 +68,11 @@ public class WMPlayerListener extends PlayerListener {
 				/**
 				 * /warp search <name>
 				 */
+			} else if (values.length == 3 && (values[1].equalsIgnoreCase("list") || values[1].equalsIgnoreCase("ls"))
+					&& values[2].equalsIgnoreCase("legend")) {
+				for (String string : Lister.getLegend()) {
+					player.sendMessage(string);
+				}
 			} else if (values.length > 2 && (values[1].equalsIgnoreCase("search"))) {
 
 				Searcher searcher = new Searcher(warpList);
@@ -118,7 +123,7 @@ public class WMPlayerListener extends PlayerListener {
 				Player invitee = plugin.getServer().getPlayer(values[2]);
 				// TODO Change to matchPlayer
 				String inviteeName = (invitee == null) ? values[2] : invitee.getName();
-				
+
 				warpList.invite(concatArray(values, 3), player, inviteeName);
 				/**
 				 * /warp uninvite <player> <name>
@@ -139,7 +144,7 @@ public class WMPlayerListener extends PlayerListener {
 						page = Integer.parseInt(values[2]);
 						if (page < 1) {
 							player.sendMessage(ChatColor.RED + "Page number can't be below 1.");
-							return;							
+							return;
 						} else if (page > 2) {
 							player.sendMessage(ChatColor.RED + "There are only 2 pages of help");
 							return;
@@ -150,7 +155,7 @@ public class WMPlayerListener extends PlayerListener {
 					}
 				}
 				String[] messages = helpPage(page);
-				
+
 				for (String message : messages) {
 					player.sendMessage(message);
 				}
@@ -161,12 +166,12 @@ public class WMPlayerListener extends PlayerListener {
 					&& (values[1].equalsIgnoreCase("message") || values[1].equalsIgnoreCase("msg"))) {
 
 				this.warpList.setMessage(values[2], player, values[3]);
-				
+
 				/*
 				 * /warp update <name>
 				 */
 			} else if (values.length > 2 && (values[1].equalsIgnoreCase("update") || values[1].equalsIgnoreCase("*"))) {
-				
+
 				this.warpList.update(concatArray(values, 2), player);
 				/*
 				 * /warp <name>
@@ -185,50 +190,50 @@ public class WMPlayerListener extends PlayerListener {
 			}
 		}
 	}
-	
+
 	public static String[] helpPage(int page) {
 		List<String> lines = new ArrayList<String>(8);
-		lines.add(ChatColor.RED + "------------------ " + ChatColor.WHITE + "/WARP HELP" + ChatColor.RED
-				+ " " + page + "/2 ------------------");
+		lines.add(ChatColor.RED + "------------------ " + ChatColor.WHITE + "/WARP HELP" + ChatColor.RED + " " + page
+				+ "/2 ------------------");
 		switch (page) {
 		case 1:
-			lines.add(ChatColor.RED + "/warp to <name>" + ChatColor.WHITE + "  -  Warp to " + ChatColor.GRAY
+			lines
+					.add(ChatColor.RED + "/warp to <name>" + ChatColor.WHITE + "  -  Warp to " + ChatColor.GRAY
+							+ "<name>");
+			lines.add(ChatColor.RED + "/warp <name>" + ChatColor.WHITE + "  -  Warp to " + ChatColor.GRAY + "<name>");
+			lines.add(ChatColor.RED + "/warp create/+ <name>" + ChatColor.WHITE + "  -  Create warp " + ChatColor.GRAY
 					+ "<name>");
-			lines.add(ChatColor.RED + "/warp <name>" + ChatColor.WHITE + "  -  Warp to " + ChatColor.GRAY
-					+ "<name>");
-			lines.add(ChatColor.RED + "/warp create/+ <name>" + ChatColor.WHITE + "  -  Create warp "
-					+ ChatColor.GRAY + "<name>");
 			lines.add(ChatColor.RED + "/warp createp/+p <name>" + ChatColor.WHITE + "  -  Create private warp "
 					+ ChatColor.GRAY + "<name>");
-			lines.add(ChatColor.RED + "/warp delete/- <name>" + ChatColor.WHITE + "  -  Delete warp "
-					+ ChatColor.GRAY + "<name>");
-			lines.add(ChatColor.RED + "/warp list/ls <#>" + ChatColor.WHITE + "  -  Views warp page "
-					+ ChatColor.GRAY + "<#>");
+			lines.add(ChatColor.RED + "/warp delete/- <name>" + ChatColor.WHITE + "  -  Delete warp " + ChatColor.GRAY
+					+ "<name>");
+			lines.add(ChatColor.RED + "/warp list/ls <#>" + ChatColor.WHITE + "  -  Views warp page " + ChatColor.GRAY
+					+ "<#>");
 			lines.add(ChatColor.RED + "/warp update/* <name>" + ChatColor.WHITE + "  -  Updates the position of warp "
 					+ ChatColor.GRAY + "<name>");
-			lines.add(ChatColor.RED + "/warp search <query>" + ChatColor.WHITE + "  -  Search for "
-					+ ChatColor.GRAY + "<query>");
+			lines.add(ChatColor.RED + "/warp search <query>" + ChatColor.WHITE + "  -  Search for " + ChatColor.GRAY
+					+ "<query>");
 			break;
 		case 2:
 			lines.add(ChatColor.RED + "/warp message/msg <name> <message>" + ChatColor.WHITE
-					+ "  -  Change message of " + ChatColor.GRAY + "<name>" + ChatColor.WHITE
-					+ " to " + ChatColor.GRAY + "<message>");
-			lines.add(ChatColor.RED + "/warp give <player> <name>" + ChatColor.WHITE + "  -  Give "
-					+ ChatColor.GRAY + "<player>" + ChatColor.WHITE + " your " + ChatColor.GRAY + "<name>");
+					+ "  -  Change message of " + ChatColor.GRAY + "<name>" + ChatColor.WHITE + " to " + ChatColor.GRAY
+					+ "<message>");
+			lines.add(ChatColor.RED + "/warp give <player> <name>" + ChatColor.WHITE + "  -  Give " + ChatColor.GRAY
+					+ "<player>" + ChatColor.WHITE + " your " + ChatColor.GRAY + "<name>");
 			lines.add(ChatColor.RED + "/warp invite <player> <name>" + ChatColor.WHITE + "  -  Invite "
 					+ ChatColor.GRAY + "<player>" + ChatColor.WHITE + " to " + ChatColor.GRAY + "<name>");
 			lines.add(ChatColor.RED + "/warp uninvite <player> <name>" + ChatColor.WHITE + "  -  Uninvite "
 					+ ChatColor.GRAY + "<player>" + ChatColor.WHITE + " to " + ChatColor.GRAY + "<name>");
-			lines.add(ChatColor.RED + "/warp public <name>" + ChatColor.WHITE + "  -  Makes warp "
-					+ ChatColor.GRAY + "<name>" + ChatColor.WHITE + " public");
-			lines.add(ChatColor.RED + "/warp private <name>" + ChatColor.WHITE + "  -  Makes warp "
-					+ ChatColor.GRAY + "<name>" + ChatColor.WHITE + " private");
+			lines.add(ChatColor.RED + "/warp public <name>" + ChatColor.WHITE + "  -  Makes warp " + ChatColor.GRAY
+					+ "<name>" + ChatColor.WHITE + " public");
+			lines.add(ChatColor.RED + "/warp private <name>" + ChatColor.WHITE + "  -  Makes warp " + ChatColor.GRAY
+					+ "<name>" + ChatColor.WHITE + " private");
 			lines.add(ChatColor.RED + "/warp convert" + ChatColor.WHITE + "  -  Imports the hmod file");
 			break;
-		default :
+		default:
 			return new String[] { ChatColor.RED + "Invalid /warp help page." };
 		}
-		
+
 		return lines.toArray(new String[0]);
 	}
 
