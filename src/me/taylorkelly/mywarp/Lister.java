@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import org.angelsl.minecraft.randomshit.fontwidth.MinecraftFontWidthCalculator;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
+import org.bukkit.event.player.PlayerChatEvent;
 
 public class Lister {
 	private WarpList warpList;
@@ -18,7 +19,6 @@ public class Lister {
 
 	public Lister(WarpList warpList) {
 		this.warpList = warpList;
-		maxPages = (int)Math.ceil(warpList.getSize()/(double)WARPS_PER_PAGE);
 	}
 
 	public void addPlayer(Player player) {
@@ -29,10 +29,11 @@ public class Lister {
 		this.page = page;
 		int start = (page-1)*WARPS_PER_PAGE;
 		sortedWarps = warpList.getSortedWarps(player, start, WARPS_PER_PAGE);
+	    maxPages = (int)Math.ceil(warpList.getMaxWarps(player)/(double)WARPS_PER_PAGE);
 	}
 
 	public void list() {
-		String intro = "-------------------- Page " + page + "/" + maxPages + " --------------------";
+		String intro = "------------------- Page " + page + "/" + maxPages + " -------------------";
 		player.sendMessage(ChatColor.YELLOW + intro);
 		for(Warp warp: sortedWarps) {
 			String name = warp.name;
@@ -51,7 +52,7 @@ public class Lister {
 			
 		
 			String location = " @(" + x + ", " + y + ", " + z + ")";
-			String creatorString = " by " + creator;
+			String creatorString = (warp.publicAll?"(+)":"(-)") + " by " + creator;
 			
 			//Find remaining length left
 			int left = MinecraftFontWidthCalculator.getStringWidth(intro) - MinecraftFontWidthCalculator.getStringWidth("''" + creatorString + location);
@@ -77,8 +78,8 @@ public class Lister {
 		return name;
 	}
 
-	public int getMaxPages() {
-		return maxPages;
+	public int getMaxPages(Player player) {
+        return (int)Math.ceil(warpList.getMaxWarps(player)/(double)WARPS_PER_PAGE);
 	}
 	
 	public String whitespace(int length) {

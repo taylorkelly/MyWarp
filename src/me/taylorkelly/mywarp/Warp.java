@@ -93,9 +93,10 @@ public class Warp {
 		return ret.toString();
 	}
 
-	public boolean playerCanWarp(String player) {
-		if(creator.equals(player)) return true;
-		if(permissions.contains(player)) return true;
+	public boolean playerCanWarp(Player player) {
+		if(creator.equals(player.getName())) return true;
+		if(permissions.contains(player.getName())) return true;
+        if(((CraftPlayer)player).isOp()) return true;
 		return publicAll;
 	}
 

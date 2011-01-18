@@ -46,9 +46,9 @@ public class WarpDataSource {
 				String name = set.getString("name");
 				String creator = set.getString("creator");
 				int world = set.getInt("world");
-				int x = set.getInt("x");
+				double x = set.getDouble("x");
 				int y = set.getInt("y");
-				int z = set.getInt("z");
+				double z = set.getDouble("z");
 				int yaw = set.getInt("yaw");
 				int pitch = set.getInt("pitch");
 				boolean publicAll = set.getBoolean("publicAll");
@@ -280,6 +280,38 @@ public class WarpDataSource {
             conn = DriverManager.getConnection(DATABASE);
             ps = conn.prepareStatement("UPDATE warpTable SET creator = ? WHERE id = ?");
             ps.setString(1, warp.creator);
+            ps.setInt(2, warp.index);
+            ps.executeUpdate();
+        } catch (SQLException ex) {
+            log.log(Level.SEVERE, "[MYWARP]: Warp Creator Exception", ex);
+        } catch (ClassNotFoundException e) {
+            log.log(Level.SEVERE, "[MYWARP]: Error loading org.sqlite.JDBC");
+        } finally {
+            try {
+                if (ps != null) {
+                    ps.close();
+                }
+                if (set != null) {
+                    set.close();
+                }
+                if (conn != null)
+                    conn.close();
+            } catch (SQLException ex) {
+                log.log(Level.SEVERE, "[MYWARP]: Warp Creator Exception (on close)", ex);
+            }
+        }
+    }
+
+    public static void updateWelcomeMessage(Warp warp) {
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet set = null;
+        Logger log = Logger.getLogger("Minecraft");
+        try {
+            Class.forName("org.sqlite.JDBC");  
+            conn = DriverManager.getConnection(DATABASE);
+            ps = conn.prepareStatement("UPDATE warpTable SET welcomeMessage = ? WHERE id = ?");
+            ps.setString(1, warp.welcomeMessage);
             ps.setInt(2, warp.index);
             ps.executeUpdate();
         } catch (SQLException ex) {

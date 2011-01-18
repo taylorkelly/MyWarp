@@ -1,3 +1,7 @@
 name: MyWarp
-version: 1.6
+version: 1.7
 main: me.taylorkelly.mywarp.MyWarp
+commands:
+  warp:
+    description: All of the MyWarp commands
+    usage: /<command> help - Displays the help for MyWarp

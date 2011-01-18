@@ -84,4 +84,13 @@ class MatchList {
 
 	public ArrayList<Warp> exactMatches;
 	public ArrayList<Warp> matches;
+    public String getMatch(String name) {
+        if(exactMatches.size() == 1) {
+            return exactMatches.get(0).name;
+        }
+        if(exactMatches.size() == 0 && matches.size() == 1) {
+            return matches.get(0).name;
+        }
+        return name;
+    }
 }
