@@ -16,8 +16,12 @@ public class WarpList {
 
 	public WarpList(Server server) {
 		this.server = server;
+		this.loadFromDatabase();
+	}
+	
+	public void loadFromDatabase() {
 		WarpDataSource.initialize();
-		warpList = WarpDataSource.getMap();
+		this.warpList = WarpDataSource.getMap();
 	}
 
 	public void addWarp(String name, Player player, boolean privateWarp) {

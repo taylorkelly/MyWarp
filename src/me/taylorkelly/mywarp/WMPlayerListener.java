@@ -173,6 +173,14 @@ public class WMPlayerListener extends PlayerListener {
 			} else if (values.length > 2 && (values[1].equalsIgnoreCase("update") || values[1].equalsIgnoreCase("*"))) {
 
 				this.warpList.update(concatArray(values, 2), player);
+				
+				/*
+				 * /warp reload
+				 */
+			} else if (values.length == 2 && values[1].equalsIgnoreCase("reload")) {
+
+				this.warpList.loadFromDatabase();
+				
 				/*
 				 * /warp <name>
 				 */
@@ -197,9 +205,8 @@ public class WMPlayerListener extends PlayerListener {
 				+ "/2 ------------------");
 		switch (page) {
 		case 1:
-			lines
-					.add(ChatColor.RED + "/warp to <name>" + ChatColor.WHITE + "  -  Warp to " + ChatColor.GRAY
-							+ "<name>");
+			lines.add(ChatColor.RED + "/warp to <name>" + ChatColor.WHITE + "  -  Warp to " + ChatColor.GRAY
+					+ "<name>");
 			lines.add(ChatColor.RED + "/warp <name>" + ChatColor.WHITE + "  -  Warp to " + ChatColor.GRAY + "<name>");
 			lines.add(ChatColor.RED + "/warp create/+ <name>" + ChatColor.WHITE + "  -  Create warp " + ChatColor.GRAY
 					+ "<name>");
@@ -229,6 +236,7 @@ public class WMPlayerListener extends PlayerListener {
 			lines.add(ChatColor.RED + "/warp private <name>" + ChatColor.WHITE + "  -  Makes warp " + ChatColor.GRAY
 					+ "<name>" + ChatColor.WHITE + " private");
 			lines.add(ChatColor.RED + "/warp convert" + ChatColor.WHITE + "  -  Imports the hmod file");
+			lines.add(ChatColor.RED + "/warp reload" + ChatColor.WHITE + "  -  Reloads from database");
 			break;
 		default:
 			return new String[] { ChatColor.RED + "Invalid /warp help page." };
