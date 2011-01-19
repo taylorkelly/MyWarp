@@ -3,7 +3,6 @@ package me.taylorkelly.mywarp;
 import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 
@@ -217,6 +216,14 @@ public class WarpList {
                 }
             }
         }
+        if(exactMatches.size() > 1) {
+            for(Warp warp: exactMatches) {
+                if(!warp.name.equals(name)) {
+                    exactMatches.remove(warp);
+                    matches.add(0, warp);
+                }
+            }
+        }
         return new MatchList(exactMatches, matches);
     }
 
@@ -288,5 +295,46 @@ public class WarpList {
 
     public void notWaiting(Player player) {
         welcomeMessage.remove(player.getName());
+    }
+
+    public void addWarpPrivate(String name, Player player) {
+        if (warpList.containsKey(name)) {
+            player.sendMessage(ChatColor.RED + "Warp called '" + name + "' already exists.");
+        } else {
+            Warp warp = new Warp(name, player, false);
+            warpList.put(name, warp);
+            WarpDataSource.addWarp(warp);
+            player.sendMessage(ChatColor.AQUA + "Successfully created '" + name + "'");
+            player.sendMessage("If you'd like to privatize it,");
+            player.sendMessage("Use: " + ChatColor.RED + "/warp private " + name);
+        }
+    }
+
+    public void list(Player player) {
+        ArrayList<Warp> results = warpsInvitedTo(player);
+        
+        if(results.size() == 0) {
+            player.sendMessage(ChatColor.RED + "You can access no warps.");
+        } else {
+            player.sendMessage(ChatColor.AQUA + "You can warp to:");
+            player.sendMessage(results.toString().replace("[", "").replace("]",""));
+        }
+    }
+
+    private ArrayList<Warp> warpsInvitedTo(Player player) {
+        ArrayList<Warp> results = new ArrayList<Warp>();
+        
+        List<String> names = new ArrayList<String>(warpList.keySet());
+        Collator collator = Collator.getInstance();
+        collator.setStrength(Collator.SECONDARY);
+        Collections.sort(names, collator);
+        
+        for(String name: names) {
+            Warp warp = warpList.get(name);
+            if(warp.playerCanWarp(player)) {
+                results.add(warp);
+            }
+        }
+        return results;
     }
 }

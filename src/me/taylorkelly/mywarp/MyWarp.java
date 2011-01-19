@@ -17,47 +17,60 @@ import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.PluginLoader;
 import org.bukkit.plugin.java.JavaPlugin;
 
-public class MyWarp extends JavaPlugin{
-	private WarpList warpList;
-	private MWPlayerListener playerListener;
-	
-	public final String name = this.getDescription().getName();
-	public final String version = this.getDescription().getVersion();
-	public MyWarp(PluginLoader pluginLoader, Server instance, PluginDescriptionFile desc, File folder, File plugin, ClassLoader cLoader) {
-		super(pluginLoader, instance, desc, folder, plugin, cLoader);
-	}
+import com.griefcraft.util.Updater;
 
-	@Override
-	public void onDisable() {}
+public class MyWarp extends JavaPlugin {
+    private WarpList warpList;
+    private MWPlayerListener playerListener;
 
-	@Override
-	public void onEnable() {
-		Logger log = Logger.getLogger("Minecraft");
+    public final String name = this.getDescription().getName();
+    public final String version = this.getDescription().getVersion();
 
-		if(new File("MyWarp").exists() && new File("MyWarp", "warps.db").exists()) {
-			updateFiles();
-		}
-	      warpList = new WarpList(getServer());
+    private Updater updater;
 
-		playerListener = new MWPlayerListener(warpList);
-		getServer().getPluginManager().registerEvent(Type.PLAYER_CHAT, playerListener, Priority.Normal, this);
-		log.info(name + " " + version + " enabled");
-	}
+    public MyWarp(PluginLoader pluginLoader, Server instance, PluginDescriptionFile desc, File folder, File plugin, ClassLoader cLoader) {
+        super(pluginLoader, instance, desc, folder, plugin, cLoader);
+        updater = new Updater();
+    }
 
-	private void updateFiles() {
-		File file = new File("MyWarp", "warps.db");
-		File folder = new File("MyWarp");
-		file.renameTo(new File("homes-warps.db"));
-		folder.delete();
-	}
-	
+    public void onDisable() {
+    }
+
+    public void onEnable() {
+        Logger log = Logger.getLogger("Minecraft");
+
+        try {
+            updater.check();
+            updater.update();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        if (new File("MyWarp").exists() && new File("MyWarp", "warps.db").exists()) {
+            updateFiles();
+        }
+        
+        WarpSettings.initialize(getDataFolder());
+        warpList = new WarpList(getServer());
+
+        playerListener = new MWPlayerListener(warpList);
+        getServer().getPluginManager().registerEvent(Type.PLAYER_CHAT, playerListener, Priority.Normal, this);
+        log.info(name + " " + version + " enabled");
+    }
+
+    private void updateFiles() {
+        File file = new File("MyWarp", "warps.db");
+        File folder = new File("MyWarp");
+        file.renameTo(new File("homes-warps.db"));
+        folder.delete();
+    }
+
     private boolean warning;
 
-    
     public boolean onCommand(Player player, Command command, String commandLabel, String[] args) {
         String[] split = args;
         String commandName = command.getName().toLowerCase();
-        
+
         // TODO permissions
         if (commandName.equals("warp")) {
             /**
@@ -94,6 +107,12 @@ public class MyWarp extends JavaPlugin{
                     lister.setPage(1);
                 }
                 lister.list();
+
+                /**
+                 * /warp slist
+                 */
+            } else if (split.length == 2 && split[1].equalsIgnoreCase("slist")) {
+                warpList.list(player);
                 /**
                  * /warp search <name>
                  */
@@ -121,6 +140,18 @@ public class MyWarp extends JavaPlugin{
                 }
 
                 warpList.addWarp(name, player);
+                /**
+                 * /warp pcreate <name>
+                 */
+            } else if (split.length > 2 && split[1].equalsIgnoreCase("create")) {
+                String name = "";
+                for (int i = 2; i < split.length; i++) {
+                    name += split[i];
+                    if (i + 1 < split.length)
+                        name += " ";
+                }
+
+                warpList.addWarpPrivate(name, player);
                 /**
                  * /warp delete <name>
                  */
@@ -265,7 +296,7 @@ public class MyWarp extends JavaPlugin{
         }
         return false;
     }
-    
+
     public static boolean isInteger(String string) {
         try {
             Integer.parseInt(string);

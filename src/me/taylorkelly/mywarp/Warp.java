@@ -4,7 +4,6 @@ import java.util.ArrayList;
 
 import org.bukkit.*;
 import org.bukkit.entity.Player;
-import org.bukkit.craftbukkit.entity.CraftPlayer;
 
 public class Warp {
     public int index;
@@ -75,6 +74,23 @@ public class Warp {
         this.welcomeMessage = "Welcome to '" + name + "'";
     }
 
+    public Warp(String name, Player creator, boolean b) {
+        this.index = nextIndex;
+        nextIndex++;
+        this.name = name;
+        this.creator = creator.getName();
+        // TODO better world handling
+        this.world = 0;
+        this.x = creator.getLocation().getX();
+        this.y = creator.getLocation().getBlockY();
+        this.z = creator.getLocation().getZ();
+        this.yaw = Math.round(creator.getLocation().getYaw()) % 360;
+        this.pitch = Math.round(creator.getLocation().getPitch()) % 360;
+        this.publicAll = b;
+        this.permissions = new ArrayList<String>();
+        this.welcomeMessage = "Welcome to '" + name + "'";
+    }
+
     private ArrayList<String> processList(String permissions) {
         String[] names = permissions.split(",");
         ArrayList<String> ret = new ArrayList<String>();
@@ -100,8 +116,10 @@ public class Warp {
             return true;
         if (permissions.contains(player.getName()))
             return true;
-        if (((CraftPlayer) player).isOp())
-            return true;
+        if (WarpSettings.adminPrivateWarps) {
+            if (player.isOp())
+                return true;
+        }
         return publicAll;
     }
 
@@ -133,12 +151,16 @@ public class Warp {
     public boolean playerCanModify(Player player) {
         if (creator.equals(player.getName()))
             return true;
-        if (((CraftPlayer) player).isOp())
+        if (player.isOp())
             return true;
         return false;
     }
 
     public void setCreator(String giveeName) {
         this.creator = giveeName;
+    }
+
+    public String toString() {
+        return name;
     }
 }
