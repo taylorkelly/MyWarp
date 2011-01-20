@@ -287,6 +287,7 @@ public class WarpList {
 			if (warp.playerCanModify(player)) {
 				warp.update(player);
 				WarpDataSource.updateWarp(warp);
+				player.sendMessage(ChatColor.AQUA + "You have updated '" + name + "'");
 			} else {
 				player.sendMessage(ChatColor.RED + "You do not have permission to change the position from '" + name
 						+ "'");				
