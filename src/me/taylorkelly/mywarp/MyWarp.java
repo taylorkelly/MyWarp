@@ -76,7 +76,7 @@ public class MyWarp extends JavaPlugin {
             /**
              * /warp convert
              */
-            if (split.length == 2 && split[1].equalsIgnoreCase("convert")) {
+            if (split.length == 1 && split[0].equalsIgnoreCase("convert")) {
                 if (!warning) {
                     player.sendMessage(ChatColor.RED + "Warning: " + ChatColor.WHITE + "Only use a copy of warps.txt.");
                     player.sendMessage("This will delete the warps.txt it uses");
@@ -89,12 +89,12 @@ public class MyWarp extends JavaPlugin {
                 /**
                  * /warp list or /warp list #
                  */
-            } else if ((split.length == 2 || (split.length == 3 && isInteger(split[2]))) && split[1].equalsIgnoreCase("list")) {
+            } else if ((split.length == 1 || (split.length == 2 && isInteger(split[1]))) && split[0].equalsIgnoreCase("list")) {
                 Lister lister = new Lister(warpList);
                 lister.addPlayer(player);
 
-                if (split.length == 3) {
-                    int page = Integer.parseInt(split[2]);
+                if (split.length == 2) {
+                    int page = Integer.parseInt(split[1]);
                     if (page < 1) {
                         player.sendMessage(ChatColor.RED + "Page number can't be below 1.");
                         return true;
@@ -111,14 +111,14 @@ public class MyWarp extends JavaPlugin {
                 /**
                  * /warp slist
                  */
-            } else if (split.length == 2 && split[1].equalsIgnoreCase("slist")) {
+            } else if (split.length == 1 && split[0].equalsIgnoreCase("slist")) {
                 warpList.list(player);
                 /**
                  * /warp search <name>
                  */
-            } else if (split.length > 2 && split[1].equalsIgnoreCase("search")) {
+            } else if (split.length > 1 && split[0].equalsIgnoreCase("search")) {
                 String name = "";
-                for (int i = 2; i < split.length; i++) {
+                for (int i = 1; i < split.length; i++) {
                     name += split[i];
                     if (i + 1 < split.length)
                         name += " ";
@@ -131,9 +131,9 @@ public class MyWarp extends JavaPlugin {
                 /**
                  * /warp create <name>
                  */
-            } else if (split.length > 2 && split[1].equalsIgnoreCase("create")) {
+            } else if (split.length > 1 && split[0].equalsIgnoreCase("create")) {
                 String name = "";
-                for (int i = 2; i < split.length; i++) {
+                for (int i = 1; i < split.length; i++) {
                     name += split[i];
                     if (i + 1 < split.length)
                         name += " ";
@@ -143,9 +143,9 @@ public class MyWarp extends JavaPlugin {
                 /**
                  * /warp pcreate <name>
                  */
-            } else if (split.length > 2 && split[1].equalsIgnoreCase("create")) {
+            } else if (split.length > 1 && split[0].equalsIgnoreCase("create")) {
                 String name = "";
-                for (int i = 2; i < split.length; i++) {
+                for (int i = 1; i < split.length; i++) {
                     name += split[i];
                     if (i + 1 < split.length)
                         name += " ";
@@ -155,9 +155,9 @@ public class MyWarp extends JavaPlugin {
                 /**
                  * /warp delete <name>
                  */
-            } else if (split.length > 2 && split[1].equalsIgnoreCase("delete")) {
+            } else if (split.length > 1 && split[0].equalsIgnoreCase("delete")) {
                 String name = "";
-                for (int i = 2; i < split.length; i++) {
+                for (int i = 1; i < split.length; i++) {
                     name += split[i];
                     if (i + 1 < split.length)
                         name += " ";
@@ -167,9 +167,9 @@ public class MyWarp extends JavaPlugin {
                 /**
                  * /warp welcome <name>
                  */
-            } else if (split.length > 2 && split[1].equalsIgnoreCase("welcome")) {
+            } else if (split.length > 1 && split[0].equalsIgnoreCase("welcome")) {
                 String name = "";
-                for (int i = 2; i < split.length; i++) {
+                for (int i = 1; i < split.length; i++) {
                     name += split[i];
                     if (i + 1 < split.length)
                         name += " ";
@@ -179,9 +179,9 @@ public class MyWarp extends JavaPlugin {
                 /**
                  * /warp private <name>
                  */
-            } else if (split.length > 2 && split[1].equalsIgnoreCase("private")) {
+            } else if (split.length > 1 && split[0].equalsIgnoreCase("private")) {
                 String name = "";
-                for (int i = 2; i < split.length; i++) {
+                for (int i = 1; i < split.length; i++) {
                     name += split[i];
                     if (i + 1 < split.length)
                         name += " ";
@@ -191,9 +191,9 @@ public class MyWarp extends JavaPlugin {
                 /**
                  * /warp public <name>
                  */
-            } else if (split.length > 2 && split[1].equalsIgnoreCase("public")) {
+            } else if (split.length > 1 && split[0].equalsIgnoreCase("public")) {
                 String name = "";
-                for (int i = 2; i < split.length; i++) {
+                for (int i = 1; i < split.length; i++) {
                     name += split[i];
                     if (i + 1 < split.length)
                         name += " ";
@@ -204,13 +204,13 @@ public class MyWarp extends JavaPlugin {
                 /**
                  * /warp give <player> <name>
                  */
-            } else if (split.length > 3 && split[1].equalsIgnoreCase("give")) {
-                Player givee = getServer().getPlayer(split[2]);
+            } else if (split.length > 2 && split[0].equalsIgnoreCase("give")) {
+                Player givee = getServer().getPlayer(split[1]);
                 // TODO Change to matchPlayer
-                String giveeName = (givee == null) ? split[2] : givee.getName();
+                String giveeName = (givee == null) ? split[1] : givee.getName();
 
                 String name = "";
-                for (int i = 3; i < split.length; i++) {
+                for (int i = 2; i < split.length; i++) {
                     name += split[i];
                     if (i + 1 < split.length)
                         name += " ";
@@ -221,13 +221,13 @@ public class MyWarp extends JavaPlugin {
                 /**
                  * /warp invite <player> <name>
                  */
-            } else if (split.length > 3 && split[1].equalsIgnoreCase("invite")) {
-                Player invitee = getServer().getPlayer(split[2]);
+            } else if (split.length > 2 && split[0].equalsIgnoreCase("invite")) {
+                Player invitee = getServer().getPlayer(split[1]);
                 // TODO Change to matchPlayer
-                String inviteeName = (invitee == null) ? split[2] : invitee.getName();
+                String inviteeName = (invitee == null) ? split[1] : invitee.getName();
 
                 String name = "";
-                for (int i = 3; i < split.length; i++) {
+                for (int i = 2; i < split.length; i++) {
                     name += split[i];
                     if (i + 1 < split.length)
                         name += " ";
@@ -237,13 +237,13 @@ public class MyWarp extends JavaPlugin {
                 /**
                  * /warp uninvite <player> <name>
                  */
-            } else if (split.length > 3 && split[1].equalsIgnoreCase("uninvite")) {
-                Player invitee = getServer().getPlayer(split[2]);
+            } else if (split.length > 2 && split[0].equalsIgnoreCase("uninvite")) {
+                Player invitee = getServer().getPlayer(split[1]);
                 // TODO Change to matchPlayer
-                String inviteeName = (invitee == null) ? split[2] : invitee.getName();
+                String inviteeName = (invitee == null) ? split[1] : invitee.getName();
 
                 String name = "";
-                for (int i = 3; i < split.length; i++) {
+                for (int i = 2; i < split.length; i++) {
                     name += split[i];
                     if (i + 1 < split.length)
                         name += " ";
@@ -254,7 +254,7 @@ public class MyWarp extends JavaPlugin {
                 /**
                  * /warp help
                  */
-            } else if (split.length == 2 && split[1].equalsIgnoreCase("help")) {
+            } else if (split.length == 1 && split[0].equalsIgnoreCase("help")) {
                 ArrayList<String> messages = new ArrayList<String>();
                 messages.add(ChatColor.RED + "-------------------- " + ChatColor.WHITE + "/WARP HELP" + ChatColor.RED + " --------------------");
                 messages.add(ChatColor.RED + "/warp <name>" + ChatColor.WHITE + "  -  Warp to " + ChatColor.GRAY + "<name>");
@@ -280,10 +280,10 @@ public class MyWarp extends JavaPlugin {
                 /**
                  * /warp <name>
                  */
-            } else if (split.length > 1) {
+            } else if (split.length > 0) {
                 // TODO ChunkLoading
                 String name = "";
-                for (int i = 1; i < split.length; i++) {
+                for (int i = 0; i < split.length; i++) {
                     name += split[i];
                     if (i + 1 < split.length)
                         name += " ";
