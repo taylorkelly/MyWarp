@@ -2,15 +2,12 @@ package me.taylorkelly.mywarp;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Server;
 import org.bukkit.command.Command;
 import org.bukkit.entity.Player;
-import org.bukkit.event.Event;
 import org.bukkit.event.Event.Priority;
 import org.bukkit.event.Event.Type;
 import org.bukkit.plugin.PluginDescriptionFile;
