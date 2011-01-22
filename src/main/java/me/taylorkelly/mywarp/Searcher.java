@@ -2,10 +2,16 @@ package me.taylorkelly.mywarp;
 
 import java.util.ArrayList;
 
-import org.angelsl.minecraft.randomshit.fontwidth.MinecraftFontWidthCalculator;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
+
+/**
+ * Searcher ...
+ *
+ * @author Kevin R. Smith - ksmith@pillartechnology.com
+ * @since 2011-01-20
+ */
 public class Searcher {
 	private WarpList warpList;
 	private Player player;
