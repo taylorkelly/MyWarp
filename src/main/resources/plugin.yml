@@ -1,6 +1,6 @@
 name: MyWarp
-version: 1.7
-main: MyWarp
+version: 1.8
+main: me.taylorkelly.mywarp.MyWarp
 commands:
   warp:
     description: All of the MyWarp commands

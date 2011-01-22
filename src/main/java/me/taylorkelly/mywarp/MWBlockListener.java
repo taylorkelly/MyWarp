@@ -15,7 +15,7 @@ public class MWBlockListener extends BlockListener {
     
     public void onBlockRightClick(BlockRightClickEvent event) {
         Block block = event.getBlock();
-        if(block.getState() instanceof Sign && SignWarp.isSignWarp((Sign) block.getState())) {
+        if(block.getState() instanceof Sign && SignWarp.isSignWarp((Sign) block.getState()) && WarpPermissions.signWarp(event.getPlayer())) {
             SignWarp.warpSign((Sign) block.getState(), list, event.getPlayer());
         }
     }
