@@ -97,10 +97,12 @@ public class Warp {
 		return ret.toString();
 	}
 
-	public boolean playerCanWarp(String player) {
-		if (creator.equals(player))
+	public boolean playerCanWarp(Player player) {
+		if (this.creator.equals(player.getName()))
 			return true;
-		if (permissions.contains(player))
+		if (this.permissions.contains(player.getName()))
+			return true;
+		if (((CraftPlayer) player).isOp())
 			return true;
 		return publicAll;
 	}
@@ -112,6 +114,14 @@ public class Warp {
 		player.teleportTo(location);
 	}
 
+	public void update(Player player) {
+		this.x = player.getLocation().getX();
+		this.y = player.getLocation().getBlockY()	;
+		this.z = player.getLocation().getZ();
+		this.yaw = Math.round(player.getLocation().getYaw()) % 360;
+		this.pitch = Math.round(player.getLocation().getPitch()) % 360;		
+	}
+	
 	public boolean playerIsCreator(String name) {
 		if (creator.equals(name))
 			return true;
@@ -140,5 +150,9 @@ public class Warp {
 
 	public void setCreator(String giveeName) {
 		this.creator = giveeName;
+	}
+	
+	public void setMessage(String message) {
+		this.welcomeMessage = message;
 	}
 }

@@ -52,9 +52,9 @@ public class WarpDataSource {
 				String name = set.getString("name");
 				String creator = set.getString("creator");
 				int world = set.getInt("world");
-				int x = set.getInt("x");
+				double x = set.getDouble("x");
 				int y = set.getInt("y");
-				int z = set.getInt("z");
+				double z = set.getDouble("z");
 				int yaw = set.getInt("yaw");
 				int pitch = set.getInt("pitch");
 				boolean publicAll = set.getBoolean("publicAll");
@@ -186,6 +186,41 @@ public class WarpDataSource {
 			}
 		}
 	}
+	
+	public static void updateWarp(Warp warp) {
+		Connection conn = null;
+		PreparedStatement ps = null;
+		Logger log = Logger.getLogger("Minecraft");
+		try {
+			Class.forName("org.sqlite.JDBC");
+			conn = DriverManager.getConnection(DATABASE);
+			
+			ps = conn
+					.prepareStatement("UPDATE warpTable SET x = ?, y = ?, z = ?, yaw = ?, pitch = ? WHERE id = ?");
+			ps.setDouble(1, warp.x);
+			ps.setInt(2, warp.y);
+			ps.setDouble(3, warp.z);
+			ps.setInt(4, warp.yaw);
+			ps.setInt(5, warp.pitch);
+			ps.setInt(6, warp.index);
+			ps.executeUpdate();
+		} catch (SQLException ex) {
+			log.log(Level.SEVERE, "[MYWARP]: Warp Update Exception", ex);
+		} catch (ClassNotFoundException e) {
+			log.log(Level.SEVERE, "[MYWARP]: Error loading org.sqlite.JDBC");
+		} finally {
+			try {
+				if (ps != null) {
+					ps.close();
+				}
+				if (conn != null)
+					conn.close();
+			} catch (SQLException ex) {
+				log.log(Level.SEVERE,
+						"[MYWARP]: Warp Insert Exception (on close)", ex);
+			}
+		}
+	}
 
 	public static void deleteWarp(Warp warp) {
 		Connection conn = null;
@@ -215,6 +250,39 @@ public class WarpDataSource {
 			} catch (SQLException ex) {
 				log.log(Level.SEVERE,
 						"[MYWARP]: Warp Delete Exception (on close)", ex);
+			}
+		}
+	}
+	
+	public static void updateMessage(Warp warp) {
+		Connection conn = null;
+		PreparedStatement ps = null;
+		ResultSet set = null;
+		Logger log = Logger.getLogger("Minecraft");
+		try {
+			Class.forName("org.sqlite.JDBC");
+			conn = DriverManager.getConnection(DATABASE);
+			ps = conn.prepareStatement("UPDATE warpTable SET welcomeMessage = ? WHERE id = ?");
+			ps.setString(1, warp.welcomeMessage);
+			ps.setInt(2, warp.index);
+			ps.executeUpdate();
+		} catch (SQLException ex) {
+			log.log(Level.SEVERE, "[MYWARP]: Warp Welcome Message Exception", ex);
+		} catch (ClassNotFoundException e) {
+			log.log(Level.SEVERE, "[MYWARP]: Error loading org.sqlite.JDBC");
+		} finally {
+			try {
+				if (ps != null) {
+					ps.close();
+				}
+				if (set != null) {
+					set.close();
+				}
+				if (conn != null)
+					conn.close();
+			} catch (SQLException ex) {
+				log.log(Level.SEVERE,
+						"[MYWARP]: Warp Publicize Exception (on close)", ex);
 			}
 		}
 	}

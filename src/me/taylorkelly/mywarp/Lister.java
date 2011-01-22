@@ -15,6 +15,12 @@ public class Lister {
 	
 	private static final int WARPS_PER_PAGE = 8;
 	ArrayList<Warp> sortedWarps;
+	
+	public static final ChatColor PUBLIC_OWN = ChatColor.AQUA;
+	public static final ChatColor PRIVATE_OWN = ChatColor.BLUE;
+	public static final ChatColor PUBLIC_OTHER = ChatColor.GREEN;
+	public static final ChatColor PRIVATE_OTHER = ChatColor.RED;
+	public static final ChatColor PRIVATE_INVITED = ChatColor.YELLOW;
 
 	public Lister(WarpList warpList) {
 		this.warpList = warpList;
@@ -63,13 +69,19 @@ public class Lister {
 			int x = (int) Math.round(warp.x);
 			int y = (int) Math.round(warp.y);
 			int z = (int) Math.round(warp.z);
-			String color;
+			ChatColor color;
 			if(warp.playerIsCreator(player.getName())) {
-				color = ChatColor.AQUA.toString();
+				if (warp.publicAll) {
+					color = PUBLIC_OWN;
+				} else {
+					color = PRIVATE_OWN;
+				}
 			} else if(warp.publicAll) {
-				color = ChatColor.GREEN.toString();
+				color = PUBLIC_OTHER;
+			} else if (warp.playerCanWarp(player)){
+				color = PRIVATE_INVITED;
 			} else {
-				color = ChatColor.RED.toString();
+				color = PRIVATE_OTHER;
 			}
 			
 		
@@ -114,5 +126,17 @@ public class Lister {
 		}
 		
 		return ret.toString();
+	}
+	
+	public static String[] getLegend() {
+		String[] result = new String[6];
+		result[0] = ChatColor.RED + "-------------------- " + ChatColor.WHITE + "LIST LEGEND" + ChatColor.RED
+		+ " -------------------";
+		result[1] = PUBLIC_OWN + "Yours and it is public.";
+		result[2] = PRIVATE_OWN + "Yours and it is private.";
+		result[3] = PUBLIC_OTHER + "Not yours and it is public";
+		result[4] = PRIVATE_OTHER + "Not yours, private and not invited";
+		result[5] = PRIVATE_INVITED + "Not yours, private and you are invited";
+		return result;
 	}
 }
