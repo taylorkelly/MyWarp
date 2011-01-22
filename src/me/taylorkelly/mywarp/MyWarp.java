@@ -22,6 +22,7 @@ import com.griefcraft.util.Updater;
 public class MyWarp extends JavaPlugin {
     private WarpList warpList;
     private MWPlayerListener playerListener;
+    private MWBlockListener blockListener;
 
     public final String name = this.getDescription().getName();
     public final String version = this.getDescription().getVersion();
@@ -52,9 +53,10 @@ public class MyWarp extends JavaPlugin {
         
         WarpSettings.initialize(getDataFolder());
         warpList = new WarpList(getServer());
-
+        blockListener = new MWBlockListener(warpList);
         playerListener = new MWPlayerListener(warpList);
-        getServer().getPluginManager().registerEvent(Type.PLAYER_CHAT, playerListener, Priority.Normal, this);
+        getServer().getPluginManager().registerEvent(Type.PLAYER_CHAT, playerListener, Priority.Low, this);
+        getServer().getPluginManager().registerEvent(Type.BLOCK_RIGHTCLICKED, blockListener, Priority.High, this);
         log.info(name + " " + version + " enabled");
     }
 

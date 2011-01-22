@@ -337,4 +337,9 @@ public class WarpList {
         }
         return results;
     }
+
+    public boolean isWarp(String name) {
+        // TODO Auto-generated method stub
+        return false;
+    }
 }
