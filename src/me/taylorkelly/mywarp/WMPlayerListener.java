@@ -10,6 +10,7 @@ import org.bukkit.event.player.PlayerListener;
 import org.bukkit.plugin.Plugin;
 
 public class WMPlayerListener extends PlayerListener {
+		
 	private boolean warning;
 	private Plugin plugin;
 	private WarpList warpList;
@@ -182,6 +183,24 @@ public class WMPlayerListener extends PlayerListener {
 				this.warpList.loadFromDatabase();
 				
 				/*
+				 * /warp permissions
+				 */
+			} else if (values.length == 2 && values[1].equalsIgnoreCase("permissions")) {
+
+				player.sendMessage("Your permissions:");
+				printPermission("warp.to.own", player);
+				printPermission("warp.to.invited", player);
+				printPermission("warp.to.other", player);
+				printPermission("warp.to.global", player);
+				printPermission("warp.create.public", player);
+				printPermission("warp.create.private", player);
+				printPermission("warp.give", player);
+				printPermission("warp.invite", player);
+				printPermission("warp.uninvite", player);
+				printPermission("warp.delete", player);
+				printPermission("warp.message", player);
+				
+				/*
 				 * /warp <name>
 				 */
 			} else if (values.length > 1) {
@@ -199,6 +218,12 @@ public class WMPlayerListener extends PlayerListener {
 		}
 	}
 
+	public static void printPermission(String name, Player player) {
+		boolean hasPermission = MyWarp.permissions.permission(player, name);
+		String message = (hasPermission ? ChatColor.GREEN : ChatColor.RED) + name + ": " + (hasPermission ? "Yes": "No");
+		player.sendMessage(message);
+	}
+	
 	public static String[] helpPage(int page) {
 		List<String> lines = new ArrayList<String>(8);
 		lines.add(ChatColor.RED + "------------------ " + ChatColor.WHITE + "/WARP HELP" + ChatColor.RED + " " + page
@@ -222,6 +247,7 @@ public class WMPlayerListener extends PlayerListener {
 					+ "<query>");
 			break;
 		case 2:
+			lines.add(ChatColor.RED + "/warp list|ls legend" + ChatColor.WHITE + "  -  Shows the warp page's legend.");
 			lines.add(ChatColor.RED + "/warp message/msg <name> <message>" + ChatColor.WHITE
 					+ "  -  Sets message");
 			lines.add(ChatColor.RED + "/warp give <player> <name>" + ChatColor.WHITE + "  -  Give " + ChatColor.GRAY

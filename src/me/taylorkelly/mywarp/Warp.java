@@ -4,7 +4,6 @@ import java.util.ArrayList;
 
 import org.bukkit.Location;
 import org.bukkit.World;
-import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 
 public class Warp {
@@ -102,8 +101,6 @@ public class Warp {
 			return true;
 		if (this.permissions.contains(player.getName()))
 			return true;
-		if (((CraftPlayer) player).isOp())
-			return true;
 		return publicAll;
 	}
 
@@ -142,8 +139,6 @@ public class Warp {
 
 	public boolean playerCanModify(Player player) {
 		if (creator.equals(player.getName()))
-			return true;
-		if (((CraftPlayer) player).isOp())
 			return true;
 		return false;
 	}

@@ -5,7 +5,6 @@ import java.io.File;
 import java.util.logging.Logger;
 
 import org.bukkit.Server;
-import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.Event.Priority;
 import org.bukkit.plugin.Plugin;
@@ -19,7 +18,7 @@ import com.nijikokun.bukkit.Permissions.Permissions;
 
 public class MyWarp extends JavaPlugin{
 	
-	public static PermissionHandler permissions = new DefaultHandler();
+	public static PermissionHandler permissions = new WarpHandler();
 	
 	private WMPlayerListener playerListener;
 	public final String name = this.getDescription().getName();
