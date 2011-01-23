@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import me.taylorkelly.myhome.HomePermissions;
 import me.taylorkelly.mywarp.griefcraft.Updater;
 
 import org.bukkit.ChatColor;
@@ -36,6 +35,7 @@ public class MyWarp extends JavaPlugin {
     }
 
     public void onDisable() {
+        ConnectionManager.freeConnection();
     }
 
     public void onEnable() {
@@ -47,6 +47,7 @@ public class MyWarp extends JavaPlugin {
         } catch (Exception e) {
             e.printStackTrace();
         }
+        
         Connection conn = ConnectionManager.initializeConnection(getServer());
         if (conn == null) {
             log.log(Level.SEVERE, "[MYWARP] Could not establish SQL connection. Disabling MyWarp");
@@ -155,7 +156,7 @@ public class MyWarp extends JavaPlugin {
                 /**
                  * /warp pcreate <name>
                  */
-            } else if (split.length > 1 && split[0].equalsIgnoreCase("create") && WarpPermissions.create(player) && WarpPermissions.canPrivate(player)) {
+            } else if (split.length > 1 && split[0].equalsIgnoreCase("pcreate") && WarpPermissions.create(player) && WarpPermissions.canPrivate(player)) {
                 String name = "";
                 for (int i = 1; i < split.length; i++) {
                     name += split[i];

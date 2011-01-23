@@ -2,7 +2,6 @@ package me.taylorkelly.mywarp;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -11,10 +10,9 @@ import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import me.taylorkelly.myhome.ConnectionManager;
-
 public class WarpDataSource {
     public final static String DATABASE = "jdbc:sqlite:homes-warps.db";
+    
     private final static String WARP_TABLE = "CREATE TABLE `warpTable` (" + "`id` INTEGER PRIMARY KEY," + "`name` varchar(32) NOT NULL DEFAULT 'warp',"
             + "`creator` varchar(32) NOT NULL DEFAULT 'Player'," + "`world` tinyint NOT NULL DEFAULT '0'," + "`x` DOUBLE NOT NULL DEFAULT '0',"
             + "`y` tinyint NOT NULL DEFAULT '0'," + "`z` DOUBLE NOT NULL DEFAULT '0'," + "`yaw` smallint NOT NULL DEFAULT '0',"
@@ -100,9 +98,9 @@ public class WarpDataSource {
         Statement st = null;
         try {
             Connection conn = ConnectionManager.getConnection();
-
             st = conn.createStatement();
             st.executeUpdate(WARP_TABLE);
+            conn.commit();
         } catch (SQLException e) {
             Logger log = Logger.getLogger("Minecraft");
             log.log(Level.SEVERE, "[MYWARP]: Create Table Exception", e);
@@ -138,6 +136,7 @@ public class WarpDataSource {
             ps.setString(11, warp.permissionsString());
             ps.setString(12, warp.welcomeMessage);
             ps.executeUpdate();
+            conn.commit();
         } catch (SQLException ex) {
             log.log(Level.SEVERE, "[MYWARP]: Warp Insert Exception", ex);
         } finally {
@@ -161,6 +160,7 @@ public class WarpDataSource {
             ps = conn.prepareStatement("DELETE FROM warpTable WHERE id = ?");
             ps.setInt(1, warp.index);
             ps.executeUpdate();
+            conn.commit();
         } catch (SQLException ex) {
             log.log(Level.SEVERE, "[MYWARP]: Warp Delete Exception", ex);
         } finally {
@@ -188,6 +188,7 @@ public class WarpDataSource {
             ps.setBoolean(1, publicAll);
             ps.setInt(2, warp.index);
             ps.executeUpdate();
+            conn.commit();
         } catch (SQLException ex) {
             log.log(Level.SEVERE, "[MYWARP]: Warp Publicize Exception", ex);
         } finally {
@@ -215,6 +216,7 @@ public class WarpDataSource {
             ps.setString(1, warp.permissionsString());
             ps.setInt(2, warp.index);
             ps.executeUpdate();
+            conn.commit();
         } catch (SQLException ex) {
             log.log(Level.SEVERE, "[MYWARP]: Warp Permissions Exception", ex);
         } finally {
@@ -242,6 +244,8 @@ public class WarpDataSource {
             ps.setString(1, warp.creator);
             ps.setInt(2, warp.index);
             ps.executeUpdate();
+            conn.commit();
+
         } catch (SQLException ex) {
             log.log(Level.SEVERE, "[MYWARP]: Warp Creator Exception", ex);
         } finally {
@@ -269,6 +273,8 @@ public class WarpDataSource {
             ps.setString(1, warp.welcomeMessage);
             ps.setInt(2, warp.index);
             ps.executeUpdate();
+            conn.commit();
+
         } catch (SQLException ex) {
             log.log(Level.SEVERE, "[MYWARP]: Warp Creator Exception", ex);
         } finally {

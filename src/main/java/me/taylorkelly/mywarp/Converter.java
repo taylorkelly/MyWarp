@@ -16,11 +16,9 @@ public class Converter {
 
     public static void convert(Player player, Server server, WarpList lister) {
         File file = new File("warps.txt");
-        Connection conn = null;
         PreparedStatement ps = null;
         try {
-            Class.forName("org.sqlite.JDBC");
-            conn = DriverManager.getConnection(WarpDataSource.DATABASE);
+            Connection conn = ConnectionManager.getConnection();
             ps = conn
                     .prepareStatement("INSERT INTO warpTable (id, name, creator, world, x, y, z, yaw, pitch, publicAll, permissions, welcomeMessage) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)");
 
@@ -73,8 +71,6 @@ public class Converter {
             player.sendMessage("Successfully imported " + size + " warps.");
         } catch (FileNotFoundException e) {
             player.sendMessage(ChatColor.RED + "Error: 'warps.txt' doesn't exist.");
-        } catch (ClassNotFoundException e) {
-            player.sendMessage(ChatColor.RED + "Error: Cannot find SQLite library");
         } catch (SQLException e) {
             player.sendMessage(ChatColor.RED + "Error: SQLite Exception");
         } finally {
@@ -82,8 +78,6 @@ public class Converter {
                 if (ps != null) {
                     ps.close();
                 }
-                if (conn != null)
-                    conn.close();
             } catch (SQLException ex) {
                 player.sendMessage(ChatColor.RED + "Error: SQLite Exception (on close)");
             }

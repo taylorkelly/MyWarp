@@ -7,7 +7,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import me.taylorkelly.myhome.MyHome;
-import me.taylorkelly.mywarp.MyWarp;
 
 import org.bukkit.Server;
 import org.bukkit.plugin.Plugin;
