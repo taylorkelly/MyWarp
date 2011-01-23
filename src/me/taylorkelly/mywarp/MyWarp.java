@@ -7,18 +7,14 @@ import java.util.logging.Logger;
 import org.bukkit.Server;
 import org.bukkit.event.Event;
 import org.bukkit.event.Event.Priority;
-import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.PluginLoader;
 import org.bukkit.plugin.java.JavaPlugin;
-
-import com.nijiko.Messaging;
-import com.nijiko.permissions.PermissionHandler;
-import com.nijikokun.bukkit.Permissions.Permissions;
+import org.bukkit.xzise.xwarp.PermissionWrapper;
 
 public class MyWarp extends JavaPlugin{
 	
-	public static PermissionHandler permissions = new WarpHandler();
+	public static PermissionWrapper permissions = new PermissionWrapper();
 	
 	private WMPlayerListener playerListener;
 	public final String name = this.getDescription().getName();
@@ -38,13 +34,7 @@ public class MyWarp extends JavaPlugin{
 			updateFiles();
 		}
 		
-		Plugin test = this.getServer().getPluginManager().getPlugin("Permissions");
-
-		if(test != null) {
-			MyWarp.permissions = Permissions.Security;
-	    } else {
-	    	log.info(Messaging.bracketize(name) + " Permission system not found.");
-	    }		
+		permissions.init(this.getServer());
 		
 		WarpList warpList = new WarpList(getServer());
 		playerListener = new WMPlayerListener(this, warpList);
