@@ -12,9 +12,12 @@ public class Lister {
 	
 	private int maxPages;
 	private int page;
+	private String introRight;
 	
 	private static final int WARPS_PER_PAGE = 8;
 	ArrayList<Warp> sortedWarps;
+	
+	private String creator;
 	
 	public static final ChatColor PUBLIC_OWN = ChatColor.AQUA;
 	public static final ChatColor PRIVATE_OWN = ChatColor.BLUE;
@@ -24,18 +27,42 @@ public class Lister {
 
 	public Lister(WarpList warpList) {
 		this.warpList = warpList;
-		this.maxPages = (int)Math.ceil(warpList.getSize()/(double)WARPS_PER_PAGE);
+		this.maxPages = -1;
 	}
 
-	public void addPlayer(Player player) {
+	public void setPlayer(Player player) {
 		this.player = player;
-		this.maxPages = (int) Math.ceil(this.warpList.getSize(player) / (double) WARPS_PER_PAGE);
+		this.maxPages = -1;
+	}
+	
+	public void setCreator(String creator) {
+		this.creator = creator;
+		this.maxPages = -1;
+	}
+	
+	public void calculateMaxPages() {
+		int size = this.warpList.getSize(this.player, this.creator);
+		this.maxPages = (int) Math.ceil(size / (double) WARPS_PER_PAGE);
+		this.introRight = "/" + maxPages + " ";
+		int width = 20 - this.getWidth(maxPages, 10);
+		while (width > 0) {
+			this.introRight += "-";
+			width--;
+		}
 	}
 
 	public void setPage(int page) {
 		this.page = page;
+		this.generatePage();
+	}
+	
+	public void generatePage() {
 		int start = (page-1)*WARPS_PER_PAGE;
-		this.sortedWarps = warpList.getSortedWarps(player, start, WARPS_PER_PAGE);
+		if (this.creator != null) {
+			this.sortedWarps = this.warpList.getSortedWarps(this.player, this.creator, start, WARPS_PER_PAGE);
+		} else {
+			this.sortedWarps = this.warpList.getSortedWarps(player, start, WARPS_PER_PAGE);
+		}
 	}
 
 	private int getWidth(int number, int base) {
@@ -48,6 +75,9 @@ public class Lister {
 	}
 	
 	public void list() {
+		if (this.maxPages < 0)
+			this.calculateMaxPages();
+		
 		// Generate header with the same length every time
 		String intro = "";
 		int width = 20 - this.getWidth(page, 10);
@@ -55,14 +85,9 @@ public class Lister {
 			intro += "-";
 			width--;
 		}
-		intro += " Page " + page + "/" + maxPages + " ";
-		width = 20 - this.getWidth(maxPages, 10);
-		while (width > 0) {
-			intro += "-";
-			width--;
-		}
+		intro += " Page " + page + introRight;
 		
-		player.sendMessage(ChatColor.YELLOW + intro);
+		this.player.sendMessage(ChatColor.YELLOW + intro);
 		for(Warp warp: sortedWarps) {
 			String name = warp.name;
 			String creator = (warp.creator.equalsIgnoreCase(player.getName()))?"you":warp.creator;
@@ -113,6 +138,9 @@ public class Lister {
 	}
 
 	public int getMaxPages() {
+		if (this.maxPages < 0) {
+			this.calculateMaxPages();
+		}
 		return this.maxPages;
 	}
 	
