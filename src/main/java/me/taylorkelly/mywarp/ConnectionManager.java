@@ -6,8 +6,6 @@ import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import me.taylorkelly.myhome.MyHome;
-
 import org.bukkit.Server;
 import org.bukkit.plugin.Plugin;
 
@@ -20,9 +18,16 @@ public class ConnectionManager {
             Plugin test = server.getPluginManager().getPlugin("MyHome");
             if (test != null && test.isEnabled()) {
                 Logger log = Logger.getLogger("Minecraft");
-                connection = MyHome.getConnection();
-                log.log(Level.INFO, "[MYWARP] Connection with MyHome established.");
-            } else {
+	            try {
+					Class myHomeClass = Class.forName("me.taylorkelly.myhome.MyHome");
+					connection = (Connection) myHomeClass.getMethod("getConnection").invoke(null);
+					log.log(Level.INFO, "[MYWARP] Connection with MyHome established.");
+	            }
+	            catch (Exception e) {
+		            log.warning("MyHome is enabled but unable to load class");
+	            }
+            }
+            if (connection == null) {
                 connection = createConnection();
             }
         }

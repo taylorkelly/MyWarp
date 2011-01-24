@@ -24,6 +24,15 @@
 			<type>jar</type>
 			<scope>compile</scope>
 		</dependency>
+
+		<dependency>
+			<groupId>com.nijikokun</groupId>
+			<artifactId>permission</artifactId>
+			<version>1.0</version>
+			<type>jar</type>
+			<scope>system</scope>
+			<systemPath>${basedir}/lib/Permissions.jar</systemPath>
+		</dependency>
 	</dependencies>
 
 	<build>
