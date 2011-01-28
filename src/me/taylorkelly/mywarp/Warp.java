@@ -4,8 +4,8 @@ import java.util.ArrayList;
 
 import org.bukkit.Location;
 import org.bukkit.World;
-import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.entity.Player;
+import org.bukkit.xzise.xwarp.PermissionWrapper.PermissionTypes;
 
 public class Warp {
 	public int index;
@@ -98,13 +98,16 @@ public class Warp {
 	}
 
 	public boolean playerCanWarp(Player player) {
-		if (this.creator.equals(player.getName()))
+		if (this.creator.equals(player.getName()) && MyWarp.permissions.permission(player, PermissionTypes.TO_OWN))
 			return true;
-		if (this.permissions.contains(player.getName()))
+		if (this.permissions.contains(player.getName()) && MyWarp.permissions.permission(player, PermissionTypes.TO_INVITED))
 			return true;
-		if (((CraftPlayer) player).isOp())
+		if (this.publicAll && MyWarp.permissions.permission(player, PermissionTypes.TO_OTHER))
 			return true;
-		return publicAll;
+		// Add to global
+//		if ( && MyWarp.permissions.permission(player, PermissionTypes.TO_GLOBAL))
+//			return true;
+		return MyWarp.permissions.permission(player, PermissionTypes.ADMIN_TO_ALL);
 	}
 
 	public void warp(Player player) {
@@ -143,8 +146,20 @@ public class Warp {
 	public boolean playerCanModify(Player player) {
 		if (creator.equals(player.getName()))
 			return true;
-		if (((CraftPlayer) player).isOp())
+		return false;
+	}
+	
+	public boolean listWarp(Player player) {
+		// Can warp
+		if (this.playerCanWarp(player))
 			return true;
+		// Creator permissions
+		if (this.playerIsCreator(player.getName()))
+			return true;
+		// Admin permissions
+		if (MyWarp.permissions.hasAdminPermission(player))
+			return true;
+			
 		return false;
 	}
 

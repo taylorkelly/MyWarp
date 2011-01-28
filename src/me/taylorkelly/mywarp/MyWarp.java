@@ -1,6 +1,7 @@
 package me.taylorkelly.mywarp;
 
 import java.io.File;
+
 import java.util.logging.Logger;
 
 import org.bukkit.Server;
@@ -9,8 +10,12 @@ import org.bukkit.event.Event.Priority;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.PluginLoader;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.xzise.xwarp.PermissionWrapper;
 
 public class MyWarp extends JavaPlugin{
+	
+	public static PermissionWrapper permissions = new PermissionWrapper();
+	
 	private WMPlayerListener playerListener;
 	public final String name = this.getDescription().getName();
 	public final String version = this.getDescription().getVersion();
@@ -28,6 +33,8 @@ public class MyWarp extends JavaPlugin{
 		if(new File("MyWarp").exists() && new File("MyWarp", "warps.db").exists()) {
 			updateFiles();
 		}
+		
+		permissions.init(this.getServer());
 		
 		WarpList warpList = new WarpList(getServer());
 		playerListener = new WMPlayerListener(this, warpList);

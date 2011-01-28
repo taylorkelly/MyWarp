@@ -8,8 +8,11 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerChatEvent;
 import org.bukkit.event.player.PlayerListener;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.xzise.xwarp.PermissionWrapper;
+import org.bukkit.xzise.xwarp.PermissionWrapper.PermissionTypes;
 
 public class WMPlayerListener extends PlayerListener {
+		
 	private boolean warning;
 	private Plugin plugin;
 	private WarpList warpList;
@@ -41,15 +44,43 @@ public class WMPlayerListener extends PlayerListener {
 					Converter.convert(player, plugin.getServer(), warpList);
 					warning = false;
 				}
-				/**
-				 * /warp list or /warp list #
+				/*
+				 * /warp list|ls legend
 				 */
-			} else if ((values.length == 2 || (values.length == 3 && isInteger(values[2])))
+			} else if (values.length == 3 && (values[1].equalsIgnoreCase("list") || values[1].equalsIgnoreCase("ls"))
+					&& values[2].equalsIgnoreCase("legend")) {
+				for (String string : Lister.getLegend()) {
+					player.sendMessage(string);
+				}
+				/*
+				 * /warp list|ls [name] [#]
+				 */
+			} else if ((values.length == 2 || values.length == 3 || (values.length == 4 && isInteger(values[3])))
 					&& (values[1].equalsIgnoreCase("list") || values[1].equalsIgnoreCase("ls"))) {
 				Lister lister = new Lister(warpList);
-				lister.addPlayer(player);
-
-				if (values.length == 3) {
+				lister.setPlayer(player);
+				
+				if (values.length == 4 ||(values.length == 3 && !isInteger(values[2]))) {
+					Player listPlayer = this.plugin.getServer().getPlayer(values[2]);
+					// TODO Change to matchPlayer
+					String listName = (listPlayer == null) ? values[2] : listPlayer.getName();
+										
+					lister.setCreator(listName);
+					if (values.length == 4) {
+						int page = Integer.parseInt(values[3]);
+						if (page < 1) {
+							player.sendMessage(ChatColor.RED + "Page number can't be below 1.");
+							return;
+						} else if (page > lister.getMaxPages()) {
+							player.sendMessage(ChatColor.RED + "There are only " + lister.getMaxPages()
+											+ " pages of warps");
+							return;
+						}
+						lister.setPage(page);
+					} else {				
+						lister.setPage(1);
+					}
+				} else if (values.length == 3) {
 					int page = Integer.parseInt(values[2]);
 					if (page < 1) {
 						player.sendMessage(ChatColor.RED + "Page number can't be below 1.");
@@ -68,11 +99,6 @@ public class WMPlayerListener extends PlayerListener {
 				/**
 				 * /warp search <name>
 				 */
-			} else if (values.length == 3 && (values[1].equalsIgnoreCase("list") || values[1].equalsIgnoreCase("ls"))
-					&& values[2].equalsIgnoreCase("legend")) {
-				for (String string : Lister.getLegend()) {
-					player.sendMessage(string);
-				}
 			} else if (values.length > 2 && (values[1].equalsIgnoreCase("search"))) {
 
 				Searcher searcher = new Searcher(warpList);
@@ -182,6 +208,16 @@ public class WMPlayerListener extends PlayerListener {
 				this.warpList.loadFromDatabase();
 				
 				/*
+				 * /warp permissions
+				 */
+			} else if (values.length == 2 && values[1].equalsIgnoreCase("permissions")) {
+
+				player.sendMessage("Your permissions:");
+				for (PermissionTypes type : PermissionWrapper.PermissionTypes.values()) {
+					printPermission(type, player);
+				}
+				
+				/*
 				 * /warp <name>
 				 */
 			} else if (values.length > 1) {
@@ -199,6 +235,12 @@ public class WMPlayerListener extends PlayerListener {
 		}
 	}
 
+	public static void printPermission(PermissionTypes permission, Player player) {
+		boolean hasPermission = MyWarp.permissions.permission(player, permission);
+		String message = (hasPermission ? ChatColor.GREEN : ChatColor.RED) + permission.name + ": " + (hasPermission ? "Yes": "No");
+		player.sendMessage(message);
+	}
+	
 	public static String[] helpPage(int page) {
 		List<String> lines = new ArrayList<String>(8);
 		lines.add(ChatColor.RED + "------------------ " + ChatColor.WHITE + "/WARP HELP" + ChatColor.RED + " " + page
@@ -208,21 +250,22 @@ public class WMPlayerListener extends PlayerListener {
 			lines.add(ChatColor.RED + "/warp to <name>" + ChatColor.WHITE + "  -  Warp to " + ChatColor.GRAY
 					+ "<name>");
 			lines.add(ChatColor.RED + "/warp <name>" + ChatColor.WHITE + "  -  Warp to " + ChatColor.GRAY + "<name>");
-			lines.add(ChatColor.RED + "/warp create/+ <name>" + ChatColor.WHITE + "  -  Create warp " + ChatColor.GRAY
+			lines.add(ChatColor.RED + "/warp create|+ <name>" + ChatColor.WHITE + "  -  Create warp " + ChatColor.GRAY
 					+ "<name>");
-			lines.add(ChatColor.RED + "/warp createp/+p <name>" + ChatColor.WHITE + "  -  Create private warp "
+			lines.add(ChatColor.RED + "/warp createp|+p <name>" + ChatColor.WHITE + "  -  Create private warp "
 					+ ChatColor.GRAY + "<name>");
-			lines.add(ChatColor.RED + "/warp delete/- <name>" + ChatColor.WHITE + "  -  Delete warp " + ChatColor.GRAY
+			lines.add(ChatColor.RED + "/warp delete|- <name>" + ChatColor.WHITE + "  -  Delete warp " + ChatColor.GRAY
 					+ "<name>");
-			lines.add(ChatColor.RED + "/warp list/ls <#>" + ChatColor.WHITE + "  -  Views warp page " + ChatColor.GRAY
+			lines.add(ChatColor.RED + "/warp list|ls <#>" + ChatColor.WHITE + "  -  Views warp page " + ChatColor.GRAY
 					+ "<#>");
-			lines.add(ChatColor.RED + "/warp update/* <name>" + ChatColor.WHITE + "  -  Updates position of "
+			lines.add(ChatColor.RED + "/warp update|* <name>" + ChatColor.WHITE + "  -  Updates position of "
 					+ ChatColor.GRAY + "<name>");
 			lines.add(ChatColor.RED + "/warp search <query>" + ChatColor.WHITE + "  -  Search for " + ChatColor.GRAY
 					+ "<query>");
 			break;
 		case 2:
-			lines.add(ChatColor.RED + "/warp message/msg <name> <message>" + ChatColor.WHITE
+			lines.add(ChatColor.RED + "/warp list|ls legend" + ChatColor.WHITE + "  -  Shows the warp page's legend.");
+			lines.add(ChatColor.RED + "/warp message|msg <name> <message>" + ChatColor.WHITE
 					+ "  -  Sets message");
 			lines.add(ChatColor.RED + "/warp give <player> <name>" + ChatColor.WHITE + "  -  Give " + ChatColor.GRAY
 					+ "<player>" + ChatColor.WHITE + " your " + ChatColor.GRAY + "<name>");
