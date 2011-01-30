@@ -239,7 +239,7 @@ public class WMPlayerListener extends PlayerListener {
 	}
 
 	public static void printPermission(PermissionTypes permission, Player player) {
-		boolean hasPermission = MyWarp.permissions.permission(player, permission);
+		boolean hasPermission = MyWarp.permissions.has(player, permission);
 		String message = (hasPermission ? ChatColor.GREEN : ChatColor.RED) + permission.name + ": " + (hasPermission ? "Yes": "No");
 		player.sendMessage(message);
 	}
