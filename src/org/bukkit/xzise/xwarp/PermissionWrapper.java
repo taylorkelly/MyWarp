@@ -54,8 +54,21 @@ public class PermissionWrapper {
 		PermissionTypes(String name) {
 			this.name = name;
 		}
+		
+		public static PermissionTypes getType(String name) {
+			for (PermissionTypes type : PermissionTypes.values()) {
+				if (type.name.equals(name)) {
+					return type;
+				}
+			}
+			return null;
+		}
+		
+		public boolean isAdminPermission() {
+			return (this == ADMIN_DELETE) || (this == ADMIN_GIVE) || (this == ADMIN_INVITE) || (this == ADMIN_MESSAGE) || (this == ADMIN_TO_ALL) || (this == ADMIN_UNINVITE) || (this == ADMIN_UPDATE);
+		}
 	}
-
+	
 	private PermissionHandler handler = null;
 
 	private boolean permission(Player player, String permission) {
@@ -67,17 +80,21 @@ public class PermissionWrapper {
 					|| permission.equals(PermissionTypes.CREATE_PRIVATE.name)
 					|| permission.equals(PermissionTypes.CREATE_PUBLIC.name)) {
 				return true; // Everybody can create private/public warps
-			} else if (hasAdminPermission(player)) {
+			} else if (isAdminPermission(permission)) {
 				return player.isOp();
 			}
 			return false;
 		} else {
-			return this.handler.permission(player, permission);
+			return this.handler.has(player, permission);
 		}
 	}
 
 	public boolean permission(Player player, PermissionTypes permission) {
 		return this.permission(player, permission.name);
+	}
+	
+	public int getInteger(Player player, PermissionTypes permission) {
+		return this.handler.getPermissionInteger(player.getName(), permission.name);
 	}
 
 	public boolean hasAdminPermission(Player player) {
@@ -85,6 +102,11 @@ public class PermissionWrapper {
 				PermissionTypes.ADMIN_INVITE, PermissionTypes.ADMIN_UNINVITE,
 				PermissionTypes.ADMIN_GIVE, PermissionTypes.ADMIN_MESSAGE,
 				PermissionTypes.ADMIN_UPDATE, PermissionTypes.ADMIN_TO_ALL);
+	}
+	
+	public boolean isAdminPermission(String permission) {
+		PermissionTypes type = PermissionTypes.getType(permission);
+		return type == null ? false : type.isAdminPermission();
 	}
 
 	public boolean permissionOr(Player player, PermissionTypes... permission) {
@@ -109,12 +131,16 @@ public class PermissionWrapper {
 		Plugin test = server.getPluginManager().getPlugin("Permissions");
 		if (test != null) {
 			Logger log = Logger.getLogger("Minecraft");
-			this.handler = Permissions.Security;
+			this.handler = ((Permissions) test).getHandler();
 			log.log(Level.INFO, "[MYWARP] Permissions enabled.");
 		} else {
 			Logger log = Logger.getLogger("Minecraft");
 			log.log(Level.SEVERE, "[MYWARP] Permission system not found.");
 		}
+	}
+	
+	public boolean useOfficial() {
+		return this.handler != null;
 	}
 
 }

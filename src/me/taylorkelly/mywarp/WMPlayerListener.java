@@ -213,6 +213,9 @@ public class WMPlayerListener extends PlayerListener {
 			} else if (values.length == 2 && values[1].equalsIgnoreCase("permissions")) {
 
 				player.sendMessage("Your permissions:");
+				if (!MyWarp.permissions.useOfficial()) {
+					player.sendMessage("(Use build in permissions!)");
+				}
 				for (PermissionTypes type : PermissionWrapper.PermissionTypes.values()) {
 					printPermission(type, player);
 				}

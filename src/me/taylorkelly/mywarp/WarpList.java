@@ -13,10 +13,12 @@ import org.bukkit.xzise.xwarp.PermissionWrapper.PermissionTypes;
 
 public class WarpList {
 	private HashMap<String, Warp> warpList;
+	private HashMap<String, HashMap<String, Warp>> playerWarps;
 	private Server server;
 
 	public WarpList(Server server) {
 		this.server = server;
+		this.playerWarps = new HashMap<String, HashMap<String,Warp>>();
 		this.loadFromDatabase();
 	}
 
