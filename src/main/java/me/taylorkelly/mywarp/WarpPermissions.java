@@ -17,7 +17,7 @@ public class WarpPermissions {
         Plugin test = server.getPluginManager().getPlugin("Permissions");
         if (test != null) {
             Logger log = Logger.getLogger("Minecraft");
-            permissionsPlugin = ((Permissions)test);
+            permissionsPlugin = ((Permissions) test);
             permissionsEnabled = true;
             log.log(Level.INFO, "[MYWARP] Permissions enabled.");
         } else {
@@ -38,17 +38,14 @@ public class WarpPermissions {
         return permissionsPlugin.Security.permission(player, string);
     }
 
+    private static int getNum(Player player, String string) {
+        return permissionsPlugin.Security.getPermissionInteger(player.getName(), string);
+    }
+
+
     public static boolean warp(Player player) {
         if (permissionsEnabled) {
             return permission(player, "mywarp.warp.basic.warp");
-        } else {
-            return true;
-        }
-    }
-
-    public static boolean create(Player player) {
-        if (permissionsEnabled) {
-            return permission(player, "mywarp.warp.basic.create");
         } else {
             return true;
         }
@@ -69,7 +66,7 @@ public class WarpPermissions {
             return true;
         }
     }
-    
+
     public static boolean welcome(Player player) {
         if (permissionsEnabled) {
             return permission(player, "mywarp.warp.basic.welcome");
@@ -77,7 +74,7 @@ public class WarpPermissions {
             return true;
         }
     }
-    
+
     public static boolean search(Player player) {
         if (permissionsEnabled) {
             return permission(player, "mywarp.warp.basic.search");
@@ -93,7 +90,7 @@ public class WarpPermissions {
             return true;
         }
     }
-    
+
     public static boolean invite(Player player) {
         if (permissionsEnabled) {
             return permission(player, "mywarp.warp.soc.invite");
@@ -132,5 +129,29 @@ public class WarpPermissions {
         } else {
             return true;
         }
+    }
+
+    public static boolean privateCreate(Player player) {
+        if (permissionsEnabled) {
+            return permission(player, "mywarp.warp.basic.createpublic");
+        } else {
+            return true;
+        }
+    }
+    
+    public static boolean publicCreate(Player player) {
+        if (permissionsEnabled) {
+            return permission(player, "mywarp.warp.basic.createprivate");
+        } else {
+            return true;
+        }
+    }
+
+    public static int maxPrivateWarps(Player player) {
+        return WarpSettings.maxPrivate;
+    }
+    
+    public static int maxPublicWarps(Player player) {
+        return WarpSettings.maxPublic;
     }
 }

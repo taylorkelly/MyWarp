@@ -116,10 +116,9 @@ public class Warp {
             return true;
         if (permissions.contains(player.getName()))
             return true;
-        if (WarpSettings.adminPrivateWarps) {
-            if (player.isOp())
-                return true;
-        }
+        if (WarpPermissions.isAdmin(player) && WarpSettings.adminPrivateWarps)
+            return true;
+
         return publicAll;
     }
 
@@ -151,7 +150,7 @@ public class Warp {
     public boolean playerCanModify(Player player) {
         if (creator.equals(player.getName()))
             return true;
-        if (player.isOp())
+        if (WarpPermissions.isAdmin(player))
             return true;
         return false;
     }

@@ -9,45 +9,29 @@ import org.bukkit.util.config.Configuration;
 
 public class WarpSettings {
     
-    private static final String settingsFile = "MyWarp.yml";
-    
+    private static final String settingsFile = "MyWarp.settings";
+
+    public static int maxPublic;
+    public static int maxPrivate;
+    public static boolean adminsObeyLimits;
     public static boolean adminPrivateWarps;
+
 
     public static void initialize(File dataFolder) {
         if(!dataFolder.exists()) {
             dataFolder.mkdirs();
         }
 
-        File configFile  = new File(dataFolder, settingsFile);
-        if(!configFile.exists()) {
-            createSettingsFile(configFile);
+        if(!dataFolder.exists()) {
+            dataFolder.mkdirs();
         }
-        Configuration config = new Configuration(configFile);
-        config.load();
-        adminPrivateWarps = config.getBoolean("adminPrivateWarps", true);
-    }
 
-    private static void createSettingsFile(File configFile) {
-        BufferedWriter bwriter = null;
-        FileWriter fwriter = null;
-        try {
-            configFile.createNewFile();
-            fwriter = new FileWriter(configFile, true);
-            bwriter = new BufferedWriter(fwriter);
-            bwriter.write("adminPrivateWarps: true");
-            bwriter.flush();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                if (bwriter != null) {
-                    bwriter.close();
-                }
-                if (fwriter != null)
-                    fwriter.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
+        File configFile  = new File(dataFolder, settingsFile);
+        PropertiesFile file = new PropertiesFile(configFile);
+        maxPublic = file.getInt("maxPublic", 5, "Maximum number of public warps any player can make");
+        maxPrivate = file.getInt("maxPrivate", 10, "Maximum number of private warps any player can make");
+        adminsObeyLimits = file.getBoolean("adminsObeyLimits", false, "Whether or not admins can disobey warp limits");
+        adminPrivateWarps = file.getBoolean("adminPrivateWarps", true, "Whether or not admins can see private warps in their list");
+        file.save();
     }
 }

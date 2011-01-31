@@ -22,16 +22,61 @@ public class WarpList {
     }
 
     public void addWarp(String name, Player player) {
-        if (warpList.containsKey(name)) {
-            player.sendMessage(ChatColor.RED + "Warp called '" + name + "' already exists.");
+        if (numPublicWarpsPlayer(player) < WarpPermissions.maxPublicWarps(player)) {
+            if (warpList.containsKey(name)) {
+                player.sendMessage(ChatColor.RED + "Warp called '" + name + "' already exists.");
+            } else {
+                Warp warp = new Warp(name, player);
+                warpList.put(name, warp);
+                WarpDataSource.addWarp(warp);
+                player.sendMessage(ChatColor.AQUA + "Successfully created '" + name + "'");
+                player.sendMessage("If you'd like to privatize it,");
+                player.sendMessage("Use: " + ChatColor.RED + "/warp private " + name);
+            }
         } else {
-            Warp warp = new Warp(name, player);
-            warpList.put(name, warp);
-            WarpDataSource.addWarp(warp);
-            player.sendMessage(ChatColor.AQUA + "Successfully created '" + name + "'");
-            player.sendMessage("If you'd like to privatize it,");
-            player.sendMessage("Use: " + ChatColor.RED + "/warp private " + name);
+            player.sendMessage(ChatColor.RED + "You have reached your max # of private warps " + ChatColor.YELLOW + "("
+                    + WarpPermissions.maxPrivateWarps(player) + ")");
+            player.sendMessage("Delete some of your warps to make more");
         }
+    }
+
+    private int numPublicWarpsPlayer(Player player) {
+        int size = 0;
+        for(Warp warp: warpList.values()) {
+            boolean publicAll = warp.publicAll;
+            String creator = warp.creator;
+            if(creator.equals(player.getName()) && publicAll) size++;
+        }
+        return size;
+    }
+
+    public void addWarpPrivate(String name, Player player) {
+        if (numPrivateWarpsPlayer(player) < WarpPermissions.maxPrivateWarps(player)) {
+            if (warpList.containsKey(name)) {
+                player.sendMessage(ChatColor.RED + "Warp called '" + name + "' already exists.");
+            } else {
+                Warp warp = new Warp(name, player, false);
+                warpList.put(name, warp);
+                WarpDataSource.addWarp(warp);
+                player.sendMessage(ChatColor.AQUA + "Successfully created '" + name + "'");
+                player.sendMessage("If you'd like to invite others to it,");
+                player.sendMessage("Use: " + ChatColor.RED + "/warp invite <player> " + name);
+            }
+        } else {
+            player.sendMessage(ChatColor.RED + "You have reached your max # of private warps " + ChatColor.YELLOW + "("
+                    + WarpPermissions.maxPrivateWarps(player) + ")");
+            player.sendMessage("Delete some of your warps to make more");
+        }
+    }
+
+    private int numPrivateWarpsPlayer(Player player) {
+        int size = 0;
+        for(Warp warp: warpList.values()) {
+            boolean privateAll = !warp.publicAll;
+            String creator = warp.creator;
+            if(creator.equals(player.getName()) && privateAll) size++;
+        }
+        return size;
     }
 
     public void blindAdd(Warp warp) {
@@ -216,9 +261,9 @@ public class WarpList {
                 }
             }
         }
-        if(exactMatches.size() > 1) {
-            for(Warp warp: exactMatches) {
-                if(!warp.name.equals(name)) {
+        if (exactMatches.size() > 1) {
+            for (Warp warp : exactMatches) {
+                if (!warp.name.equals(name)) {
                     exactMatches.remove(warp);
                     matches.add(0, warp);
                 }
@@ -283,55 +328,42 @@ public class WarpList {
     }
 
     public void setWelcomeMessage(Player player, String message) {
-        if(welcomeMessage.containsKey(player.getName())) {
+        if (welcomeMessage.containsKey(player.getName())) {
             Warp warp = welcomeMessage.get(player.getName());
             warp.welcomeMessage = message;
             WarpDataSource.updateWelcomeMessage(warp);
             player.sendMessage(ChatColor.AQUA + "Changed welcome message for '" + warp.name + "' to:");
             player.sendMessage(message);
         }
-        
+
     }
 
     public void notWaiting(Player player) {
         welcomeMessage.remove(player.getName());
     }
 
-    public void addWarpPrivate(String name, Player player) {
-        if (warpList.containsKey(name)) {
-            player.sendMessage(ChatColor.RED + "Warp called '" + name + "' already exists.");
-        } else {
-            Warp warp = new Warp(name, player, false);
-            warpList.put(name, warp);
-            WarpDataSource.addWarp(warp);
-            player.sendMessage(ChatColor.AQUA + "Successfully created '" + name + "'");
-            player.sendMessage("If you'd like to privatize it,");
-            player.sendMessage("Use: " + ChatColor.RED + "/warp private " + name);
-        }
-    }
-
     public void list(Player player) {
         ArrayList<Warp> results = warpsInvitedTo(player);
-        
-        if(results.size() == 0) {
+
+        if (results.size() == 0) {
             player.sendMessage(ChatColor.RED + "You can access no warps.");
         } else {
             player.sendMessage(ChatColor.AQUA + "You can warp to:");
-            player.sendMessage(results.toString().replace("[", "").replace("]",""));
+            player.sendMessage(results.toString().replace("[", "").replace("]", ""));
         }
     }
 
     private ArrayList<Warp> warpsInvitedTo(Player player) {
         ArrayList<Warp> results = new ArrayList<Warp>();
-        
+
         List<String> names = new ArrayList<String>(warpList.keySet());
         Collator collator = Collator.getInstance();
         collator.setStrength(Collator.SECONDARY);
         Collections.sort(names, collator);
-        
-        for(String name: names) {
+
+        for (String name : names) {
             Warp warp = warpList.get(name);
-            if(warp.playerCanWarp(player)) {
+            if (warp.playerCanWarp(player)) {
                 results.add(warp);
             }
         }
