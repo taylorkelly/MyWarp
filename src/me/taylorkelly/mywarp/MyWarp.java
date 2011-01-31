@@ -10,10 +10,6 @@ import org.bukkit.event.Event.Priority;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.PluginLoader;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.xzise.permissionwrapper.WrapperCreator;
-import org.bukkit.xzise.permissionwrapper.creators.PermissionsPluginCreator;
-import org.bukkit.xzise.permissionwrapper.wrapper.PermissionsInterface;
-import org.bukkit.xzise.xwarp.OldPermissions;
 import org.bukkit.xzise.xwarp.PermissionWrapper;
 
 public class MyWarp extends JavaPlugin{
@@ -25,8 +21,6 @@ public class MyWarp extends JavaPlugin{
 	public final String version = this.getDescription().getVersion();
 	public MyWarp(PluginLoader pluginLoader, Server instance, PluginDescriptionFile desc, File directory, File plugin, ClassLoader cLoader) {
 		super(pluginLoader, instance, desc, directory, plugin, cLoader);
-		
-		
 	}
 
 	@Override
@@ -40,7 +34,7 @@ public class MyWarp extends JavaPlugin{
 			updateFiles();
 		}
 		
-		MyWarp.permissions.init(this, new PermissionsPluginCreator(), new OldPermissions());
+		permissions.init(this.getServer());
 		
 		WarpList warpList = new WarpList(getServer());
 		playerListener = new WMPlayerListener(this, warpList);

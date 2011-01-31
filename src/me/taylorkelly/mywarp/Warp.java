@@ -98,16 +98,16 @@ public class Warp {
 	}
 
 	public boolean playerCanWarp(Player player) {
-		if (this.creator.equals(player.getName()) && MyWarp.permissions.has(player, PermissionTypes.TO_OWN))
+		if (this.creator.equals(player.getName()) && MyWarp.permissions.permission(player, PermissionTypes.TO_OWN))
 			return true;
-		if (this.permissions.contains(player.getName()) && MyWarp.permissions.has(player, PermissionTypes.TO_INVITED))
+		if (this.permissions.contains(player.getName()) && MyWarp.permissions.permission(player, PermissionTypes.TO_INVITED))
 			return true;
-		if (this.publicAll && MyWarp.permissions.has(player, PermissionTypes.TO_OTHER))
+		if (this.publicAll && MyWarp.permissions.permission(player, PermissionTypes.TO_OTHER))
 			return true;
 		// Add to global
 //		if ( && MyWarp.permissions.permission(player, PermissionTypes.TO_GLOBAL))
 //			return true;
-		return MyWarp.permissions.has(player, PermissionTypes.ADMIN_TO_ALL);
+		return MyWarp.permissions.permission(player, PermissionTypes.ADMIN_TO_ALL);
 	}
 
 	public void warp(Player player) {

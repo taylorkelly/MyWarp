@@ -28,7 +28,7 @@ public class WarpList {
 	}
 
 	public void addWarp(String name, Player player, boolean privateWarp) {
-		if (MyWarp.permissions.has(player,
+		if (MyWarp.permissions.permission(player,
 				privateWarp ? PermissionTypes.CREATE_PRIVATE
 						: PermissionTypes.CREATE_PUBLIC)) {
 			Warp warp = this.getWarp(name);
@@ -82,7 +82,7 @@ public class WarpList {
 	public void deleteWarp(String name, Player player) {
 		Warp warp = this.getWarp(name);
 		if (warp != null) {
-			if (MyWarp.permissions.has(player,
+			if (MyWarp.permissions.permission(player,
 					PermissionTypes.ADMIN_DELETE)
 					|| warp.playerCanModify(player)) {
 				warpList.remove(name);
@@ -101,7 +101,7 @@ public class WarpList {
 	public void privatize(String name, Player player) {
 		Warp warp = this.getWarp(name);
 		if (warp != null) {
-			if (MyWarp.permissions.has(player,
+			if (MyWarp.permissions.permission(player,
 					PermissionTypes.CREATE_PRIVATE)
 					|| warp.playerCanModify(player)) {
 				warp.publicAll = false;
@@ -124,7 +124,7 @@ public class WarpList {
 	public void invite(String name, Player player, String inviteeName) {
 		Warp warp = this.getWarp(name);
 		if (warp != null) {
-			if (MyWarp.permissions.has(player,
+			if (MyWarp.permissions.permission(player,
 					PermissionTypes.ADMIN_INVITE)
 					|| warp.playerCanModify(player)) {
 				if (warp.playerIsInvited(inviteeName)) {
@@ -164,7 +164,7 @@ public class WarpList {
 	public void publicize(String name, Player player) {
 		Warp warp = this.getWarp(name);
 		if (warp != null) {
-			if (MyWarp.permissions.has(player,
+			if (MyWarp.permissions.permission(player,
 					PermissionTypes.CREATE_PUBLIC)
 					|| warp.playerCanModify(player)) {
 				warp.publicAll = true;
@@ -184,7 +184,7 @@ public class WarpList {
 	public void uninvite(String name, Player player, String inviteeName) {
 		Warp warp = this.getWarp(name);
 		if (warp != null) {
-			if (MyWarp.permissions.has(player,
+			if (MyWarp.permissions.permission(player,
 					PermissionTypes.ADMIN_UNINVITE)
 					|| warp.playerCanModify(player)) {
 				if (!warp.playerIsInvited(inviteeName)) {
@@ -329,7 +329,7 @@ public class WarpList {
 		Warp warp = this.getWarp(name);
 		if (warp != null) {
 			if (warp.playerCanModify(player)) {
-				if (MyWarp.permissions.has(player,
+				if (MyWarp.permissions.permission(player,
 						PermissionTypes.ADMIN_GIVE)
 						|| warp.playerIsCreator(giveeName)) {
 					player.sendMessage(ChatColor.RED + giveeName
@@ -359,7 +359,7 @@ public class WarpList {
 	public void setMessage(String name, Player player, String message) {
 		Warp warp = this.getWarp(name);
 		if (warp != null) {
-			if (MyWarp.permissions.has(player,
+			if (MyWarp.permissions.permission(player,
 					PermissionTypes.ADMIN_MESSAGE)
 					|| warp.playerCanModify(player)) {
 				warp.setMessage(message);
@@ -380,7 +380,7 @@ public class WarpList {
 	public void update(String name, Player player) {
 		Warp warp = this.getWarp(name);
 		if (warp != null) {
-			if (MyWarp.permissions.has(player,
+			if (MyWarp.permissions.permission(player,
 					PermissionTypes.ADMIN_UPDATE)
 					|| warp.playerCanModify(player)) {
 				warp.update(player);

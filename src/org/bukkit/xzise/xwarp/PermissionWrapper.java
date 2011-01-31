@@ -1,9 +1,16 @@
 package org.bukkit.xzise.xwarp;
 
-import org.bukkit.entity.Player;
-import org.bukkit.xzise.permissionwrapper.WrapperCreator;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-public class PermissionWrapper extends WrapperCreator {
+import org.bukkit.Server;
+import org.bukkit.entity.Player;
+import org.bukkit.plugin.Plugin;
+
+import com.nijiko.permissions.PermissionHandler;
+import com.nijikokun.bukkit.Permissions.Permissions;
+
+public class PermissionWrapper {
 
 	public enum PermissionTypes {
 		// Warp to global warps
@@ -61,13 +68,33 @@ public class PermissionWrapper extends WrapperCreator {
 			return (this == ADMIN_DELETE) || (this == ADMIN_GIVE) || (this == ADMIN_INVITE) || (this == ADMIN_MESSAGE) || (this == ADMIN_TO_ALL) || (this == ADMIN_UNINVITE) || (this == ADMIN_UPDATE);
 		}
 	}
+	
+	private PermissionHandler handler = null;
 
-	public boolean has(Player player, PermissionTypes permission) {
-		return this.getPermissions().has(player, permission.name);
+	private boolean permission(Player player, String permission) {
+		if (this.handler == null) {
+			if (permission.equals(PermissionTypes.TO_GLOBAL.name)
+					|| permission.equals(PermissionTypes.TO_OWN.name)
+					|| permission.equals(PermissionTypes.TO_OTHER.name)
+					|| permission.equals(PermissionTypes.TO_INVITED.name)
+					|| permission.equals(PermissionTypes.CREATE_PRIVATE.name)
+					|| permission.equals(PermissionTypes.CREATE_PUBLIC.name)) {
+				return true; // Everybody can create private/public warps
+			} else if (isAdminPermission(permission)) {
+				return player.isOp();
+			}
+			return false;
+		} else {
+			return this.handler.has(player, permission);
+		}
+	}
+
+	public boolean permission(Player player, PermissionTypes permission) {
+		return this.permission(player, permission.name);
 	}
 	
 	public int getInteger(Player player, PermissionTypes permission) {
-		return this.getPermissions().getInteger(player, permission.name);
+		return this.handler.getPermissionInteger(player.getName(), permission.name);
 	}
 
 	public boolean hasAdminPermission(Player player) {
@@ -77,14 +104,14 @@ public class PermissionWrapper extends WrapperCreator {
 				PermissionTypes.ADMIN_UPDATE, PermissionTypes.ADMIN_TO_ALL);
 	}
 	
-	public static boolean isAdminPermission(String permission) {
+	public boolean isAdminPermission(String permission) {
 		PermissionTypes type = PermissionTypes.getType(permission);
 		return type == null ? false : type.isAdminPermission();
 	}
 
 	public boolean permissionOr(Player player, PermissionTypes... permission) {
 		for (PermissionTypes permissionType : permission) {
-			if (this.has(player, permissionType)) {
+			if (this.permission(player, permissionType)) {
 				return true;
 			}
 		}
@@ -93,15 +120,27 @@ public class PermissionWrapper extends WrapperCreator {
 
 	public boolean permissionAnd(Player player, PermissionTypes... permission) {
 		for (PermissionTypes permissionType : permission) {
-			if (!this.has(player, permissionType)) {
+			if (!this.permission(player, permissionType)) {
 				return false;
 			}
 		}
 		return true;
 	}
+
+	public void init(Server server) {
+		Plugin test = server.getPluginManager().getPlugin("Permissions");
+		if (test != null) {
+			Logger log = Logger.getLogger("Minecraft");
+			this.handler = ((Permissions) test).getHandler();
+			log.log(Level.INFO, "[MYWARP] Permissions enabled.");
+		} else {
+			Logger log = Logger.getLogger("Minecraft");
+			log.log(Level.SEVERE, "[MYWARP] Permission system not found.");
+		}
+	}
 	
 	public boolean useOfficial() {
-		return !(this.getPermissions() instanceof OldPermissions);
+		return this.handler != null;
 	}
 
 }
