@@ -147,18 +147,30 @@ public class MyWarp extends JavaPlugin {
                     /**
                      * /warp create <name>
                      */
-                } else if (split.length > 1 && (split[0].equalsIgnoreCase("create") || split[0].equalsIgnoreCase("set")) && (WarpPermissions.publicCreate(player) || WarpPermissions.privateCreate(player))) {
+                } else if (split.length > 1 && (split[0].equalsIgnoreCase("create") || split[0].equalsIgnoreCase("set"))
+                        && (WarpPermissions.publicCreate(player) || WarpPermissions.privateCreate(player))) {
                     String name = "";
                     for (int i = 1; i < split.length; i++) {
                         name += split[i];
                         if (i + 1 < split.length)
                             name += " ";
                     }
-                    if(WarpPermissions.publicCreate(player)) {
+                    if (WarpPermissions.publicCreate(player)) {
                         warpList.addWarp(name, player);
                     } else {
                         warpList.addWarpPrivate(name, player);
                     }
+                    /**
+                     * /warp point <name>
+                     */
+                } else if (split.length > 1 && split[0].equalsIgnoreCase("point") && WarpPermissions.compass(player)) {
+                    String name = "";
+                    for (int i = 1; i < split.length; i++) {
+                        name += split[i];
+                        if (i + 1 < split.length)
+                            name += " ";
+                    }
+                    warpList.point(name, player);
                     /**
                      * /warp pcreate <name>
                      */
@@ -268,7 +280,7 @@ public class MyWarp extends JavaPlugin {
                     }
 
                     warpList.uninvite(name, player, inviteeName);
-                    
+
                     /**
                      * /warp player <player> <name>
                      */
@@ -276,7 +288,6 @@ public class MyWarp extends JavaPlugin {
                     Player invitee = getServer().getPlayer(split[1]);
                     String inviteeName = (invitee == null) ? split[1] : invitee.getName();
 
-                    
                     // TODO ChunkLoading
                     String name = "";
                     for (int i = 2; i < split.length; i++) {

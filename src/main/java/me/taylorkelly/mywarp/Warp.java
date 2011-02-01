@@ -162,4 +162,10 @@ public class Warp {
     public String toString() {
         return name;
     }
+
+    public Location getLocation(Player player) {
+        World world = player.getWorld();
+        Location location = new Location(world, x, y, z, yaw, pitch);
+        return location;
+    }
 }

@@ -146,6 +146,14 @@ public class WarpPermissions {
             return true;
         }
     }
+    
+    public static boolean compass(Player player) {
+        if (permissionsEnabled) {
+            return permission(player, "mywarp.warp.basic.compass");
+        } else {
+            return true;
+        }
+    }
 
     public static int maxPrivateWarps(Player player) {
         return WarpSettings.maxPrivate;

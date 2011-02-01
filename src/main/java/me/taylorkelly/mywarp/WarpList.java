@@ -369,4 +369,20 @@ public class WarpList {
         }
         return results;
     }
+
+    public void point(String name, Player player) {
+        MatchList matches = this.getMatches(name, player);
+        name = matches.getMatch(name);
+        if (warpList.containsKey(name)) {
+            Warp warp = warpList.get(name);
+            if (warp.playerCanWarp(player)) {
+                player.setCompassTarget(warp.getLocation(player));
+                player.sendMessage(ChatColor.AQUA + "Your compass now guides you to '" + name + "'");
+            } else {
+                player.sendMessage(ChatColor.RED + "You do not have permission to point to '" + name + "'");
+            }
+        } else {
+            player.sendMessage(ChatColor.RED + "No such warp '" + name + "'");
+        }
+    }
 }
