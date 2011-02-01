@@ -67,6 +67,7 @@ public class Converter {
                 }
             }
             ps.executeBatch();
+            conn.commit();
             file.delete();
             player.sendMessage("Successfully imported " + size + " warps.");
         } catch (FileNotFoundException e) {
