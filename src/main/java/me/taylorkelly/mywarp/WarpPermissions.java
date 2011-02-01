@@ -133,7 +133,7 @@ public class WarpPermissions {
 
     public static boolean privateCreate(Player player) {
         if (permissionsEnabled) {
-            return permission(player, "mywarp.warp.basic.createpublic");
+            return permission(player, "mywarp.warp.basic.createprivate");
         } else {
             return true;
         }
@@ -141,7 +141,7 @@ public class WarpPermissions {
     
     public static boolean publicCreate(Player player) {
         if (permissionsEnabled) {
-            return permission(player, "mywarp.warp.basic.createprivate");
+            return permission(player, "mywarp.warp.basic.createpublic");
         } else {
             return true;
         }
