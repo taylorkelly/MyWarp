@@ -34,8 +34,8 @@ public class WarpList {
                 player.sendMessage("Use: " + ChatColor.RED + "/warp private " + name);
             }
         } else {
-            player.sendMessage(ChatColor.RED + "You have reached your max # of private warps " + ChatColor.YELLOW + "("
-                    + WarpPermissions.maxPrivateWarps(player) + ")");
+            player.sendMessage(ChatColor.RED + "You have reached your max # of public warps " + ChatColor.YELLOW + "("
+                    + WarpPermissions.maxPublicWarps(player) + ")");
             player.sendMessage("Delete some of your warps to make more");
         }
     }
