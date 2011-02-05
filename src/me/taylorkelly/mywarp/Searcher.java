@@ -38,40 +38,25 @@ public class Searcher {
 			if (exactMatches.size() > 0) {
 				player.sendMessage(ChatColor.YELLOW + "Exact matches for search: " + ChatColor.GRAY + query);
 				for (Warp warp : exactMatches) {
-					String color;
-					if (warp.playerIsCreator(player.getName())) {
-						color = ChatColor.AQUA.toString();
-					} else if (warp.publicAll) {
-						color = ChatColor.GREEN.toString();
-					} else {
-						color = ChatColor.RED.toString();
-					}
-					String creator = (warp.creator.equalsIgnoreCase(player.getName())) ? "you" : warp.creator;
-					int x = (int) Math.round(warp.x);
-					int y = (int) Math.round(warp.y);
-					int z = (int) Math.round(warp.z);
-					player.sendMessage(color + "'" + warp.name + "'" + ChatColor.WHITE + " by " + creator + " @(" + x + ", " + y + ", " + z + ")");
+					Searcher.printWarpLine(warp, this.player);
 				}
 			}
 			if (matches.size() > 0) {
 				player.sendMessage(ChatColor.YELLOW + "Partial matches for search: " + ChatColor.GRAY + query);
 				for (Warp warp : matches) {
-					String color;
-					if (warp.playerIsCreator(player.getName())) {
-						color = ChatColor.AQUA.toString();
-					} else if (warp.publicAll) {
-						color = ChatColor.GREEN.toString();
-					} else {
-						color = ChatColor.RED.toString();
-					}
-					String creator = (warp.creator.equalsIgnoreCase(player.getName())) ? "you" : warp.creator;
-					int x = (int) Math.round(warp.x);
-					int y = (int) Math.round(warp.y);
-					int z = (int) Math.round(warp.z);
-					player.sendMessage(color + "'" + warp.name + "'" + ChatColor.WHITE + " by " + creator + " @(" + x + ", " + y + ", " + z + ")");
+					Searcher.printWarpLine(warp, this.player);
 				}
 			}
 		}
+	}
+	
+	public static void printWarpLine(Warp warp, Player player) {
+		String color = Lister.getColor(warp, player).toString();
+		String creator = (warp.creator.equalsIgnoreCase(player.getName())) ? "you" : warp.creator;
+		int x = (int) Math.round(warp.x);
+		int y = (int) Math.round(warp.y);
+		int z = (int) Math.round(warp.z);
+		player.sendMessage(color + "'" + warp.name + "'" + ChatColor.WHITE + " by " + creator + " @(" + x + ", " + y + ", " + z + ")");
 	}
 }
 

@@ -18,11 +18,15 @@ public class Lister {
 	ArrayList<Warp> sortedWarps;
 	
 	private String creator;
+
+	public static final ChatColor GLOBAL_OWN = ChatColor.AQUA;
+	public static final ChatColor PUBLIC_OWN = ChatColor.BLUE;
+	public static final ChatColor PRIVATE_OWN = ChatColor.DARK_BLUE;
 	
-	public static final ChatColor PUBLIC_OWN = ChatColor.AQUA;
-	public static final ChatColor PRIVATE_OWN = ChatColor.BLUE;
+	public static final ChatColor GLOBAL_OTHER = ChatColor.DARK_GREEN;
 	public static final ChatColor PUBLIC_OTHER = ChatColor.GREEN;
 	public static final ChatColor PRIVATE_OTHER = ChatColor.RED;
+	
 	public static final ChatColor PRIVATE_INVITED = ChatColor.YELLOW;
 
 	public Lister(WarpList warpList) {
@@ -94,21 +98,7 @@ public class Lister {
 			int x = (int) Math.round(warp.x);
 			int y = (int) Math.round(warp.y);
 			int z = (int) Math.round(warp.z);
-			ChatColor color;
-			if(warp.playerIsCreator(player.getName())) {
-				if (warp.publicAll) {
-					color = PUBLIC_OWN;
-				} else {
-					color = PRIVATE_OWN;
-				}
-			} else if(warp.publicAll) {
-				color = PUBLIC_OTHER;
-			} else if (warp.playerCanWarp(player)){
-				color = PRIVATE_INVITED;
-			} else {
-				color = PRIVATE_OTHER;
-			}
-			
+			ChatColor color = getColor(warp, this.player);			
 		
 			String location = " @(" + x + ", " + y + ", " + z + ")";
 			String creatorString = " by " + creator;
@@ -160,11 +150,41 @@ public class Lister {
 		String[] result = new String[6];
 		result[0] = ChatColor.RED + "-------------------- " + ChatColor.WHITE + "LIST LEGEND" + ChatColor.RED
 		+ " -------------------";
-		result[1] = PUBLIC_OWN + "Yours and it is public.";
-		result[2] = PRIVATE_OWN + "Yours and it is private.";
-		result[3] = PUBLIC_OTHER + "Not yours and it is public";
-		result[4] = PRIVATE_OTHER + "Not yours, private and not invited";
-		result[5] = PRIVATE_INVITED + "Not yours, private and you are invited";
+		int i = 1;
+//		result[i++] = GLOBAL_OWN + "Yours and it is global";
+		result[i++] = PUBLIC_OWN + "Yours and it is public.";
+		result[i++] = PRIVATE_OWN + "Yours and it is private.";
+//		result[i++] = GLOBAL_OTHER + "Not yours and it is global";
+		result[i++] = PUBLIC_OTHER + "Not yours and it is public";
+		result[i++] = PRIVATE_OTHER + "Not yours, private and not invited";
+		result[i++] = PRIVATE_INVITED + "Not yours, private and you are invited";
 		return result;
+	}
+	
+	public static ChatColor getColor(Warp warp, Player player) {
+		if(warp.playerIsCreator(player.getName())) {
+			switch (warp.visibility) {
+			case PRIVATE :
+				return PRIVATE_OWN;
+			case PUBLIC :
+				return PUBLIC_OWN;
+			case GLOBAL :
+				return GLOBAL_OWN;
+			}
+		} else {
+			switch (warp.visibility) {
+			case PRIVATE :
+				if (warp.playerCanWarp(player)) {
+					return PRIVATE_INVITED;
+				} else {
+					return PRIVATE_OTHER;
+				}
+			case PUBLIC :
+				return PUBLIC_OTHER;
+			case GLOBAL :
+				return GLOBAL_OTHER;
+			}
+		}
+		return PRIVATE_OTHER;
 	}
 }

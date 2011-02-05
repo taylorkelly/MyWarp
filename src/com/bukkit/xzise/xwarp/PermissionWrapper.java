@@ -1,12 +1,10 @@
-package org.bukkit.xzise.xwarp;
-
-import java.util.logging.Level;
-import java.util.logging.Logger;
+package com.bukkit.xzise.xwarp;
 
 import org.bukkit.Server;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 
+import com.bukkit.xzise.XLogger;
 import com.nijiko.permissions.PermissionHandler;
 import com.nijikokun.bukkit.Permissions.Permissions;
 
@@ -130,12 +128,10 @@ public class PermissionWrapper {
 	public void init(Server server) {
 		Plugin test = server.getPluginManager().getPlugin("Permissions");
 		if (test != null) {
-			Logger log = Logger.getLogger("Minecraft");
 			this.handler = ((Permissions) test).getHandler();
-			log.log(Level.INFO, "[MYWARP] Permissions enabled.");
+			XLogger.info("Permissions enabled.");
 		} else {
-			Logger log = Logger.getLogger("Minecraft");
-			log.log(Level.SEVERE, "[MYWARP] Permission system not found.");
+			XLogger.severe("Permission system not found. Use defaults.");
 		}
 	}
 	

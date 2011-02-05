@@ -9,7 +9,10 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.HashMap;
 import java.util.logging.Level;
-import java.util.logging.Logger;
+
+import me.taylorkelly.mywarp.Warp.Visibility;
+
+import com.bukkit.xzise.XLogger;
 
 public class WarpDataSource {
 	public final static String DATABASE = "jdbc:sqlite:homes-warps.db";
@@ -38,7 +41,6 @@ public class WarpDataSource {
 		Connection conn = null;
 		Statement statement = null;
 		ResultSet set = null;
-		Logger log = Logger.getLogger("Minecraft");
 		try {
 			Class.forName("org.sqlite.JDBC");
 			conn = DriverManager.getConnection(DATABASE);
@@ -64,11 +66,11 @@ public class WarpDataSource {
 						pitch, publicAll, permissions, welcomeMessage);
 				ret.put(name.toLowerCase(), warp);
 			}
-			log.info("[MYWARP]: " + size + " warps loaded");
+			XLogger.info(size + " warps loaded");
 		} catch (SQLException ex) {
-			log.log(Level.SEVERE, "[MYWARP]: Warp Load Exception");
+			XLogger.severe("Warp Load Exception");
 		} catch (ClassNotFoundException e) {
-			log.log(Level.SEVERE, "[MYWARP]: Error loading org.sqlite.JDBC");
+			XLogger.severe("Error loading org.sqlite.JDBC");
 		} finally {
 			try {
 				if (statement != null)
@@ -78,8 +80,7 @@ public class WarpDataSource {
 				if (conn != null)
 					conn.close();
 			} catch (SQLException ex) {
-				log.log(Level.SEVERE,
-						"[MYWARP]: Warp Load Exception (on close)");
+				XLogger.severe("Warp Load Exception (on close)");
 			}
 		}
 		return ret;
@@ -97,12 +98,10 @@ public class WarpDataSource {
 				return false;
 			return true;
 		} catch (SQLException ex) {
-			Logger log = Logger.getLogger("Minecraft");
-			log.log(Level.SEVERE, "[MYWARP]: Table Check Exception", ex);
+			XLogger.log(Level.SEVERE, "Table Check Exception", ex);
 			return false;
 		} catch (ClassNotFoundException e) {
-			Logger log = Logger.getLogger("Minecraft");
-			log.log(Level.SEVERE, "[MYWARP]: Error loading org.sqlite.JDBC");
+			XLogger.severe("Error loading org.sqlite.JDBC");
 			return false;
 		} finally {
 			try {
@@ -111,9 +110,7 @@ public class WarpDataSource {
 				if (conn != null)
 					conn.close();
 			} catch (SQLException ex) {
-				Logger log = Logger.getLogger("Minecraft");
-				log.log(Level.SEVERE,
-						"[MYWARP]: Table Check SQL Exception (on closing)");
+				XLogger.severe("Table Check SQL Exception (on closing)");
 			}
 		}
 	}
@@ -127,11 +124,9 @@ public class WarpDataSource {
 			st = conn.createStatement();
 			st.executeUpdate(WARP_TABLE);
 		} catch (SQLException e) {
-			Logger log = Logger.getLogger("Minecraft");
-			log.log(Level.SEVERE, "[MYWARP]: Create Table Exception", e);
+			XLogger.log(Level.SEVERE, "Create Table Exception", e);
 		} catch (ClassNotFoundException e) {
-			Logger log = Logger.getLogger("Minecraft");
-			log.log(Level.SEVERE, "[MYWARP]: Error loading org.sqlite.JDBC");
+			XLogger.severe("Error loading org.sqlite.JDBC");
 		} finally {
 			try {
 				if (conn != null)
@@ -139,9 +134,7 @@ public class WarpDataSource {
 				if (st != null)
 					st.close();
 			} catch (SQLException e) {
-				Logger log = Logger.getLogger("Minecraft");
-				log.log(Level.SEVERE,
-						"[MYWARP]: Could not create the table (on close)");
+				XLogger.severe("Could not create the table (on close)");
 			}
 		}
 	}
@@ -149,7 +142,6 @@ public class WarpDataSource {
 	public static void addWarp(Warp warp) {
 		Connection conn = null;
 		PreparedStatement ps = null;
-		Logger log = Logger.getLogger("Minecraft");
 		try {
 			Class.forName("org.sqlite.JDBC");
 			conn = DriverManager.getConnection(DATABASE);
@@ -165,14 +157,14 @@ public class WarpDataSource {
 			ps.setDouble(7, warp.z);
 			ps.setInt(8, warp.yaw);
 			ps.setInt(9, warp.pitch);
-			ps.setBoolean(10, warp.publicAll);
+			ps.setBoolean(10, warp.visibility == Visibility.PUBLIC);
 			ps.setString(11, warp.permissionsString());
 			ps.setString(12, warp.welcomeMessage);
 			ps.executeUpdate();
 		} catch (SQLException ex) {
-			log.log(Level.SEVERE, "[MYWARP]: Warp Insert Exception", ex);
+			XLogger.log(Level.SEVERE, "Warp Insert Exception", ex);
 		} catch (ClassNotFoundException e) {
-			log.log(Level.SEVERE, "[MYWARP]: Error loading org.sqlite.JDBC");
+			XLogger.severe("Error loading org.sqlite.JDBC");
 		} finally {
 			try {
 				if (ps != null) {
@@ -181,8 +173,7 @@ public class WarpDataSource {
 				if (conn != null)
 					conn.close();
 			} catch (SQLException ex) {
-				log.log(Level.SEVERE,
-						"[MYWARP]: Warp Insert Exception (on close)", ex);
+				XLogger.log(Level.SEVERE, "Warp Insert Exception (on close)", ex);
 			}
 		}
 	}
@@ -190,7 +181,6 @@ public class WarpDataSource {
 	public static void updateWarp(Warp warp) {
 		Connection conn = null;
 		PreparedStatement ps = null;
-		Logger log = Logger.getLogger("Minecraft");
 		try {
 			Class.forName("org.sqlite.JDBC");
 			conn = DriverManager.getConnection(DATABASE);
@@ -205,9 +195,9 @@ public class WarpDataSource {
 			ps.setInt(6, warp.index);
 			ps.executeUpdate();
 		} catch (SQLException ex) {
-			log.log(Level.SEVERE, "[MYWARP]: Warp Update Exception", ex);
+			XLogger.log(Level.SEVERE, "Warp Update Exception", ex);
 		} catch (ClassNotFoundException e) {
-			log.log(Level.SEVERE, "[MYWARP]: Error loading org.sqlite.JDBC");
+			XLogger.severe("Error loading org.sqlite.JDBC");
 		} finally {
 			try {
 				if (ps != null) {
@@ -216,8 +206,7 @@ public class WarpDataSource {
 				if (conn != null)
 					conn.close();
 			} catch (SQLException ex) {
-				log.log(Level.SEVERE,
-						"[MYWARP]: Warp Insert Exception (on close)", ex);
+				XLogger.log(Level.SEVERE, "Warp Insert Exception (on close)", ex);
 			}
 		}
 	}
@@ -226,7 +215,6 @@ public class WarpDataSource {
 		Connection conn = null;
 		PreparedStatement ps = null;
 		ResultSet set = null;
-		Logger log = Logger.getLogger("Minecraft");
 		try {
 			Class.forName("org.sqlite.JDBC");
 			conn = DriverManager.getConnection(DATABASE);
@@ -234,9 +222,9 @@ public class WarpDataSource {
 			ps.setInt(1, warp.index);
 			ps.executeUpdate();
 		} catch (SQLException ex) {
-			log.log(Level.SEVERE, "[MYWARP]: Warp Delete Exception", ex);
+			XLogger.log(Level.SEVERE, "Warp Delete Exception", ex);
 		} catch (ClassNotFoundException e) {
-			log.log(Level.SEVERE, "[MYWARP]: Error loading org.sqlite.JDBC");
+			XLogger.severe("Error loading org.sqlite.JDBC");
 		} finally {
 			try {
 				if (ps != null) {
@@ -248,8 +236,7 @@ public class WarpDataSource {
 				if (conn != null)
 					conn.close();
 			} catch (SQLException ex) {
-				log.log(Level.SEVERE,
-						"[MYWARP]: Warp Delete Exception (on close)", ex);
+				XLogger.log(Level.SEVERE, "Warp Delete Exception (on close)", ex);
 			}
 		}
 	}
@@ -258,7 +245,6 @@ public class WarpDataSource {
 		Connection conn = null;
 		PreparedStatement ps = null;
 		ResultSet set = null;
-		Logger log = Logger.getLogger("Minecraft");
 		try {
 			Class.forName("org.sqlite.JDBC");
 			conn = DriverManager.getConnection(DATABASE);
@@ -267,9 +253,9 @@ public class WarpDataSource {
 			ps.setInt(2, warp.index);
 			ps.executeUpdate();
 		} catch (SQLException ex) {
-			log.log(Level.SEVERE, "[MYWARP]: Warp Welcome Message Exception", ex);
+			XLogger.log(Level.SEVERE, "Warp Welcome Message Exception", ex);
 		} catch (ClassNotFoundException e) {
-			log.log(Level.SEVERE, "[MYWARP]: Error loading org.sqlite.JDBC");
+			XLogger.severe("Error loading org.sqlite.JDBC");
 		} finally {
 			try {
 				if (ps != null) {
@@ -281,8 +267,7 @@ public class WarpDataSource {
 				if (conn != null)
 					conn.close();
 			} catch (SQLException ex) {
-				log.log(Level.SEVERE,
-						"[MYWARP]: Warp Publicize Exception (on close)", ex);
+				XLogger.log(Level.SEVERE, "Warp Publicize Exception (on close)", ex);
 			}
 		}
 	}
@@ -291,7 +276,6 @@ public class WarpDataSource {
 		Connection conn = null;
 		PreparedStatement ps = null;
 		ResultSet set = null;
-		Logger log = Logger.getLogger("Minecraft");
 		try {
 			Class.forName("org.sqlite.JDBC");
 			conn = DriverManager.getConnection(DATABASE);
@@ -301,9 +285,9 @@ public class WarpDataSource {
 			ps.setInt(2, warp.index);
 			ps.executeUpdate();
 		} catch (SQLException ex) {
-			log.log(Level.SEVERE, "[MYWARP]: Warp Publicize Exception", ex);
+			XLogger.log(Level.SEVERE, "Warp Publicize Exception", ex);
 		} catch (ClassNotFoundException e) {
-			log.log(Level.SEVERE, "[MYWARP]: Error loading org.sqlite.JDBC");
+			XLogger.severe("Error loading org.sqlite.JDBC");
 		} finally {
 			try {
 				if (ps != null) {
@@ -315,8 +299,7 @@ public class WarpDataSource {
 				if (conn != null)
 					conn.close();
 			} catch (SQLException ex) {
-				log.log(Level.SEVERE,
-						"[MYWARP]: Warp Publicize Exception (on close)", ex);
+				XLogger.log(Level.SEVERE, "Warp Publicize Exception (on close)", ex);
 			}
 		}
 	}
@@ -325,7 +308,6 @@ public class WarpDataSource {
 		Connection conn = null;
 		PreparedStatement ps = null;
 		ResultSet set = null;
-		Logger log = Logger.getLogger("Minecraft");
 		try {
 			Class.forName("org.sqlite.JDBC");
 			conn = DriverManager.getConnection(DATABASE);
@@ -335,9 +317,9 @@ public class WarpDataSource {
 			ps.setInt(2, warp.index);
 			ps.executeUpdate();
 		} catch (SQLException ex) {
-			log.log(Level.SEVERE, "[MYWARP]: Warp Permissions Exception", ex);
+			XLogger.log(Level.SEVERE, "Warp Permissions Exception", ex);
 		} catch (ClassNotFoundException e) {
-			log.log(Level.SEVERE, "[MYWARP]: Error loading org.sqlite.JDBC");
+			XLogger.severe("Error loading org.sqlite.JDBC");
 		} finally {
 			try {
 				if (ps != null) {
@@ -349,8 +331,7 @@ public class WarpDataSource {
 				if (conn != null)
 					conn.close();
 			} catch (SQLException ex) {
-				log.log(Level.SEVERE,
-						"[MYWARP]: Warp Permissions Exception (on close)", ex);
+				XLogger.log(Level.SEVERE, "Warp Permissions Exception (on close)", ex);
 			}
 		}
 	}
@@ -359,7 +340,6 @@ public class WarpDataSource {
 		Connection conn = null;
 		PreparedStatement ps = null;
 		ResultSet set = null;
-		Logger log = Logger.getLogger("Minecraft");
 		try {
 			Class.forName("org.sqlite.JDBC");
 			conn = DriverManager.getConnection(DATABASE);
@@ -368,9 +348,9 @@ public class WarpDataSource {
 			ps.setInt(2, warp.index);
 			ps.executeUpdate();
 		} catch (SQLException ex) {
-			log.log(Level.SEVERE, "[MYWARP]: Warp Creator Exception", ex);
+			XLogger.log(Level.SEVERE, "Warp Creator Exception", ex);
 		} catch (ClassNotFoundException e) {
-			log.log(Level.SEVERE, "[MYWARP]: Error loading org.sqlite.JDBC");
+			XLogger.severe("Error loading org.sqlite.JDBC");
 		} finally {
 			try {
 				if (ps != null) {
@@ -382,8 +362,8 @@ public class WarpDataSource {
 				if (conn != null)
 					conn.close();
 			} catch (SQLException ex) {
-				log.log(Level.SEVERE,
-						"[MYWARP]: Warp Creator Exception (on close)", ex);
+				XLogger.log(Level.SEVERE,
+						"Warp Creator Exception (on close)", ex);
 			}
 		}
 	}

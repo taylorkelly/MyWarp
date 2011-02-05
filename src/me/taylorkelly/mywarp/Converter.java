@@ -8,6 +8,8 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Scanner;
 
+import me.taylorkelly.mywarp.Warp.Visibility;
+
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Server;
@@ -44,8 +46,7 @@ public class Converter {
 
 				World world = server.getWorlds()[0];
 				Location location = new Location(world, x, y, z, (float) yaw, (float) pitch);
-				Warp warp = new Warp(name, location);
-				warp.setCreator(player.getName());
+				Warp warp = new Warp(name, player.getName(), location);
 				lister.blindAdd(warp);
 
 				ps.setInt(1, warp.index);
@@ -57,7 +58,7 @@ public class Converter {
 				ps.setDouble(7, warp.z);
 				ps.setInt(8, warp.yaw);
 				ps.setInt(9, warp.pitch);
-				ps.setBoolean(10, warp.publicAll);
+				ps.setBoolean(10, warp.visibility == Visibility.PUBLIC);
 				ps.setString(11, warp.permissionsString());
 				ps.setString(12, warp.welcomeMessage);
 				ps.addBatch();

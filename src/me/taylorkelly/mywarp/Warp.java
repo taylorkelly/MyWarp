@@ -1,13 +1,22 @@
 package me.taylorkelly.mywarp;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
-import org.bukkit.xzise.xwarp.PermissionWrapper.PermissionTypes;
+
+import com.bukkit.xzise.xwarp.PermissionWrapper.PermissionTypes;
 
 public class Warp {
+	
+	public enum Visibility {
+		PRIVATE,
+		PUBLIC,
+		GLOBAL;
+	}
+	
 	public int index;
 	public String name;
 	public String creator;
@@ -17,9 +26,10 @@ public class Warp {
 	public double z;
 	public int yaw;
 	public int pitch;
-	public boolean publicAll;
+	public Visibility visibility;
 	public String welcomeMessage;
-	public ArrayList<String> permissions;
+	public List<String> permissions;
+	public List<String> editors;
 
 	public static int nextIndex = 1;
 
@@ -35,51 +45,33 @@ public class Warp {
 		this.z = z;
 		this.pitch = pitch;
 		this.yaw = yaw;
-		this.publicAll = publicAll;
+		this.visibility = publicAll ? Visibility.PUBLIC : Visibility.PRIVATE;
 		this.permissions = processList(permissions);
 		this.welcomeMessage = welcomeMessage;
 		if (index > nextIndex)
 			nextIndex = index;
 		nextIndex++;
 	}
+	
+	public Warp(String name, String creator, Location location) {
+		this(nextIndex, name, creator, 0, location.getX(), location.getBlockY(), location.getZ(), normalizeRotation(location.getYaw()), normalizeRotation(location.getPitch()), true, "", "Welcome to '" + name + "'");
+	}
+	
+	private static int normalizeRotation(float degrees) {
+		return Math.round(degrees) % 360;
+	}
 
 	public Warp(String name, Player creator) {
-		this.index = nextIndex;
-		nextIndex++;
-		this.name = name;
-		this.creator = creator.getName();
-		// TODO better world handling
-		this.world = 0;
-		this.x = creator.getLocation().getX();
-		this.y = creator.getLocation().getBlockY()	;
-		this.z = creator.getLocation().getZ();
-		this.yaw = Math.round(creator.getLocation().getYaw()) % 360;
-		this.pitch = Math.round(creator.getLocation().getPitch()) % 360;
-		this.publicAll = true;
-		this.permissions = new ArrayList<String>();
-		this.welcomeMessage = "Welcome to '" + name + "'";
+		this(name, creator.getName(), creator.getLocation());
 	}
 
 	public Warp(String name, Location location) {
-		this.index = nextIndex;
-		nextIndex++;
-		this.name = name;
-		this.creator = "No Player";
-		// TODO better world handling
-		this.world = 0;
-		this.x = location.getBlockX();
-		this.y = location.getBlockY();
-		this.z = location.getBlockZ();
-		this.yaw = Math.round(location.getYaw());
-		this.pitch = Math.round(location.getPitch());
-		this.publicAll = true;
-		this.permissions = new ArrayList<String>();
-		this.welcomeMessage = "Welcome to '" + name + "'";
+		this(name, "No Player", location);
 	}
 
-	private ArrayList<String> processList(String permissions) {
+	private static List<String> processList(String permissions) {
 		String[] names = permissions.split(",");
-		ArrayList<String> ret = new ArrayList<String>();
+		List<String> ret = new ArrayList<String>();
 		for (String name : names) {
 			if (name.equals(""))
 				continue;
@@ -102,11 +94,11 @@ public class Warp {
 			return true;
 		if (this.permissions.contains(player.getName()) && MyWarp.permissions.permission(player, PermissionTypes.TO_INVITED))
 			return true;
-		if (this.publicAll && MyWarp.permissions.permission(player, PermissionTypes.TO_OTHER))
+		if (this.visibility == Visibility.PUBLIC && MyWarp.permissions.permission(player, PermissionTypes.TO_OTHER))
 			return true;
 		// Add to global
-//		if ( && MyWarp.permissions.permission(player, PermissionTypes.TO_GLOBAL))
-//			return true;
+		if (this.visibility == Visibility.GLOBAL && MyWarp.permissions.permission(player, PermissionTypes.TO_GLOBAL))
+			return true;
 		return MyWarp.permissions.permission(player, PermissionTypes.ADMIN_TO_ALL);
 	}
 

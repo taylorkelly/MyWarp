@@ -6,19 +6,20 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
+import me.taylorkelly.mywarp.Warp.Visibility;
+
 import org.bukkit.ChatColor;
 import org.bukkit.Server;
 import org.bukkit.entity.Player;
-import org.bukkit.xzise.xwarp.PermissionWrapper.PermissionTypes;
+
+import com.bukkit.xzise.xwarp.PermissionWrapper.PermissionTypes;
 
 public class WarpList {
 	private HashMap<String, Warp> warpList;
-	private HashMap<String, HashMap<String, Warp>> playerWarps;
 	private Server server;
 
 	public WarpList(Server server) {
 		this.server = server;
-		this.playerWarps = new HashMap<String, HashMap<String,Warp>>();
 		this.loadFromDatabase();
 	}
 
@@ -104,7 +105,7 @@ public class WarpList {
 			if (MyWarp.permissions.permission(player,
 					PermissionTypes.CREATE_PRIVATE)
 					|| warp.playerCanModify(player)) {
-				warp.publicAll = false;
+				warp.visibility = Visibility.PRIVATE;
 				WarpDataSource.publicizeWarp(warp, false);
 				player.sendMessage(ChatColor.AQUA + "You have privatized '"
 						+ name + "'");
@@ -138,7 +139,7 @@ public class WarpList {
 					WarpDataSource.updatePermissions(warp);
 					player.sendMessage(ChatColor.AQUA + "You have invited "
 							+ inviteeName + " to '" + name + "'");
-					if (warp.publicAll) {
+					if (warp.visibility != Visibility.PRIVATE) {
 						player.sendMessage(ChatColor.RED + "But '" + name
 								+ "' is still public.");
 					}
@@ -167,7 +168,7 @@ public class WarpList {
 			if (MyWarp.permissions.permission(player,
 					PermissionTypes.CREATE_PUBLIC)
 					|| warp.playerCanModify(player)) {
-				warp.publicAll = true;
+				warp.visibility = Visibility.PUBLIC;
 				WarpDataSource.publicizeWarp(warp, true);
 				player.sendMessage(ChatColor.AQUA + "You have publicized '"
 						+ name + "'");
@@ -198,7 +199,7 @@ public class WarpList {
 					WarpDataSource.updatePermissions(warp);
 					player.sendMessage(ChatColor.AQUA + "You have uninvited "
 							+ inviteeName + " from '" + name + "'");
-					if (warp.publicAll) {
+					if (warp.visibility != Visibility.PRIVATE) {
 						player.sendMessage(ChatColor.RED + "But '" + name
 								+ "' is still public.");
 					}
