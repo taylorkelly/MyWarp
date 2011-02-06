@@ -30,7 +30,7 @@ public class XLogger {
 	}
 
 	public static void log(Level level, String string, Throwable exception) {
-		XLogger.log(level, string, exception);
+		XLogger.logger.log(level, string, exception);
 	}
 	
 }
