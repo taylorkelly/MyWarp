@@ -27,7 +27,9 @@ public class MyWarp extends JavaPlugin implements DatabaseConnection {
 	}
 
 	@Override
-	public void onDisable() {}
+	public void onDisable() {
+	    ConnectionManager.freeConnection();
+	}
 
 	@Override
 	public void onEnable() {

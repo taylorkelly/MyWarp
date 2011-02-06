@@ -13,6 +13,7 @@ import com.bukkit.xzise.XLogger;
 public class ConnectionManager {
 
     private static Connection connection;
+    private static boolean own;
     private static final String[] plugins = new String[] {"MyHome", "MyWarp"};
 
     public static synchronized Connection initializeConnection(Server server) {
@@ -27,6 +28,7 @@ public class ConnectionManager {
 					}
 				}
 			}
+        	own = true;
         	connection = createConnection();
         }
         return connection;
@@ -52,13 +54,17 @@ public class ConnectionManager {
     }
 
     public static synchronized void freeConnection() {
-        if (connection != null) {
+    	System.out.println("free connection call");
+        if (connection != null && own) {
+        	XLogger.info("Close connection!");
             try {
                 connection.close();
                 connection = null;
             } catch (SQLException e) {
                 e.printStackTrace();
             }
+        } else {
+        	connection = null;
         }
     }
 }
