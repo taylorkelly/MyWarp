@@ -238,7 +238,7 @@ public class WarpList {
 				}
 			} else {
 				player.sendMessage(ChatColor.RED
-						+ "You do not have permission to publicize '" + warp.name
+						+ "You do not have permission to globalize '" + warp.name
 						+ "'");
 			}
 		} else {
