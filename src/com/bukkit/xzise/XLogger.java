@@ -28,9 +28,13 @@ public class XLogger {
 	public static void severe(String msg) {
 		XLogger.logger.severe(XLogger.formatMessage(msg));
 	}
+	
+	public static void severe(String msg, Throwable exception) {
+		XLogger.log(Level.SEVERE, msg, exception);
+	}
 
-	public static void log(Level level, String string, Throwable exception) {
-		XLogger.logger.log(level, string, exception);
+	public static void log(Level level, String msg, Throwable exception) {
+		XLogger.logger.log(level, msg, exception);
 	}
 	
 }

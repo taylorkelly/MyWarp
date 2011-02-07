@@ -1,6 +1,7 @@
 package me.taylorkelly.mywarp;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import org.angelsl.minecraft.randomshit.fontwidth.MinecraftFontWidthCalculator;
 import org.bukkit.ChatColor;
@@ -14,7 +15,6 @@ public class Lister {
 	private int page;
 	private String introRight;
 	
-	private static final int WARPS_PER_PAGE = 8;
 	ArrayList<Warp> sortedWarps;
 	
 	private String creator;
@@ -46,7 +46,7 @@ public class Lister {
 	
 	public void calculateMaxPages() {
 		int size = this.warpList.getSize(this.player, this.creator);
-		this.maxPages = (int) Math.ceil(size / (double) WARPS_PER_PAGE);
+		this.maxPages = (int) Math.ceil(size / (double) (WMPlayerListener.LINES_PER_PAGE - 1));
 		this.introRight = "/" + maxPages + " ";
 		int width = 20 - this.getWidth(maxPages, 10);
 		while (width > 0) {
@@ -61,11 +61,11 @@ public class Lister {
 	}
 	
 	public void generatePage() {
-		int start = (page-1)*WARPS_PER_PAGE;
+		int start = (page-1) * (WMPlayerListener.LINES_PER_PAGE - 1);
 		if (this.creator != null) {
-			this.sortedWarps = this.warpList.getSortedWarps(this.player, this.creator, start, WARPS_PER_PAGE);
+			this.sortedWarps = this.warpList.getSortedWarps(this.player, this.creator, start, WMPlayerListener.LINES_PER_PAGE - 1);
 		} else {
-			this.sortedWarps = this.warpList.getSortedWarps(player, start, WARPS_PER_PAGE);
+			this.sortedWarps = this.warpList.getSortedWarps(player, start, WMPlayerListener.LINES_PER_PAGE - 1);
 		}
 	}
 
@@ -147,18 +147,17 @@ public class Lister {
 	}
 	
 	public static String[] getLegend() {
-		String[] result = new String[6];
-		result[0] = ChatColor.RED + "-------------------- " + ChatColor.WHITE + "LIST LEGEND" + ChatColor.RED
-		+ " -------------------";
-		int i = 1;
-//		result[i++] = GLOBAL_OWN + "Yours and it is global";
-		result[i++] = PUBLIC_OWN + "Yours and it is public.";
-		result[i++] = PRIVATE_OWN + "Yours and it is private.";
-//		result[i++] = GLOBAL_OTHER + "Not yours and it is global";
-		result[i++] = PUBLIC_OTHER + "Not yours and it is public";
-		result[i++] = PRIVATE_OTHER + "Not yours, private and not invited";
-		result[i++] = PRIVATE_INVITED + "Not yours, private and you are invited";
-		return result;
+		List<String> result = new ArrayList<String>(8);
+		result.add(ChatColor.RED + "-------------------- " + ChatColor.WHITE + "LIST LEGEND" + ChatColor.RED
+		+ " -------------------");
+		result.add(GLOBAL_OWN + "Yours and it is global");
+		result.add(PUBLIC_OWN + "Yours and it is public.");
+		result.add(PRIVATE_OWN + "Yours and it is private.");
+		result.add(GLOBAL_OTHER + "Not yours and it is global");
+		result.add(PUBLIC_OTHER + "Not yours and it is public");
+		result.add(PRIVATE_OTHER + "Not yours, private and not invited");
+		result.add(PRIVATE_INVITED + "Not yours, private and you are invited");
+		return result.toArray(new String[0]);
 	}
 	
 	public static ChatColor getColor(Warp warp, Player player) {

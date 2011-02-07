@@ -12,9 +12,24 @@ import com.bukkit.xzise.xwarp.PermissionWrapper.PermissionTypes;
 public class Warp {
 	
 	public enum Visibility {
-		PRIVATE,
-		PUBLIC,
-		GLOBAL;
+		PRIVATE(0),
+		PUBLIC(1),
+		GLOBAL(2);
+		
+		public final int level;
+		
+		private Visibility(int level) {
+			this.level = level;
+		}
+		
+		public static Visibility parseLevel(int level) {
+			for (Visibility visibility : Visibility.values()) {
+				if (visibility.level == level) {
+					return visibility;
+				}
+			}
+			return null;
+		}
 	}
 	
 	public int index;
@@ -34,7 +49,7 @@ public class Warp {
 	public static int nextIndex = 1;
 
 	public Warp(int index, String name, String creator, int world, double x,
-			int y, double z, int yaw, int pitch, boolean publicAll,
+			int y, double z, int yaw, int pitch, Visibility visibility,
 			String permissions, String welcomeMessage) {
 		this.index = index;
 		this.name = name;
@@ -45,7 +60,7 @@ public class Warp {
 		this.z = z;
 		this.pitch = pitch;
 		this.yaw = yaw;
-		this.visibility = publicAll ? Visibility.PUBLIC : Visibility.PRIVATE;
+		this.visibility = visibility;
 		this.permissions = processList(permissions);
 		this.welcomeMessage = welcomeMessage;
 		if (index > nextIndex)
@@ -54,7 +69,7 @@ public class Warp {
 	}
 	
 	public Warp(String name, String creator, Location location) {
-		this(nextIndex, name, creator, 0, location.getX(), location.getBlockY(), location.getZ(), normalizeRotation(location.getYaw()), normalizeRotation(location.getPitch()), true, "", "Welcome to '" + name + "'");
+		this(nextIndex, name, creator, 0, location.getX(), location.getBlockY(), location.getZ(), normalizeRotation(location.getYaw()), normalizeRotation(location.getPitch()), Visibility.PUBLIC, "", "Welcome to '" + name + "'");
 	}
 	
 	private static int normalizeRotation(float degrees) {

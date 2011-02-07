@@ -3,6 +3,8 @@ package me.taylorkelly.mywarp;
 import java.util.ArrayList;
 import java.util.List;
 
+import me.taylorkelly.mywarp.Warp.Visibility;
+
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerChatEvent;
@@ -13,6 +15,8 @@ import com.bukkit.xzise.xwarp.PermissionWrapper;
 import com.bukkit.xzise.xwarp.PermissionWrapper.PermissionTypes;
 
 public class WMPlayerListener extends PlayerListener {
+	
+	public static final int LINES_PER_PAGE = 10;
 		
 	private boolean warning;
 	private Plugin plugin;
@@ -31,10 +35,16 @@ public class WMPlayerListener extends PlayerListener {
 		// TODO permissions
 		if (values[0].equalsIgnoreCase("/warp")) {
 			event.setCancelled(true);
-			/**
+			
+//			for (int i = 0; i < values.length; i++) {
+//				player.sendMessage(i + "=" + values[i]);
+//			}
+			
+			/*
 			 * /warp convert
 			 */
 			if (values.length == 2 && values[1].equalsIgnoreCase("convert")) {
+//				player.sendMessage("convert");
 				if (!warning) {
 					player.sendMessage(ChatColor.RED + "Warning: " + ChatColor.WHITE + "Only use a copy of warps.txt.");
 					player.sendMessage("This will delete the warps.txt it uses");
@@ -45,19 +55,23 @@ public class WMPlayerListener extends PlayerListener {
 					Converter.convert(player, plugin.getServer(), warpList);
 					warning = false;
 				}
+				
 				/*
 				 * /warp list|ls legend
 				 */
 			} else if (values.length == 3 && (values[1].equalsIgnoreCase("list") || values[1].equalsIgnoreCase("ls"))
 					&& values[2].equalsIgnoreCase("legend")) {
+//				player.sendMessage("list legend");
 				for (String string : Lister.getLegend()) {
 					player.sendMessage(string);
 				}
+				
 				/*
 				 * /warp list|ls [name] [#]
 				 */
 			} else if ((values.length == 2 || values.length == 3 || (values.length == 4 && isInteger(values[3])))
 					&& (values[1].equalsIgnoreCase("list") || values[1].equalsIgnoreCase("ls"))) {
+//				player.sendMessage("list");
 				Lister lister = new Lister(warpList);
 				lister.setPlayer(player);
 				
@@ -97,74 +111,181 @@ public class WMPlayerListener extends PlayerListener {
 					lister.setPage(1);
 				}
 				lister.list();
-				/**
+				
+				/*
 				 * /warp search <name>
 				 */
 			} else if (values.length > 2 && (values[1].equalsIgnoreCase("search"))) {
-
+//				player.sendMessage("search");
 				Searcher searcher = new Searcher(warpList);
 				searcher.addPlayer(player);
 				searcher.setQuery(concatArray(values, 2));
 				searcher.search();
-				/**
+				
+				/*
 				 * /warp create <name>
 				 */
 			} else if (values.length > 2
-					&& (values[1].equalsIgnoreCase("create") || values[1].equalsIgnoreCase("createp")
-							|| values[1].equals("+") || values[1].equalsIgnoreCase("+p"))) {
+					&& (values[1].equalsIgnoreCase("create") || values[1].equalsIgnoreCase("createp") || values[1].equalsIgnoreCase("createg")
+							|| values[1].equals("+") || values[1].equalsIgnoreCase("+p") || values[1].equalsIgnoreCase("+g"))) {
 
-				warpList.addWarp(concatArray(values, 2), player, values[1].equalsIgnoreCase("createp")
-						|| values[1].equalsIgnoreCase("+p"));
-				/**
+//				player.sendMessage("create");
+				Visibility visibility = Visibility.PUBLIC;
+				if (values[1].equalsIgnoreCase("createp") || values[1].equalsIgnoreCase("+p")) {
+					visibility = Visibility.PRIVATE;
+				} else if (values[1].equalsIgnoreCase("createg") || values[1].equalsIgnoreCase("+g")) {
+					visibility = Visibility.GLOBAL;
+				}
+				
+				warpList.addWarp(concatArray(values, 2), player, visibility);
+				/*
 				 * /warp delete <name>
 				 */
-			} else if (values.length > 2 && (values[1].equalsIgnoreCase("delete") || values[1].equals("-"))) {
+			} else if (((values.length == 3) || (values.length == 4)) && (values[1].equalsIgnoreCase("delete") || values[1].equals("-"))) {
+//				player.sendMessage("delete");
+				String creator = "";
+				if (values.length == 4) {
+					creator = values[3];
+				}
 
-				warpList.deleteWarp(concatArray(values, 2), player);
-				/**
+				this.warpList.deleteWarp(values[2], creator, player);
+				
+				/*
 				 * /warp private <name>
 				 */
-			} else if (values.length > 2 && values[1].equalsIgnoreCase("private")) {
-
-				warpList.privatize(concatArray(values, 2), player);
-				/**
+			} else if (((values.length == 3) || (values.length == 4)) && values[1].equalsIgnoreCase("private")) {
+//				player.sendMessage("private");
+				String creator = "";
+				if (values.length == 4) {
+					creator = values[3];
+				}
+				
+				this.warpList.privatize(values[2], creator, player);
+				
+				/*
 				 * /warp public <name>
 				 */
-			} else if (values.length > 2 && values[1].equalsIgnoreCase("public")) {
-
-				warpList.publicize(concatArray(values, 2), player);
-				/**
+			} else if (((values.length == 3) || (values.length == 4)) && values[1].equalsIgnoreCase("public")) {
+//				player.sendMessage("public");
+				String creator = "";
+				if (values.length == 4) {
+					creator = values[3];
+				}
+				
+				this.warpList.publicize(values[2], creator, player);
+				
+				/*
+				 * /warp global <name>
+				 */
+			} else if (((values.length == 3) || (values.length == 4)) && values[1].equalsIgnoreCase("public")) {
+//				player.sendMessage("global");
+				String creator = "";
+				if (values.length == 4) {
+					creator = values[3];
+				}
+				
+				this.warpList.globalize(values[2], creator, player);
+				
+				/*
 				 * /warp give <player> <name>
 				 */
-			} else if (values.length > 3 && values[1].equalsIgnoreCase("give")) {
-				Player givee = plugin.getServer().getPlayer(values[2]);
-				// TODO Change to matchPlayer
-				String giveeName = (givee == null) ? values[2] : givee.getName();
+			} else if (((values.length == 4) || (values.length == 5)) && values[1].equalsIgnoreCase("give")) {
+//				player.sendMessage("give");
+				String giveeName = this.getPlayer(values[values.length - 1]);
+				String creator = "";
+				if (values.length == 5) {
+					creator = values[3];
+				}
+				
+				this.warpList.give(values[2], creator, player, giveeName);
 
-				warpList.give(concatArray(values, 3), player, giveeName);
-
-				/**
+				/*
 				 * /warp invite <player> <name>
 				 */
-			} else if (values.length > 3 && values[1].equalsIgnoreCase("invite")) {
-				Player invitee = plugin.getServer().getPlayer(values[2]);
-				// TODO Change to matchPlayer
-				String inviteeName = (invitee == null) ? values[2] : invitee.getName();
-
-				warpList.invite(concatArray(values, 3), player, inviteeName);
-				/**
+			} else if (((values.length == 4) || (values.length == 5)) && values[1].equalsIgnoreCase("invite")) {
+//				player.sendMessage("invite");
+				String inviteeName = this.getPlayer(values[values.length - 1]);
+				String creator = "";
+				if (values.length == 5) {
+					creator = values[3];
+				}
+				
+				warpList.invite(values[2], creator, player, inviteeName);
+				
+				/*
 				 * /warp uninvite <player> <name>
 				 */
-			} else if (values.length > 3 && values[1].equalsIgnoreCase("uninvite")) {
-				Player invitee = plugin.getServer().getPlayer(values[2]);
-				// TODO Change to matchPlayer
-				String inviteeName = (invitee == null) ? values[2] : invitee.getName();
-
-				warpList.uninvite(concatArray(values, 3), player, inviteeName);
-				/**
-				 * /warp help
+			} else if (((values.length == 4) || (values.length == 5)) && values[1].equalsIgnoreCase("uninvite")) {
+//				player.sendMessage("uninvite");
+				String inviteeName = this.getPlayer(values[values.length - 1]);
+				String creator = "";
+				if (values.length == 5) {
+					creator = values[3];
+				}
+				
+				warpList.uninvite(values[2], creator, player, inviteeName);
+				
+				/*
+				 * /warp message <name> <message>
 				 */
-			} else if (values.length >= 2 && (values[1].equalsIgnoreCase("help") || values[1].equalsIgnoreCase("?"))) {
+			} else if (((values.length == 4) || (values.length == 5))
+					&& (values[1].equalsIgnoreCase("message") || values[1].equalsIgnoreCase("msg"))) {
+//				player.sendMessage("message");
+				String creator = "";
+				if (values.length == 5) {
+					creator = values[3];
+				}
+				
+				this.warpList.setMessage(values[2], creator, player, values[values.length - 1]);
+
+				/*
+				 * /warp update <name>
+				 */
+			} else if (((values.length == 3) || (values.length == 4)) && (values[1].equalsIgnoreCase("update") || values[1].equalsIgnoreCase("*"))) {
+//				player.sendMessage("update");
+				String creator = "";
+				if (values.length == 4) {
+					creator = values[3];
+				}
+				this.warpList.update(values[2], creator, player);
+				
+				/*
+				 * /warp reload
+				 */
+			} else if (values.length == 2 && values[1].equalsIgnoreCase("reload")) {
+//				player.sendMessage("reload");
+				this.warpList.loadFromDatabase();
+				
+				/*
+				 * /warp permissions
+				 */
+			} else if (values.length == 2 && values[1].equalsIgnoreCase("permissions")) {
+//				player.sendMessage("permissions");
+				
+				player.sendMessage("Your permissions:");
+				if (!MyWarp.permissions.useOfficial()) {
+					player.sendMessage("(Use build in permissions!)");
+				}
+				for (PermissionTypes type : PermissionWrapper.PermissionTypes.values()) {
+					printPermission(type, player);
+				}
+				
+				/*
+				 * /warp [to] <name>
+				 */
+			} else if (values.length > 1 && values.length < 4) {
+//				player.sendMessage("to");
+				// TODO ChunkLoading
+				int start = 1;
+				if (values[1].equalsIgnoreCase("to") && values.length > 2) {
+					start++;
+				}
+				String creator = "";
+				if (values.length > start + 1) {
+					creator = values[start + 1];
+				}
+				this.warpList.warpTo(values[start], creator, player, start == 1);
+			} else {
 				int page = 1;
 				if (values.length == 3) {
 					if (isInteger(values[2])) {
@@ -186,55 +307,6 @@ public class WMPlayerListener extends PlayerListener {
 				for (String message : messages) {
 					player.sendMessage(message);
 				}
-				/*
-				 * /warp message <name> <message>
-				 */
-			} else if (values.length == 4
-					&& (values[1].equalsIgnoreCase("message") || values[1].equalsIgnoreCase("msg"))) {
-
-				this.warpList.setMessage(values[2], player, values[3]);
-
-				/*
-				 * /warp update <name>
-				 */
-			} else if (values.length > 2 && (values[1].equalsIgnoreCase("update") || values[1].equalsIgnoreCase("*"))) {
-
-				this.warpList.update(concatArray(values, 2), player);
-				
-				/*
-				 * /warp reload
-				 */
-			} else if (values.length == 2 && values[1].equalsIgnoreCase("reload")) {
-
-				this.warpList.loadFromDatabase();
-				
-				/*
-				 * /warp permissions
-				 */
-			} else if (values.length == 2 && values[1].equalsIgnoreCase("permissions")) {
-
-				player.sendMessage("Your permissions:");
-				if (!MyWarp.permissions.useOfficial()) {
-					player.sendMessage("(Use build in permissions!)");
-				}
-				for (PermissionTypes type : PermissionWrapper.PermissionTypes.values()) {
-					printPermission(type, player);
-				}
-				
-				/*
-				 * /warp <name>
-				 */
-			} else if (values.length > 1) {
-				// TODO ChunkLoading
-				int start = 1;
-				if (values[1].equalsIgnoreCase("to") && values.length > 2) {
-					start++;
-				}
-				this.warpList.warpTo(concatArray(values, start), player, start == 1);
-			} else {
-				// TODO help?
-				player.sendMessage(ChatColor.RED + "Invalid /warp command! " + ChatColor.WHITE + "Use " + ChatColor.RED
-						+ "/warp help " + ChatColor.WHITE + "for help.");
 			}
 		}
 	}
@@ -245,49 +317,43 @@ public class WMPlayerListener extends PlayerListener {
 		player.sendMessage(message);
 	}
 	
+	public String getPlayer(String name) {
+		Player player = this.plugin.getServer().getPlayer(name);
+		return player == null ? name : player.getName();
+	}
+	
+	private static String[] helpLines = new String[] { 
+		ChatColor.RED + "/warp [to] <name>" + ChatColor.WHITE + "  -  Warp to " + ChatColor.GRAY + "<name>",
+		ChatColor.RED + "/warp create|+ <name>" + ChatColor.WHITE + "  -  Create warp " + ChatColor.GRAY + "<name>",
+		ChatColor.RED + "/warp createp|+p <name>" + ChatColor.WHITE + "  -  Create private warp " + ChatColor.GRAY + "<name>",
+		ChatColor.RED + "/warp createg|+g <name>" + ChatColor.WHITE + "  -  Create global warp " + ChatColor.GRAY + "<name>",
+		ChatColor.RED + "/warp delete|- <name>" + ChatColor.WHITE + "  -  Delete warp " + ChatColor.GRAY + "<name>",
+		ChatColor.RED + "/warp list|ls <#>" + ChatColor.WHITE + "  -  Views warp page " + ChatColor.GRAY + "<#>",
+		ChatColor.RED + "/warp update|* <name>" + ChatColor.WHITE + "  -  Updates position of " + ChatColor.GRAY + "<name>",
+		ChatColor.RED + "/warp search <query>" + ChatColor.WHITE + "  -  Search for " + ChatColor.GRAY + "<query>",
+		ChatColor.RED + "/warp list|ls legend" + ChatColor.WHITE + "  -  Shows the warp page's legend.",
+		ChatColor.RED + "/warp message|msg <name> <message>" + ChatColor.WHITE + "  -  Sets message",
+		ChatColor.RED + "/warp give <player> <name>" + ChatColor.WHITE + "  -  Give " + ChatColor.GRAY + "<player>" + ChatColor.WHITE + " your " + ChatColor.GRAY + "<name>",
+		ChatColor.RED + "/warp invite <player> <name>" + ChatColor.WHITE + "  -  Invite " + ChatColor.GRAY + "<player>" + ChatColor.WHITE + " to " + ChatColor.GRAY + "<name>",
+		ChatColor.RED + "/warp uninvite <player> <name>" + ChatColor.WHITE + "  -  Uninvite " + ChatColor.GRAY + "<player>" + ChatColor.WHITE + " to " + ChatColor.GRAY + "<name>",
+		ChatColor.RED + "/warp global <name>" + ChatColor.WHITE + "  -  Makes warp " + ChatColor.GRAY + "<name>" + ChatColor.WHITE + " global",
+		ChatColor.RED + "/warp public <name>" + ChatColor.WHITE + "  -  Makes warp " + ChatColor.GRAY + "<name>" + ChatColor.WHITE + " public",
+		ChatColor.RED + "/warp private <name>" + ChatColor.WHITE + "  -  Makes warp " + ChatColor.GRAY + "<name>" + ChatColor.WHITE + " private",
+		ChatColor.RED + "/warp convert" + ChatColor.WHITE + "  -  Imports the hmod file",
+		ChatColor.RED + "/warp reload" + ChatColor.WHITE + "  -  Reloads from database",
+	};
+	
 	public static String[] helpPage(int page) {
-		List<String> lines = new ArrayList<String>(8);
-		lines.add(ChatColor.RED + "------------------ " + ChatColor.WHITE + "/WARP HELP" + ChatColor.RED + " " + page
-				+ "/2 ------------------");
-		switch (page) {
-		case 1:
-			lines.add(ChatColor.RED + "/warp to <name>" + ChatColor.WHITE + "  -  Warp to " + ChatColor.GRAY
-					+ "<name>");
-			lines.add(ChatColor.RED + "/warp <name>" + ChatColor.WHITE + "  -  Warp to " + ChatColor.GRAY + "<name>");
-			lines.add(ChatColor.RED + "/warp create|+ <name>" + ChatColor.WHITE + "  -  Create warp " + ChatColor.GRAY
-					+ "<name>");
-			lines.add(ChatColor.RED + "/warp createp|+p <name>" + ChatColor.WHITE + "  -  Create private warp "
-					+ ChatColor.GRAY + "<name>");
-			lines.add(ChatColor.RED + "/warp delete|- <name>" + ChatColor.WHITE + "  -  Delete warp " + ChatColor.GRAY
-					+ "<name>");
-			lines.add(ChatColor.RED + "/warp list|ls <#>" + ChatColor.WHITE + "  -  Views warp page " + ChatColor.GRAY
-					+ "<#>");
-			lines.add(ChatColor.RED + "/warp update|* <name>" + ChatColor.WHITE + "  -  Updates position of "
-					+ ChatColor.GRAY + "<name>");
-			lines.add(ChatColor.RED + "/warp search <query>" + ChatColor.WHITE + "  -  Search for " + ChatColor.GRAY
-					+ "<query>");
-			break;
-		case 2:
-			lines.add(ChatColor.RED + "/warp list|ls legend" + ChatColor.WHITE + "  -  Shows the warp page's legend.");
-			lines.add(ChatColor.RED + "/warp message|msg <name> <message>" + ChatColor.WHITE
-					+ "  -  Sets message");
-			lines.add(ChatColor.RED + "/warp give <player> <name>" + ChatColor.WHITE + "  -  Give " + ChatColor.GRAY
-					+ "<player>" + ChatColor.WHITE + " your " + ChatColor.GRAY + "<name>");
-			lines.add(ChatColor.RED + "/warp invite <player> <name>" + ChatColor.WHITE + "  -  Invite "
-					+ ChatColor.GRAY + "<player>" + ChatColor.WHITE + " to " + ChatColor.GRAY + "<name>");
-			lines.add(ChatColor.RED + "/warp uninvite <player> <name>" + ChatColor.WHITE + "  -  Uninvite "
-					+ ChatColor.GRAY + "<player>" + ChatColor.WHITE + " to " + ChatColor.GRAY + "<name>");
-			lines.add(ChatColor.RED + "/warp public <name>" + ChatColor.WHITE + "  -  Makes warp " + ChatColor.GRAY
-					+ "<name>" + ChatColor.WHITE + " public");
-			lines.add(ChatColor.RED + "/warp private <name>" + ChatColor.WHITE + "  -  Makes warp " + ChatColor.GRAY
-					+ "<name>" + ChatColor.WHITE + " private");
-			lines.add(ChatColor.RED + "/warp convert" + ChatColor.WHITE + "  -  Imports the hmod file");
-			lines.add(ChatColor.RED + "/warp reload" + ChatColor.WHITE + "  -  Reloads from database");
-			break;
-		default:
+		if (helpLines.length / (LINES_PER_PAGE - 1) > page) {
 			return new String[] { ChatColor.RED + "Invalid /warp help page." };
 		}
-
+		List<String> lines = new ArrayList<String>(LINES_PER_PAGE);
+		lines.add(ChatColor.RED + "------------------ " + ChatColor.WHITE + "/WARP HELP" + ChatColor.RED + " " + page
+				+ "/" + ((int) Math.ceil(helpLines.length / (LINES_PER_PAGE - 1))) + "------------------");
+		
+		for (int i = page * (LINES_PER_PAGE - 1); i < helpLines.length && i < (page + 1) * (LINES_PER_PAGE - 1); i++) {
+			lines.add(helpLines[i]);
+		}
 		return lines.toArray(new String[0]);
 	}
 
@@ -333,7 +399,7 @@ public class WMPlayerListener extends PlayerListener {
 		List<String> values = new ArrayList<String>(2);
 		for (int i = 0; i < line.length(); i++) {
 			char c = line.charAt(i);
-			if (word < 2) {
+			if (word < 1) {
 				if (c == ' ') {
 					values.add(value);
 					value = "";

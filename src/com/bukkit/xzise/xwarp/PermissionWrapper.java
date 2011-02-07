@@ -12,7 +12,7 @@ public class PermissionWrapper {
 
 	public enum PermissionTypes {
 		// Warp to global warps
-		TO_GLOBAL("warp.to.global"), // Not implemented yet
+		TO_GLOBAL("warp.to.global"),
 		// Warp to own warps
 		TO_OWN("warp.to.own"),
 		// Warp to invited warps
@@ -25,7 +25,7 @@ public class PermissionWrapper {
 		// Create/Edit public warps
 		CREATE_PUBLIC("warp.create.public"),
 		// Create/Edit global warps
-		CREATE_GLOBAL("warp.create.global"), // Not implemented yet
+		CREATE_GLOBAL("warp.create.global"),
 
 		// Delete all warps
 		ADMIN_DELETE("warp.admin.delete"),
@@ -39,7 +39,12 @@ public class PermissionWrapper {
 		ADMIN_MESSAGE("warp.admin.message"),
 		// Update all warps
 		ADMIN_UPDATE("warp.admin.update"),
-
+		// Make other's warp privates
+		ADMIN_PRIVATE("warp.admin.private"),
+		// Make other's warp public
+		ADMIN_PUBLIC("warp.admin.public"),
+		// Make other's warps global
+		ADMIN_GLOBAL("warp.admin.global"),
 		// Warp to all warps
 		ADMIN_TO_ALL("warp.admin.to.all");
 

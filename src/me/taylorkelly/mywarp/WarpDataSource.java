@@ -2,12 +2,11 @@ package me.taylorkelly.mywarp;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Level;
 
 import me.taylorkelly.mywarp.Warp.Visibility;
@@ -26,28 +25,69 @@ public class WarpDataSource {
 			+ "`z` DOUBLE NOT NULL DEFAULT '0',"
 			+ "`yaw` smallint NOT NULL DEFAULT '0',"
 			+ "`pitch` smallint NOT NULL DEFAULT '0',"
-			+ "`publicAll` boolean NOT NULL DEFAULT '1',"
+			+ "`publicLevel` smallint NOT NULL DEFAULT '1',"
 			+ "`permissions` varchar(150) NOT NULL DEFAULT '',"
 			+ "`welcomeMessage` varchar(100) NOT NULL DEFAULT ''" + ");";
+	
+	private final static String VERSION_TABLE = "CREATE TABLE `meta` (`name` varchar(32) NOT NULL, `value` int NOT NULL);";
 
+	private final static int TARGET_VERSION = 0;
+	
 	public static void initialize() {
-		if (!tableExists()) {
-			createTable();
+		int version = getVersion();
+		
+		if (version < TARGET_VERSION) {
+			XLogger.info("Database layout is outdated (" + version + ")! Updating to " + TARGET_VERSION + ".");
+			Statement statement = null;
+			ResultSet set = null;
+			try {
+				Connection conn = ConnectionManager.getConnection();
+				statement = conn.createStatement();
+				
+				// Copy old database
+				if (tableExists("warpTable")) {
+					// Backup it
+					statement.execute("ALTER TABLE warpTable RENAME TO warpTable_backup");
+					XLogger.info("Backuping old database.");
+				}
+				// Create new database
+				statement.executeUpdate(WARP_TABLE);
+				if (tableExists("warpTable_backup")) {
+					// Copy back
+					statement.executeUpdate("INSERT INTO warpTable SELECT * FROM warpTable_backup");
+					statement.executeUpdate("DROP TABLE warpTable_backup");
+					XLogger.info("Recovering the backup.");
+				}
+				statement.executeUpdate("INSERT INTO meta (name, value) VALUES (\"version\", " + TARGET_VERSION + ")");
+				conn.commit();
+			} catch (SQLException ex) {
+//				try {
+//					statement.execute("ROLLBACK");
+//				} catch (SQLException e) {
+//					XLogger.severe("Unable to rollback changes!");
+//				}
+				XLogger.log(Level.SEVERE, "Warp Load Exception", ex);
+			} finally {
+				try {
+					if (statement != null)
+						statement.close();
+					if (set != null)
+						set.close();
+				} catch (SQLException ex) {
+					XLogger.severe("Warp Load Exception (on close)");
+				}
+			}
 		}
 	}
 
-	public static HashMap<String, Warp> getMap() {
-		HashMap<String, Warp> ret = new HashMap<String, Warp>();
-		Connection conn = null;
+	public static void getMap(Map<String, Warp> global, Map<String, Map<String, Warp>> personal) {
 		Statement statement = null;
 		ResultSet set = null;
 		try {
-			Class.forName("org.sqlite.JDBC");
-			conn = DriverManager.getConnection(DATABASE);
-
-			statement = conn.createStatement();
+			statement = ConnectionManager.getConnection().createStatement();
 			set = statement.executeQuery("SELECT * FROM warpTable");
 			int size = 0;
+			int globalSize = 0;
 			while (set.next()) {
 				size++;
 				int index = set.getInt("id");
@@ -59,95 +99,113 @@ public class WarpDataSource {
 				double z = set.getDouble("z");
 				int yaw = set.getInt("yaw");
 				int pitch = set.getInt("pitch");
-				boolean publicAll = set.getBoolean("publicAll");
+				Visibility visibility = Visibility.parseLevel(set.getInt("publicLevel"));
 				String permissions = set.getString("permissions");
 				String welcomeMessage = set.getString("welcomeMessage");
 				Warp warp = new Warp(index, name, creator, world, x, y, z, yaw,
-						pitch, publicAll, permissions, welcomeMessage);
-				ret.put(name.toLowerCase(), warp);
+						pitch, visibility, permissions, welcomeMessage);
+				if (visibility == Visibility.GLOBAL || !global.containsKey(name.toLowerCase())) {
+					global.put(name.toLowerCase(), warp);
+					if (visibility == Visibility.GLOBAL) {
+						globalSize++;
+					}
+				}
+				WarpList.putIntoPersonal(personal, warp);
 			}
-			XLogger.info(size + " warps loaded");
+			XLogger.info(size + " warps loaded (" + globalSize + " global)");
 		} catch (SQLException ex) {
-			XLogger.severe("Warp Load Exception");
-		} catch (ClassNotFoundException e) {
-			XLogger.severe("Error loading org.sqlite.JDBC");
+			XLogger.severe("Warp Load Exception", ex);
 		} finally {
 			try {
 				if (statement != null)
 					statement.close();
 				if (set != null)
 					set.close();
-				if (conn != null)
-					conn.close();
 			} catch (SQLException ex) {
 				XLogger.severe("Warp Load Exception (on close)");
 			}
 		}
-		return ret;
+	}
+	
+	private static int getVersion() {
+		Statement statement = null;
+		int version = -1;
+		ResultSet set = null;
+		try {
+			Connection conn = ConnectionManager.getConnection();
+			statement = conn.createStatement();
+			if (tableExists("meta")) {
+				set = statement.executeQuery("SELECT * FROM meta WHERE name = \"version\"");
+
+				if (set.next()) {
+					version = set.getInt("value");
+				}
+			} else {
+				XLogger.info("Meta table doesn't exists... Creating new");
+				statement.executeUpdate(VERSION_TABLE);
+				conn.commit();
+				version = -1;
+			}
+		} catch (SQLException ex) {
+			XLogger.log(Level.SEVERE, "Table Check Exception", ex);
+		} finally {
+			try {
+				if (statement != null) {
+					statement.close();
+				}
+				if (set != null)
+					set.close();
+			} catch (SQLException ex) {
+				XLogger.severe("Table Check SQL Exception (on closing)");
+			}
+		}
+		return version;
 	}
 
-	private static boolean tableExists() {
-		Connection conn = null;
+	private static boolean tableExists(String name) {
 		ResultSet rs = null;
 		try {
-			Class.forName("org.sqlite.JDBC");
-			conn = DriverManager.getConnection(DATABASE);
-			DatabaseMetaData dbm = conn.getMetaData();
-			rs = dbm.getTables(null, null, "warpTable", null);
+			DatabaseMetaData dbm = ConnectionManager.getConnection().getMetaData();
+			rs = dbm.getTables(null, null, name, null);
 			if (!rs.next())
 				return false;
 			return true;
 		} catch (SQLException ex) {
 			XLogger.log(Level.SEVERE, "Table Check Exception", ex);
 			return false;
-		} catch (ClassNotFoundException e) {
-			XLogger.severe("Error loading org.sqlite.JDBC");
-			return false;
 		} finally {
 			try {
 				if (rs != null)
 					rs.close();
-				if (conn != null)
-					conn.close();
 			} catch (SQLException ex) {
 				XLogger.severe("Table Check SQL Exception (on closing)");
 			}
 		}
 	}
 
-	private static void createTable() {
-		Connection conn = null;
-		Statement st = null;
-		try {
-			Class.forName("org.sqlite.JDBC");
-			conn = DriverManager.getConnection(DATABASE);
-			st = conn.createStatement();
-			st.executeUpdate(WARP_TABLE);
-		} catch (SQLException e) {
-			XLogger.log(Level.SEVERE, "Create Table Exception", e);
-		} catch (ClassNotFoundException e) {
-			XLogger.severe("Error loading org.sqlite.JDBC");
-		} finally {
-			try {
-				if (conn != null)
-					conn.close();
-				if (st != null)
-					st.close();
-			} catch (SQLException e) {
-				XLogger.severe("Could not create the table (on close)");
-			}
-		}
-	}
+//	private static void createTable() {
+//		Statement st = null;
+//		try {
+//			st = ConnectionManager.getConnection().createStatement();
+//			st.executeUpdate(WARP_TABLE);
+//		} catch (SQLException e) {
+//			XLogger.log(Level.SEVERE, "Create Table Exception", e);
+//		} finally {
+//			try {
+//				if (st != null)
+//					st.close();
+//			} catch (SQLException e) {
+//				XLogger.severe("Could not create the table (on close)");
+//			}
+//		}
+//	}
 
 	public static void addWarp(Warp warp) {
-		Connection conn = null;
 		PreparedStatement ps = null;
 		try {
-			Class.forName("org.sqlite.JDBC");
-			conn = DriverManager.getConnection(DATABASE);
-
-			ps = conn
-					.prepareStatement("INSERT INTO warpTable (id, name, creator, world, x, y, z, yaw, pitch, publicAll, permissions, welcomeMessage) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)");
+			Connection conn = ConnectionManager.getConnection();
+			
+			ps = conn.prepareStatement("INSERT INTO warpTable (id, name, creator, world, x, y, z, yaw, pitch, publicLevel, permissions, welcomeMessage) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)");
 			ps.setInt(1, warp.index);
 			ps.setString(2, warp.name);
 			ps.setString(3, warp.creator);
@@ -157,21 +215,19 @@ public class WarpDataSource {
 			ps.setDouble(7, warp.z);
 			ps.setInt(8, warp.yaw);
 			ps.setInt(9, warp.pitch);
-			ps.setBoolean(10, warp.visibility == Visibility.PUBLIC);
+			ps.setInt(10, warp.visibility.level);
 			ps.setString(11, warp.permissionsString());
 			ps.setString(12, warp.welcomeMessage);
 			ps.executeUpdate();
+			XLogger.info("ro:" + conn.isReadOnly());
+			conn.commit();
 		} catch (SQLException ex) {
 			XLogger.log(Level.SEVERE, "Warp Insert Exception", ex);
-		} catch (ClassNotFoundException e) {
-			XLogger.severe("Error loading org.sqlite.JDBC");
 		} finally {
 			try {
 				if (ps != null) {
 					ps.close();
 				}
-				if (conn != null)
-					conn.close();
 			} catch (SQLException ex) {
 				XLogger.log(Level.SEVERE, "Warp Insert Exception (on close)", ex);
 			}
@@ -179,14 +235,11 @@ public class WarpDataSource {
 	}
 	
 	public static void updateWarp(Warp warp) {
-		Connection conn = null;
 		PreparedStatement ps = null;
 		try {
-			Class.forName("org.sqlite.JDBC");
-			conn = DriverManager.getConnection(DATABASE);
+			Connection conn = ConnectionManager.getConnection();
 			
-			ps = conn
-					.prepareStatement("UPDATE warpTable SET x = ?, y = ?, z = ?, yaw = ?, pitch = ? WHERE id = ?");
+			ps = conn.prepareStatement("UPDATE warpTable SET x = ?, y = ?, z = ?, yaw = ?, pitch = ? WHERE id = ?");
 			ps.setDouble(1, warp.x);
 			ps.setInt(2, warp.y);
 			ps.setDouble(3, warp.z);
@@ -194,17 +247,14 @@ public class WarpDataSource {
 			ps.setInt(5, warp.pitch);
 			ps.setInt(6, warp.index);
 			ps.executeUpdate();
+			conn.commit();
 		} catch (SQLException ex) {
 			XLogger.log(Level.SEVERE, "Warp Update Exception", ex);
-		} catch (ClassNotFoundException e) {
-			XLogger.severe("Error loading org.sqlite.JDBC");
 		} finally {
 			try {
 				if (ps != null) {
 					ps.close();
 				}
-				if (conn != null)
-					conn.close();
 			} catch (SQLException ex) {
 				XLogger.log(Level.SEVERE, "Warp Insert Exception (on close)", ex);
 			}
@@ -212,19 +262,16 @@ public class WarpDataSource {
 	}
 
 	public static void deleteWarp(Warp warp) {
-		Connection conn = null;
 		PreparedStatement ps = null;
 		ResultSet set = null;
 		try {
-			Class.forName("org.sqlite.JDBC");
-			conn = DriverManager.getConnection(DATABASE);
+			Connection conn = ConnectionManager.getConnection();
 			ps = conn.prepareStatement("DELETE FROM warpTable WHERE id = ?");
 			ps.setInt(1, warp.index);
 			ps.executeUpdate();
+			conn.commit();
 		} catch (SQLException ex) {
 			XLogger.log(Level.SEVERE, "Warp Delete Exception", ex);
-		} catch (ClassNotFoundException e) {
-			XLogger.severe("Error loading org.sqlite.JDBC");
 		} finally {
 			try {
 				if (ps != null) {
@@ -233,8 +280,6 @@ public class WarpDataSource {
 				if (set != null) {
 					set.close();
 				}
-				if (conn != null)
-					conn.close();
 			} catch (SQLException ex) {
 				XLogger.log(Level.SEVERE, "Warp Delete Exception (on close)", ex);
 			}
@@ -242,20 +287,17 @@ public class WarpDataSource {
 	}
 	
 	public static void updateMessage(Warp warp) {
-		Connection conn = null;
 		PreparedStatement ps = null;
 		ResultSet set = null;
 		try {
-			Class.forName("org.sqlite.JDBC");
-			conn = DriverManager.getConnection(DATABASE);
+			Connection conn = ConnectionManager.getConnection();
 			ps = conn.prepareStatement("UPDATE warpTable SET welcomeMessage = ? WHERE id = ?");
 			ps.setString(1, warp.welcomeMessage);
 			ps.setInt(2, warp.index);
 			ps.executeUpdate();
+			conn.commit();
 		} catch (SQLException ex) {
 			XLogger.log(Level.SEVERE, "Warp Welcome Message Exception", ex);
-		} catch (ClassNotFoundException e) {
-			XLogger.severe("Error loading org.sqlite.JDBC");
 		} finally {
 			try {
 				if (ps != null) {
@@ -264,30 +306,24 @@ public class WarpDataSource {
 				if (set != null) {
 					set.close();
 				}
-				if (conn != null)
-					conn.close();
 			} catch (SQLException ex) {
 				XLogger.log(Level.SEVERE, "Warp Publicize Exception (on close)", ex);
 			}
 		}
 	}
-
-	public static void publicizeWarp(Warp warp, boolean publicAll) {
-		Connection conn = null;
+	
+	public static void updateVisibility(Warp warp, Visibility visibility) {
 		PreparedStatement ps = null;
 		ResultSet set = null;
 		try {
-			Class.forName("org.sqlite.JDBC");
-			conn = DriverManager.getConnection(DATABASE);
-			ps = conn
-					.prepareStatement("UPDATE warpTable SET publicAll = ? WHERE id = ?");
-			ps.setBoolean(1, publicAll);
+			Connection conn = ConnectionManager.getConnection();
+			ps = conn.prepareStatement("UPDATE warpTable SET publicLevel = ? WHERE id = ?");
+			ps.setInt(1, visibility.level);
 			ps.setInt(2, warp.index);
 			ps.executeUpdate();
+			conn.commit();
 		} catch (SQLException ex) {
-			XLogger.log(Level.SEVERE, "Warp Publicize Exception", ex);
-		} catch (ClassNotFoundException e) {
-			XLogger.severe("Error loading org.sqlite.JDBC");
+			XLogger.log(Level.SEVERE, "Warp Visibility Exception", ex);
 		} finally {
 			try {
 				if (ps != null) {
@@ -296,8 +332,6 @@ public class WarpDataSource {
 				if (set != null) {
 					set.close();
 				}
-				if (conn != null)
-					conn.close();
 			} catch (SQLException ex) {
 				XLogger.log(Level.SEVERE, "Warp Publicize Exception (on close)", ex);
 			}
@@ -305,21 +339,17 @@ public class WarpDataSource {
 	}
 
 	public static void updatePermissions(Warp warp) {
-		Connection conn = null;
 		PreparedStatement ps = null;
 		ResultSet set = null;
 		try {
-			Class.forName("org.sqlite.JDBC");
-			conn = DriverManager.getConnection(DATABASE);
-			ps = conn
-					.prepareStatement("UPDATE warpTable SET permissions = ? WHERE id = ?");
+			Connection conn = ConnectionManager.getConnection();
+			ps = conn.prepareStatement("UPDATE warpTable SET permissions = ? WHERE id = ?");
 			ps.setString(1, warp.permissionsString());
 			ps.setInt(2, warp.index);
 			ps.executeUpdate();
+			conn.commit();
 		} catch (SQLException ex) {
 			XLogger.log(Level.SEVERE, "Warp Permissions Exception", ex);
-		} catch (ClassNotFoundException e) {
-			XLogger.severe("Error loading org.sqlite.JDBC");
 		} finally {
 			try {
 				if (ps != null) {
@@ -328,8 +358,6 @@ public class WarpDataSource {
 				if (set != null) {
 					set.close();
 				}
-				if (conn != null)
-					conn.close();
 			} catch (SQLException ex) {
 				XLogger.log(Level.SEVERE, "Warp Permissions Exception (on close)", ex);
 			}
@@ -337,20 +365,17 @@ public class WarpDataSource {
 	}
 
 	public static void updateCreator(Warp warp) {
-		Connection conn = null;
 		PreparedStatement ps = null;
 		ResultSet set = null;
 		try {
-			Class.forName("org.sqlite.JDBC");
-			conn = DriverManager.getConnection(DATABASE);
+			Connection conn = ConnectionManager.getConnection();
 			ps = conn.prepareStatement("UPDATE warpTable SET creator = ? WHERE id = ?");
 			ps.setString(1, warp.creator);
 			ps.setInt(2, warp.index);
 			ps.executeUpdate();
+			conn.commit();
 		} catch (SQLException ex) {
 			XLogger.log(Level.SEVERE, "Warp Creator Exception", ex);
-		} catch (ClassNotFoundException e) {
-			XLogger.severe("Error loading org.sqlite.JDBC");
 		} finally {
 			try {
 				if (ps != null) {
@@ -359,8 +384,6 @@ public class WarpDataSource {
 				if (set != null) {
 					set.close();
 				}
-				if (conn != null)
-					conn.close();
 			} catch (SQLException ex) {
 				XLogger.log(Level.SEVERE,
 						"Warp Creator Exception (on close)", ex);
