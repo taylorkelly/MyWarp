@@ -254,7 +254,7 @@ public class WMPlayerListener extends PlayerListener {
 				 */
 			} else if (values.length == 2 && values[1].equalsIgnoreCase("reload")) {
 //				player.sendMessage("reload");
-				this.warpList.loadFromDatabase();
+				this.warpList.loadFromDatabase(player);
 				
 				/*
 				 * /warp permissions

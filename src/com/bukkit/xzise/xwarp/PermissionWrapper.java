@@ -46,7 +46,9 @@ public class PermissionWrapper {
 		// Make other's warps global
 		ADMIN_GLOBAL("warp.admin.global"),
 		// Warp to all warps
-		ADMIN_TO_ALL("warp.admin.to.all");
+		ADMIN_TO_ALL("warp.admin.to.all"),
+		// Reload database
+		ADMIN_RELOAD("warp.admin.reload");
 
 		// Maybe upcoming permissions:
 		// Different admin permissions for each warp (only edit public warps
@@ -68,7 +70,7 @@ public class PermissionWrapper {
 		}
 		
 		public boolean isAdminPermission() {
-			return (this == ADMIN_DELETE) || (this == ADMIN_GIVE) || (this == ADMIN_INVITE) || (this == ADMIN_MESSAGE) || (this == ADMIN_TO_ALL) || (this == ADMIN_UNINVITE) || (this == ADMIN_UPDATE);
+			return this.name.matches("warp\\.admin\\..*");
 		}
 	}
 	

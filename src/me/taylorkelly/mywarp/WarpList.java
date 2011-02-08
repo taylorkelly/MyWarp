@@ -26,11 +26,19 @@ public class WarpList {
 		this.loadFromDatabase();
 	}
 
-	public void loadFromDatabase() {
+	private void loadFromDatabase() {
 		WarpDataSource.initialize();
 		this.global = new HashMap<String, Warp>();
 		this.personal = new HashMap<String, Map<String,Warp>>();
 		WarpDataSource.getMap(this.global, this.personal);
+	}
+	
+	public void loadFromDatabase(Player player) {
+		if (MyWarp.permissions.permission(player, PermissionTypes.ADMIN_RELOAD)) {
+			this.loadFromDatabase();
+		} else {
+			player.sendMessage(ChatColor.RED + "You have no permission to reload.");
+		}
 	}
 
 	public void addWarp(String name, Player player, Visibility visibility) {
