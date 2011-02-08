@@ -58,7 +58,7 @@ public class WarpList {
 		}
 		if (MyWarp.permissions.permission(player, type)) {
 			Warp warp = this.getWarp(name, player.getName());
-			if (warp != null) {
+			if (warp != null || (visibility == Visibility.GLOBAL && this.getWarp(name) != null)) {
 				player.sendMessage(ChatColor.RED + "Warp called '" + name
 						+ "' already exists (" + warp.name + ").");
 			} else {
@@ -89,17 +89,28 @@ public class WarpList {
 		}
 	}
 	
-	public static void putIntoPersonal(Map<String, Map<String, Warp>> personal, Warp warp) {
+	public static boolean putIntoPersonal(Map<String, Map<String, Warp>> personal, Warp warp) {
 		Map<String, Warp> creatorWarps = personal.get(warp.creator.toLowerCase());
 		if (creatorWarps == null) {
 			creatorWarps = new HashMap<String, Warp>();
 			personal.put(warp.creator.toLowerCase(), creatorWarps);
 		}
+		if (creatorWarps.containsKey(warp.name)) {
+			return false;
+		}
 		creatorWarps.put(warp.name.toLowerCase(), warp);
+		return true;
 	}
 
 	public void blindAdd(Warp warp) {
-		this.global.put(warp.name.toLowerCase(), warp);
+		if (this.getWarp(warp.name) == null) {
+			this.global.put(warp.name.toLowerCase(), warp);
+		} else if (warp.visibility == Visibility.GLOBAL) {
+			throw new IllegalArgumentException("A global warp could not override an existing one.");
+		}
+		if (!putIntoPersonal(personal, warp)) {
+			throw new IllegalArgumentException("A personal warp could not override an existing one.");
+		}
 	}
 
 	public void warpTo(String name, String creator, Player player, boolean toAlternative) {
@@ -234,13 +245,15 @@ public class WarpList {
 					PermissionTypes.CREATE_GLOBAL)
 					&& warp.playerCanModify(player))
 					|| MyWarp.permissions.permission(player, PermissionTypes.ADMIN_GLOBAL)) {
-				Warp existing = this.global.get(name.toLowerCase());
+				Warp existing = this.getWarp(name);
 				if (existing == null || existing.visibility != Visibility.GLOBAL) {
 					warp.visibility = Visibility.GLOBAL;
 					WarpDataSource.updateVisibility(warp, warp.visibility);
 					this.global.put(name.toLowerCase(), warp);
 					player.sendMessage(ChatColor.AQUA + "You have globalized '"
 							+ warp.name + "'");	
+				} else if (existing.equals(warp) && existing.visibility == Visibility.GLOBAL) {
+					player.sendMessage(ChatColor.RED + "This warp is already globalized.");
 				} else {
 					player.sendMessage(ChatColor.RED + "One global warp with this name already exists.");
 				}
@@ -489,5 +502,14 @@ public class WarpList {
 				return null;
 			}
 		}
+	}
+	
+	/**
+	 * Returns the global warp.
+	 * @param name The name of the global warp.
+	 * @return The global warp. If no global warp exists it returns null.
+	 */
+	public Warp getWarp(String name) {
+		return this.getWarp(name, null);
 	}
 }

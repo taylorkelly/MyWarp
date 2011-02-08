@@ -177,7 +177,7 @@ public class WMPlayerListener extends PlayerListener {
 				/*
 				 * /warp global <name>
 				 */
-			} else if (((values.length == 3) || (values.length == 4)) && values[1].equalsIgnoreCase("public")) {
+			} else if (((values.length == 3) || (values.length == 4)) && values[1].equalsIgnoreCase("global")) {
 //				player.sendMessage("global");
 				String creator = "";
 				if (values.length == 4) {
