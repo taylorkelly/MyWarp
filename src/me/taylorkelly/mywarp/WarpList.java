@@ -58,9 +58,13 @@ public class WarpList {
 		}
 		if (MyWarp.permissions.permission(player, type)) {
 			Warp warp = this.getWarp(name, player.getName());
-			if (warp != null || (visibility == Visibility.GLOBAL && this.getWarp(name) != null)) {
+			Warp globalWarp = this.getWarp(name);
+			if (warp != null) {
 				player.sendMessage(ChatColor.RED + "Warp called '" + name
 						+ "' already exists (" + warp.name + ").");
+			} else if (visibility == Visibility.GLOBAL && globalWarp != null) {
+				player.sendMessage(ChatColor.RED + "Warp called '" + name
+						+ "' already exists (" + globalWarp.name + ").");				
 			} else {
 				warp = new Warp(name, player);
 				putIntoPersonal(this.personal, warp);

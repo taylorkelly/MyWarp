@@ -219,7 +219,6 @@ public class WarpDataSource {
 			ps.setString(11, warp.permissionsString());
 			ps.setString(12, warp.welcomeMessage);
 			ps.executeUpdate();
-			XLogger.info("ro:" + conn.isReadOnly());
 			conn.commit();
 		} catch (SQLException ex) {
 			XLogger.log(Level.SEVERE, "Warp Insert Exception", ex);
