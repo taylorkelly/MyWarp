@@ -51,9 +51,10 @@ public class MyWarp extends JavaPlugin implements DatabaseConnection {
 		WarpList warpList = new WarpList(getServer());
 
 		this.playerListener = new WMPlayerListener(this, warpList);
+		MWBlockListener blockListener = new MWBlockListener(warpList);
 		this.getServer().getPluginManager().registerEvent(Event.Type.PLAYER_COMMAND, playerListener, Priority.Normal, this);
-		this.getServer().getPluginManager().registerEvent(Event.Type.BLOCK_RIGHTCLICKED, new MWBlockListener(warpList), Priority.High, this);
-//		this.getServer().getPluginManager().registerEvent(Event.Type.BLOCK_CANBUILD, listener, priority, plugin)
+		this.getServer().getPluginManager().registerEvent(Event.Type.BLOCK_RIGHTCLICKED, blockListener, Priority.Normal, this);
+//		this.getServer().getPluginManager().registerEvent(Event.Type.BLOCK_CANBUILD, blockListener, Priority.Normal, this);
 		XLogger.info(name + " " + version + " enabled");
 	}
 

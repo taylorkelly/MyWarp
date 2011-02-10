@@ -119,7 +119,7 @@ public class Lister {
 	 * Lob shit off that string till it fits.
 	 */
 	private String substring(String name, int left) {
-		while(MinecraftFontWidthCalculator.getStringWidth(name) > left) {
+		while(MinecraftFontWidthCalculator.getStringWidth(name) > left && !name.isEmpty()) {
 			name = name.substring(0, name.length()-1);
 		}
 		return name;
@@ -190,6 +190,6 @@ public class Lister {
 	}
 	
 	public static String getLocationString(Location location) {
-		return " @(" + location.getX() + ", " + location.getY() + ", " + location.getZ() + ")";
+		return " @(" + (int) location.getX() + ", " + (int) location.getY() + ", " + (int) location.getZ() + ")";
 	}
 }
