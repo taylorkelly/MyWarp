@@ -19,9 +19,9 @@ public class Lister {
 	
 	private String creator;
 
-	public static final ChatColor GLOBAL_OWN = ChatColor.AQUA;
+	public static final ChatColor GLOBAL_OWN = ChatColor.DARK_BLUE;
 	public static final ChatColor PUBLIC_OWN = ChatColor.BLUE;
-	public static final ChatColor PRIVATE_OWN = ChatColor.DARK_BLUE;
+	public static final ChatColor PRIVATE_OWN = ChatColor.AQUA;
 	
 	public static final ChatColor GLOBAL_OTHER = ChatColor.DARK_GREEN;
 	public static final ChatColor PUBLIC_OTHER = ChatColor.GREEN;

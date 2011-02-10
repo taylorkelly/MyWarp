@@ -6,8 +6,8 @@ import org.bukkit.event.block.BlockListener;
 import org.bukkit.event.block.BlockRightClickEvent;
 
 public class MWBlockListener extends BlockListener {
+	
     private WarpList list;
-    
     
     public MWBlockListener(WarpList list) {
         this.list = list;
@@ -15,8 +15,9 @@ public class MWBlockListener extends BlockListener {
     
     public void onBlockRightClick(BlockRightClickEvent event) {
         Block block = event.getBlock();
-        if(block.getState() instanceof Sign && SignWarp.isSignWarp((Sign) block.getState())) {
-            SignWarp.warpSign((Sign) block.getState(), list, event.getPlayer());
+        if(block.getState() instanceof Sign) {
+        	SignWarp signWarp = new SignWarp((Sign) block.getState());
+        	signWarp.warp(this.list, event.getPlayer());
         }
     }
 }
