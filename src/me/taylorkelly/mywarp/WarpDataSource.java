@@ -9,9 +9,14 @@ import java.sql.Statement;
 import java.util.Map;
 import java.util.logging.Level;
 
+import org.bukkit.Location;
+import org.bukkit.Server;
+import org.bukkit.World;
+
+import de.xzise.XLogger;
+
 import me.taylorkelly.mywarp.Warp.Visibility;
 
-import com.bukkit.xzise.XLogger;
 
 public class WarpDataSource {
 	public final static String DATABASE = "jdbc:sqlite:homes-warps.db";
@@ -80,7 +85,7 @@ public class WarpDataSource {
 		}
 	}
 
-	public static void getMap(Map<String, Warp> global, Map<String, Map<String, Warp>> personal) {
+	public static void getMap(Map<String, Warp> global, Map<String, Map<String, Warp>> personal, Server server) {
 		Statement statement = null;
 		ResultSet set = null;
 		try {
@@ -93,17 +98,18 @@ public class WarpDataSource {
 				int index = set.getInt("id");
 				String name = set.getString("name");
 				String creator = set.getString("creator");
-				int world = set.getInt("world");
+				World world = server.getWorlds().get(0);
+//				World world = server.getWorld(set.getString("world"));
 				double x = set.getDouble("x");
 				int y = set.getInt("y");
 				double z = set.getDouble("z");
 				int yaw = set.getInt("yaw");
 				int pitch = set.getInt("pitch");
+				Location loc = new Location(world, x, y, z, yaw, pitch);
 				Visibility visibility = Visibility.parseLevel(set.getInt("publicLevel"));
 				String permissions = set.getString("permissions");
 				String welcomeMessage = set.getString("welcomeMessage");
-				Warp warp = new Warp(index, name, creator, world, x, y, z, yaw,
-						pitch, visibility, permissions, welcomeMessage);
+				Warp warp = new Warp(index, name, creator, loc, visibility, permissions, welcomeMessage);
 				if (visibility == Visibility.GLOBAL || !global.containsKey(name.toLowerCase())) {
 					global.put(name.toLowerCase(), warp);
 					if (visibility == Visibility.GLOBAL) {
@@ -209,12 +215,7 @@ public class WarpDataSource {
 			ps.setInt(1, warp.index);
 			ps.setString(2, warp.name);
 			ps.setString(3, warp.creator);
-			ps.setInt(4, warp.world);
-			ps.setDouble(5, warp.x);
-			ps.setInt(6, warp.y);
-			ps.setDouble(7, warp.z);
-			ps.setInt(8, warp.yaw);
-			ps.setInt(9, warp.pitch);
+			setLocation(warp.getLocation(), 4, ps);
 			ps.setInt(10, warp.visibility.level);
 			ps.setString(11, warp.permissionsString());
 			ps.setString(12, warp.welcomeMessage);
@@ -233,18 +234,25 @@ public class WarpDataSource {
 		}
 	}
 	
+	public static void setLocation(Location location, int offset, PreparedStatement ps) throws SQLException {
+		ps.setInt(offset++, 0); //TODO: Add World
+//		ps.setString(offset++, location.getWorld().getName());
+		ps.setDouble(offset++, location.getX());
+		ps.setInt(offset++, (int) location.getY());
+		ps.setDouble(offset++, location.getZ());
+		ps.setInt(offset++, (int) location.getYaw());
+		ps.setInt(offset++, (int) location.getPitch());
+	}
+	
 	public static void updateWarp(Warp warp) {
 		PreparedStatement ps = null;
 		try {
 			Connection conn = ConnectionManager.getConnection();
 			
-			ps = conn.prepareStatement("UPDATE warpTable SET x = ?, y = ?, z = ?, yaw = ?, pitch = ? WHERE id = ?");
-			ps.setDouble(1, warp.x);
-			ps.setInt(2, warp.y);
-			ps.setDouble(3, warp.z);
-			ps.setInt(4, warp.yaw);
-			ps.setInt(5, warp.pitch);
-			ps.setInt(6, warp.index);
+			ps = conn.prepareStatement("UPDATE warpTable SET world = ?, x = ?, y = ?, z = ?, yaw = ?, pitch = ? WHERE id = ?");
+			Location loc = warp.getLocation();
+			setLocation(loc, 1, ps);
+			ps.setInt(7, warp.index);
 			ps.executeUpdate();
 			conn.commit();
 		} catch (SQLException ex) {

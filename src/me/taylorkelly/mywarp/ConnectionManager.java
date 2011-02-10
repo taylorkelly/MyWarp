@@ -7,8 +7,9 @@ import java.sql.SQLException;
 import org.bukkit.Server;
 import org.bukkit.plugin.Plugin;
 
-import com.bukkit.xzise.DatabaseConnection;
-import com.bukkit.xzise.XLogger;
+import de.xzise.DatabaseConnection;
+import de.xzise.XLogger;
+
 
 public class ConnectionManager {
 

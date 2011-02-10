@@ -1,12 +1,14 @@
-package com.bukkit.xzise.xwarp;
+package de.xzise.xwarp;
 
 import org.bukkit.Server;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 
-import com.bukkit.xzise.XLogger;
 import com.nijiko.permissions.PermissionHandler;
 import com.nijikokun.bukkit.Permissions.Permissions;
+
+import de.xzise.XLogger;
+
 
 public class PermissionWrapper {
 
@@ -19,6 +21,9 @@ public class PermissionWrapper {
 		TO_INVITED("warp.to.invited"),
 		// Warp to public warps
 		TO_OTHER("warp.to.other"),
+		
+		// Warp with sign
+		SIGN_WARP("warp.sign"),
 
 		// Create/Edit private warps
 		CREATE_PRIVATE("warp.create.private"),

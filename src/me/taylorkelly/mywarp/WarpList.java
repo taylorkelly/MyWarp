@@ -13,8 +13,10 @@ import org.bukkit.ChatColor;
 import org.bukkit.Server;
 import org.bukkit.entity.Player;
 
-import com.bukkit.xzise.XLogger;
-import com.bukkit.xzise.xwarp.PermissionWrapper.PermissionTypes;
+import de.xzise.XLogger;
+import de.xzise.xwarp.PermissionWrapper.PermissionTypes;
+
+
 
 public class WarpList {
 	private Map<String, Warp> global;
@@ -30,7 +32,7 @@ public class WarpList {
 		WarpDataSource.initialize();
 		this.global = new HashMap<String, Warp>();
 		this.personal = new HashMap<String, Map<String,Warp>>();
-		WarpDataSource.getMap(this.global, this.personal);
+		WarpDataSource.getMap(this.global, this.personal, this.server);
 	}
 	
 	public void loadFromDatabase(Player player) {

@@ -39,7 +39,7 @@ public class Converter {
 
 				yaw = (yaw < 0) ? (360 + (yaw % 360)) : (yaw % 360);
 
-				World world = server.getWorlds()[0];
+				World world = server.getWorlds().get(0);
 				Location location = new Location(world, x, y, z, (float) yaw, (float) pitch);
 				Warp warp = new Warp(name, player.getName(), location);
 				lister.blindAdd(warp);
@@ -47,12 +47,7 @@ public class Converter {
 				ps.setInt(1, warp.index);
 				ps.setString(2, warp.name);
 				ps.setString(3, warp.creator);
-				ps.setInt(4, warp.world);
-				ps.setDouble(5, warp.x);
-				ps.setDouble(6, warp.y);
-				ps.setDouble(7, warp.z);
-				ps.setInt(8, warp.yaw);
-				ps.setInt(9, warp.pitch);
+				WarpDataSource.setLocation(warp.getLocation(), 4, ps);
 				ps.setInt(10, warp.visibility.level);
 				ps.setString(11, warp.permissionsString());
 				ps.setString(12, warp.welcomeMessage);

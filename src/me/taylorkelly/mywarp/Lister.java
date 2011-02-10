@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.angelsl.minecraft.randomshit.fontwidth.MinecraftFontWidthCalculator;
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
 public class Lister {
@@ -95,12 +96,9 @@ public class Lister {
 		for(Warp warp: sortedWarps) {
 			String name = warp.name;
 			String creator = (warp.creator.equalsIgnoreCase(player.getName()))?"you":warp.creator;
-			int x = (int) Math.round(warp.x);
-			int y = (int) Math.round(warp.y);
-			int z = (int) Math.round(warp.z);
 			ChatColor color = getColor(warp, this.player);			
 		
-			String location = " @(" + x + ", " + y + ", " + z + ")";
+			String location = getLocationString(warp);
 			String creatorString = " by " + creator;
 			
 			//Find remaining length left
@@ -185,5 +183,13 @@ public class Lister {
 			}
 		}
 		return PRIVATE_OTHER;
+	}
+	
+	public static String getLocationString(Warp warp) {
+		return getLocationString(warp.getLocation());
+	}
+	
+	public static String getLocationString(Location location) {
+		return " @(" + location.getX() + ", " + location.getY() + ", " + location.getZ() + ")";
 	}
 }

@@ -4,10 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.bukkit.Location;
-import org.bukkit.World;
 import org.bukkit.entity.Player;
 
-import com.bukkit.xzise.xwarp.PermissionWrapper.PermissionTypes;
+import de.xzise.xwarp.PermissionWrapper.PermissionTypes;
+
 
 public class Warp {
 	
@@ -35,12 +35,7 @@ public class Warp {
 	public int index;
 	public String name;
 	public String creator;
-	public int world;
-	public double x;
-	public int y;
-	public double z;
-	public int yaw;
-	public int pitch;
+	private Location location;
 	public Visibility visibility;
 	public String welcomeMessage;
 	public List<String> permissions;
@@ -48,18 +43,12 @@ public class Warp {
 
 	public static int nextIndex = 1;
 
-	public Warp(int index, String name, String creator, int world, double x,
-			int y, double z, int yaw, int pitch, Visibility visibility,
+	public Warp(int index, String name, String creator, Location location, Visibility visibility,
 			String permissions, String welcomeMessage) {
 		this.index = index;
 		this.name = name;
 		this.creator = creator;
-		this.world = world;
-		this.x = x;
-		this.y = y;
-		this.z = z;
-		this.pitch = pitch;
-		this.yaw = yaw;
+		this.location = location.clone();
 		this.visibility = visibility;
 		this.permissions = processList(permissions);
 		this.welcomeMessage = welcomeMessage;
@@ -69,11 +58,7 @@ public class Warp {
 	}
 	
 	public Warp(String name, String creator, Location location) {
-		this(nextIndex, name, creator, 0, location.getX(), location.getBlockY(), location.getZ(), normalizeRotation(location.getYaw()), normalizeRotation(location.getPitch()), Visibility.PUBLIC, "", "Welcome to '" + name + "'");
-	}
-	
-	private static int normalizeRotation(float degrees) {
-		return Math.round(degrees) % 360;
+		this(nextIndex, name, creator, location, Visibility.PUBLIC, "", "Welcome to '" + name + "'");
 	}
 
 	public Warp(String name, Player creator) {
@@ -118,18 +103,11 @@ public class Warp {
 	}
 
 	public void warp(Player player) {
-		// Better world support
-		World world = player.getWorld();
-		Location location = new Location(world, x, y, z, yaw, pitch);
-		player.teleportTo(location);
+		player.teleportTo(this.location);
 	}
 
 	public void update(Player player) {
-		this.x = player.getLocation().getX();
-		this.y = player.getLocation().getBlockY()	;
-		this.z = player.getLocation().getZ();
-		this.yaw = Math.round(player.getLocation().getYaw()) % 360;
-		this.pitch = Math.round(player.getLocation().getPitch()) % 360;		
+		this.location = player.getLocation().clone();		
 	}
 	
 	public boolean playerIsCreator(String name) {
@@ -176,5 +154,9 @@ public class Warp {
 	
 	public void setMessage(String message) {
 		this.welcomeMessage = message;
+	}
+	
+	public Location getLocation() {
+		return this.location.clone();
 	}
 }

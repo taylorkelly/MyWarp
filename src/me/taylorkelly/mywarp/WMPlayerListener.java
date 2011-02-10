@@ -11,8 +11,9 @@ import org.bukkit.event.player.PlayerChatEvent;
 import org.bukkit.event.player.PlayerListener;
 import org.bukkit.plugin.Plugin;
 
-import com.bukkit.xzise.xwarp.PermissionWrapper;
-import com.bukkit.xzise.xwarp.PermissionWrapper.PermissionTypes;
+import de.xzise.xwarp.PermissionWrapper;
+import de.xzise.xwarp.PermissionWrapper.PermissionTypes;
+
 
 public class WMPlayerListener extends PlayerListener {
 	

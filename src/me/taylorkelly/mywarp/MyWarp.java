@@ -10,9 +10,10 @@ import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.PluginLoader;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import com.bukkit.xzise.DatabaseConnection;
-import com.bukkit.xzise.XLogger;
-import com.bukkit.xzise.xwarp.PermissionWrapper;
+
+import de.xzise.DatabaseConnection;
+import de.xzise.XLogger;
+import de.xzise.xwarp.PermissionWrapper;
 
 public class MyWarp extends JavaPlugin implements DatabaseConnection {
 	
@@ -48,9 +49,11 @@ public class MyWarp extends JavaPlugin implements DatabaseConnection {
 		permissions.init(this.getServer());
 		
 		WarpList warpList = new WarpList(getServer());
+
 		this.playerListener = new WMPlayerListener(this, warpList);
 		this.getServer().getPluginManager().registerEvent(Event.Type.PLAYER_COMMAND, playerListener, Priority.Normal, this);
 		this.getServer().getPluginManager().registerEvent(Event.Type.BLOCK_RIGHTCLICKED, new MWBlockListener(warpList), Priority.High, this);
+//		this.getServer().getPluginManager().registerEvent(Event.Type.BLOCK_CANBUILD, listener, priority, plugin)
 		XLogger.info(name + " " + version + " enabled");
 	}
 

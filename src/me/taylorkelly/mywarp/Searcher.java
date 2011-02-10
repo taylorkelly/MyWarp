@@ -53,10 +53,7 @@ public class Searcher {
 	public static void printWarpLine(Warp warp, Player player) {
 		String color = Lister.getColor(warp, player).toString();
 		String creator = (warp.creator.equalsIgnoreCase(player.getName())) ? "you" : warp.creator;
-		int x = (int) Math.round(warp.x);
-		int y = (int) Math.round(warp.y);
-		int z = (int) Math.round(warp.z);
-		player.sendMessage(color + "'" + warp.name + "'" + ChatColor.WHITE + " by " + creator + " @(" + x + ", " + y + ", " + z + ")");
+		player.sendMessage(color + "'" + warp.name + "'" + ChatColor.WHITE + " by " + creator + Lister.getLocationString(warp));
 	}
 }
 

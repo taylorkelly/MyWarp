@@ -1,4 +1,4 @@
-package com.bukkit.xzise;
+package de.xzise;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
