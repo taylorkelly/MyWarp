@@ -96,7 +96,6 @@ public class Warp {
 			return true;
 		if (this.visibility == Visibility.PUBLIC && MyWarp.permissions.permission(player, PermissionTypes.TO_OTHER))
 			return true;
-		// Add to global
 		if (this.visibility == Visibility.GLOBAL && MyWarp.permissions.permission(player, PermissionTypes.TO_GLOBAL))
 			return true;
 		return MyWarp.permissions.permission(player, PermissionTypes.ADMIN_TO_ALL);

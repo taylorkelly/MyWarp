@@ -41,9 +41,9 @@ public class SignWarp {
 		}
 	}
 	
-	private static WarpDestination getType(String[] lines) {
+	public static WarpDestination getType(String[] lines) {
 		// My Warp
-		if (lines[0].contains("MyWarp") && lines.length == 2) {
+		if (lines.length == 2 && lines[0].contains("MyWarp")) {
 			return new WarpDestination(lines[1], null, SignWarpType.MY_WARP);
 		}
 		
@@ -84,7 +84,7 @@ public class SignWarp {
 		}
 		
 		// xWarp
-		if ((lines[0].equalsIgnoreCase("xWarp") || lines[0].matches("(W|w)arp:?")) && (lines.length == 2 || lines.length == 3)) {
+		if ((lines.length == 2 || lines.length == 3) && ((lines[0].equalsIgnoreCase("xWarp") || lines[0].matches("(W|w)arp:?")))) {
 			String creator = "";
 			if (lines.length == 3) {
 				creator = lines[2];
@@ -97,7 +97,10 @@ public class SignWarp {
 	}
 	
 	private static String[] getFilledLines(Sign sign) {
-		String[] lines = sign.getLines();
+		return SignWarp.getFilledLines(sign.getLines());
+	}
+	
+	public static String[] getFilledLines(String[] lines) {
 		List<String> result = new ArrayList<String>(); 
 		for (int i = 0; i < lines.length; i++) {
 			if (!lines[i].trim().isEmpty()) {
