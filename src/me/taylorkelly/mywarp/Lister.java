@@ -63,11 +63,7 @@ public class Lister {
 	
 	public void generatePage() {
 		int start = (page-1) * (WMPlayerListener.LINES_PER_PAGE - 1);
-		if (this.creator != null) {
-			this.sortedWarps = this.warpList.getSortedWarps(this.player, this.creator, start, WMPlayerListener.LINES_PER_PAGE - 1);
-		} else {
-			this.sortedWarps = this.warpList.getSortedWarps(player, start, WMPlayerListener.LINES_PER_PAGE - 1);
-		}
+		this.sortedWarps = this.warpList.getSortedWarps(this.player, this.creator, start, WMPlayerListener.LINES_PER_PAGE - 1);
 	}
 
 	private int getWidth(int number, int base) {

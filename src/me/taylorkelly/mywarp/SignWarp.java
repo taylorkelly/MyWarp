@@ -20,8 +20,12 @@ public class SignWarp {
 		this.sign = sign;
 	}
 	
+	public WarpDestination getDestination() {
+		return SignWarp.getType(SignWarp.getFilledLines(this.sign));
+	}
+	
 	public SignWarpType getType() {
-		WarpDestination destination = SignWarp.getType(SignWarp.getFilledLines(this.sign)); 
+		WarpDestination destination = this.getDestination(); 
 		return destination == null ? null : destination.type;
 	}
 	

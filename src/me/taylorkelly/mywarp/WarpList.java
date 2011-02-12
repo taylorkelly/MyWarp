@@ -3,6 +3,7 @@ package me.taylorkelly.mywarp;
 import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -311,18 +312,34 @@ public class WarpList {
 		}
 	}
 
-	public ArrayList<Warp> getSortedWarps(Player player, int start, int size) {
+	public ArrayList<Warp> getSortedWarps(Player player, String creator, int start, int size) {
 		ArrayList<Warp> ret = new ArrayList<Warp>();
-		List<String> names = new ArrayList<String>(global.keySet());
-		Collator collator = Collator.getInstance();
+		List<Warp> names;
+		if (creator == null || creator.isEmpty()) {
+			names = this.getAllWarps();
+		} else {
+			names = new ArrayList<Warp>();
+			Map<String, Warp> map = this.personal.get(creator);
+			if (map != null) {
+				names.addAll(map.values());
+			}
+		}
+		
+		final Collator collator = Collator.getInstance();
 		collator.setStrength(Collator.SECONDARY);
-		Collections.sort(names, collator);
+		Collections.sort(names, new Comparator<Warp>() {
+
+			@Override
+			public int compare(Warp o1, Warp o2) {
+				return collator.compare(o1.name, o2.name);
+			}
+			
+		});
 
 		int index = 0;
 		int currentCount = 0;
 		while (index < names.size() && ret.size() < size) {
-			String currName = names.get(index);
-			Warp warp = global.get(currName);
+			Warp warp = names.get(index);
 			if (warp.listWarp(player) || warp.playerCanWarp(player)) {
 				if (currentCount >= start) {
 					ret.add(warp);
@@ -335,47 +352,20 @@ public class WarpList {
 		return ret;
 	}
 
-	public ArrayList<Warp> getSortedWarps(Player player, String creator,
-			int start, int size) {
-		ArrayList<Warp> ret = new ArrayList<Warp>();
-		List<String> names = new ArrayList<String>(global.keySet());
-		Collator collator = Collator.getInstance();
-		collator.setStrength(Collator.SECONDARY);
-		Collections.sort(names, collator);
-
-		int index = 0;
-		int currentCount = 0;
-		while (index < names.size() && ret.size() < size) {
-			String currName = names.get(index);
-			Warp warp = global.get(currName);
-			if (warp.listWarp(player) && warp.playerIsCreator(creator)) {
-				if (currentCount >= start) {
-					ret.add(warp);
-				} else {
-					currentCount++;
-				}
-			}
-			index++;
-		}
-		return ret;
-	}
-
-	public int getSize() {
-		return global.size();
-	}
-
 	/**
-	 * Returns the number of warps the player can modify.
+	 * Returns the number of warps the player can modify/use.
 	 * 
 	 * @param player
 	 *            The given player.
-	 * @return The number of warps the player can modify.
+	 * @return The number of warps the player can modify/use.
 	 */
 	public int getSize(Player player) {
 		int size = 0;
-		for (Warp warp : this.global.values()) {
-			if (warp.listWarp(player)) {
-				size++;
+		for (Map<String, Warp> map : this.personal.values()) {
+			for (Warp warp : map.values()) {
+				if (warp.listWarp(player)) {
+					size++;
+				}
 			}
 		}
 		return size;
@@ -384,28 +374,38 @@ public class WarpList {
 	public int getSize(Player player, String creator) {
 		if (creator == null || creator.isEmpty())
 			return this.getSize(player);
-		
-		int size = 0;
-		for (Warp warp : this.global.values()) {
-			if (warp.listWarp(player) && warp.playerIsCreator(creator)) {
-				size++;
-			}
+		else {
+			Map<String, Warp> map = this.personal.get(creator);
+			return map == null ? 0 : map.size();
 		}
-		return size;
+	}
+	
+	public List<Warp> getAllWarps() {
+		List<Warp> result = new ArrayList<Warp>();
+		for (Map<String, Warp> map : this.personal.values()) {
+			result.addAll(map.values());
+		}		
+		return result;
 	}
 
 	public MatchList getMatches(String name, Player player) {
 		ArrayList<Warp> exactMatches = new ArrayList<Warp>();
 		ArrayList<Warp> matches = new ArrayList<Warp>();
+		List<Warp> all = this.getAllWarps();
 
-		List<String> names = new ArrayList<String>(global.keySet());
-		Collator collator = Collator.getInstance();
+		final Collator collator = Collator.getInstance();
 		collator.setStrength(Collator.SECONDARY);
-		Collections.sort(names, collator);
+		Collections.sort(all, new Comparator<Warp>() {
 
-		for (int i = 0; i < names.size(); i++) {
-			String currName = names.get(i);
-			Warp warp = global.get(currName);
+			@Override
+			public int compare(Warp o1, Warp o2) {
+				return collator.compare(o1.name, o2.name);
+			}
+			
+		});
+
+		for (int i = 0; i < all.size(); i++) {
+			Warp warp = all.get(i);
 			if (warp.playerCanWarp(player)) {
 				if (warp.name.equalsIgnoreCase(name)) {
 					exactMatches.add(warp);
