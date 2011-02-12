@@ -88,7 +88,8 @@ public class PermissionWrapper {
 					|| permission.equals(PermissionTypes.TO_OTHER.name)
 					|| permission.equals(PermissionTypes.TO_INVITED.name)
 					|| permission.equals(PermissionTypes.CREATE_PRIVATE.name)
-					|| permission.equals(PermissionTypes.CREATE_PUBLIC.name)) {
+					|| permission.equals(PermissionTypes.CREATE_PUBLIC.name)
+					|| permission.equals(PermissionTypes.SIGN_WARP.name)) {
 				return true; // Everybody can create private/public warps
 			} else if (isAdminPermission(permission)) {
 				return player.isOp();
