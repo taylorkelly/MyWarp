@@ -30,9 +30,9 @@ public class WMPlayerListener extends PlayerListener {
 			
 			event.setCancelled(true);
 			
-			for (int i = 0; i < values.length; i++) {
-				player.sendMessage(i + "=" + parameters[i]);
-			}
+//			for (int i = 0; i < parameters.length; i++) {
+//				player.sendMessage(i + "=" + parameters[i]);
+//			}
 			
 			this.commands.executeCommand(player, parameters);
 		}

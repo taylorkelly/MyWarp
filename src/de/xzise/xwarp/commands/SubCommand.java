@@ -45,7 +45,7 @@ public abstract class SubCommand {
 	protected abstract boolean internalExecute(Player player, String[] parameters);
 	
 	public final boolean execute(Player player, String[] parameters) {
-		player.sendMessage(this.getClass().getSimpleName());
+//		player.sendMessage(this.getClass().getSimpleName());
 		
 		return this.internalExecute(player, parameters);
 	}
