@@ -3,6 +3,7 @@ package me.taylorkelly.mywarp;
 import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -13,8 +14,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.Server;
 import org.bukkit.entity.Player;
 
-import com.bukkit.xzise.XLogger;
-import com.bukkit.xzise.xwarp.PermissionWrapper.PermissionTypes;
+import de.xzise.xwarp.PermissionWrapper.PermissionTypes;
 
 public class WarpList {
 	private Map<String, Warp> global;
@@ -26,11 +26,19 @@ public class WarpList {
 		this.loadFromDatabase();
 	}
 
-	public void loadFromDatabase() {
+	private void loadFromDatabase() {
 		WarpDataSource.initialize();
 		this.global = new HashMap<String, Warp>();
 		this.personal = new HashMap<String, Map<String,Warp>>();
-		WarpDataSource.getMap(this.global, this.personal);
+		WarpDataSource.getMap(this.global, this.personal, this.server);
+	}
+	
+	public void loadFromDatabase(Player player) {
+		if (MyWarp.permissions.permission(player, PermissionTypes.ADMIN_RELOAD)) {
+			this.loadFromDatabase();
+		} else {
+			player.sendMessage(ChatColor.RED + "You have no permission to reload.");
+		}
 	}
 
 	public void addWarp(String name, Player player, Visibility visibility) {
@@ -50,14 +58,18 @@ public class WarpList {
 		}
 		if (MyWarp.permissions.permission(player, type)) {
 			Warp warp = this.getWarp(name, player.getName());
+			Warp globalWarp = this.getWarp(name);
 			if (warp != null) {
 				player.sendMessage(ChatColor.RED + "Warp called '" + name
 						+ "' already exists (" + warp.name + ").");
+			} else if (visibility == Visibility.GLOBAL && globalWarp != null) {
+				player.sendMessage(ChatColor.RED + "Warp called '" + name
+						+ "' already exists (" + globalWarp.name + ").");				
 			} else {
 				warp = new Warp(name, player);
 				putIntoPersonal(this.personal, warp);
 				if (warp != this.getWarp(name, player.getName())) {
-					XLogger.severe("Warp saving error!");
+					MyWarp.logger.severe("Warp saving error!");
 				}
 				WarpDataSource.addWarp(warp);
 				player.sendMessage(ChatColor.AQUA + "Successfully created '"
@@ -81,17 +93,28 @@ public class WarpList {
 		}
 	}
 	
-	public static void putIntoPersonal(Map<String, Map<String, Warp>> personal, Warp warp) {
+	public static boolean putIntoPersonal(Map<String, Map<String, Warp>> personal, Warp warp) {
 		Map<String, Warp> creatorWarps = personal.get(warp.creator.toLowerCase());
 		if (creatorWarps == null) {
 			creatorWarps = new HashMap<String, Warp>();
 			personal.put(warp.creator.toLowerCase(), creatorWarps);
 		}
+		if (creatorWarps.containsKey(warp.name)) {
+			return false;
+		}
 		creatorWarps.put(warp.name.toLowerCase(), warp);
+		return true;
 	}
 
 	public void blindAdd(Warp warp) {
-		this.global.put(warp.name.toLowerCase(), warp);
+		if (this.getWarp(warp.name) == null) {
+			this.global.put(warp.name.toLowerCase(), warp);
+		} else if (warp.visibility == Visibility.GLOBAL) {
+			throw new IllegalArgumentException("A global warp could not override an existing one.");
+		}
+		if (!putIntoPersonal(personal, warp)) {
+			throw new IllegalArgumentException("A personal warp could not override an existing one.");
+		}
 	}
 
 	public void warpTo(String name, String creator, Player player, boolean toAlternative) {
@@ -121,7 +144,10 @@ public class WarpList {
 					PermissionTypes.ADMIN_DELETE)
 					|| warp.playerCanModify(player)) {
 				this.global.remove(warp);
-				this.personal.get(creator).remove(warp);
+				if (creator == null || creator.isEmpty()) {
+					creator = warp.creator;
+				}
+				this.personal.get(creator.toLowerCase()).remove(warp);
 				WarpDataSource.deleteWarp(warp);
 				player.sendMessage(ChatColor.AQUA + "You have deleted '" + name
 						+ "'");
@@ -226,19 +252,21 @@ public class WarpList {
 					PermissionTypes.CREATE_GLOBAL)
 					&& warp.playerCanModify(player))
 					|| MyWarp.permissions.permission(player, PermissionTypes.ADMIN_GLOBAL)) {
-				Warp existing = this.global.get(name.toLowerCase());
+				Warp existing = this.getWarp(name);
 				if (existing == null || existing.visibility != Visibility.GLOBAL) {
 					warp.visibility = Visibility.GLOBAL;
 					WarpDataSource.updateVisibility(warp, warp.visibility);
 					this.global.put(name.toLowerCase(), warp);
 					player.sendMessage(ChatColor.AQUA + "You have globalized '"
 							+ warp.name + "'");	
+				} else if (existing.equals(warp) && existing.visibility == Visibility.GLOBAL) {
+					player.sendMessage(ChatColor.RED + "This warp is already globalized.");
 				} else {
 					player.sendMessage(ChatColor.RED + "One global warp with this name already exists.");
 				}
 			} else {
 				player.sendMessage(ChatColor.RED
-						+ "You do not have permission to publicize '" + warp.name
+						+ "You do not have permission to globalize '" + warp.name
 						+ "'");
 			}
 		} else {
@@ -284,18 +312,34 @@ public class WarpList {
 		}
 	}
 
-	public ArrayList<Warp> getSortedWarps(Player player, int start, int size) {
+	public ArrayList<Warp> getSortedWarps(Player player, String creator, int start, int size) {
 		ArrayList<Warp> ret = new ArrayList<Warp>();
-		List<String> names = new ArrayList<String>(global.keySet());
-		Collator collator = Collator.getInstance();
+		List<Warp> names;
+		if (creator == null || creator.isEmpty()) {
+			names = this.getAllWarps();
+		} else {
+			names = new ArrayList<Warp>();
+			Map<String, Warp> map = this.personal.get(creator);
+			if (map != null) {
+				names.addAll(map.values());
+			}
+		}
+		
+		final Collator collator = Collator.getInstance();
 		collator.setStrength(Collator.SECONDARY);
-		Collections.sort(names, collator);
+		Collections.sort(names, new Comparator<Warp>() {
+
+			@Override
+			public int compare(Warp o1, Warp o2) {
+				return collator.compare(o1.name, o2.name);
+			}
+			
+		});
 
 		int index = 0;
 		int currentCount = 0;
 		while (index < names.size() && ret.size() < size) {
-			String currName = names.get(index);
-			Warp warp = global.get(currName);
+			Warp warp = names.get(index);
 			if (warp.listWarp(player) || warp.playerCanWarp(player)) {
 				if (currentCount >= start) {
 					ret.add(warp);
@@ -308,47 +352,20 @@ public class WarpList {
 		return ret;
 	}
 
-	public ArrayList<Warp> getSortedWarps(Player player, String creator,
-			int start, int size) {
-		ArrayList<Warp> ret = new ArrayList<Warp>();
-		List<String> names = new ArrayList<String>(global.keySet());
-		Collator collator = Collator.getInstance();
-		collator.setStrength(Collator.SECONDARY);
-		Collections.sort(names, collator);
-
-		int index = 0;
-		int currentCount = 0;
-		while (index < names.size() && ret.size() < size) {
-			String currName = names.get(index);
-			Warp warp = global.get(currName);
-			if (warp.listWarp(player) && warp.playerIsCreator(creator)) {
-				if (currentCount >= start) {
-					ret.add(warp);
-				} else {
-					currentCount++;
-				}
-			}
-			index++;
-		}
-		return ret;
-	}
-
-	public int getSize() {
-		return global.size();
-	}
-
 	/**
-	 * Returns the number of warps the player can modify.
+	 * Returns the number of warps the player can modify/use.
 	 * 
 	 * @param player
 	 *            The given player.
-	 * @return The number of warps the player can modify.
+	 * @return The number of warps the player can modify/use.
 	 */
 	public int getSize(Player player) {
 		int size = 0;
-		for (Warp warp : this.global.values()) {
-			if (warp.listWarp(player)) {
-				size++;
+		for (Map<String, Warp> map : this.personal.values()) {
+			for (Warp warp : map.values()) {
+				if (warp.listWarp(player)) {
+					size++;
+				}
 			}
 		}
 		return size;
@@ -357,28 +374,38 @@ public class WarpList {
 	public int getSize(Player player, String creator) {
 		if (creator == null || creator.isEmpty())
 			return this.getSize(player);
-		
-		int size = 0;
-		for (Warp warp : this.global.values()) {
-			if (warp.listWarp(player) && warp.playerIsCreator(creator)) {
-				size++;
-			}
+		else {
+			Map<String, Warp> map = this.personal.get(creator);
+			return map == null ? 0 : map.size();
 		}
-		return size;
+	}
+	
+	public List<Warp> getAllWarps() {
+		List<Warp> result = new ArrayList<Warp>();
+		for (Map<String, Warp> map : this.personal.values()) {
+			result.addAll(map.values());
+		}		
+		return result;
 	}
 
 	public MatchList getMatches(String name, Player player) {
 		ArrayList<Warp> exactMatches = new ArrayList<Warp>();
 		ArrayList<Warp> matches = new ArrayList<Warp>();
+		List<Warp> all = this.getAllWarps();
 
-		List<String> names = new ArrayList<String>(global.keySet());
-		Collator collator = Collator.getInstance();
+		final Collator collator = Collator.getInstance();
 		collator.setStrength(Collator.SECONDARY);
-		Collections.sort(names, collator);
+		Collections.sort(all, new Comparator<Warp>() {
 
-		for (int i = 0; i < names.size(); i++) {
-			String currName = names.get(i);
-			Warp warp = global.get(currName);
+			@Override
+			public int compare(Warp o1, Warp o2) {
+				return collator.compare(o1.name, o2.name);
+			}
+			
+		});
+
+		for (int i = 0; i < all.size(); i++) {
+			Warp warp = all.get(i);
 			if (warp.playerCanWarp(player)) {
 				if (warp.name.equalsIgnoreCase(name)) {
 					exactMatches.add(warp);
@@ -481,5 +508,14 @@ public class WarpList {
 				return null;
 			}
 		}
+	}
+	
+	/**
+	 * Returns the global warp.
+	 * @param name The name of the global warp.
+	 * @return The global warp. If no global warp exists it returns null.
+	 */
+	public Warp getWarp(String name) {
+		return this.getWarp(name, null);
 	}
 }

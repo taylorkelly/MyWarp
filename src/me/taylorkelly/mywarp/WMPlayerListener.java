@@ -11,24 +11,23 @@ import org.bukkit.event.player.PlayerChatEvent;
 import org.bukkit.event.player.PlayerListener;
 import org.bukkit.plugin.Plugin;
 
-import com.bukkit.xzise.xwarp.PermissionWrapper.PermissionTypes;
-import com.bukkit.xzise.xwarp.commands.ConvertCommand;
-import com.bukkit.xzise.xwarp.commands.CreateCommand;
-import com.bukkit.xzise.xwarp.commands.DeleteCommand;
-import com.bukkit.xzise.xwarp.commands.GiveCommand;
-import com.bukkit.xzise.xwarp.commands.GlobalizeCommand;
-import com.bukkit.xzise.xwarp.commands.HelpCommand;
-import com.bukkit.xzise.xwarp.commands.InviteCommand;
-import com.bukkit.xzise.xwarp.commands.ListCommand;
-import com.bukkit.xzise.xwarp.commands.PermissionsCommand;
-import com.bukkit.xzise.xwarp.commands.PrivatizeCommand;
-import com.bukkit.xzise.xwarp.commands.PublicizeCommand;
-import com.bukkit.xzise.xwarp.commands.ReloadCommand;
-import com.bukkit.xzise.xwarp.commands.SearchCommand;
-import com.bukkit.xzise.xwarp.commands.SubCommand;
-import com.bukkit.xzise.xwarp.commands.UninviteCommand;
-import com.bukkit.xzise.xwarp.commands.UpdateCommand;
-import com.bukkit.xzise.xwarp.commands.WarpToCommand;
+import de.xzise.xwarp.commands.ConvertCommand;
+import de.xzise.xwarp.commands.CreateCommand;
+import de.xzise.xwarp.commands.DeleteCommand;
+import de.xzise.xwarp.commands.GiveCommand;
+import de.xzise.xwarp.commands.GlobalizeCommand;
+import de.xzise.xwarp.commands.HelpCommand;
+import de.xzise.xwarp.commands.InviteCommand;
+import de.xzise.xwarp.commands.ListCommand;
+import de.xzise.xwarp.commands.PermissionsCommand;
+import de.xzise.xwarp.commands.PrivatizeCommand;
+import de.xzise.xwarp.commands.PublicizeCommand;
+import de.xzise.xwarp.commands.ReloadCommand;
+import de.xzise.xwarp.commands.SearchCommand;
+import de.xzise.xwarp.commands.SubCommand;
+import de.xzise.xwarp.commands.UninviteCommand;
+import de.xzise.xwarp.commands.UpdateCommand;
+import de.xzise.xwarp.commands.WarpToCommand;
 
 public class WMPlayerListener extends PlayerListener {
 	
@@ -108,7 +107,7 @@ public class WMPlayerListener extends PlayerListener {
 //			for (int i = 0; i < values.length; i++) {
 //				player.sendMessage(i + "=" + values[i]);
 //			}
-
+			
 			this.subCommandExecutor(player, values);
 		}
 	}
@@ -117,11 +116,40 @@ public class WMPlayerListener extends PlayerListener {
 		Player player = this.plugin.getServer().getPlayer(name);
 		return player == null ? name : player.getName();
 	}
+
+	private static String[] helpLines = new String[] { 
+		ChatColor.RED + "/warp [to] <name>" + ChatColor.WHITE + "  -  Warp to " + ChatColor.GRAY + "<name>",
+		ChatColor.RED + "/warp create|+ <name>" + ChatColor.WHITE + "  -  Create warp " + ChatColor.GRAY + "<name>",
+		ChatColor.RED + "/warp createp|+p <name>" + ChatColor.WHITE + "  -  Create private warp " + ChatColor.GRAY + "<name>",
+		ChatColor.RED + "/warp createg|+g <name>" + ChatColor.WHITE + "  -  Create global warp " + ChatColor.GRAY + "<name>",
+		ChatColor.RED + "/warp delete|- <name>" + ChatColor.WHITE + "  -  Delete warp " + ChatColor.GRAY + "<name>",
+		ChatColor.RED + "/warp list|ls <#>" + ChatColor.WHITE + "  -  Views warp page " + ChatColor.GRAY + "<#>",
+		ChatColor.RED + "/warp update|* <name>" + ChatColor.WHITE + "  -  Updates position of " + ChatColor.GRAY + "<name>",
+		ChatColor.RED + "/warp search <query>" + ChatColor.WHITE + "  -  Search for " + ChatColor.GRAY + "<query>",
+		ChatColor.RED + "/warp list|ls legend" + ChatColor.WHITE + "  -  Shows the warp page's legend.",
+		ChatColor.RED + "/warp message|msg <name> <message>" + ChatColor.WHITE + "  -  Sets message",
+		ChatColor.RED + "/warp give <player> <name>" + ChatColor.WHITE + "  -  Give " + ChatColor.GRAY + "<player>" + ChatColor.WHITE + " your " + ChatColor.GRAY + "<name>",
+		ChatColor.RED + "/warp invite <player> <name>" + ChatColor.WHITE + "  -  Invite " + ChatColor.GRAY + "<player>" + ChatColor.WHITE + " to " + ChatColor.GRAY + "<name>",
+		ChatColor.RED + "/warp uninvite <player> <name>" + ChatColor.WHITE + "  -  Uninvite " + ChatColor.GRAY + "<player>" + ChatColor.WHITE + " to " + ChatColor.GRAY + "<name>",
+		ChatColor.RED + "/warp global <name>" + ChatColor.WHITE + "  -  Makes warp " + ChatColor.GRAY + "<name>" + ChatColor.WHITE + " global",
+		ChatColor.RED + "/warp public <name>" + ChatColor.WHITE + "  -  Makes warp " + ChatColor.GRAY + "<name>" + ChatColor.WHITE + " public",
+		ChatColor.RED + "/warp private <name>" + ChatColor.WHITE + "  -  Makes warp " + ChatColor.GRAY + "<name>" + ChatColor.WHITE + " private",
+		ChatColor.RED + "/warp convert" + ChatColor.WHITE + "  -  Imports the hmod file",
+		ChatColor.RED + "/warp reload" + ChatColor.WHITE + "  -  Reloads from database",
+	};
 	
-	public static void printPermission(PermissionTypes permission, Player player) {
-		boolean hasPermission = MyWarp.permissions.permission(player, permission);
-		String message = (hasPermission ? ChatColor.GREEN : ChatColor.RED) + permission.name + ": " + (hasPermission ? "Yes": "No");
-		player.sendMessage(message);
+	public static String[] helpPage(int page) {
+		if (helpLines.length / (LINES_PER_PAGE - 1) < page || page <= 0) {
+			return new String[] { ChatColor.RED + "Invalid /warp help page." };
+		}
+		List<String> lines = new ArrayList<String>(LINES_PER_PAGE);
+		lines.add(ChatColor.RED + "------------------ " + ChatColor.WHITE + "/WARP HELP" + ChatColor.RED + " " + page
+				+ "/" + ((int) Math.ceil(helpLines.length / (LINES_PER_PAGE - 1))) + "------------------");
+		
+		for (int i = page * (LINES_PER_PAGE - 1); i < helpLines.length && i < (page + 1) * (LINES_PER_PAGE - 1); i++) {
+			lines.add(helpLines[i]);
+		}
+		return lines.toArray(new String[0]);
 	}
 
 	public static String concatArray(String[] array, int start) {

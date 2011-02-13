@@ -1,10 +1,11 @@
-package com.bukkit.xzise.xwarp;
+package de.xzise.xwarp;
+
+import me.taylorkelly.mywarp.MyWarp;
 
 import org.bukkit.Server;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 
-import com.bukkit.xzise.XLogger;
 import com.nijiko.permissions.PermissionHandler;
 import com.nijikokun.bukkit.Permissions.Permissions;
 
@@ -19,6 +20,9 @@ public class PermissionWrapper {
 		TO_INVITED("warp.to.invited"),
 		// Warp to public warps
 		TO_OTHER("warp.to.other"),
+		
+		// Warp with sign
+		SIGN_WARP("warp.sign"),
 
 		// Create/Edit private warps
 		CREATE_PRIVATE("warp.create.private"),
@@ -46,7 +50,9 @@ public class PermissionWrapper {
 		// Make other's warps global
 		ADMIN_GLOBAL("warp.admin.global"),
 		// Warp to all warps
-		ADMIN_TO_ALL("warp.admin.to.all");
+		ADMIN_TO_ALL("warp.admin.to.all"),
+		// Reload database
+		ADMIN_RELOAD("warp.admin.reload");
 
 		// Maybe upcoming permissions:
 		// Different admin permissions for each warp (only edit public warps
@@ -68,7 +74,7 @@ public class PermissionWrapper {
 		}
 		
 		public boolean isAdminPermission() {
-			return (this == ADMIN_DELETE) || (this == ADMIN_GIVE) || (this == ADMIN_INVITE) || (this == ADMIN_MESSAGE) || (this == ADMIN_TO_ALL) || (this == ADMIN_UNINVITE) || (this == ADMIN_UPDATE);
+			return this.name.matches("warp\\.admin\\..*");
 		}
 	}
 	
@@ -81,7 +87,8 @@ public class PermissionWrapper {
 					|| permission.equals(PermissionTypes.TO_OTHER.name)
 					|| permission.equals(PermissionTypes.TO_INVITED.name)
 					|| permission.equals(PermissionTypes.CREATE_PRIVATE.name)
-					|| permission.equals(PermissionTypes.CREATE_PUBLIC.name)) {
+					|| permission.equals(PermissionTypes.CREATE_PUBLIC.name)
+					|| permission.equals(PermissionTypes.SIGN_WARP.name)) {
 				return true; // Everybody can create private/public warps
 			} else if (isAdminPermission(permission)) {
 				return player.isOp();
@@ -134,9 +141,9 @@ public class PermissionWrapper {
 		Plugin test = server.getPluginManager().getPlugin("Permissions");
 		if (test != null) {
 			this.handler = ((Permissions) test).getHandler();
-			XLogger.info("Permissions enabled.");
+			MyWarp.logger.info("Permissions enabled.");
 		} else {
-			XLogger.severe("Permission system not found. Use defaults.");
+			MyWarp.logger.severe("Permission system not found. Use defaults.");
 		}
 	}
 	

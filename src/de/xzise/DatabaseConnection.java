@@ -1,4 +1,4 @@
-package com.bukkit.xzise;
+package de.xzise;
 
 import java.sql.Connection;
 

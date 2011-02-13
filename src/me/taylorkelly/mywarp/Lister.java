@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.angelsl.minecraft.randomshit.fontwidth.MinecraftFontWidthCalculator;
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
 public class Lister {
@@ -19,9 +20,9 @@ public class Lister {
 	
 	private String creator;
 
-	public static final ChatColor GLOBAL_OWN = ChatColor.AQUA;
+	public static final ChatColor GLOBAL_OWN = ChatColor.DARK_BLUE;
 	public static final ChatColor PUBLIC_OWN = ChatColor.BLUE;
-	public static final ChatColor PRIVATE_OWN = ChatColor.DARK_BLUE;
+	public static final ChatColor PRIVATE_OWN = ChatColor.AQUA;
 	
 	public static final ChatColor GLOBAL_OTHER = ChatColor.DARK_GREEN;
 	public static final ChatColor PUBLIC_OTHER = ChatColor.GREEN;
@@ -62,11 +63,7 @@ public class Lister {
 	
 	public void generatePage() {
 		int start = (page-1) * (WMPlayerListener.LINES_PER_PAGE - 1);
-		if (this.creator != null) {
-			this.sortedWarps = this.warpList.getSortedWarps(this.player, this.creator, start, WMPlayerListener.LINES_PER_PAGE - 1);
-		} else {
-			this.sortedWarps = this.warpList.getSortedWarps(player, start, WMPlayerListener.LINES_PER_PAGE - 1);
-		}
+		this.sortedWarps = this.warpList.getSortedWarps(this.player, this.creator, start, WMPlayerListener.LINES_PER_PAGE - 1);
 	}
 
 	private int getWidth(int number, int base) {
@@ -95,12 +92,9 @@ public class Lister {
 		for(Warp warp: sortedWarps) {
 			String name = warp.name;
 			String creator = (warp.creator.equalsIgnoreCase(player.getName()))?"you":warp.creator;
-			int x = (int) Math.round(warp.x);
-			int y = (int) Math.round(warp.y);
-			int z = (int) Math.round(warp.z);
 			ChatColor color = getColor(warp, this.player);			
 		
-			String location = " @(" + x + ", " + y + ", " + z + ")";
+			String location = getLocationString(warp);
 			String creatorString = " by " + creator;
 			
 			//Find remaining length left
@@ -121,7 +115,7 @@ public class Lister {
 	 * Lob shit off that string till it fits.
 	 */
 	private String substring(String name, int left) {
-		while(MinecraftFontWidthCalculator.getStringWidth(name) > left) {
+		while(MinecraftFontWidthCalculator.getStringWidth(name) > left && !name.isEmpty()) {
 			name = name.substring(0, name.length()-1);
 		}
 		return name;
@@ -185,5 +179,13 @@ public class Lister {
 			}
 		}
 		return PRIVATE_OTHER;
+	}
+	
+	public static String getLocationString(Warp warp) {
+		return getLocationString(warp.getLocation());
+	}
+	
+	public static String getLocationString(Location location) {
+		return " @(" + (int) location.getX() + ", " + (int) location.getY() + ", " + (int) location.getZ() + ")";
 	}
 }

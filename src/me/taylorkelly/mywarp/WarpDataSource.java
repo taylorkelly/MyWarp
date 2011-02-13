@@ -9,9 +9,11 @@ import java.sql.Statement;
 import java.util.Map;
 import java.util.logging.Level;
 
-import me.taylorkelly.mywarp.Warp.Visibility;
+import org.bukkit.Location;
+import org.bukkit.Server;
+import org.bukkit.World;
 
-import com.bukkit.xzise.XLogger;
+import me.taylorkelly.mywarp.Warp.Visibility;
 
 public class WarpDataSource {
 	public final static String DATABASE = "jdbc:sqlite:homes-warps.db";
@@ -37,7 +39,7 @@ public class WarpDataSource {
 		int version = getVersion();
 		
 		if (version < TARGET_VERSION) {
-			XLogger.info("Database layout is outdated (" + version + ")! Updating to " + TARGET_VERSION + ".");
+			MyWarp.logger.info("Database layout is outdated (" + version + ")! Updating to " + TARGET_VERSION + ".");
 			Statement statement = null;
 			ResultSet set = null;
 			try {
@@ -48,7 +50,7 @@ public class WarpDataSource {
 				if (tableExists("warpTable")) {
 					// Backup it
 					statement.execute("ALTER TABLE warpTable RENAME TO warpTable_backup");
-					XLogger.info("Backuping old database.");
+					MyWarp.logger.info("Backuping old database.");
 				}
 				// Create new database
 				statement.executeUpdate(WARP_TABLE);
@@ -56,7 +58,7 @@ public class WarpDataSource {
 					// Copy back
 					statement.executeUpdate("INSERT INTO warpTable SELECT * FROM warpTable_backup");
 					statement.executeUpdate("DROP TABLE warpTable_backup");
-					XLogger.info("Recovering the backup.");
+					MyWarp.logger.info("Recovering the backup.");
 				}
 				statement.executeUpdate("INSERT INTO meta (name, value) VALUES (\"version\", " + TARGET_VERSION + ")");
 				conn.commit();
@@ -64,9 +66,9 @@ public class WarpDataSource {
 //				try {
 //					statement.execute("ROLLBACK");
 //				} catch (SQLException e) {
-//					XLogger.severe("Unable to rollback changes!");
+//					MyWarp.logger.severe("Unable to rollback changes!");
 //				}
-				XLogger.log(Level.SEVERE, "Warp Load Exception", ex);
+				MyWarp.logger.log(Level.SEVERE, "Warp Load Exception", ex);
 			} finally {
 				try {
 					if (statement != null)
@@ -74,13 +76,13 @@ public class WarpDataSource {
 					if (set != null)
 						set.close();
 				} catch (SQLException ex) {
-					XLogger.severe("Warp Load Exception (on close)");
+					MyWarp.logger.severe("Warp Load Exception (on close)");
 				}
 			}
 		}
 	}
 
-	public static void getMap(Map<String, Warp> global, Map<String, Map<String, Warp>> personal) {
+	public static void getMap(Map<String, Warp> global, Map<String, Map<String, Warp>> personal, Server server) {
 		Statement statement = null;
 		ResultSet set = null;
 		try {
@@ -93,17 +95,18 @@ public class WarpDataSource {
 				int index = set.getInt("id");
 				String name = set.getString("name");
 				String creator = set.getString("creator");
-				int world = set.getInt("world");
+				World world = server.getWorlds().get(0);
+//				World world = server.getWorld(set.getString("world"));
 				double x = set.getDouble("x");
 				int y = set.getInt("y");
 				double z = set.getDouble("z");
 				int yaw = set.getInt("yaw");
 				int pitch = set.getInt("pitch");
+				Location loc = new Location(world, x, y, z, yaw, pitch);
 				Visibility visibility = Visibility.parseLevel(set.getInt("publicLevel"));
 				String permissions = set.getString("permissions");
 				String welcomeMessage = set.getString("welcomeMessage");
-				Warp warp = new Warp(index, name, creator, world, x, y, z, yaw,
-						pitch, visibility, permissions, welcomeMessage);
+				Warp warp = new Warp(index, name, creator, loc, visibility, permissions, welcomeMessage);
 				if (visibility == Visibility.GLOBAL || !global.containsKey(name.toLowerCase())) {
 					global.put(name.toLowerCase(), warp);
 					if (visibility == Visibility.GLOBAL) {
@@ -112,9 +115,9 @@ public class WarpDataSource {
 				}
 				WarpList.putIntoPersonal(personal, warp);
 			}
-			XLogger.info(size + " warps loaded (" + globalSize + " global)");
+			MyWarp.logger.info(size + " warps loaded (" + globalSize + " global)");
 		} catch (SQLException ex) {
-			XLogger.severe("Warp Load Exception", ex);
+			MyWarp.logger.severe("Warp Load Exception", ex);
 		} finally {
 			try {
 				if (statement != null)
@@ -122,7 +125,7 @@ public class WarpDataSource {
 				if (set != null)
 					set.close();
 			} catch (SQLException ex) {
-				XLogger.severe("Warp Load Exception (on close)");
+				MyWarp.logger.severe("Warp Load Exception (on close)");
 			}
 		}
 	}
@@ -141,13 +144,13 @@ public class WarpDataSource {
 					version = set.getInt("value");
 				}
 			} else {
-				XLogger.info("Meta table doesn't exists... Creating new");
+				MyWarp.logger.info("Meta table doesn't exists... Creating new");
 				statement.executeUpdate(VERSION_TABLE);
 				conn.commit();
 				version = -1;
 			}
 		} catch (SQLException ex) {
-			XLogger.log(Level.SEVERE, "Table Check Exception", ex);
+			MyWarp.logger.log(Level.SEVERE, "Table Check Exception", ex);
 		} finally {
 			try {
 				if (statement != null) {
@@ -156,7 +159,7 @@ public class WarpDataSource {
 				if (set != null)
 					set.close();
 			} catch (SQLException ex) {
-				XLogger.severe("Table Check SQL Exception (on closing)");
+				MyWarp.logger.severe("Table Check SQL Exception (on closing)");
 			}
 		}
 		return version;
@@ -171,14 +174,14 @@ public class WarpDataSource {
 				return false;
 			return true;
 		} catch (SQLException ex) {
-			XLogger.log(Level.SEVERE, "Table Check Exception", ex);
+			MyWarp.logger.log(Level.SEVERE, "Table Check Exception", ex);
 			return false;
 		} finally {
 			try {
 				if (rs != null)
 					rs.close();
 			} catch (SQLException ex) {
-				XLogger.severe("Table Check SQL Exception (on closing)");
+				MyWarp.logger.severe("Table Check SQL Exception (on closing)");
 			}
 		}
 	}
@@ -189,13 +192,13 @@ public class WarpDataSource {
 //			st = ConnectionManager.getConnection().createStatement();
 //			st.executeUpdate(WARP_TABLE);
 //		} catch (SQLException e) {
-//			XLogger.log(Level.SEVERE, "Create Table Exception", e);
+//			MyWarp.logger.log(Level.SEVERE, "Create Table Exception", e);
 //		} finally {
 //			try {
 //				if (st != null)
 //					st.close();
 //			} catch (SQLException e) {
-//				XLogger.severe("Could not create the table (on close)");
+//				MyWarp.logger.severe("Could not create the table (on close)");
 //			}
 //		}
 //	}
@@ -209,29 +212,33 @@ public class WarpDataSource {
 			ps.setInt(1, warp.index);
 			ps.setString(2, warp.name);
 			ps.setString(3, warp.creator);
-			ps.setInt(4, warp.world);
-			ps.setDouble(5, warp.x);
-			ps.setInt(6, warp.y);
-			ps.setDouble(7, warp.z);
-			ps.setInt(8, warp.yaw);
-			ps.setInt(9, warp.pitch);
+			setLocation(warp.getLocation(), 4, ps);
 			ps.setInt(10, warp.visibility.level);
 			ps.setString(11, warp.permissionsString());
 			ps.setString(12, warp.welcomeMessage);
 			ps.executeUpdate();
-			XLogger.info("ro:" + conn.isReadOnly());
 			conn.commit();
 		} catch (SQLException ex) {
-			XLogger.log(Level.SEVERE, "Warp Insert Exception", ex);
+			MyWarp.logger.log(Level.SEVERE, "Warp Insert Exception", ex);
 		} finally {
 			try {
 				if (ps != null) {
 					ps.close();
 				}
 			} catch (SQLException ex) {
-				XLogger.log(Level.SEVERE, "Warp Insert Exception (on close)", ex);
+				MyWarp.logger.log(Level.SEVERE, "Warp Insert Exception (on close)", ex);
 			}
 		}
+	}
+	
+	public static void setLocation(Location location, int offset, PreparedStatement ps) throws SQLException {
+		ps.setInt(offset++, 0); //TODO: Add World
+//		ps.setString(offset++, location.getWorld().getName());
+		ps.setDouble(offset++, location.getX());
+		ps.setInt(offset++, (int) location.getY());
+		ps.setDouble(offset++, location.getZ());
+		ps.setInt(offset++, (int) location.getYaw());
+		ps.setInt(offset++, (int) location.getPitch());
 	}
 	
 	public static void updateWarp(Warp warp) {
@@ -239,24 +246,21 @@ public class WarpDataSource {
 		try {
 			Connection conn = ConnectionManager.getConnection();
 			
-			ps = conn.prepareStatement("UPDATE warpTable SET x = ?, y = ?, z = ?, yaw = ?, pitch = ? WHERE id = ?");
-			ps.setDouble(1, warp.x);
-			ps.setInt(2, warp.y);
-			ps.setDouble(3, warp.z);
-			ps.setInt(4, warp.yaw);
-			ps.setInt(5, warp.pitch);
-			ps.setInt(6, warp.index);
+			ps = conn.prepareStatement("UPDATE warpTable SET world = ?, x = ?, y = ?, z = ?, yaw = ?, pitch = ? WHERE id = ?");
+			Location loc = warp.getLocation();
+			setLocation(loc, 1, ps);
+			ps.setInt(7, warp.index);
 			ps.executeUpdate();
 			conn.commit();
 		} catch (SQLException ex) {
-			XLogger.log(Level.SEVERE, "Warp Update Exception", ex);
+			MyWarp.logger.log(Level.SEVERE, "Warp Update Exception", ex);
 		} finally {
 			try {
 				if (ps != null) {
 					ps.close();
 				}
 			} catch (SQLException ex) {
-				XLogger.log(Level.SEVERE, "Warp Insert Exception (on close)", ex);
+				MyWarp.logger.log(Level.SEVERE, "Warp Insert Exception (on close)", ex);
 			}
 		}
 	}
@@ -271,7 +275,7 @@ public class WarpDataSource {
 			ps.executeUpdate();
 			conn.commit();
 		} catch (SQLException ex) {
-			XLogger.log(Level.SEVERE, "Warp Delete Exception", ex);
+			MyWarp.logger.log(Level.SEVERE, "Warp Delete Exception", ex);
 		} finally {
 			try {
 				if (ps != null) {
@@ -281,7 +285,7 @@ public class WarpDataSource {
 					set.close();
 				}
 			} catch (SQLException ex) {
-				XLogger.log(Level.SEVERE, "Warp Delete Exception (on close)", ex);
+				MyWarp.logger.log(Level.SEVERE, "Warp Delete Exception (on close)", ex);
 			}
 		}
 	}
@@ -297,7 +301,7 @@ public class WarpDataSource {
 			ps.executeUpdate();
 			conn.commit();
 		} catch (SQLException ex) {
-			XLogger.log(Level.SEVERE, "Warp Welcome Message Exception", ex);
+			MyWarp.logger.log(Level.SEVERE, "Warp Welcome Message Exception", ex);
 		} finally {
 			try {
 				if (ps != null) {
@@ -307,7 +311,7 @@ public class WarpDataSource {
 					set.close();
 				}
 			} catch (SQLException ex) {
-				XLogger.log(Level.SEVERE, "Warp Publicize Exception (on close)", ex);
+				MyWarp.logger.log(Level.SEVERE, "Warp Publicize Exception (on close)", ex);
 			}
 		}
 	}
@@ -323,7 +327,7 @@ public class WarpDataSource {
 			ps.executeUpdate();
 			conn.commit();
 		} catch (SQLException ex) {
-			XLogger.log(Level.SEVERE, "Warp Visibility Exception", ex);
+			MyWarp.logger.log(Level.SEVERE, "Warp Visibility Exception", ex);
 		} finally {
 			try {
 				if (ps != null) {
@@ -333,7 +337,7 @@ public class WarpDataSource {
 					set.close();
 				}
 			} catch (SQLException ex) {
-				XLogger.log(Level.SEVERE, "Warp Publicize Exception (on close)", ex);
+				MyWarp.logger.log(Level.SEVERE, "Warp Publicize Exception (on close)", ex);
 			}
 		}
 	}
@@ -349,7 +353,7 @@ public class WarpDataSource {
 			ps.executeUpdate();
 			conn.commit();
 		} catch (SQLException ex) {
-			XLogger.log(Level.SEVERE, "Warp Permissions Exception", ex);
+			MyWarp.logger.log(Level.SEVERE, "Warp Permissions Exception", ex);
 		} finally {
 			try {
 				if (ps != null) {
@@ -359,7 +363,7 @@ public class WarpDataSource {
 					set.close();
 				}
 			} catch (SQLException ex) {
-				XLogger.log(Level.SEVERE, "Warp Permissions Exception (on close)", ex);
+				MyWarp.logger.log(Level.SEVERE, "Warp Permissions Exception (on close)", ex);
 			}
 		}
 	}
@@ -375,7 +379,7 @@ public class WarpDataSource {
 			ps.executeUpdate();
 			conn.commit();
 		} catch (SQLException ex) {
-			XLogger.log(Level.SEVERE, "Warp Creator Exception", ex);
+			MyWarp.logger.log(Level.SEVERE, "Warp Creator Exception", ex);
 		} finally {
 			try {
 				if (ps != null) {
@@ -385,7 +389,7 @@ public class WarpDataSource {
 					set.close();
 				}
 			} catch (SQLException ex) {
-				XLogger.log(Level.SEVERE,
+				MyWarp.logger.log(Level.SEVERE,
 						"Warp Creator Exception (on close)", ex);
 			}
 		}
