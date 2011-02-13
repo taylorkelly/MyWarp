@@ -11,25 +11,7 @@ import org.bukkit.entity.Player;
 public class ListCommand extends SubCommand {
 
 	public ListCommand(WarpList list, Server server) {
-		super(list, server);
-	}
-
-	@Override
-	public int getPossibility(String[] parameters) {
-		if (parameters.length > 0) {
-			if (!(parameters[0].equalsIgnoreCase("list") || parameters[0].equalsIgnoreCase("ls"))) {
-				return -1;
-			}
-			if (parameters.length <= 2) {
-				return 1;
-			} else if (parameters.length == 3 && WMPlayerListener.isInteger(parameters[2])) {
-				return 1;
-			} else {
-				return -1;
-			}
-		} else {
-			return -1;
-		}
+		super(list, server, "list", "ls");
 	}
 
 	@Override
@@ -70,6 +52,11 @@ public class ListCommand extends SubCommand {
 		}
 		lister.list();
 		return true;
+	}
+
+	@Override
+	public boolean isValid(String[] parameters) {
+		return parameters.length == 1 || parameters.length == 2 || (parameters.length == 3 && WMPlayerListener.isInteger(parameters[2]));
 	}
 
 }

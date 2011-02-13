@@ -10,19 +10,10 @@ import org.bukkit.entity.Player;
 import de.xzise.xwarp.PermissionWrapper;
 import de.xzise.xwarp.PermissionWrapper.PermissionTypes;
 
-public class PermissionsCommand extends SubCommand {
+public class PermissionsCommand extends FixedParametersCommand {
 
 	public PermissionsCommand(WarpList list, Server server) {
-		super(list, server);
-	}
-
-	@Override
-	public int getPossibility(String[] parameters) {
-		if (parameters.length == 1 && parameters[0].equalsIgnoreCase("permissions")) {
-			return 1;
-		} else {
-			return -1;
-		}
+		super(list, server, "permissions");
 	}
 
 	@Override

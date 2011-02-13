@@ -8,19 +8,7 @@ import org.bukkit.entity.Player;
 public class WarpToCommand extends SubCommand {
 
 	public WarpToCommand(WarpList list, Server server) {
-		super(list, server);
-	}
-
-	@Override
-	public int getPossibility(String[] parameters) {
-		if (parameters.length > 0 && parameters.length <= 3) {
-			if (parameters.length > 1 && parameters[0].equalsIgnoreCase("to")) {
-				return 1;
-			} else if (parameters.length <= 2) {
-				return 0;
-			}
-		}
-		return -1;
+		super(list, server, "to");
 	}
 
 	@Override
@@ -36,6 +24,12 @@ public class WarpToCommand extends SubCommand {
 		}
 		this.list.warpTo(parameters[start], creator, player, start == 1);
 		return true;
+	}
+
+	@Override
+	public boolean isValid(String[] parameters) {
+		// TODO Auto-generated method stub
+		return parameters.length == 1 || parameters.length == 2 || (parameters.length == 3 && parameters[0].equalsIgnoreCase("to"));
 	}
 
 }

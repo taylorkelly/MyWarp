@@ -13,23 +13,34 @@ public abstract class SubCommand {
 	
 	protected final WarpList list;
 	protected final Server server;
+	protected final String[] commands;
 	
-	protected SubCommand(WarpList list, Server server) {
+	/**
+	 * Creates a subcommand.
+	 * @param list The list to all warps.
+	 * @param server The server instance.
+	 * @param commands The commands.
+	 * @throws IllegalArgumentException If commands is empty.
+	 */
+	protected SubCommand(WarpList list, Server server, String... commands) {
+		if (commands.length <= 0) {
+			throw new IllegalArgumentException("No command given!");
+		}
 		this.list = list;
 		this.server = server;
+		this.commands = commands;
 	}
 
-	public String getPlayer(String name) {
+	protected String getPlayer(String name) {
 		Player player = this.server.getPlayer(name);
 		return player == null ? name : player.getName();
 	}
 	
-	/**
-	 * Returns the possibility that this command could be meant.
-	 * @param parameters The complete parameters including the command.
-	 * @return The possibility. If negative it is impossible for this command.
-	 */
-	public abstract int getPossibility(String[] parameters);
+	public String[] getCommands() {
+		return this.commands.clone();
+	}
+	
+	public abstract boolean isValid(String[] parameters);
 	
 	protected abstract boolean internalExecute(Player player, String[] parameters);
 	

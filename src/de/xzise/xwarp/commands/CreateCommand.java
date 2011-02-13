@@ -6,18 +6,10 @@ import me.taylorkelly.mywarp.Warp.Visibility;
 import org.bukkit.Server;
 import org.bukkit.entity.Player;
 
-public class CreateCommand extends SubCommand {
+public class CreateCommand extends FixedParametersCommand {
 
 	public CreateCommand(WarpList list, Server server) {
-		super(list, server);
-	}
-
-	@Override
-	public int getPossibility(String[] parameters) {
-		if (parameters.length == 2 && (parameters[0].equalsIgnoreCase("create") || parameters[0].equalsIgnoreCase("+") || parameters[0].equalsIgnoreCase("createp") || parameters[0].equalsIgnoreCase("+p") || parameters[0].equalsIgnoreCase("createg") || parameters[0].equalsIgnoreCase("+g"))) {
-			return 1;
-		}
-		return -1;
+		super(list, server, 1, "create", "+", "createp", "+p", "createg", "+g");
 	}
 
 	@Override
@@ -32,5 +24,4 @@ public class CreateCommand extends SubCommand {
 		this.list.addWarp(parameters[1], player, visibility);
 		return true;
 	}
-
 }

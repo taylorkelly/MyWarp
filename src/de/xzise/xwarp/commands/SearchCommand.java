@@ -6,18 +6,10 @@ import me.taylorkelly.mywarp.WarpList;
 import org.bukkit.Server;
 import org.bukkit.entity.Player;
 
-public class SearchCommand extends SubCommand {
+public class SearchCommand extends FixedParametersCommand {
 
 	public SearchCommand(WarpList list, Server server) {
-		super(list, server);
-	}
-
-	@Override
-	public int getPossibility(String[] parameters) {
-		if (parameters.length == 2 && parameters[0].equalsIgnoreCase("search")) {
-			return 1;
-		}
-		return -1;
+		super(list, server, 1, "search");
 	}
 
 	@Override
@@ -28,5 +20,4 @@ public class SearchCommand extends SubCommand {
 		searcher.search();
 		return true;
 	}
-
 }

@@ -13,6 +13,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import de.xzise.DatabaseConnection;
 import de.xzise.XLogger;
+import de.xzise.xwarp.CommandMap;
 import de.xzise.xwarp.PermissionWrapper;
 
 public class MyWarp extends JavaPlugin implements DatabaseConnection {
@@ -51,7 +52,16 @@ public class MyWarp extends JavaPlugin implements DatabaseConnection {
 		
 		WarpList warpList = new WarpList(getServer());
 
-		this.playerListener = new WMPlayerListener(this, warpList);
+		// Create commands
+		CommandMap commands = null;
+		try {
+			commands = new CommandMap(warpList, this.getServer());
+		} catch (IllegalArgumentException iae) {
+			MyWarp.logger.severe("Couldn't initalize commands.", iae);
+			this.getServer().getPluginManager().disablePlugin(this);
+		}
+		
+		this.playerListener = new WMPlayerListener(commands);
 		MWBlockListener blockListener = new MWBlockListener(warpList);
 		this.getServer().getPluginManager().registerEvent(Event.Type.PLAYER_COMMAND, playerListener, Priority.Normal, this);
 		this.getServer().getPluginManager().registerEvent(Event.Type.BLOCK_RIGHTCLICKED, blockListener, Priority.Normal, this);

@@ -7,12 +7,12 @@ import org.bukkit.entity.Player;
 import me.taylorkelly.mywarp.Converter;
 import me.taylorkelly.mywarp.WarpList;
 
-public class ConvertCommand extends SubCommand {
+public class ConvertCommand extends FixedParametersCommand {
 
 	private boolean warning;
 
 	public ConvertCommand(WarpList list, Server server) {
-		super(list, server);
+		super(list, server, "convert");
 		this.warning = false;
 	}
 
@@ -34,14 +34,4 @@ public class ConvertCommand extends SubCommand {
 			return false;
 		}
 	}
-
-	@Override
-	public int getPossibility(String[] parameters) {
-		if (parameters[0].equalsIgnoreCase("convert") && parameters.length == 1) {
-			return 1;
-		} else {
-			return -1;
-		}
-	}
-
 }

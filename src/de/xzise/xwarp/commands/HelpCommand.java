@@ -13,15 +13,7 @@ import org.bukkit.entity.Player;
 public class HelpCommand extends SubCommand {
 
 	public HelpCommand(WarpList list, Server server) {
-		super(list, server);
-	}
-
-	@Override
-	public int getPossibility(String[] parameters) {
-		if ((parameters.length == 1 || parameters.length == 2) && parameters[0].equalsIgnoreCase("help")) {
-			return 1;
-		}
-		return -1;
+		super(list, server, "help", "?");
 	}
 
 	@Override
@@ -78,10 +70,15 @@ public class HelpCommand extends SubCommand {
 		lines.add(ChatColor.RED + "------------------ " + ChatColor.WHITE + "/WARP HELP" + ChatColor.RED + " " + page
 				+ "/" + HELP_PAGES_MAXIMUM + "------------------");
 		
-		for (int i = page * WMPlayerListener.LINES_PER_PAGE; i < helpLines.length && i < (page + 1) * WMPlayerListener.LINES_PER_PAGE; i++) {
+		for (int i = page * (WMPlayerListener.LINES_PER_PAGE - 1); i < helpLines.length && i < (page + 1) * (WMPlayerListener.LINES_PER_PAGE - 1); i++) {
 			lines.add(helpLines[i]);
 		}
 		return lines.toArray(new String[0]);
+	}
+
+	@Override
+	public boolean isValid(String[] parameters) {
+		return parameters.length == 1 || (parameters.length == 2 && WMPlayerListener.isInteger(parameters[1]));
 	}
 
 }
