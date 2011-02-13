@@ -14,10 +14,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.Server;
 import org.bukkit.entity.Player;
 
-import de.xzise.XLogger;
 import de.xzise.xwarp.PermissionWrapper.PermissionTypes;
-
-
 
 public class WarpList {
 	private Map<String, Warp> global;
@@ -72,7 +69,7 @@ public class WarpList {
 				warp = new Warp(name, player);
 				putIntoPersonal(this.personal, warp);
 				if (warp != this.getWarp(name, player.getName())) {
-					XLogger.severe("Warp saving error!");
+					MyWarp.logger.severe("Warp saving error!");
 				}
 				WarpDataSource.addWarp(warp);
 				player.sendMessage(ChatColor.AQUA + "Successfully created '"

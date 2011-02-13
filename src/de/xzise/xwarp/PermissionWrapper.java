@@ -1,14 +1,13 @@
 package de.xzise.xwarp;
 
+import me.taylorkelly.mywarp.MyWarp;
+
 import org.bukkit.Server;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 
 import com.nijiko.permissions.PermissionHandler;
 import com.nijikokun.bukkit.Permissions.Permissions;
-
-import de.xzise.XLogger;
-
 
 public class PermissionWrapper {
 
@@ -142,9 +141,9 @@ public class PermissionWrapper {
 		Plugin test = server.getPluginManager().getPlugin("Permissions");
 		if (test != null) {
 			this.handler = ((Permissions) test).getHandler();
-			XLogger.info("Permissions enabled.");
+			MyWarp.logger.info("Permissions enabled.");
 		} else {
-			XLogger.severe("Permission system not found. Use defaults.");
+			MyWarp.logger.severe("Permission system not found. Use defaults.");
 		}
 	}
 	
