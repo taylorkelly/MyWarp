@@ -8,7 +8,6 @@ import org.bukkit.event.block.BlockListener;
 import org.bukkit.event.block.BlockRightClickEvent;
 import org.bukkit.event.block.SignChangeEvent;
 
-import de.xzise.XLogger;
 import de.xzise.xwarp.PermissionWrapper.PermissionTypes;
 
 public class MWBlockListener extends BlockListener {
@@ -32,12 +31,12 @@ public class MWBlockListener extends BlockListener {
         if(block.getState() instanceof Sign /*&& MyWarp.permissions.permission(event.getPlayer(), PermissionTypes.SIGN_WARP)*/) {
         	SignWarp signWarp = new SignWarp((Sign) block.getState());
         	if (signWarp.getType() != null) {
-        		XLogger.info("cb");
+        		MyWarp.logger.info("cb");
         		event.setBuildable(false);
         	}
-        	XLogger.info("cb pre");
+        	MyWarp.logger.info("cb pre");
         } else {
-        	XLogger.info("cb !sign");
+        	MyWarp.logger.info("cb !sign");
         }
     }
     

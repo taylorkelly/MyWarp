@@ -8,7 +8,6 @@ import org.bukkit.Server;
 import org.bukkit.plugin.Plugin;
 
 import de.xzise.DatabaseConnection;
-import de.xzise.XLogger;
 
 
 public class ConnectionManager {
@@ -24,7 +23,7 @@ public class ConnectionManager {
 				if (test != null && test.isEnabled() && test instanceof DatabaseConnection) {
 					connection = ((DatabaseConnection) test).getConnection();
 					if (connection != null) {
-						XLogger.info("Connection with " + name + " established.");
+						MyWarp.logger.info("Connection with " + name + " established.");
 						return connection;
 					}
 				}
@@ -55,9 +54,8 @@ public class ConnectionManager {
     }
 
     public static synchronized void freeConnection() {
-    	System.out.println("free connection call");
         if (connection != null && own) {
-        	XLogger.info("Close connection!");
+        	MyWarp.logger.info("Close connection!");
             try {
                 connection.close();
                 connection = null;

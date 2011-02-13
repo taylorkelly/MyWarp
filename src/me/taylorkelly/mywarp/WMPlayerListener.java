@@ -274,7 +274,7 @@ public class WMPlayerListener extends PlayerListener {
 				/*
 				 * /warp [to] <name>
 				 */
-			} else if (values.length > 1 && values.length < 4) {
+			} else if (values.length > 1 && values.length < 4 && !(values[1].equalsIgnoreCase("help") || values[1].equalsIgnoreCase("?"))) {
 //				player.sendMessage("to");
 				// TODO ChunkLoading
 				int start = 1;
@@ -345,7 +345,7 @@ public class WMPlayerListener extends PlayerListener {
 	};
 	
 	public static String[] helpPage(int page) {
-		if (helpLines.length / (LINES_PER_PAGE - 1) > page) {
+		if (helpLines.length / (LINES_PER_PAGE - 1) < page || page <= 0) {
 			return new String[] { ChatColor.RED + "Invalid /warp help page." };
 		}
 		List<String> lines = new ArrayList<String>(LINES_PER_PAGE);

@@ -18,13 +18,15 @@ import de.xzise.xwarp.PermissionWrapper;
 public class MyWarp extends JavaPlugin implements DatabaseConnection {
 	
 	public static PermissionWrapper permissions = new PermissionWrapper();
+	public static XLogger logger;
 	
 	private WMPlayerListener playerListener;
 	public final String name = this.getDescription().getName();
 	public final String version = this.getDescription().getVersion();
+	
 	public MyWarp(PluginLoader pluginLoader, Server instance, PluginDescriptionFile desc, File directory, File plugin, ClassLoader cLoader) {
 		super(pluginLoader, instance, desc, directory, plugin, cLoader);
-		XLogger.initialize("Minecraft", this.name);
+		logger = new XLogger(this.name);
 	}
 
 	@Override
@@ -41,7 +43,7 @@ public class MyWarp extends JavaPlugin implements DatabaseConnection {
 
 		// Init connection here
 		if (ConnectionManager.initializeConnection(this.getServer()) == null) {
-			XLogger.severe("Could not establish SQL connection. Disabling " + name + "!");
+			logger.severe("Could not establish SQL connection. Disabling " + name + "!");
 			this.getServer().getPluginManager().disablePlugin(this);
 			return;
 		}
@@ -57,7 +59,7 @@ public class MyWarp extends JavaPlugin implements DatabaseConnection {
 		this.getServer().getPluginManager().registerEvent(Event.Type.SIGN_CHANGE, blockListener, Priority.Low, this);
 //		this.getServer().getPluginManager().registerEvent(Event.Type.BLOCK_CANBUILD, blockListener, Priority.Normal, this);
 //		this.getServer().getPluginManager().registerEvent(Event.Type.BLOCK_PLACED, blockListener, Priority.Low, this);
-		XLogger.info(name + " " + version + " enabled");
+		logger.info(name + " " + version + " enabled");
 	}
 
 	private void updateFiles() {

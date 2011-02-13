@@ -5,36 +5,40 @@ import java.util.logging.Logger;
 
 public class XLogger {
 
-	private static Logger logger;
-	private static String name;
+	private final Logger logger;
+	private final String pluginName;
 	
-	public static void initialize(String name, String pluginName) {
-		XLogger.logger = Logger.getLogger(name);
-		XLogger.name = pluginName;
+	public XLogger(String loggerName, String pluginName) {
+		this.logger = Logger.getLogger(loggerName);
+		this.pluginName = pluginName;
 	}
 	
-	private static String formatMessage(String message) {
-		return "[" + XLogger.name + "]: " + message;
+	public XLogger(String pluginName) {
+		this("minecraft", pluginName);
 	}
 	
-	public static void info(String msg) {
-		XLogger.logger.info(XLogger.formatMessage(msg));
+	private String formatMessage(String message) {
+		return "[" + pluginName + "]: " + message;
 	}
 	
-	public static void warning(String msg) {
-		XLogger.logger.warning(XLogger.formatMessage(msg));
+	public void info(String msg) {
+		this.logger.info(this.formatMessage(msg));
 	}
 	
-	public static void severe(String msg) {
-		XLogger.logger.severe(XLogger.formatMessage(msg));
+	public void warning(String msg) {
+		this.logger.warning(this.formatMessage(msg));
 	}
 	
-	public static void severe(String msg, Throwable exception) {
-		XLogger.log(Level.SEVERE, msg, exception);
+	public void severe(String msg) {
+		this.logger.severe(this.formatMessage(msg));
+	}
+	
+	public void severe(String msg, Throwable exception) {
+		this.log(Level.SEVERE, msg, exception);
 	}
 
-	public static void log(Level level, String msg, Throwable exception) {
-		XLogger.logger.log(level, msg, exception);
+	public void log(Level level, String msg, Throwable exception) {
+		this.logger.log(level, this.formatMessage(msg), exception);
 	}
 	
 }
