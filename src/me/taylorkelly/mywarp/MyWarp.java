@@ -24,6 +24,7 @@ public class MyWarp extends JavaPlugin implements DatabaseConnection {
 	private WMPlayerListener playerListener;
 	public final String name = this.getDescription().getName();
 	public final String version = this.getDescription().getVersion();
+	
 	public MyWarp(PluginLoader pluginLoader, Server instance, PluginDescriptionFile desc, File directory, File plugin, ClassLoader cLoader) {
 		super(pluginLoader, instance, desc, directory, plugin, cLoader);
 		logger = new XLogger(this.name);

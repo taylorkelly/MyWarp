@@ -37,7 +37,7 @@ public class WMPlayerListener extends PlayerListener {
 			this.commands.executeCommand(player, parameters);
 		}
 	}
-
+	
 	/**
 	 * Parses a command line. Reads the two first commands like "split" and the
 	 * following with quotes/escaping.

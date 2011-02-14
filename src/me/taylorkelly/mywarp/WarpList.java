@@ -27,7 +27,7 @@ public class WarpList {
 	}
 
 	private void loadFromDatabase() {
-		WarpDataSource.initialize();
+		WarpDataSource.initialize(this.server);
 		this.global = new HashMap<String, Warp>();
 		this.personal = new HashMap<String, Map<String,Warp>>();
 		WarpDataSource.getMap(this.global, this.personal, this.server);

@@ -21,7 +21,7 @@ public class WarpDataSource {
 			+ "`id` INTEGER PRIMARY KEY,"
 			+ "`name` varchar(32) NOT NULL DEFAULT 'warp',"
 			+ "`creator` varchar(32) NOT NULL DEFAULT 'Player',"
-			+ "`world` tinyint NOT NULL DEFAULT '0',"
+			+ "`world` varchar(32) NOT NULL,"
 			+ "`x` DPUBLE NOT NULL DEFAULT '0',"
 			+ "`y` tinyint NOT NULL DEFAULT '0',"
 			+ "`z` DOUBLE NOT NULL DEFAULT '0',"
@@ -33,14 +33,15 @@ public class WarpDataSource {
 	
 	private final static String VERSION_TABLE = "CREATE TABLE `meta` (`name` varchar(32) NOT NULL, `value` int NOT NULL);";
 
-	private final static int TARGET_VERSION = 0;
+	private final static int TARGET_VERSION = 1;
 	
-	public static void initialize() {
+	public static void initialize(Server server) {
 		int version = getVersion();
 		
 		if (version < TARGET_VERSION) {
 			MyWarp.logger.info("Database layout is outdated (" + version + ")! Updating to " + TARGET_VERSION + ".");
 			Statement statement = null;
+			PreparedStatement convertedWarp = null;
 			ResultSet set = null;
 			try {
 				Connection conn = ConnectionManager.getConnection();
@@ -55,12 +56,41 @@ public class WarpDataSource {
 				// Create new database
 				statement.executeUpdate(WARP_TABLE);
 				if (tableExists("warpTable_backup")) {
-					// Copy back
-					statement.executeUpdate("INSERT INTO warpTable SELECT * FROM warpTable_backup");
+					// Select line by line
+					String world = server.getWorlds().get(0).getName();
+					set = statement.executeQuery("SELECT * FROM warpTable_backup");
+					convertedWarp = conn.prepareStatement("INSERT INTO warpTable (id, name, creator, world, x, y, z, yaw, pitch, publicLevel, permissions, welcomeMessage) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)");
+					while (set.next()) {
+						convertedWarp.setInt(1, set.getInt("id"));
+						convertedWarp.setString(2, set.getString("name"));
+						convertedWarp.setString(3, set.getString("creator"));
+						convertedWarp.setString(4, world);						
+						convertedWarp.setDouble(5, set.getDouble("x"));
+						convertedWarp.setInt(6, set.getInt("y"));
+						convertedWarp.setDouble(7, set.getDouble("z"));
+						convertedWarp.setInt(8, set.getInt("yaw"));
+						convertedWarp.setInt(9, set.getInt("pitch"));
+						if (version < 0) {
+							if (set.getBoolean("publicAll")) {
+								convertedWarp.setInt(10, 1);
+							} else {
+								convertedWarp.setInt(10, 0);
+							}
+						} else {
+							convertedWarp.setInt(10, set.getInt("publicLevel"));
+						}
+						convertedWarp.setString(11, set.getString("permissions"));
+						convertedWarp.setString(12, set.getString("welcomeMessage"));
+						convertedWarp.executeUpdate();						
+					}
 					statement.executeUpdate("DROP TABLE warpTable_backup");
 					MyWarp.logger.info("Recovering the backup.");
 				}
+				if (version < 0) {
 				statement.executeUpdate("INSERT INTO meta (name, value) VALUES (\"version\", " + TARGET_VERSION + ")");
+				} else {
+					statement.executeUpdate("UPDATE meta SET value = " + TARGET_VERSION + " WHERE name = \"version\"");
+				}
 				conn.commit();
 			} catch (SQLException ex) {
 //				try {
@@ -95,8 +125,7 @@ public class WarpDataSource {
 				int index = set.getInt("id");
 				String name = set.getString("name");
 				String creator = set.getString("creator");
-				World world = server.getWorlds().get(0);
-//				World world = server.getWorld(set.getString("world"));
+				World world = server.getWorld(set.getString("world"));
 				double x = set.getDouble("x");
 				int y = set.getInt("y");
 				double z = set.getDouble("z");
@@ -232,8 +261,7 @@ public class WarpDataSource {
 	}
 	
 	public static void setLocation(Location location, int offset, PreparedStatement ps) throws SQLException {
-		ps.setInt(offset++, 0); //TODO: Add World
-//		ps.setString(offset++, location.getWorld().getName());
+		ps.setString(offset++, location.getWorld().getName());
 		ps.setDouble(offset++, location.getX());
 		ps.setInt(offset++, (int) location.getY());
 		ps.setDouble(offset++, location.getZ());
