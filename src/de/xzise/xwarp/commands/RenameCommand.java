@@ -8,7 +8,7 @@ import org.bukkit.entity.Player;
 public class RenameCommand extends EditCommand {
 
 	public RenameCommand(WarpList list, Server server) {
-		super(list, server, true, "update", "*");
+		super(list, server, true, "rename");
 	}
 
 	@Override
