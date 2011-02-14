@@ -19,7 +19,11 @@ public class ListCommand extends SubCommand {
 		Lister lister = new Lister(this.list);
 		lister.setPlayer(player);
 		
-		if (parameters.length == 3 ||(parameters.length == 2 && !WMPlayerListener.isInteger(parameters[1]))) {
+		if (parameters.length == 2 && parameters[1].equalsIgnoreCase("legend")) {
+			for (String line : Lister.getLegend()) {
+				player.sendMessage(line);
+			}
+		} else if (parameters.length == 3 ||(parameters.length == 2 && !WMPlayerListener.isInteger(parameters[1]))) {
 			lister.setCreator(this.getPlayer(parameters[1]));
 			if (parameters.length == 3) {
 				int page = Integer.parseInt(parameters[2]);
