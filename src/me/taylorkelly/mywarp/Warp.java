@@ -109,6 +109,10 @@ public class Warp {
 		this.location = player.getLocation().clone();		
 	}
 	
+	public void rename(String newName) {
+		this.name = newName;
+	}
+	
 	public boolean playerIsCreator(String name) {
 		if (creator.equals(name))
 			return true;

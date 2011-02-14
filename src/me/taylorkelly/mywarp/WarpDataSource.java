@@ -264,18 +264,19 @@ public class WarpDataSource {
 			}
 		}
 	}
-
-	public static void deleteWarp(Warp warp) {
+	
+	public static void updateName(Warp warp) {
 		PreparedStatement ps = null;
 		ResultSet set = null;
 		try {
 			Connection conn = ConnectionManager.getConnection();
-			ps = conn.prepareStatement("DELETE FROM warpTable WHERE id = ?");
-			ps.setInt(1, warp.index);
+			ps = conn.prepareStatement("UPDATE warpTable SET name = ? WHERE id = ?");
+			ps.setString(1, warp.name);
+			ps.setInt(2, warp.index);
 			ps.executeUpdate();
 			conn.commit();
 		} catch (SQLException ex) {
-			MyWarp.logger.log(Level.SEVERE, "Warp Delete Exception", ex);
+			MyWarp.logger.log(Level.SEVERE, "Warp Name Exception", ex);
 		} finally {
 			try {
 				if (ps != null) {
@@ -285,7 +286,7 @@ public class WarpDataSource {
 					set.close();
 				}
 			} catch (SQLException ex) {
-				MyWarp.logger.log(Level.SEVERE, "Warp Delete Exception (on close)", ex);
+				MyWarp.logger.log(Level.SEVERE, "Warp Name Exception (on close)", ex);
 			}
 		}
 	}
@@ -311,7 +312,7 @@ public class WarpDataSource {
 					set.close();
 				}
 			} catch (SQLException ex) {
-				MyWarp.logger.log(Level.SEVERE, "Warp Publicize Exception (on close)", ex);
+				MyWarp.logger.log(Level.SEVERE, "Warp Welcome Message Exception (on close)", ex);
 			}
 		}
 	}
@@ -337,7 +338,7 @@ public class WarpDataSource {
 					set.close();
 				}
 			} catch (SQLException ex) {
-				MyWarp.logger.log(Level.SEVERE, "Warp Publicize Exception (on close)", ex);
+				MyWarp.logger.log(Level.SEVERE, "Warp Visibility (on close)", ex);
 			}
 		}
 	}
@@ -389,10 +390,33 @@ public class WarpDataSource {
 					set.close();
 				}
 			} catch (SQLException ex) {
-				MyWarp.logger.log(Level.SEVERE,
-						"Warp Creator Exception (on close)", ex);
+				MyWarp.logger.log(Level.SEVERE,	"Warp Creator Exception (on close)", ex);
 			}
 		}
 	}
 
+	public static void deleteWarp(Warp warp) {
+		PreparedStatement ps = null;
+		ResultSet set = null;
+		try {
+			Connection conn = ConnectionManager.getConnection();
+			ps = conn.prepareStatement("DELETE FROM warpTable WHERE id = ?");
+			ps.setInt(1, warp.index);
+			ps.executeUpdate();
+			conn.commit();
+		} catch (SQLException ex) {
+			MyWarp.logger.log(Level.SEVERE, "Warp Delete Exception", ex);
+		} finally {
+			try {
+				if (ps != null) {
+					ps.close();
+				}
+				if (set != null) {
+					set.close();
+				}
+			} catch (SQLException ex) {
+				MyWarp.logger.log(Level.SEVERE, "Warp Delete Exception (on close)", ex);
+			}
+		}
+	}
 }

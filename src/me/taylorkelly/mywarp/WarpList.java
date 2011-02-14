@@ -486,6 +486,25 @@ public class WarpList {
 			player.sendMessage(ChatColor.RED + "No such warp '" + name + "'");
 		}
 	}
+	
+	public void rename(String name, String creator, Player player, String newName) {
+		Warp warp = this.getWarp(name, creator);
+		if (warp != null) {
+			if (MyWarp.permissions.permission(player,
+					PermissionTypes.ADMIN_RENAME)
+					|| warp.playerCanModify(player)) {
+				warp.rename(newName);
+				WarpDataSource.updateWarp(warp);
+				player.sendMessage(ChatColor.AQUA + "You have updated '" + warp.name + "'");
+			} else {
+				player.sendMessage(ChatColor.RED
+						+ "You do not have permission to change the position from '"
+						+ warp.name + "'");
+			}
+		} else {
+			player.sendMessage(ChatColor.RED + "No such warp '" + name + "'");
+		}
+	}
 
 	public boolean warpExists(String name) {
 		return this.global.containsKey(name.toLowerCase());

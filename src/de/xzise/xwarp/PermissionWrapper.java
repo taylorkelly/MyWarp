@@ -43,6 +43,8 @@ public class PermissionWrapper {
 		ADMIN_MESSAGE("warp.admin.message"),
 		// Update all warps
 		ADMIN_UPDATE("warp.admin.update"),
+		// Rename all warps
+		ADMIN_RENAME("warp.admin.rename"),
 		// Make other's warp privates
 		ADMIN_PRIVATE("warp.admin.private"),
 		// Make other's warp public
