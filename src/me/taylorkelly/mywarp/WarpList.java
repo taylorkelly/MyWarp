@@ -119,7 +119,7 @@ public class WarpList {
 		}
 	}
 
-	public void warpTo(String name, String creator, Player player, boolean toAlternative) {
+	public void warpTo(String name, String creator, Player player) {
 		Warp warp = this.getWarp(name, creator);
 		if (warp != null) {
 			if (warp.playerCanWarp(player)) {
@@ -131,11 +131,7 @@ public class WarpList {
 						+ "'");
 			}
 		} else {
-			player.sendMessage(ChatColor.RED + "No such warp '" + name + "'");
-			if (this.warpExists("to " + name) && toAlternative) {
-				player.sendMessage("Did you mean '" + ChatColor.AQUA + "to "
-						+ name + ChatColor.WHITE + "'?");
-			}
+			this.sendMissingWarp(name, creator, player);
 		}
 	}
 
@@ -158,7 +154,7 @@ public class WarpList {
 						+ "You do not have permission to delete '" + name + "'");
 			}
 		} else {
-			player.sendMessage(ChatColor.RED + "No such warp '" + name + "'");
+			this.sendMissingWarp(name, creator, player);
 		}
 	}
 
@@ -182,7 +178,7 @@ public class WarpList {
 						+ "'");
 			}
 		} else {
-			player.sendMessage(ChatColor.RED + "No such warp '" + name + "'");
+			this.sendMissingWarp(name, creator, player);
 		}
 	}
 
@@ -222,7 +218,7 @@ public class WarpList {
 						+ name + "'");
 			}
 		} else {
-			player.sendMessage(ChatColor.RED + "No such warp '" + name + "'");
+			this.sendMissingWarp(name, creator, player);
 		}
 	}
 
@@ -243,7 +239,7 @@ public class WarpList {
 						+ "'");
 			}
 		} else {
-			player.sendMessage(ChatColor.RED + "No such warp '" + name + "'");
+			this.sendMissingWarp(name, creator, player);
 		}
 	}
 	
@@ -272,7 +268,7 @@ public class WarpList {
 						+ "'");
 			}
 		} else {
-			player.sendMessage(ChatColor.RED + "No such warp '" + name + "'");
+			this.sendMissingWarp(name, creator, player);
 		}
 	}
 
@@ -310,7 +306,15 @@ public class WarpList {
 						+ name + "'");
 			}
 		} else {
-			player.sendMessage(ChatColor.RED + "No such warp '" + name + "'");
+			this.sendMissingWarp(name, creator, player);
+		}
+	}
+	
+	public void sendMissingWarp(String name, String creator, Player player) {
+		if (creator == null || creator.isEmpty()) {
+			player.sendMessage(ChatColor.RED + "Global warp '" + name + "' doesn't exists.");
+		} else {
+			player.sendMessage(ChatColor.RED + "Player '" + creator + "' don't owns a warp named '" + name + "'.");
 		}
 	}
 

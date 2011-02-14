@@ -34,7 +34,7 @@ public class SignWarp {
 		WarpDestination destination = SignWarp.getType(lines);
 	
 		if (destination != null) {
-			list.warpTo(destination.name, destination.creator, player, false);
+			list.warpTo(destination.name, destination.creator, player);
 			return true;
 		} else {
 			return false;

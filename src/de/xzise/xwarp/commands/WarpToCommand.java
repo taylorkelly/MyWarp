@@ -22,13 +22,12 @@ public class WarpToCommand extends SubCommand {
 		if (parameters.length > start + 1) {
 			creator = parameters[start + 1];
 		}
-		this.list.warpTo(parameters[start], creator, player, start == 1);
+		this.list.warpTo(parameters[start], creator, player);
 		return true;
 	}
 
 	@Override
 	public boolean isValid(String[] parameters) {
-		// TODO Auto-generated method stub
 		return parameters.length == 1 || parameters.length == 2 || (parameters.length == 3 && parameters[0].equalsIgnoreCase("to"));
 	}
 
