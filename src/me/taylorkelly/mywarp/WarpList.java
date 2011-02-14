@@ -20,6 +20,8 @@ public class WarpList {
 	private Map<String, Warp> global;
 	private Map<String, Map<String, Warp>> personal;
 	private Server server;
+	
+	private static final WarpComparator warpComparator = new WarpComparator();
 
 	public WarpList(Server server) {
 		this.server = server;
@@ -327,14 +329,7 @@ public class WarpList {
 		
 		final Collator collator = Collator.getInstance();
 		collator.setStrength(Collator.SECONDARY);
-		Collections.sort(names, new Comparator<Warp>() {
-
-			@Override
-			public int compare(Warp o1, Warp o2) {
-				return collator.compare(o1.name, o2.name);
-			}
-			
-		});
+		Collections.sort(names, WarpList.warpComparator);
 
 		int index = 0;
 		int currentCount = 0;
@@ -395,14 +390,7 @@ public class WarpList {
 
 		final Collator collator = Collator.getInstance();
 		collator.setStrength(Collator.SECONDARY);
-		Collections.sort(all, new Comparator<Warp>() {
-
-			@Override
-			public int compare(Warp o1, Warp o2) {
-				return collator.compare(o1.name, o2.name);
-			}
-			
-		});
+		Collections.sort(all, WarpList.warpComparator);
 
 		for (int i = 0; i < all.size(); i++) {
 			Warp warp = all.get(i);
@@ -556,8 +544,22 @@ public class WarpList {
 	 * Returns the global warp.
 	 * @param name The name of the global warp.
 	 * @return The global warp. If no global warp exists it returns null.
+	 * @see {@link #getWarp(String, String)} Calls this method with creator == <code>null</code>.
 	 */
 	public Warp getWarp(String name) {
 		return this.getWarp(name, null);
 	}
+}
+
+/**
+ * Compares to warps about the name.
+ * 
+ * @author Fabian Neundorf.
+ */
+class WarpComparator implements Comparator<Warp> {
+
+	@Override
+	public int compare(Warp o1, Warp o2) {
+		return o1.name.compareTo(o2.name);
+	}	
 }
