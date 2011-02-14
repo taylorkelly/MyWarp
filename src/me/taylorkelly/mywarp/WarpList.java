@@ -493,9 +493,32 @@ public class WarpList {
 			if (MyWarp.permissions.permission(player,
 					PermissionTypes.ADMIN_RENAME)
 					|| warp.playerCanModify(player)) {
-				warp.rename(newName);
-				WarpDataSource.updateWarp(warp);
-				player.sendMessage(ChatColor.AQUA + "You have updated '" + warp.name + "'");
+				// Creator has to exists!
+				if (creator == null || creator.isEmpty()) {
+					creator = warp.creator;
+				}
+				if (warp.visibility == Visibility.GLOBAL && (this.getWarp(newName) != null)) {
+					player.sendMessage(ChatColor.RED + "A global warp with this name already exists!");
+				} else if (this.getWarp(newName, creator) != null) {
+					player.sendMessage(ChatColor.RED + "You already have a warp with this name.");
+				} else {
+					// Rename in global list.
+					// Is in global list
+					if (this.getWarp(name) == warp) {
+						this.global.remove(name.toLowerCase());
+						// Only put new in, if there is no existing
+						if (!this.global.containsKey(newName.toLowerCase())) {
+							this.global.put(newName.toLowerCase(), warp);
+						}
+					}
+					// Rename in personal list.
+					this.personal.get(creator.toLowerCase()).remove(name.toLowerCase());
+					this.personal.get(creator.toLowerCase()).put(newName.toLowerCase(), warp);
+					
+					warp.rename(newName);
+					WarpDataSource.updateWarp(warp);
+					player.sendMessage(ChatColor.AQUA + "You have renamed '" + warp.name + "'");
+				}
 			} else {
 				player.sendMessage(ChatColor.RED
 						+ "You do not have permission to change the position from '"
