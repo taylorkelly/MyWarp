@@ -24,20 +24,20 @@ public abstract class EditCommand extends SubCommand {
 	
 	@Override
 	protected boolean internalExecute(Player player, String[] parameters) {
-		if (parameters.length < this.length || parameters.length > this.length + 1) {
+		if (!this.isValid(parameters)) {
 			return false;
 		}
 		String creator = "";
-		int parameterIndex = 1;
+		int parameterIndex = 2;
 		if (parameters.length == this.length + 1) {
-			creator = parameters[1];
+			creator = this.getPlayer(parameters[2]);
 			parameterIndex++;
 		}
 		String parameter = "";
 		if (this.parameter) {
 			parameter = parameters[parameterIndex];
 		}
-		this.executeEdit(player, parameters[0], creator, parameter);
+		this.executeEdit(player, parameters[1], creator, parameter);
 		return true;
 	}
 	
