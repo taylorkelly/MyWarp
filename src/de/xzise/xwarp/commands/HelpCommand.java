@@ -50,6 +50,7 @@ public class HelpCommand extends SubCommand {
 		ChatColor.RED + "/warp delete|- <name>" + ChatColor.WHITE + "  -  Delete warp " + ChatColor.GRAY + "<name>",
 		ChatColor.RED + "/warp list|ls <#>" + ChatColor.WHITE + "  -  Views warp page " + ChatColor.GRAY + "<#>",
 		ChatColor.RED + "/warp update|* <name>" + ChatColor.WHITE + "  -  Updates position of " + ChatColor.GRAY + "<name>",
+		ChatColor.RED + "/warp rename <player> [creator] <new name>" + ChatColor.WHITE + "  -  Renames warp",
 		ChatColor.RED + "/warp search <query>" + ChatColor.WHITE + "  -  Search for " + ChatColor.GRAY + "<query>",
 		ChatColor.RED + "/warp list|ls legend" + ChatColor.WHITE + "  -  Shows the warp page's legend.",
 		ChatColor.RED + "/warp message|msg <name> <message>" + ChatColor.WHITE + "  -  Sets message",
