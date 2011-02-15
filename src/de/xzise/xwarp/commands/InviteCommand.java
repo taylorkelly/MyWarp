@@ -5,7 +5,7 @@ import org.bukkit.entity.Player;
 
 import me.taylorkelly.mywarp.WarpList;
 
-public class InviteCommand extends EditCommand {
+public class InviteCommand extends WarpCommand {
 
 	public InviteCommand(WarpList list, Server server) {
 		super(list, server, true, "invite");

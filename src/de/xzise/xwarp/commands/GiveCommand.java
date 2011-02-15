@@ -5,7 +5,7 @@ import me.taylorkelly.mywarp.WarpList;
 import org.bukkit.Server;
 import org.bukkit.entity.Player;
 
-public class GiveCommand extends EditCommand {
+public class GiveCommand extends WarpCommand {
 
 	public GiveCommand(WarpList list, Server server) {
 		super(list, server, true, "give");

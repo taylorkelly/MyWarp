@@ -5,7 +5,7 @@ import me.taylorkelly.mywarp.WarpList;
 import org.bukkit.Server;
 import org.bukkit.entity.Player;
 
-public class DeleteCommand extends EditCommand {
+public class DeleteCommand extends WarpCommand {
 
 	public DeleteCommand(WarpList list, Server server) {
 		super(list, server, false, "delete", "-");

@@ -5,7 +5,7 @@ import me.taylorkelly.mywarp.WarpList;
 import org.bukkit.Server;
 import org.bukkit.entity.Player;
 
-public class UpdateCommand extends EditCommand {
+public class UpdateCommand extends WarpCommand {
 
 	public UpdateCommand(WarpList list, Server server) {
 		super(list, server, false, "update", "*");

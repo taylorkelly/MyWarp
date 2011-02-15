@@ -5,7 +5,7 @@ import me.taylorkelly.mywarp.WarpList;
 import org.bukkit.Server;
 import org.bukkit.entity.Player;
 
-public class UninviteCommand extends EditCommand {
+public class UninviteCommand extends WarpCommand {
 
 	public UninviteCommand(WarpList list, Server server) {
 		super(list, server, true, "uninvite");

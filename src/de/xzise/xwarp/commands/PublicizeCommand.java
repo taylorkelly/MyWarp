@@ -5,7 +5,7 @@ import me.taylorkelly.mywarp.WarpList;
 import org.bukkit.Server;
 import org.bukkit.entity.Player;
 
-public class PublicizeCommand extends EditCommand {
+public class PublicizeCommand extends WarpCommand {
 
 	public PublicizeCommand(WarpList list, Server server) {
 		super(list, server, false, "public");

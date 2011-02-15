@@ -5,7 +5,7 @@ import me.taylorkelly.mywarp.WarpList;
 import org.bukkit.Server;
 import org.bukkit.entity.Player;
 
-public class RenameCommand extends EditCommand {
+public class RenameCommand extends WarpCommand {
 
 	public RenameCommand(WarpList list, Server server) {
 		super(list, server, true, "rename");

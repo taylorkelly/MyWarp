@@ -14,6 +14,7 @@ import de.xzise.xwarp.commands.DeleteCommand;
 import de.xzise.xwarp.commands.GiveCommand;
 import de.xzise.xwarp.commands.GlobalizeCommand;
 import de.xzise.xwarp.commands.HelpCommand;
+import de.xzise.xwarp.commands.InfoCommand;
 import de.xzise.xwarp.commands.InviteCommand;
 import de.xzise.xwarp.commands.ListCommand;
 import de.xzise.xwarp.commands.PermissionsCommand;
@@ -57,6 +58,7 @@ public class CommandMap {
 		this.registerCommand(new ReloadCommand(list, server));
 		this.registerCommand(new GiveCommand(list, server));
 		this.registerCommand(new PermissionsCommand(list, server));
+		this.registerCommand(new InfoCommand(list, server));
 	}
 	
 	private void registerCommand(SubCommand command) {

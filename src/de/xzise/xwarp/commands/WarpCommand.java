@@ -5,12 +5,19 @@ import me.taylorkelly.mywarp.WarpList;
 import org.bukkit.Server;
 import org.bukkit.entity.Player;
 
-public abstract class EditCommand extends SubCommand {
+/**
+ * Default command structure with a warp definition. The command structure is:
+ * <blockquote><code>/warp &lt;command&gt; &lt;warpname&gt; [command] &lt;parameter&gt;</code></blockquote>
+ * The parameter could be disabled.    
+ * 
+ * @author Fabian Neundorf
+ */
+public abstract class WarpCommand extends SubCommand {
 
 	private final int length;
 	private final boolean parameter;
 	
-	protected EditCommand(WarpList list, Server server, boolean parameter, String... commands) {
+	protected WarpCommand(WarpList list, Server server, boolean parameter, String... commands) {
 		super(list, server, commands);
 		this.parameter = parameter;
 		if (this.parameter) {

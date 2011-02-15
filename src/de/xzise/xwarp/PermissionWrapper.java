@@ -100,6 +100,14 @@ public class PermissionWrapper {
 			return this.handler.has(player, permission);
 		}
 	}
+	
+	public String getGroup(String player) {
+		if (this.handler == null) {
+			return null;
+		} else {
+			return this.handler.getGroup(player);
+		}
+	}
 
 	public boolean permission(Player player, PermissionTypes permission) {
 		return this.permission(player, permission.name);

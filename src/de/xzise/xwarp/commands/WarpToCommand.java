@@ -20,7 +20,7 @@ public class WarpToCommand extends SubCommand {
 		}
 		String creator = "";
 		if (parameters.length > start + 1) {
-			creator = parameters[start + 1];
+			creator = this.getPlayer(parameters[start + 1]);
 		}
 		this.list.warpTo(parameters[start], creator, player);
 		return true;

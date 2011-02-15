@@ -325,7 +325,7 @@ public class WarpList {
 			names = this.getAllWarps();
 		} else {
 			names = new ArrayList<Warp>();
-			Map<String, Warp> map = this.personal.get(creator);
+			Map<String, Warp> map = this.personal.get(creator.toLowerCase());
 			if (map != null) {
 				names.addAll(map.values());
 			}
