@@ -6,6 +6,8 @@ import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import de.xzise.xwarp.lister.GenericLister;
+
 public class Searcher {
 	private WarpList warpList;
 	private CommandSender sender;
@@ -52,12 +54,12 @@ public class Searcher {
 	}
 	
 	public static void printWarpLine(Warp warp, CommandSender player) {
-		ChatColor color = player instanceof Player ? Lister.getColor(warp, (Player) player) : ChatColor.WHITE;
+		ChatColor color = player instanceof Player ? GenericLister.getColor(warp, (Player) player) : ChatColor.WHITE;
 		String creator = warp.creator;
 		if (player instanceof Player && warp.creator.equalsIgnoreCase(((Player) player).getName())) {
 			creator = "you";
 		}
-		player.sendMessage(color + "'" + warp.name + "'" + ChatColor.WHITE + " by " + creator + Lister.getLocationString(warp));
+		player.sendMessage(color + "'" + warp.name + "'" + ChatColor.WHITE + " by " + creator + GenericLister.getLocationString(warp));
 	}
 }
 

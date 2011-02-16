@@ -14,7 +14,7 @@ public class XLogger {
 	}
 	
 	public XLogger(String pluginName) {
-		this("minecraft", pluginName);
+		this("Minecraft", pluginName);
 	}
 	
 	private String formatMessage(String message) {

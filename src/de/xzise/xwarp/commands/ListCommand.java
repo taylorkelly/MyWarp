@@ -1,6 +1,5 @@
 package de.xzise.xwarp.commands;
 
-import me.taylorkelly.mywarp.Lister;
 import me.taylorkelly.mywarp.WMPlayerListener;
 import me.taylorkelly.mywarp.WarpList;
 
@@ -9,10 +8,51 @@ import org.bukkit.Server;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 
+import de.xzise.xwarp.lister.GenericLister;
+import de.xzise.xwarp.lister.ListDataReciever;
+import de.xzise.xwarp.lister.ListSection;
+
 public class ListCommand extends SubCommand {
 
+	private class WarpListReciever implements ListDataReciever {
+
+		private final WarpList list;
+		private CommandSender sender;
+		private String creator;
+		
+		public WarpListReciever(WarpList list) {
+			this.list = list;
+		}
+		
+		public void setSender(CommandSender sender, String creator) {
+			this.sender = sender;
+			this.creator = creator;
+		}
+		
+		@Override
+		public ListSection[] getListSections(int start, int length) {
+			ListSection section = new ListSection(null);
+			
+			section.addWarps(this.list.getSortedWarps(sender, creator, start, length));
+			
+			return new ListSection[] { section };
+		}
+
+		@Override
+		public int getSize() {
+			return this.list.getSize(sender, creator);
+		}
+		
+	}
+	
+	private GenericLister lister;
+	private WarpListReciever reciever;
+	
 	public ListCommand(WarpList list, Server server) {
 		super(list, server, "list", "ls");
+		
+		this.reciever = new WarpListReciever(list);
+		this.lister = new GenericLister(this.reciever);
 	}
 
 	@Override
@@ -25,17 +65,18 @@ public class ListCommand extends SubCommand {
 			if (sender instanceof ConsoleCommandSender) {
 				sender.sendMessage("No colors in console, so this command is useless here!");
 			}
-			for (String line : Lister.getLegend()) {
+			for (String line : GenericLister.getLegend()) {
 				sender.sendMessage(line);
 			}
 		} else {
-			Lister lister = new Lister(this.list);
-			lister.setPlayer(sender);
+			this.lister.setSender(sender);			
+			String creator = null;
+			int page;
 			
 			if (parameters.length == 3 || (parameters.length == 2 && !WMPlayerListener.isInteger(parameters[1]))) {
-				lister.setCreator(this.getPlayer(parameters[1]));
+				creator = this.getPlayer(parameters[1]);
 				if (parameters.length == 3) {
-					int page = Integer.parseInt(parameters[2]);
+					page = Integer.parseInt(parameters[2]);
 					if (page < 1) {
 						sender.sendMessage(ChatColor.RED + "Page number can't be below 1.");
 						return true;
@@ -44,12 +85,11 @@ public class ListCommand extends SubCommand {
 										+ " pages of warps");
 						return true;
 					}
-					lister.setPage(page);
 				} else {				
-					lister.setPage(1);
+					page = 1;
 				}
 			} else if (parameters.length == 2) {
-				int page = Integer.parseInt(parameters[1]);
+				page = Integer.parseInt(parameters[1]);
 				if (page < 1) {
 					sender.sendMessage(ChatColor.RED + "Page number can't be below 1.");
 					return true;
@@ -58,11 +98,11 @@ public class ListCommand extends SubCommand {
 									+ " pages of warps");
 					return true;
 				}
-				lister.setPage(page);
 			} else {
-				lister.setPage(1);
+				page = 1;
 			}
-			lister.list();
+			this.reciever.setSender(sender, creator);
+			this.lister.listPage(page);
 		}
 		return true;
 	}

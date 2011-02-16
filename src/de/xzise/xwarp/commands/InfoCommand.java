@@ -3,7 +3,6 @@ package de.xzise.xwarp.commands;
 import java.util.Iterator;
 import java.util.List;
 
-import me.taylorkelly.mywarp.Lister;
 import me.taylorkelly.mywarp.MyWarp;
 import me.taylorkelly.mywarp.Warp;
 import me.taylorkelly.mywarp.WarpList;
@@ -13,6 +12,8 @@ import org.bukkit.Location;
 import org.bukkit.Server;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+
+import de.xzise.xwarp.lister.GenericLister;
 
 public class InfoCommand extends WarpCommand {
 
@@ -46,17 +47,21 @@ public class InfoCommand extends WarpCommand {
 			break;
 		}		
 		if (sender instanceof Player) {
-			visibility = Lister.getColor(warp, (Player) sender) + visibility;
+			visibility = GenericLister.getColor(warp, (Player) sender) + visibility;
 		}
 		sender.sendMessage("Visibility: " + visibility);
 		List<String> permissions = warp.permissions;
-		Iterator<String> i = permissions.iterator();
 		String invitees = "";
-		while (i.hasNext()) {
-			String name = i.next();
-			invitees = invitees + name;
-			if (i.hasNext()) {
-				invitees += ", ";
+		if (permissions.size() == 0) {
+			invitees = "None";
+		} else {
+			Iterator<String> i = permissions.iterator();
+			while (i.hasNext()) {
+				String name = i.next();
+				invitees = invitees + ChatColor.GREEN + name;
+				if (i.hasNext()) {
+					invitees += ChatColor.WHITE + ", ";
+				}
 			}
 		}
 		sender.sendMessage("Invitees: " + invitees);
