@@ -30,7 +30,7 @@ public class InfoCommand extends WarpCommand {
 		String group = MyWarp.permissions.getGroup(warp.creator);
 		String groupText = "";
 		if (group != null) {
-			groupText = " (Group: " + ChatColor.GREEN + group + ChatColor.WHITE + ")";
+			groupText = ChatColor.WHITE + " (Group: " + ChatColor.GREEN + group + ChatColor.WHITE + ")";
 		}
 		
 		sender.sendMessage("Creator: " + ChatColor.GREEN + warp.creator + groupText);

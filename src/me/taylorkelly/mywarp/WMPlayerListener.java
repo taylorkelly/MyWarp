@@ -33,6 +33,10 @@ public class WMPlayerListener extends PlayerListener {
 //			for (int i = 0; i < parameters.length; i++) {
 //				player.sendMessage(i + "=" + parameters[i]);
 //			}
+//			
+//			for (int i = 0; i < parameters.length; i++) {
+//				MyWarp.logger.info(i + "=" + parameters[i]);
+//			}
 			
 			this.commands.executeCommand(player, parameters);
 		}

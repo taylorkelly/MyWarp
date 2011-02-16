@@ -78,18 +78,13 @@ public class MyWarp extends JavaPlugin implements DatabaseConnection {
 	
 	@Override
     public boolean onCommand(CommandSender sender, Command cmd, String commandLabel, String[] args) {
-		if (cmd.getName().equalsIgnoreCase("warp")) {
-			
-			// If this is a player do nothing!
-			// Because parsing doesn't working -.-
-			if (sender instanceof Player) {
-				return false;
-			}
-			
-			return this.commands.executeCommand(sender, args);
-			
+		// If this is a player do nothing!
+		// Because parsing doesn't working -.-
+		if (sender instanceof Player) {
+			return false;
 		}
-        return false; // default implementation:  do nothing!
+			
+		return this.commands.executeCommand(sender, args);
     }
 
 	private void updateFiles() {
