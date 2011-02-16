@@ -11,11 +11,11 @@ import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Server;
 import org.bukkit.World;
-import org.bukkit.entity.Player;
+import org.bukkit.command.CommandSender;
 
 public class Converter {
 
-	public static void convert(Player player, Server server, WarpList lister) {
+	public static void convert(CommandSender sender, Server server, WarpList lister, String owner) {
 		File file = new File("warps.txt");
 		PreparedStatement ps = null;
 		try {
@@ -41,7 +41,7 @@ public class Converter {
 
 				World world = server.getWorlds().get(0);
 				Location location = new Location(world, x, y, z, (float) yaw, (float) pitch);
-				Warp warp = new Warp(name, player.getName(), location);
+				Warp warp = new Warp(name, owner, location);
 				lister.blindAdd(warp);
 
 				ps.setInt(1, warp.index);
@@ -57,18 +57,18 @@ public class Converter {
 			ps.executeBatch();
 			conn.commit();
 			file.delete();
-			player.sendMessage("Successfully imported " + size + " warps.");
+			sender.sendMessage("Successfully imported " + size + " warps.");
 		} catch (FileNotFoundException e) {
-			player.sendMessage(ChatColor.RED + "Error: 'warps.txt' doesn't exist.");
+			sender.sendMessage(ChatColor.RED + "Error: 'warps.txt' doesn't exist.");
 		} catch (SQLException e) {
-			player.sendMessage(ChatColor.RED + "Error: SQLite Exception");
+			sender.sendMessage(ChatColor.RED + "Error: SQLite Exception");
 		} finally {
 			try {
 				if (ps != null) {
 					ps.close();
 				}
 			} catch (SQLException ex) {
-				player.sendMessage(ChatColor.RED + "Error: SQLite Exception (on close)");
+				sender.sendMessage(ChatColor.RED + "Error: SQLite Exception (on close)");
 			}
 		}
 	}

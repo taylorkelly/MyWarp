@@ -4,6 +4,9 @@ import java.io.File;
 import java.sql.Connection;
 
 import org.bukkit.Server;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.Event.Priority;
 import org.bukkit.plugin.PluginDescriptionFile;
@@ -22,6 +25,7 @@ public class MyWarp extends JavaPlugin implements DatabaseConnection {
 	public static XLogger logger;
 	
 	private WMPlayerListener playerListener;
+	private CommandMap commands;
 	public final String name = this.getDescription().getName();
 	public final String version = this.getDescription().getVersion();
 	
@@ -54,15 +58,15 @@ public class MyWarp extends JavaPlugin implements DatabaseConnection {
 		WarpList warpList = new WarpList(getServer());
 
 		// Create commands
-		CommandMap commands = null;
+		this.commands = null;
 		try {
-			commands = new CommandMap(warpList, this.getServer());
+			this.commands = new CommandMap(warpList, this.getServer());
 		} catch (IllegalArgumentException iae) {
 			MyWarp.logger.severe("Couldn't initalize commands.", iae);
 			this.getServer().getPluginManager().disablePlugin(this);
 		}
 		
-		this.playerListener = new WMPlayerListener(commands);
+		this.playerListener = new WMPlayerListener(this.commands);
 		MWBlockListener blockListener = new MWBlockListener(warpList);
 		this.getServer().getPluginManager().registerEvent(Event.Type.PLAYER_COMMAND, playerListener, Priority.Normal, this);
 		this.getServer().getPluginManager().registerEvent(Event.Type.BLOCK_RIGHTCLICKED, blockListener, Priority.Normal, this);
@@ -71,6 +75,22 @@ public class MyWarp extends JavaPlugin implements DatabaseConnection {
 //		this.getServer().getPluginManager().registerEvent(Event.Type.BLOCK_PLACED, blockListener, Priority.Low, this);
 		MyWarp.logger.info(name + " " + version + " enabled");
 	}
+	
+	@Override
+    public boolean onCommand(CommandSender sender, Command cmd, String commandLabel, String[] args) {
+		if (cmd.getName().equalsIgnoreCase("warp")) {
+			
+			// If this is a player do nothing!
+			// Because parsing doesn't working -.-
+			if (sender instanceof Player) {
+				return false;
+			}
+			
+			return this.commands.executeCommand(sender, args);
+			
+		}
+        return false; // default implementation:  do nothing!
+    }
 
 	private void updateFiles() {
 		File file = new File("MyWarp", "warps.db");

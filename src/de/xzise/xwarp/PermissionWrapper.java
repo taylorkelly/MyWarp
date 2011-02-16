@@ -3,6 +3,8 @@ package de.xzise.xwarp;
 import me.taylorkelly.mywarp.MyWarp;
 
 import org.bukkit.Server;
+import org.bukkit.command.CommandSender;
+import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 
@@ -74,32 +76,35 @@ public class PermissionWrapper {
 			}
 			return null;
 		}
-		
-		public boolean isAdminPermission() {
-			return this.name.matches("warp\\.admin\\..*");
-		}
 	}
 	
+	private static PermissionTypes[] ADMIN_PERMISSIONS = new PermissionTypes[] {
+		PermissionTypes.ADMIN_DELETE,
+		PermissionTypes.ADMIN_INVITE,
+		PermissionTypes.ADMIN_UNINVITE,
+		PermissionTypes.ADMIN_GIVE, 
+		PermissionTypes.ADMIN_MESSAGE,
+		PermissionTypes.ADMIN_UPDATE, 
+		PermissionTypes.ADMIN_TO_ALL,
+		PermissionTypes.ADMIN_GLOBAL,
+		PermissionTypes.ADMIN_PUBLIC,
+		PermissionTypes.ADMIN_PRIVATE,
+		PermissionTypes.ADMIN_RELOAD,
+		PermissionTypes.ADMIN_RENAME,
+	};
+	
+	private static PermissionTypes[] DEFAULT_PERMISSIONS = new PermissionTypes[] {
+		PermissionTypes.TO_GLOBAL,
+		PermissionTypes.TO_OWN,
+		PermissionTypes.TO_OTHER,
+		PermissionTypes.TO_INVITED,
+		PermissionTypes.CREATE_PRIVATE,
+		PermissionTypes.CREATE_PUBLIC,
+		PermissionTypes.CREATE_GLOBAL,
+		PermissionTypes.SIGN_WARP,
+	};
+	
 	private PermissionHandler handler = null;
-
-	private boolean permission(Player player, String permission) {
-		if (this.handler == null) {
-			if (permission.equals(PermissionTypes.TO_GLOBAL.name)
-					|| permission.equals(PermissionTypes.TO_OWN.name)
-					|| permission.equals(PermissionTypes.TO_OTHER.name)
-					|| permission.equals(PermissionTypes.TO_INVITED.name)
-					|| permission.equals(PermissionTypes.CREATE_PRIVATE.name)
-					|| permission.equals(PermissionTypes.CREATE_PUBLIC.name)
-					|| permission.equals(PermissionTypes.SIGN_WARP.name)) {
-				return true; // Everybody can create private/public warps
-			} else if (isAdminPermission(permission)) {
-				return player.isOp();
-			}
-			return false;
-		} else {
-			return this.handler.has(player, permission);
-		}
-	}
 	
 	public String getGroup(String player) {
 		if (this.handler == null) {
@@ -108,39 +113,51 @@ public class PermissionWrapper {
 			return this.handler.getGroup(player);
 		}
 	}
-
-	public boolean permission(Player player, PermissionTypes permission) {
-		return this.permission(player, permission.name);
+	
+	private boolean permissionX(CommandSender sender, PermissionTypes permission) {
+		if (contains(permission, DEFAULT_PERMISSIONS)) {
+			return true;
+		} else if (contains(permission, ADMIN_PERMISSIONS)) {
+			return sender.isOp();
+		} else {
+			return false;
+		}
+	}
+	
+	public boolean permission(CommandSender sender, PermissionTypes permission) {
+		if (sender instanceof Player) {
+			if (this.handler != null) {
+				return this.handler.has((Player) sender, permission.name);
+			} else {
+				return this.permissionX(sender, permission);
+			}
+		} else if (sender instanceof ConsoleCommandSender) {
+			return true;
+		} else {
+			return this.permissionX(sender, permission);
+		}
 	}
 	
 	public int getInteger(Player player, PermissionTypes permission) {
 		return this.handler.getPermissionInteger(player.getName(), permission.name);
 	}
 
-	public boolean hasAdminPermission(Player player) {
-		return this.permissionOr(player, PermissionTypes.ADMIN_DELETE,
-				PermissionTypes.ADMIN_INVITE, PermissionTypes.ADMIN_UNINVITE,
-				PermissionTypes.ADMIN_GIVE, PermissionTypes.ADMIN_MESSAGE,
-				PermissionTypes.ADMIN_UPDATE, PermissionTypes.ADMIN_TO_ALL);
-	}
-	
-	public boolean isAdminPermission(String permission) {
-		PermissionTypes type = PermissionTypes.getType(permission);
-		return type == null ? false : type.isAdminPermission();
+	public boolean hasAdminPermission(CommandSender sender) {
+		return this.permissionOr(sender, ADMIN_PERMISSIONS);
 	}
 
-	public boolean permissionOr(Player player, PermissionTypes... permission) {
+	public boolean permissionOr(CommandSender sender, PermissionTypes... permission) {
 		for (PermissionTypes permissionType : permission) {
-			if (this.permission(player, permissionType)) {
+			if (this.permission(sender, permissionType)) {
 				return true;
 			}
 		}
 		return false;
 	}
 
-	public boolean permissionAnd(Player player, PermissionTypes... permission) {
+	public boolean permissionAnd(CommandSender sender, PermissionTypes... permission) {
 		for (PermissionTypes permissionType : permission) {
-			if (!this.permission(player, permissionType)) {
+			if (!this.permission(sender, permissionType)) {
 				return false;
 			}
 		}
@@ -161,4 +178,13 @@ public class PermissionWrapper {
 		return this.handler != null;
 	}
 
+	public static <T> boolean contains(T o, T[] a) {
+		for (T t : a) {
+			if (t != null && t.equals(o)) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
 }

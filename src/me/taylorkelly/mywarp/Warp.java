@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.bukkit.Location;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import de.xzise.xwarp.PermissionWrapper.PermissionTypes;
@@ -137,16 +138,20 @@ public class Warp {
 		return false;
 	}
 	
-	public boolean listWarp(Player player) {
-		// Can warp
-		if (this.playerCanWarp(player))
-			return true;
-		// Creator permissions
-		if (this.playerIsCreator(player.getName()))
-			return true;
+	public boolean listWarp(CommandSender sender) {
+		
 		// Admin permissions
-		if (MyWarp.permissions.hasAdminPermission(player))
+		if (MyWarp.permissions.hasAdminPermission(sender))
 			return true;
+		
+		if (sender instanceof Player) {
+			// Can warp
+			if (this.playerCanWarp((Player) sender))
+				return true;
+			// Creator permissions
+			if (this.playerIsCreator(((Player) sender).getName()))
+				return true;
+		}
 			
 		return false;
 	}

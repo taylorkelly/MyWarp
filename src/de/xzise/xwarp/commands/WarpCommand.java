@@ -3,7 +3,7 @@ package de.xzise.xwarp.commands;
 import me.taylorkelly.mywarp.WarpList;
 
 import org.bukkit.Server;
-import org.bukkit.entity.Player;
+import org.bukkit.command.CommandSender;
 
 /**
  * Default command structure with a warp definition. The command structure is:
@@ -30,8 +30,8 @@ public abstract class WarpCommand extends SubCommand {
 	}
 	
 	@Override
-	protected boolean internalExecute(Player player, String[] parameters) {
-		if (!this.isValid(parameters)) {
+	protected boolean internalExecute(CommandSender sender, String[] parameters) {
+		if (parameters.length != this.length + 1 && parameters.length != this.length + 2) {
 			return false;
 		}
 		String creator = "";
@@ -44,14 +44,8 @@ public abstract class WarpCommand extends SubCommand {
 		if (this.parameter) {
 			parameter = parameters[parameterIndex];
 		}
-		this.executeEdit(player, parameters[1], creator, parameter);
-		return true;
+		return this.executeEdit(sender, parameters[1], creator, parameter);
 	}
 	
-	protected abstract void executeEdit(Player player, String warpName, String creator, String parameter);
-
-	@Override
-	public boolean isValid(String[] parameters) {
-		return parameters.length == this.length + 1 || parameters.length == this.length + 2;
-	}
+	protected abstract boolean executeEdit(CommandSender sender, String warpName, String creator, String parameter);
 }

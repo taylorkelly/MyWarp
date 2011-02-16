@@ -1,6 +1,11 @@
 name: xWarp
-version: 2.3.2
+version: 2.4.0
 main: me.taylorkelly.mywarp.MyWarp
 authors:
   - 'xZise'
   - 'tkelly'
+commands:
+  warp:
+    description: Warp commands
+    usage: /<command> help - Displays the help for xWarp
+    parser: Quoted

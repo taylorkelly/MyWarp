@@ -1,7 +1,7 @@
 package de.xzise.xwarp.commands;
 
 import org.bukkit.Server;
-import org.bukkit.entity.Player;
+import org.bukkit.command.CommandSender;
 
 import me.taylorkelly.mywarp.WarpList;
 
@@ -12,8 +12,9 @@ public class InviteCommand extends WarpCommand {
 	}
 
 	@Override
-	protected void executeEdit(Player player, String warpName, String creator, String parameter) {
-		this.list.invite(warpName, creator, player, this.getPlayer(parameter));
+	protected boolean executeEdit(CommandSender sender, String warpName, String creator, String parameter) {
+		this.list.invite(warpName, creator, sender, this.getPlayer(parameter));
+		return true;
 	}
 
 }

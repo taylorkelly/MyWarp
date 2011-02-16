@@ -6,7 +6,8 @@ import me.taylorkelly.mywarp.WarpList;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Server;
-import org.bukkit.entity.Player;
+import org.bukkit.command.CommandSender;
+import org.bukkit.command.ConsoleCommandSender;
 
 public class ListCommand extends SubCommand {
 
@@ -15,24 +16,31 @@ public class ListCommand extends SubCommand {
 	}
 
 	@Override
-	protected boolean internalExecute(Player player, String[] parameters) {
+	protected boolean internalExecute(CommandSender sender, String[] parameters) {
+		if (parameters.length == 3 && !WMPlayerListener.isInteger(parameters[2])) {
+			return false;
+		}
+		
 		if (parameters.length == 2 && parameters[1].equalsIgnoreCase("legend")) {
+			if (sender instanceof ConsoleCommandSender) {
+				sender.sendMessage("No colors in console, so this command is useless here!");
+			}
 			for (String line : Lister.getLegend()) {
-				player.sendMessage(line);
+				sender.sendMessage(line);
 			}
 		} else {
 			Lister lister = new Lister(this.list);
-			lister.setPlayer(player);
+			lister.setPlayer(sender);
 			
-			if (parameters.length == 3 ||(parameters.length == 2 && !WMPlayerListener.isInteger(parameters[1]))) {
+			if (parameters.length == 3 || (parameters.length == 2 && !WMPlayerListener.isInteger(parameters[1]))) {
 				lister.setCreator(this.getPlayer(parameters[1]));
 				if (parameters.length == 3) {
 					int page = Integer.parseInt(parameters[2]);
 					if (page < 1) {
-						player.sendMessage(ChatColor.RED + "Page number can't be below 1.");
+						sender.sendMessage(ChatColor.RED + "Page number can't be below 1.");
 						return true;
 					} else if (page > lister.getMaxPages()) {
-						player.sendMessage(ChatColor.RED + "There are only " + lister.getMaxPages()
+						sender.sendMessage(ChatColor.RED + "There are only " + lister.getMaxPages()
 										+ " pages of warps");
 						return true;
 					}
@@ -43,11 +51,10 @@ public class ListCommand extends SubCommand {
 			} else if (parameters.length == 2) {
 				int page = Integer.parseInt(parameters[1]);
 				if (page < 1) {
-					player.sendMessage(ChatColor.RED + "Page number can't be below 1.");
+					sender.sendMessage(ChatColor.RED + "Page number can't be below 1.");
 					return true;
 				} else if (page > lister.getMaxPages()) {
-					player
-							.sendMessage(ChatColor.RED + "There are only " + lister.getMaxPages()
+					sender.sendMessage(ChatColor.RED + "There are only " + lister.getMaxPages()
 									+ " pages of warps");
 					return true;
 				}
@@ -59,10 +66,4 @@ public class ListCommand extends SubCommand {
 		}
 		return true;
 	}
-
-	@Override
-	public boolean isValid(String[] parameters) {
-		return parameters.length == 1 || parameters.length == 2 || (parameters.length == 3 && WMPlayerListener.isInteger(parameters[2]));
-	}
-
 }

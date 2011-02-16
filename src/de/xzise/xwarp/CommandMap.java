@@ -6,7 +6,7 @@ import java.util.Map;
 import me.taylorkelly.mywarp.WarpList;
 
 import org.bukkit.Server;
-import org.bukkit.entity.Player;
+import org.bukkit.command.CommandSender;
 
 import de.xzise.xwarp.commands.ConvertCommand;
 import de.xzise.xwarp.commands.CreateCommand;
@@ -69,20 +69,21 @@ public class CommandMap {
 		}
 	}
 	
-	public boolean executeCommand(Player player, String[] parameters) {
+	public boolean executeCommand(CommandSender sender, String[] parameters) {
 		if (parameters.length == 0) {
-			return this.helper.execute(player, parameters);
+			return this.helper.execute(sender, parameters);
 		} else {
 			SubCommand command = this.commands.get(parameters[0]);
 			if (command != null) {
-				if (command.isValid(parameters)) {
-					return command.execute(player, parameters);
+				if (command.execute(sender, parameters)) {
+					
+					return true;
 				} else {
 					//TODO: Add specific helper here?
 					return false;
 				}
 			} else {
-				return this.warper.execute(player, parameters);
+				return this.warper.execute(sender, parameters);
 			}
 		}
 	}

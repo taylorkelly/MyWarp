@@ -6,11 +6,12 @@ import java.util.List;
 import org.angelsl.minecraft.randomshit.fontwidth.MinecraftFontWidthCalculator;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 public class Lister {
 	private WarpList warpList;
-	private Player player;
+	private CommandSender player;
 	
 	private int maxPages;
 	private int page;
@@ -35,8 +36,8 @@ public class Lister {
 		this.maxPages = -1;
 	}
 
-	public void setPlayer(Player player) {
-		this.player = player;
+	public void setPlayer(CommandSender sender) {
+		this.player = sender;
 		this.maxPages = -1;
 	}
 	
@@ -91,8 +92,15 @@ public class Lister {
 		this.player.sendMessage(ChatColor.YELLOW + intro);
 		for(Warp warp: sortedWarps) {
 			String name = warp.name;
-			String creator = (warp.creator.equalsIgnoreCase(player.getName()))?"you":warp.creator;
-			ChatColor color = getColor(warp, this.player);			
+			
+			String creator = warp.creator;
+			ChatColor color = ChatColor.WHITE;
+			if (this.player instanceof Player) {
+				if (warp.creator.equalsIgnoreCase(((Player) this.player).getName())) {
+					creator = "you";
+				}
+				color = getColor(warp, (Player) this.player);
+			}
 		
 			String location = getLocationString(warp);
 			String creatorString = " by " + creator;

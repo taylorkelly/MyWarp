@@ -3,11 +3,12 @@ package me.taylorkelly.mywarp;
 import java.util.ArrayList;
 
 import org.bukkit.ChatColor;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 public class Searcher {
 	private WarpList warpList;
-	private Player player;
+	private CommandSender sender;
 
 	private ArrayList<Warp> exactMatches;
 	private ArrayList<Warp> matches;
@@ -18,13 +19,13 @@ public class Searcher {
 		this.warpList = warpList;
 	}
 
-	public void addPlayer(Player player) {
-		this.player = player;
+	public void addPlayer(CommandSender sender) {
+		this.sender = sender;
 	}
 
 	public void setQuery(String name) {
 		this.query = name;
-		MatchList matches = warpList.getMatches(name, player);
+		MatchList matches = warpList.getMatches(name, sender);
 		this.exactMatches = matches.exactMatches;
 		this.matches = matches.matches;
 
@@ -33,26 +34,29 @@ public class Searcher {
 	public void search() {
 
 		if (exactMatches.size() == 0 && matches.size() == 0) {
-			player.sendMessage(ChatColor.RED + "No warp matches for search: " + ChatColor.GRAY + query);
+			this.sender.sendMessage(ChatColor.RED + "No warp matches for search: " + ChatColor.GRAY + query);
 		} else {
 			if (exactMatches.size() > 0) {
-				player.sendMessage(ChatColor.YELLOW + "Exact matches for search: " + ChatColor.GRAY + query);
+				this.sender.sendMessage(ChatColor.YELLOW + "Exact matches for search: " + ChatColor.GRAY + query);
 				for (Warp warp : exactMatches) {
-					Searcher.printWarpLine(warp, this.player);
+					Searcher.printWarpLine(warp, this.sender);
 				}
 			}
 			if (matches.size() > 0) {
-				player.sendMessage(ChatColor.YELLOW + "Partial matches for search: " + ChatColor.GRAY + query);
+				this.sender.sendMessage(ChatColor.YELLOW + "Partial matches for search: " + ChatColor.GRAY + query);
 				for (Warp warp : matches) {
-					Searcher.printWarpLine(warp, this.player);
+					Searcher.printWarpLine(warp, this.sender);
 				}
 			}
 		}
 	}
 	
-	public static void printWarpLine(Warp warp, Player player) {
-		String color = Lister.getColor(warp, player).toString();
-		String creator = (warp.creator.equalsIgnoreCase(player.getName())) ? "you" : warp.creator;
+	public static void printWarpLine(Warp warp, CommandSender player) {
+		ChatColor color = player instanceof Player ? Lister.getColor(warp, (Player) player) : ChatColor.WHITE;
+		String creator = warp.creator;
+		if (player instanceof Player && warp.creator.equalsIgnoreCase(((Player) player).getName())) {
+			creator = "you";
+		}
 		player.sendMessage(color + "'" + warp.name + "'" + ChatColor.WHITE + " by " + creator + Lister.getLocationString(warp));
 	}
 }

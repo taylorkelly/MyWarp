@@ -8,7 +8,7 @@ import me.taylorkelly.mywarp.WarpList;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Server;
-import org.bukkit.entity.Player;
+import org.bukkit.command.CommandSender;
 
 public class HelpCommand extends SubCommand {
 
@@ -17,27 +17,30 @@ public class HelpCommand extends SubCommand {
 	}
 
 	@Override
-	protected boolean internalExecute(Player player, String[] parameters) {
+	protected boolean internalExecute(CommandSender sender, String[] parameters) {
+		if (parameters.length > 2) {
+			return false;
+		}
 		int page = 1;
 		if (parameters.length == 2) {
 			if (WMPlayerListener.isInteger(parameters[1])) {
 				page = Integer.parseInt(parameters[1]);
 				if (page < 1) {
-					player.sendMessage(ChatColor.RED + "Page number can't be below 1.");
-					return true;
+					sender.sendMessage(ChatColor.RED + "Page number can't be below 1.");
+					return false;
 				} else if (page > HELP_PAGES_MAXIMUM) {
-					player.sendMessage(ChatColor.RED + "There are only 2 pages of help");
-					return true;
+					sender.sendMessage(ChatColor.RED + "There are only 2 pages of help");
+					return false;
 				}
 			} else {
-				player.sendMessage(ChatColor.RED + "Please input a valid number");
-				return true;
+				sender.sendMessage(ChatColor.RED + "Please input a valid number");
+				return false;
 			}
 		}
 		String[] messages = helpPage(page);
 
 		for (String message : messages) {
-			player.sendMessage(message);
+			sender.sendMessage(message);
 		}
 		return true;
 	}
@@ -76,10 +79,4 @@ public class HelpCommand extends SubCommand {
 		}
 		return lines.toArray(new String[0]);
 	}
-
-	@Override
-	public boolean isValid(String[] parameters) {
-		return parameters.length == 1 || (parameters.length == 2 && WMPlayerListener.isInteger(parameters[1]));
-	}
-
 }

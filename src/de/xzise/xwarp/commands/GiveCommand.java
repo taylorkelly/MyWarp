@@ -3,7 +3,7 @@ package de.xzise.xwarp.commands;
 import me.taylorkelly.mywarp.WarpList;
 
 import org.bukkit.Server;
-import org.bukkit.entity.Player;
+import org.bukkit.command.CommandSender;
 
 public class GiveCommand extends WarpCommand {
 
@@ -12,8 +12,9 @@ public class GiveCommand extends WarpCommand {
 	}
 
 	@Override
-	protected void executeEdit(Player player, String warpName, String creator, String parameter) {
-		this.list.give(warpName, creator, player, this.getPlayer(parameter));
+	protected boolean executeEdit(CommandSender sender, String warpName, String creator, String parameter) {
+		this.list.give(warpName, creator, sender, this.getPlayer(parameter));
+		return true;
 	}
 
 }

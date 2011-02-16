@@ -3,7 +3,7 @@ package de.xzise.xwarp.commands;
 import me.taylorkelly.mywarp.WarpList;
 
 import org.bukkit.Server;
-import org.bukkit.entity.Player;
+import org.bukkit.command.CommandSender;
 
 public class RenameCommand extends WarpCommand {
 
@@ -12,7 +12,8 @@ public class RenameCommand extends WarpCommand {
 	}
 
 	@Override
-	protected void executeEdit(Player player, String warpName, String creator, String parameter) {
-		this.list.rename(warpName, creator, player, parameter);
+	protected boolean executeEdit(CommandSender sender, String warpName, String creator, String parameter) {
+		this.list.rename(warpName, creator, sender, parameter);
+		return true;
 	}
 }

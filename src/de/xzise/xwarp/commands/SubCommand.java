@@ -1,6 +1,7 @@
 package de.xzise.xwarp.commands;
 
 import org.bukkit.Server;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import me.taylorkelly.mywarp.WarpList;
@@ -39,14 +40,18 @@ public abstract class SubCommand {
 	public String[] getCommands() {
 		return this.commands.clone();
 	}
+		
+	/**
+	 * Executes the command. If the command could executed it return true.
+	 * @param sender Sender of this command.
+	 * @param parameters Parameters including the command.
+	 * @return True if the command could executed.
+	 */
+	protected abstract boolean internalExecute(CommandSender sender, String[] parameters);
 	
-	public abstract boolean isValid(String[] parameters);
-	
-	protected abstract boolean internalExecute(Player player, String[] parameters);
-	
-	public final boolean execute(Player player, String[] parameters) {
+	public final boolean execute(CommandSender sender, String[] parameters) {
 //		player.sendMessage(this.getClass().getSimpleName());
 		
-		return this.internalExecute(player, parameters);
+		return this.internalExecute(sender, parameters);
 	}
 }

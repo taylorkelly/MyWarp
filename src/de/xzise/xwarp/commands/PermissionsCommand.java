@@ -5,27 +5,32 @@ import me.taylorkelly.mywarp.WarpList;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Server;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import de.xzise.xwarp.PermissionWrapper;
 import de.xzise.xwarp.PermissionWrapper.PermissionTypes;
 
-public class PermissionsCommand extends FixedParametersCommand {
+public class PermissionsCommand extends SubCommand {
 
 	public PermissionsCommand(WarpList list, Server server) {
 		super(list, server, "permissions");
 	}
 
 	@Override
-	protected boolean internalExecute(Player player, String[] parameters) {
-		player.sendMessage("Your permissions:");
-		if (!MyWarp.permissions.useOfficial()) {
-			player.sendMessage("(Use build in permissions!)");
+	protected boolean internalExecute(CommandSender sender, String[] parameters) {
+		if (parameters.length == 1 && sender instanceof Player) {
+			sender.sendMessage("Your permissions:");
+			if (!MyWarp.permissions.useOfficial()) {
+				sender.sendMessage("(Use build in permissions!)");
+			}
+			for (PermissionTypes type : PermissionWrapper.PermissionTypes.values()) {
+				PermissionsCommand.printPermission(type, (Player) sender);
+			}
+			return true;
+		} else {
+			return false;
 		}
-		for (PermissionTypes type : PermissionWrapper.PermissionTypes.values()) {
-			PermissionsCommand.printPermission(type, player);
-		}
-		return true;
 	}
 	
 	public static void printPermission(PermissionTypes permission, Player player) {
