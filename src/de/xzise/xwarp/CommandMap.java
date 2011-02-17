@@ -51,7 +51,9 @@ public class CommandMap {
 		this.registerCommand(new PublicizeCommand(list, server));
 		this.registerCommand(new GlobalizeCommand(list, server));
 		this.registerCommand(new SearchCommand(list, server));
-		this.registerCommand(new CreateCommand(list, server));
+		this.registerCommand(CreateCommand.newCreatePrivate(list, server));
+		this.registerCommand(CreateCommand.newCreatePublic(list, server));
+		this.registerCommand(CreateCommand.newCreateGlobal(list, server));
 		this.registerCommand(new ListCommand(list, server));
 		this.registerCommand(new UninviteCommand(list, server));
 		this.registerCommand(new InviteCommand(list, server));
@@ -59,6 +61,8 @@ public class CommandMap {
 		this.registerCommand(new GiveCommand(list, server));
 		this.registerCommand(new PermissionsCommand(list, server));
 		this.registerCommand(new InfoCommand(list, server));
+		
+		this.helper.setCommands(this.commands.values());
 	}
 	
 	private void registerCommand(SubCommand command) {

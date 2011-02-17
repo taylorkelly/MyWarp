@@ -56,7 +56,9 @@ public class PermissionWrapper {
 		// Warp to all warps
 		ADMIN_TO_ALL("warp.admin.to.all"),
 		// Reload database
-		ADMIN_RELOAD("warp.admin.reload");
+		ADMIN_RELOAD("warp.admin.reload"), 
+		// Converts from hmod file
+		ADMIN_CONVERT("warp.admin.convert");
 
 		// Maybe upcoming permissions:
 		// Different admin permissions for each warp (only edit public warps
@@ -91,6 +93,7 @@ public class PermissionWrapper {
 		PermissionTypes.ADMIN_PRIVATE,
 		PermissionTypes.ADMIN_RELOAD,
 		PermissionTypes.ADMIN_RENAME,
+		PermissionTypes.ADMIN_CONVERT,
 	};
 	
 	private static PermissionTypes[] DEFAULT_PERMISSIONS = new PermissionTypes[] {

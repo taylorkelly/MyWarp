@@ -3,7 +3,6 @@ package de.xzise.xwarp.lister;
 import java.util.ArrayList;
 import java.util.List;
 
-import me.taylorkelly.mywarp.WMPlayerListener;
 import me.taylorkelly.mywarp.Warp;
 
 import org.angelsl.minecraft.randomshit.fontwidth.MinecraftFontWidthCalculator;
@@ -15,31 +14,6 @@ import org.bukkit.entity.Player;
 
 public class GenericLister {
 	
-	private interface WidthCalculator {
-		int getWidth(String text);
-	}
-	
-	private class MinecraftWidth implements WidthCalculator {
-
-		@Override
-		public int getWidth(String text) {
-			return MinecraftFontWidthCalculator.getStringWidth(text);
-		}
-		
-	}
-	
-	private class ConsoleWidth implements WidthCalculator {
-
-		@Override
-		public int getWidth(String text) {
-			// Assume that the font is non proportional!
-			
-			//TODO: Remove color codes!
-			return text.length();
-		}
-		
-	}
-	
 	public static final ChatColor GLOBAL_OWN = ChatColor.DARK_BLUE;
 	public static final ChatColor PUBLIC_OWN = ChatColor.BLUE;
 	public static final ChatColor PRIVATE_OWN = ChatColor.AQUA;
@@ -50,84 +24,32 @@ public class GenericLister {
 	
 	public static final ChatColor PRIVATE_INVITED = ChatColor.YELLOW;
 	
-	private ListDataReciever dataReciever;
-	private CommandSender sender;
+	private GenericLister() {}
 	
-	private int maxPages;
-	private String introRight;
-	private String introLeft;
-	
-	private ListSection[] listSections;
-	
-	public GenericLister(ListDataReciever dataReciever) {
-		this.dataReciever = dataReciever;
-		this.maxPages = -1;
-	}
-	
-	public void setSender(CommandSender sender) {
-		if (sender != this.sender) {
-			this.sender = sender;
-			this.maxPages = -1;
-		}
-	}
-	
-	private void calculateMaxPages() {
-		int size = this.dataReciever.getSize();
-		this.maxPages = (int) Math.ceil(size / (double) (WMPlayerListener.LINES_PER_PAGE - 1));
-		this.introRight = "/" + maxPages + " ";
-		int width = 20 - GenericLister.getWidth(maxPages, 10);
-		while (width > 0) {
-			this.introRight += "-";
-			width--;
-		}
-	}
+	public static void listPage(int page, int maxPages, ListSection[] sections, CommandSender sender) {
 
-	public int getMaxPages() {
-		if (this.maxPages < 0) {
-			this.calculateMaxPages();
-		}
-		return this.maxPages;
-	}
-	
-	public void setPage(int page) {
-		this.listSections = this.dataReciever.getListSections((page-1) * (WMPlayerListener.LINES_PER_PAGE - 1), WMPlayerListener.LINES_PER_PAGE);
-		
-		// Generate header with the same length every time
-		this.introLeft = "";
-		int width = 20 - GenericLister.getWidth(page, 10);
-		while (width > 0) {
-			this.introLeft += "-";
-			width--;
-		}
-		this.introLeft += " Page " + page;
-	}
-	
-	public void listPage(int page) {
-		this.setPage(page);
-		this.listPage();
-	}
-	
-	public void listPage() {
-		if (this.maxPages < 0) {
-			this.calculateMaxPages();
-		}		
-		
-		this.sender.sendMessage(ChatColor.YELLOW + this.introLeft + this.introRight);
-		
+		int charsPerLine = 40;	
 		WidthCalculator widther = null;
 		
 		// Get the correct width calculator!
 		if (sender instanceof ConsoleCommandSender) {
+			charsPerLine = 80;
 			widther = new ConsoleWidth();
 		} else if (sender instanceof Player) {
+			charsPerLine = 40;
 			widther = new MinecraftWidth();
 		}
 		
-		int width = widther.getWidth(this.introLeft + this.introRight); 
+		// Generate header with the same length every time
+		String intro = GenericLister.charList(charsPerLine / 2 - GenericLister.getWidth(page, 10), '-') + " Page " + page + "/" + maxPages + " " + GenericLister.charList(charsPerLine / 2 - GenericLister.getWidth(maxPages, 10), '-');
 		
-		for (ListSection listSection : this.listSections) {
+		sender.sendMessage(ChatColor.YELLOW + intro);
+		
+		int width = widther.getWidth(intro); 
+		
+		for (ListSection listSection : sections) {
 			if (listSection.title != null && !listSection.title.isEmpty()) {
-				this.sender.sendMessage(ChatColor.GREEN + listSection.title);
+				sender.sendMessage(ChatColor.GREEN + listSection.title);
 			}
 			
 			for (Warp warp : listSection) {
@@ -135,11 +57,11 @@ public class GenericLister {
 				
 				String creator = warp.creator;
 				ChatColor color = ChatColor.WHITE;
-				if (this.sender instanceof Player) {
-					if (warp.creator.equalsIgnoreCase(((Player) this.sender).getName())) {
+				if (sender instanceof Player) {
+					if (warp.creator.equalsIgnoreCase(((Player) sender).getName())) {
 						creator = "you";
 					}
-					color = GenericLister.getColor(warp, (Player) this.sender);
+					color = GenericLister.getColor(warp, (Player) sender);
 				}
 			
 				String location = GenericLister.getLocationString(warp);
@@ -155,7 +77,7 @@ public class GenericLister {
 					name = "'" + substring(name, left, widther) + "'" + ChatColor.WHITE + creatorString;
 				}
 
-				this.sender.sendMessage(color + name + location);		
+				sender.sendMessage(color + name + location);		
 			}
 		}
 	}
@@ -170,11 +92,15 @@ public class GenericLister {
 		return name;
 	}
 	
-	public static String whitespace(int length, int spaceWidth) {		
+	public static String whitespace(int length, int spaceWidth) {
+		return charList(length / spaceWidth, ' ');
+	}
+	
+	public static String charList(int count, char c) {
 		StringBuilder ret = new StringBuilder();
 		
-		for(int i = 0; i < length; i+=spaceWidth) {
-			ret.append(" ");
+		while (count-- > 0) {
+			ret.append(c);
 		}
 		
 		return ret.toString();
@@ -235,7 +161,32 @@ public class GenericLister {
 	}
 	
 	public static String getLocationString(Location location) {
-		return " @(" + (int) location.getX() + ", " + (int) location.getY() + ", " + (int) location.getZ() + ")";
+		return " @(" + location.getWorld().getName() + ", " + (int) location.getX() + ", " + (int) location.getY() + ", " + (int) location.getZ() + ")";
 	}
 
+}
+
+interface WidthCalculator {
+	int getWidth(String text);
+}
+
+class MinecraftWidth implements WidthCalculator {
+
+	@Override
+	public int getWidth(String text) {
+		return MinecraftFontWidthCalculator.getStringWidth(text);
+	}
+	
+}
+
+class ConsoleWidth implements WidthCalculator {
+
+	@Override
+	public int getWidth(String text) {
+		// Assume that the font is non proportional!
+		
+		//TODO: Remove color codes!
+		return text.length();
+	}
+	
 }

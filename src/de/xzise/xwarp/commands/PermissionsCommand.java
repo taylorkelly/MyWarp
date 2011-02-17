@@ -39,4 +39,25 @@ public class PermissionsCommand extends SubCommand {
 		player.sendMessage(message);
 	}
 
+	@Override
+	protected String[] getFullHelpText() {
+		return new String[] { "Shows all your permissions." };
+	}
+
+	@Override
+	protected String getSmallHelpText() {
+		return "Shows the permissions of you";
+	}
+
+	@Override
+	protected String getCommand() {
+		return "warp permissions";
+	}
+
+	@Override
+	protected boolean listHelp(CommandSender sender) {
+		//TODO: false or true? It is only a debug function so ... false?
+		return false;
+	}
+
 }

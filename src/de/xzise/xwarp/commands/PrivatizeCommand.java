@@ -8,7 +8,7 @@ import org.bukkit.command.CommandSender;
 public class PrivatizeCommand extends WarpCommand {
 
 	public PrivatizeCommand(WarpList list, Server server) {
-		super(list, server, false, "private");
+		super(list, server, "", "private");
 	}
 
 	@Override
@@ -17,4 +17,13 @@ public class PrivatizeCommand extends WarpCommand {
 		return true;
 	}
 
+	@Override
+	protected String[] getFullHelpText() {
+		return new String[] { "Sets a warp to private.", "Only invited and the creator could visit private warps." };
+	}
+
+	@Override
+	protected String getSmallHelpText() {
+		return "Privatizes the warp";
+	}
 }

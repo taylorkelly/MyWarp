@@ -9,50 +9,12 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 
 import de.xzise.xwarp.lister.GenericLister;
-import de.xzise.xwarp.lister.ListDataReciever;
 import de.xzise.xwarp.lister.ListSection;
 
 public class ListCommand extends SubCommand {
-
-	private class WarpListReciever implements ListDataReciever {
-
-		private final WarpList list;
-		private CommandSender sender;
-		private String creator;
-		
-		public WarpListReciever(WarpList list) {
-			this.list = list;
-		}
-		
-		public void setSender(CommandSender sender, String creator) {
-			this.sender = sender;
-			this.creator = creator;
-		}
-		
-		@Override
-		public ListSection[] getListSections(int start, int length) {
-			ListSection section = new ListSection(null);
-			
-			section.addWarps(this.list.getSortedWarps(sender, creator, start, length));
-			
-			return new ListSection[] { section };
-		}
-
-		@Override
-		public int getSize() {
-			return this.list.getSize(sender, creator);
-		}
-		
-	}
-	
-	private GenericLister lister;
-	private WarpListReciever reciever;
 	
 	public ListCommand(WarpList list, Server server) {
 		super(list, server, "list", "ls");
-		
-		this.reciever = new WarpListReciever(list);
-		this.lister = new GenericLister(this.reciever);
 	}
 
 	@Override
@@ -68,21 +30,23 @@ public class ListCommand extends SubCommand {
 			for (String line : GenericLister.getLegend()) {
 				sender.sendMessage(line);
 			}
-		} else {
-			this.lister.setSender(sender);			
+		} else {			
 			String creator = null;
 			int page;
+			int maxPages = -1;
+			
+			ListSection section = new ListSection("");
 			
 			if (parameters.length == 3 || (parameters.length == 2 && !WMPlayerListener.isInteger(parameters[1]))) {
 				creator = this.getPlayer(parameters[1]);
+				maxPages = getNumberOfPages(this.list.getSize(sender, creator));
 				if (parameters.length == 3) {
 					page = Integer.parseInt(parameters[2]);
 					if (page < 1) {
 						sender.sendMessage(ChatColor.RED + "Page number can't be below 1.");
 						return true;
-					} else if (page > lister.getMaxPages()) {
-						sender.sendMessage(ChatColor.RED + "There are only " + lister.getMaxPages()
-										+ " pages of warps");
+					} else if (page > maxPages) {
+						sender.sendMessage(ChatColor.RED + "There are only " + maxPages + " pages of warps");
 						return true;
 					}
 				} else {				
@@ -93,17 +57,40 @@ public class ListCommand extends SubCommand {
 				if (page < 1) {
 					sender.sendMessage(ChatColor.RED + "Page number can't be below 1.");
 					return true;
-				} else if (page > lister.getMaxPages()) {
-					sender.sendMessage(ChatColor.RED + "There are only " + lister.getMaxPages()
-									+ " pages of warps");
+				} else if (page > maxPages) {
+					sender.sendMessage(ChatColor.RED + "There are only " + maxPages + " pages of warps");
 					return true;
 				}
 			} else {
 				page = 1;
 			}
-			this.reciever.setSender(sender, creator);
-			this.lister.listPage(page);
+			
+			section.addWarps(this.list.getSortedWarps(sender, creator, (page - 1) * (WMPlayerListener.LINES_PER_PAGE - 1), WMPlayerListener.LINES_PER_PAGE - 1));
+			
+			if (maxPages < 0) {
+				maxPages = getNumberOfPages(this.list.getSize(sender));
+			}
+			GenericLister.listPage(page, maxPages, new ListSection[] { section }, sender);
 		}
 		return true;
+	}
+	
+	private static int getNumberOfPages(int elements) {
+		return (int) Math.ceil(elements / (double) (WMPlayerListener.LINES_PER_PAGE - 1));
+	}
+
+	@Override
+	protected String[] getFullHelpText() {
+		return new String[] { "Shows the given page of the warp list.", "If creator is set only the warps of the creator are listed." };
+	}
+
+	@Override
+	protected String getSmallHelpText() {
+		return "Shows the warp list";
+	}
+
+	@Override
+	protected String getCommand() {
+		return "warp list [creator] [#page]";
 	}
 }

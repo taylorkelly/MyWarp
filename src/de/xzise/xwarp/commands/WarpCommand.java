@@ -16,16 +16,19 @@ public abstract class WarpCommand extends SubCommand {
 
 	private final int length;
 	private final boolean parameter;
+	private final String parameterText;
 	
-	protected WarpCommand(WarpList list, Server server, boolean parameter, String... commands) {
+	protected WarpCommand(WarpList list, Server server, String parameterText, String... commands) {
 		super(list, server, commands);
-		this.parameter = parameter;
+		this.parameter = parameterText != null && !parameterText.isEmpty();
 		if (this.parameter) {
 			// Warp, Parameter
 			this.length = 2;
+			this.parameterText = " <" + parameterText + ">";
 		} else {
 			// Warp
 			this.length = 1;
+			this.parameterText = "";
 		}
 	}
 	
@@ -36,7 +39,7 @@ public abstract class WarpCommand extends SubCommand {
 		}
 		String creator = "";
 		int parameterIndex = 2;
-		if (parameters.length == this.length + 1) {
+		if (parameters.length == this.length + 2) {
 			creator = this.getPlayer(parameters[2]);
 			parameterIndex++;
 		}
@@ -48,4 +51,9 @@ public abstract class WarpCommand extends SubCommand {
 	}
 	
 	protected abstract boolean executeEdit(CommandSender sender, String warpName, String creator, String parameter);
+	
+	@Override
+	protected String getCommand() {
+		return "warp " + this.commands[0] + " <name> [creator]" + parameterText;
+	}
 }

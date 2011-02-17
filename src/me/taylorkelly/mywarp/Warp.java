@@ -52,6 +52,7 @@ public class Warp {
 		this.location = location.clone();
 		this.visibility = visibility;
 		this.permissions = processList(permissions);
+		this.editors = new ArrayList<String>();
 		this.welcomeMessage = welcomeMessage;
 		if (index > nextIndex)
 			nextIndex = index;

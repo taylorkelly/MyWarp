@@ -5,7 +5,10 @@ import org.bukkit.Server;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import de.xzise.xwarp.PermissionWrapper.PermissionTypes;
+
 import me.taylorkelly.mywarp.Converter;
+import me.taylorkelly.mywarp.MyWarp;
 import me.taylorkelly.mywarp.WarpList;
 
 public class ConvertCommand extends SubCommand {
@@ -41,5 +44,25 @@ public class ConvertCommand extends SubCommand {
 		} else {
 			return false;
 		}
+	}
+
+	@Override
+	protected String[] getFullHelpText() {
+		return new String[] { "Converts the hmod warps.txt into the xWarp database.", "If executed ingame the creator is the initiator.", "Otherwise define the creator in the parameter." };
+	}
+
+	@Override
+	protected String getSmallHelpText() {
+		return "Converts the hmod warps.txt";
+	}
+
+	@Override
+	protected String getCommand() {
+		return "warp convert (owner)";
+	}
+	
+	@Override
+	protected boolean listHelp(CommandSender sender) {
+		return MyWarp.permissions.permission(sender, PermissionTypes.ADMIN_CONVERT);
 	}
 }

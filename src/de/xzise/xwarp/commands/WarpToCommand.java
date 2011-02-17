@@ -1,10 +1,13 @@
 package de.xzise.xwarp.commands;
 
+import me.taylorkelly.mywarp.MyWarp;
 import me.taylorkelly.mywarp.WarpList;
 
 import org.bukkit.Server;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+
+import de.xzise.xwarp.PermissionWrapper.PermissionTypes;
 
 public class WarpToCommand extends SubCommand {
 
@@ -29,5 +32,25 @@ public class WarpToCommand extends SubCommand {
 		} else {
 			return false;
 		}
+	}
+
+	@Override
+	protected String[] getFullHelpText() {
+		return new String[] { "Warps the player to the given warp.", "This command is only ingame available." };
+	}
+
+	@Override
+	protected String getSmallHelpText() {
+		return "Warps the player";
+	}
+
+	@Override
+	protected String getCommand() {
+		return "warp [to] <name> [creator]";
+	}
+
+	@Override
+	protected boolean listHelp(CommandSender sender) {
+		return MyWarp.permissions.permissionOr(sender, PermissionTypes.TO_GLOBAL, PermissionTypes.TO_INVITED, PermissionTypes.TO_OTHER, PermissionTypes.TO_OWN, PermissionTypes.ADMIN_TO_ALL);
 	}
 }

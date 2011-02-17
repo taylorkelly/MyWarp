@@ -18,7 +18,7 @@ import de.xzise.xwarp.lister.GenericLister;
 public class InfoCommand extends WarpCommand {
 
 	public InfoCommand(WarpList list, Server server) {
-		super(list, server, false, "info");
+		super(list, server, "", "info");
 	}
 
 	@Override
@@ -65,11 +65,37 @@ public class InfoCommand extends WarpCommand {
 			}
 		}
 		sender.sendMessage("Invitees: " + invitees);
+
+		List<String> editors = warp.editors;
+		String editor = "";
+		if (editors.size() == 0) {
+			editor = "None";
+		} else {
+			Iterator<String> i = editors.iterator();
+			while (i.hasNext()) {
+				String name = i.next();
+				editor = editor + ChatColor.GREEN + name;
+				if (i.hasNext()) {
+					editor += ChatColor.WHITE + ", ";
+				}
+			}
+		}
+		sender.sendMessage("Editors: " + editor);
 		
 		Location location = warp.getLocation();
-		sender.sendMessage("Position: x = " + ChatColor.GREEN + location.getBlockX() + ChatColor.WHITE + ", y = " + ChatColor.GREEN + location.getBlockY() + ChatColor.WHITE + ", z = " + ChatColor.GREEN + location.getBlockZ());
+		sender.sendMessage("Location: World = " + ChatColor.GREEN + location.getWorld().getName() + ChatColor.WHITE + ", x = " + ChatColor.GREEN + location.getBlockX() + ChatColor.WHITE + ", y = " + ChatColor.GREEN + location.getBlockY() + ChatColor.WHITE + ", z = " + ChatColor.GREEN + location.getBlockZ());
 		
 		return true;
+	}
+
+	@Override
+	protected String[] getFullHelpText() {
+		return new String[] { "Show the information about the warp." };
+	}
+
+	@Override
+	protected String getSmallHelpText() {
+		return "Show warp's information";
 	}
 
 }

@@ -8,7 +8,7 @@ import org.bukkit.command.CommandSender;
 public class PublicizeCommand extends WarpCommand {
 
 	public PublicizeCommand(WarpList list, Server server) {
-		super(list, server, false, "public");
+		super(list, server, "", "public");
 	}
 
 	@Override
@@ -17,4 +17,13 @@ public class PublicizeCommand extends WarpCommand {
 		return true;
 	}
 
+	@Override
+	protected String[] getFullHelpText() {
+		return new String[] { "Publizices the warp so everybody could visit it." };
+	}
+
+	@Override
+	protected String getSmallHelpText() {
+		return "Publizices the warp";
+	}
 }

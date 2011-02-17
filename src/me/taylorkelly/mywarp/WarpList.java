@@ -356,7 +356,7 @@ public class WarpList {
 		if (creator == null || creator.isEmpty())
 			return this.getSize(sender);
 		else {
-			Map<String, Warp> map = this.personal.get(creator);
+			Map<String, Warp> map = this.personal.get(creator.toLowerCase());
 			return map == null ? 0 : this.getSize(sender, map);
 		}
 	}
@@ -409,15 +409,20 @@ public class WarpList {
 					sender.sendMessage(ChatColor.RED + giveeName
 							+ " is already the owner.");
 				} else {
-					warp.setCreator(giveeName);
-					WarpDataSource.updateCreator(warp);
-					sender.sendMessage(ChatColor.AQUA + "You have given '"
-							+ warp.name + "' to " + giveeName);
-					Player match = server.getPlayer(giveeName);
-					if (match != null) {
-						match.sendMessage(ChatColor.AQUA
-								+ "You've been given '" + warp.name + "' by "
-								+ getName(sender));
+					Warp giveeWarp = this.getWarp(name, giveeName);
+					if (giveeWarp == null) {
+						warp.setCreator(giveeName);
+						WarpDataSource.updateCreator(warp);
+						sender.sendMessage(ChatColor.AQUA + "You have given '"
+								+ warp.name + "' to " + giveeName);
+						Player match = server.getPlayer(giveeName);
+						if (match != null) {
+							match.sendMessage(ChatColor.AQUA
+									+ "You've been given '" + warp.name + "' by "
+									+ getName(sender));
+						}
+					} else {
+						sender.sendMessage(ChatColor.RED + "The new owner already has a warp named " + giveeWarp.name);
 					}
 				}
 			} else {

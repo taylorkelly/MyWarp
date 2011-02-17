@@ -9,7 +9,7 @@ import org.bukkit.entity.Player;
 public class UpdateCommand extends WarpCommand {
 
 	public UpdateCommand(WarpList list, Server server) {
-		super(list, server, false, "update", "*");
+		super(list, server, "", "update", "*");
 	}
 
 	@Override
@@ -20,5 +20,15 @@ public class UpdateCommand extends WarpCommand {
 		} else {
 			return false;
 		}
+	}
+
+	@Override
+	protected String[] getFullHelpText() {
+		return new String[] { "Updates the position of the warp." };
+	}
+
+	@Override
+	protected String getSmallHelpText() {
+		return "Updates the warp's position.";
 	}
 }

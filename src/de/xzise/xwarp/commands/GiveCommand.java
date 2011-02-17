@@ -8,7 +8,7 @@ import org.bukkit.command.CommandSender;
 public class GiveCommand extends WarpCommand {
 
 	public GiveCommand(WarpList list, Server server) {
-		super(list, server, true, "give");
+		super(list, server, "new owner", "give");
 	}
 
 	@Override
@@ -17,4 +17,13 @@ public class GiveCommand extends WarpCommand {
 		return true;
 	}
 
+	@Override
+	protected String[] getFullHelpText() {
+		return new String[] { "Changes the owner of the warp." };
+	}
+
+	@Override
+	protected String getSmallHelpText() {
+		return "Gives the warp away.";
+	}
 }

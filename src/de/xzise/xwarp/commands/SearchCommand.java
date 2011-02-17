@@ -3,6 +3,7 @@ package de.xzise.xwarp.commands;
 import me.taylorkelly.mywarp.Searcher;
 import me.taylorkelly.mywarp.WarpList;
 
+import org.bukkit.ChatColor;
 import org.bukkit.Server;
 import org.bukkit.command.CommandSender;
 
@@ -23,5 +24,20 @@ public class SearchCommand extends SubCommand {
 		} else {
 			return false;
 		}
+	}
+
+	@Override
+	protected String[] getFullHelpText() {
+		return new String[] { "List all warps which name contains the query text." };
+	}
+
+	@Override
+	protected String getSmallHelpText() {
+		return "Search for " + ChatColor.GRAY + "<query>";
+	}
+
+	@Override
+	protected String getCommand() {
+		return "warp search <query>";
 	}
 }
