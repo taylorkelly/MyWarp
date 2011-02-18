@@ -136,7 +136,9 @@ public class WarpDataSource {
 				String permissions = set.getString("permissions");
 				String welcomeMessage = set.getString("welcomeMessage");
 				Warp warp = new Warp(index, name, creator, loc, visibility, permissions, welcomeMessage);
-				if (visibility == Visibility.GLOBAL || !global.containsKey(name.toLowerCase())) {
+//				if (visibility == Visibility.GLOBAL || !global.containsKey(name.toLowerCase())) {
+				// Load only REAL global warps
+				if (visibility == Visibility.GLOBAL) {
 					global.put(name.toLowerCase(), warp);
 					if (visibility == Visibility.GLOBAL) {
 						globalSize++;

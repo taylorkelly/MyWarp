@@ -161,6 +161,8 @@ public class WarpList {
 		Warp warp = this.getWarp(name, creator);
 		if (warp != null) {
 			if (playerCanModifyWarp(sender, warp, PermissionTypes.CREATE_PRIVATE, PermissionTypes.ADMIN_PRIVATE)) {
+				if (warp.visibility == Visibility.GLOBAL)
+					this.global.remove(warp.name.toLowerCase());
 				warp.visibility = Visibility.PRIVATE;
 				WarpDataSource.updateVisibility(warp, warp.visibility);
 				sender.sendMessage(ChatColor.AQUA + "You have privatized '"
@@ -220,6 +222,8 @@ public class WarpList {
 		Warp warp = this.getWarp(name, creator);
 		if (warp != null) {
 			if (playerCanModifyWarp(sender, warp, PermissionTypes.CREATE_PUBLIC, PermissionTypes.ADMIN_PUBLIC)) {
+				if (warp.visibility == Visibility.GLOBAL)
+					this.global.remove(warp.name.toLowerCase());
 				warp.visibility = Visibility.PUBLIC;
 				WarpDataSource.updateVisibility(warp, warp.visibility);
 				sender.sendMessage(ChatColor.AQUA + "You have publicized '"
@@ -298,7 +302,7 @@ public class WarpList {
 	
 	public void sendMissingWarp(String name, String creator, CommandSender sender) {
 		if (creator == null || creator.isEmpty()) {
-			sender.sendMessage(ChatColor.RED + "Global warp '" + name + "' doesn't exists.");
+			sender.sendMessage(ChatColor.RED + "Global warp '" + name + "' doesn't exist.");
 		} else {
 			sender.sendMessage(ChatColor.RED + "Player '" + creator + "' don't owns a warp named '" + name + "'.");
 		}

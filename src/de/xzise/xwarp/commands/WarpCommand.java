@@ -54,6 +54,6 @@ public abstract class WarpCommand extends SubCommand {
 	
 	@Override
 	protected String getCommand() {
-		return "warp " + this.commands[0] + " <name> [creator]" + parameterText;
+		return "warp " + this.commands[0] + " <name> [owner]" + parameterText;
 	}
 }

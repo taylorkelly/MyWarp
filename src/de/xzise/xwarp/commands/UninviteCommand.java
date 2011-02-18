@@ -8,7 +8,7 @@ import org.bukkit.command.CommandSender;
 public class UninviteCommand extends WarpCommand {
 
 	public UninviteCommand(WarpList list, Server server) {
-		super(list, server, "ex-invited", "uninvite");
+		super(list, server, "player", "uninvite");
 	}
 
 	@Override
