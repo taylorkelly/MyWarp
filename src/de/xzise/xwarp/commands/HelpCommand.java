@@ -51,7 +51,7 @@ public class HelpCommand extends SubCommand {
 				return true;
 			}
 		}
-		sender.sendMessage(ChatColor.WHITE + "------------------ " + ChatColor.GREEN + "/WARP HELP " + page + "/" + maxPage + ChatColor.WHITE + "------------------");
+		sender.sendMessage(ChatColor.WHITE + "------------------ " + ChatColor.GREEN + "xWarp Help " + page + "/" + maxPage + ChatColor.WHITE + "------------------");
 		for (int i = (page - 1) * (WMPlayerListener.LINES_PER_PAGE - 1); i < lines.size() && i < page * (WMPlayerListener.LINES_PER_PAGE - 1); i++) {
 			sender.sendMessage(lines.get(i));
 		}
@@ -60,6 +60,13 @@ public class HelpCommand extends SubCommand {
 	
 	public void setCommands(Collection<SubCommand> commands) {
 		this.commands.addAll(commands);
+	}
+	
+	public void showCommandHelp(CommandSender sender, SubCommand command) {
+		sender.sendMessage("xWarp Help");
+		for (String line : command.getFullHelp()) {
+			sender.sendMessage(line);
+		}
 	}
 	
 	@Override

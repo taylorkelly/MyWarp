@@ -1,5 +1,7 @@
 package de.xzise.xwarp;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -40,29 +42,35 @@ public class CommandMap {
 		this.helper = new HelpCommand(list, server);
 		this.warper = new WarpToCommand(list, server);
 		
-		this.registerCommand(this.helper);
-		this.registerCommand(this.warper);
+		Collection<SubCommand> subCommands = new ArrayList<SubCommand>();
 		
-		this.registerCommand(new ConvertCommand(list, server));
-		this.registerCommand(new DeleteCommand(list, server));
-		this.registerCommand(new UpdateCommand(list, server));
-		this.registerCommand(new RenameCommand(list, server));
-		this.registerCommand(new PrivatizeCommand(list, server));
-		this.registerCommand(new PublicizeCommand(list, server));
-		this.registerCommand(new GlobalizeCommand(list, server));
-		this.registerCommand(new SearchCommand(list, server));
-		this.registerCommand(CreateCommand.newCreatePrivate(list, server));
-		this.registerCommand(CreateCommand.newCreatePublic(list, server));
-		this.registerCommand(CreateCommand.newCreateGlobal(list, server));
-		this.registerCommand(new ListCommand(list, server));
-		this.registerCommand(new UninviteCommand(list, server));
-		this.registerCommand(new InviteCommand(list, server));
-		this.registerCommand(new ReloadCommand(list, server));
-		this.registerCommand(new GiveCommand(list, server));
-		this.registerCommand(new PermissionsCommand(list, server));
-		this.registerCommand(new InfoCommand(list, server));
+		subCommands.add(this.warper);
+
+		subCommands.add(CreateCommand.newCreatePrivate(list, server));
+		subCommands.add(CreateCommand.newCreatePublic(list, server));
+		subCommands.add(CreateCommand.newCreateGlobal(list, server));
+		subCommands.add(new DeleteCommand(list, server));
+		subCommands.add(new UpdateCommand(list, server));
+		subCommands.add(new RenameCommand(list, server));
+		subCommands.add(this.helper);
+		subCommands.add(new UninviteCommand(list, server));
+		subCommands.add(new InviteCommand(list, server));
+		subCommands.add(new GiveCommand(list, server));
+		subCommands.add(new PrivatizeCommand(list, server));
+		subCommands.add(new PublicizeCommand(list, server));
+		subCommands.add(new GlobalizeCommand(list, server));
+		subCommands.add(new SearchCommand(list, server));
+		subCommands.add(new ListCommand(list, server));
+		subCommands.add(new InfoCommand(list, server));
+		subCommands.add(new ReloadCommand(list, server));
+		subCommands.add(new PermissionsCommand(list, server));
+		subCommands.add(new ConvertCommand(list, server));
 		
-		this.helper.setCommands(this.commands.values());
+		for (SubCommand subCommand : subCommands) {
+			this.registerCommand(subCommand);
+		}
+		
+		this.helper.setCommands(subCommands);
 	}
 	
 	private void registerCommand(SubCommand command) {
@@ -80,10 +88,9 @@ public class CommandMap {
 			SubCommand command = this.commands.get(parameters[0]);
 			if (command != null) {
 				if (command.execute(sender, parameters)) {
-					
 					return true;
 				} else {
-					//TODO: Add specific helper here?
+					this.helper.showCommandHelp(sender, command);
 					return false;
 				}
 			} else {
@@ -91,5 +98,4 @@ public class CommandMap {
 			}
 		}
 	}
-
 }
