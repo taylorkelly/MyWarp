@@ -140,11 +140,11 @@ public class WarpList {
 		Warp warp = this.getWarp(name, creator);
 		if (warp != null) {
 			if (playerCanModifyWarp(sender, warp, PermissionTypes.ADMIN_DELETE)) {
-				this.global.remove(warp);
+				this.global.remove(warp.name.toLowerCase());
 				if (creator == null || creator.isEmpty()) {
 					creator = warp.creator;
 				}
-				this.personal.get(creator.toLowerCase()).remove(warp);
+				this.personal.get(creator.toLowerCase()).remove(warp.name.toLowerCase());
 				WarpDataSource.deleteWarp(warp);
 				sender.sendMessage(ChatColor.AQUA + "You have deleted '" + name
 						+ "'");
