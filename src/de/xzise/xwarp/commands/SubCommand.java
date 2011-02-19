@@ -76,9 +76,9 @@ public abstract class SubCommand {
 		}
 		if (this.commands.length > 1) {
 			String aliases = "Aliases: ";
-			for (int i = 0; i < this.commands.length; i++) {
+			for (int i = 1; i < this.commands.length; i++) {
 				aliases += ChatColor.GREEN + this.commands[i];
-				if (i < this.commands.length) {
+				if (i < this.commands.length - 1) {
 					aliases += ChatColor.WHITE + ", ";
 				}
 			}

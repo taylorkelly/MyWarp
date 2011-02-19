@@ -6,7 +6,6 @@ import java.sql.Connection;
 import org.bukkit.Server;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.Event.Priority;
 import org.bukkit.plugin.PluginDescriptionFile;
@@ -77,13 +76,7 @@ public class MyWarp extends JavaPlugin implements DatabaseConnection {
 	}
 	
 	@Override
-    public boolean onCommand(CommandSender sender, Command cmd, String commandLabel, String[] args) {
-		// If this is a player do nothing!
-		// Because parsing doesn't working -.-
-		if (sender instanceof Player) {
-			return false;
-		}
-			
+    public boolean onCommand(CommandSender sender, Command cmd, String commandLabel, String[] args) {		
 		return this.commands.executeCommand(sender, args);
     }
 

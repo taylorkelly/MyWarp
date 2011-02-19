@@ -30,7 +30,7 @@ public class MWBlockListener extends BlockListener {
     	Block block = event.getBlock();
         if(block.getState() instanceof Sign /*&& MyWarp.permissions.permission(event.getPlayer(), PermissionTypes.SIGN_WARP)*/) {
         	SignWarp signWarp = new SignWarp((Sign) block.getState());
-        	if (signWarp.getType() != null) {
+        	if (signWarp.getDestination() != null) {
         		MyWarp.logger.info("cb");
         		event.setBuildable(false);
         	}
@@ -43,7 +43,7 @@ public class MWBlockListener extends BlockListener {
     public void onSignChange(SignChangeEvent event) {
     	Block block = event.getBlock();
     	if (block.getState() instanceof Sign && MyWarp.permissions.permission(event.getPlayer(), PermissionTypes.SIGN_WARP)) {    		
-    		WarpDestination destination = SignWarp.getType(SignWarp.getFilledLines(event.getLines()));
+    		WarpDestination destination = SignWarp.getDestination(SignWarp.getFilledLines(event.getLines()));
     		if (destination != null) {
     			event.getPlayer().sendMessage("Warp sign found.");
     			Warp warp = this.list.getWarp(destination.name, destination.creator);
