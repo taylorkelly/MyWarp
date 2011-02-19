@@ -5,7 +5,8 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
-import me.taylorkelly.mywarp.WMPlayerListener;
+import de.xzise.MinecraftUtil;
+
 import me.taylorkelly.mywarp.Warp;
 
 public class ListSection implements Iterable<Warp> {
@@ -15,7 +16,7 @@ public class ListSection implements Iterable<Warp> {
 	
 	public ListSection(String title) {
 		this.title = title;
-		this.warps = new ArrayList<Warp>(WMPlayerListener.LINES_PER_PAGE);
+		this.warps = new ArrayList<Warp>(MinecraftUtil.MAX_LINES_VISIBLE);
 	}
 	
 	public void addWarp(Warp warp) {

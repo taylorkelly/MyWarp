@@ -32,14 +32,18 @@ public class CreateCommand extends SubCommand {
 	}
 	
 	private static String[] getCreateCommands(String suffix) {
-		return new String[] { "create" + suffix, "+" + suffix };
+		return new String[] { "create" + suffix, "+" + suffix, "add" + suffix };
 	}
 
 	@Override
 	protected boolean internalExecute(CommandSender sender, String[] parameters) {
-		if (parameters.length == 2 && sender instanceof Player) {			
-			this.list.addWarp(parameters[1], (Player) sender, this.visibility);
-			return true;
+		if (sender instanceof Player) {
+			if (parameters.length == 2) {			
+				this.list.addWarp(parameters[1], (Player) sender, ((Player) sender).getName(), this.visibility);
+				return true;
+			} else {
+				return false;
+			}
 		} else {
 			return false;
 		}

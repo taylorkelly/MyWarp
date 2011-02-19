@@ -1,6 +1,7 @@
 package de.xzise.xwarp.commands;
 
 import me.taylorkelly.mywarp.Searcher;
+import me.taylorkelly.mywarp.WMPlayerListener;
 import me.taylorkelly.mywarp.WarpList;
 
 import org.bukkit.ChatColor;
@@ -15,11 +16,18 @@ public class SearchCommand extends SubCommand {
 
 	@Override
 	protected boolean internalExecute(CommandSender sender, String[] parameters) {
-		if (parameters.length == 2) {
+		if (parameters.length == 2 || (parameters.length == 3 && WMPlayerListener.isInteger(parameters[2]))) {
+			int page;
+			if (parameters.length == 3) {
+				page = Integer.parseInt(parameters[2]);
+			} else {
+				page = 1;
+			}
+			
 			Searcher searcher = new Searcher(this.list);
 			searcher.addPlayer(sender);
 			searcher.setQuery(parameters[1]);
-			searcher.search();
+			searcher.search(page);
 			return true;
 		} else {
 			return false;

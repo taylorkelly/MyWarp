@@ -11,6 +11,8 @@ import org.bukkit.ChatColor;
 import org.bukkit.Server;
 import org.bukkit.command.CommandSender;
 
+import de.xzise.MinecraftUtil;
+
 public class HelpCommand extends SubCommand {
 	
 	private Collection<SubCommand> commands;
@@ -35,7 +37,7 @@ public class HelpCommand extends SubCommand {
 		}
 		
 		int page = 1;
-		int maxPage = lines.size() / (WMPlayerListener.LINES_PER_PAGE - 1);
+		int maxPage = lines.size() / (MinecraftUtil.MAX_LINES_VISIBLE - 1);
 		if (parameters.length == 2) {
 			if (WMPlayerListener.isInteger(parameters[1])) {
 				page = Integer.parseInt(parameters[1]);
@@ -52,7 +54,7 @@ public class HelpCommand extends SubCommand {
 			}
 		}
 		sender.sendMessage(ChatColor.WHITE + "------------------ " + ChatColor.GREEN + "xWarp Help " + page + "/" + maxPage + ChatColor.WHITE + "------------------");
-		for (int i = (page - 1) * (WMPlayerListener.LINES_PER_PAGE - 1); i < lines.size() && i < page * (WMPlayerListener.LINES_PER_PAGE - 1); i++) {
+		for (int i = (page - 1) * (MinecraftUtil.MAX_LINES_VISIBLE - 1); i < lines.size() && i < page * (MinecraftUtil.MAX_LINES_VISIBLE - 1); i++) {
 			sender.sendMessage(lines.get(i));
 		}
 		return true;

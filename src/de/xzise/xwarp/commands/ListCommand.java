@@ -8,6 +8,7 @@ import org.bukkit.Server;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 
+import de.xzise.MinecraftUtil;
 import de.xzise.xwarp.lister.GenericLister;
 import de.xzise.xwarp.lister.ListSection;
 
@@ -63,7 +64,7 @@ public class ListCommand extends SubCommand {
 				return true;
 			}			
 			
-			section.addWarps(this.list.getSortedWarps(sender, creator, (page - 1) * (WMPlayerListener.LINES_PER_PAGE - 1), WMPlayerListener.LINES_PER_PAGE - 1));
+			section.addWarps(this.list.getSortedWarps(sender, creator, (page - 1) * (MinecraftUtil.MAX_LINES_VISIBLE - 1), MinecraftUtil.MAX_LINES_VISIBLE - 1));
 			
 			GenericLister.listPage(page, maxPages, new ListSection[] { section }, sender);
 		}
@@ -71,7 +72,7 @@ public class ListCommand extends SubCommand {
 	}
 	
 	private static int getNumberOfPages(int elements) {
-		return (int) Math.ceil(elements / (double) (WMPlayerListener.LINES_PER_PAGE - 1));
+		return (int) Math.ceil(elements / (double) (MinecraftUtil.MAX_LINES_VISIBLE - 1));
 	}
 
 	@Override

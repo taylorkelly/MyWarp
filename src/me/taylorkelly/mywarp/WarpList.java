@@ -44,7 +44,7 @@ public class WarpList {
 		}
 	}
 
-	public void addWarp(String name, Player player, Visibility visibility) {
+	public void addWarp(String name, Player player, String newOwner, Visibility visibility) {
 		PermissionTypes type;
 		switch (visibility) {
 		case PRIVATE :
@@ -60,33 +60,30 @@ public class WarpList {
 			return;
 		}
 		if (MyWarp.permissions.permission(player, type)) {
-			Warp warp = this.getWarp(name, player.getName());
+			Warp warp = this.getWarp(name, newOwner);
 			Warp globalWarp = this.getWarp(name);
 			if (warp != null) {
 				player.sendMessage(ChatColor.RED + "Warp called '" + name
 						+ "' already exists (" + warp.name + ").");
 			} else if (visibility == Visibility.GLOBAL && globalWarp != null) {
-				player.sendMessage(ChatColor.RED + "Warp called '" + name
+				player.sendMessage(ChatColor.RED + "Global warp called '" + name
 						+ "' already exists (" + globalWarp.name + ").");				
 			} else {
-				warp = new Warp(name, player);
+				warp = new Warp(name, newOwner, player.getLocation());
 				putIntoPersonal(this.personal, warp);
-				if (warp != this.getWarp(name, player.getName())) {
-					MyWarp.logger.severe("Warp saving error!");
-				}
 				WarpDataSource.addWarp(warp);
 				player.sendMessage(ChatColor.AQUA + "Successfully created '"
 						+ warp.name + "'");
 				switch (visibility) {
 				case PRIVATE :
-					this.privatize(name, player.getName(), player);
+					this.privatize(name, newOwner, player);
 					break;
 				case PUBLIC :
 					player.sendMessage("If you'd like to privatize it,");
 					player.sendMessage("Use: " + ChatColor.RED + "/warp private " + warp.name);
 					break;
 				case GLOBAL :
-					this.globalize(name, player.getName(), player);
+					this.globalize(name, newOwner, player);
 					break;
 				}
 			}

@@ -8,11 +8,10 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerChatEvent;
 import org.bukkit.event.player.PlayerListener;
 
+import de.xzise.MinecraftUtil;
 import de.xzise.xwarp.CommandMap;
 
 public class WMPlayerListener extends PlayerListener {
-	
-	public static final int LINES_PER_PAGE = 10;
 	
 	private CommandMap commands;
 
@@ -118,11 +117,6 @@ public class WMPlayerListener extends PlayerListener {
 	}
 
 	public static boolean isInteger(String string) {
-		try {
-			Integer.parseInt(string);
-		} catch (Exception e) {
-			return false;
-		}
-		return true;
+		return MinecraftUtil.tryAndGetInteger(string) != null;
 	}
 }

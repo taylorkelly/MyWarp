@@ -7,7 +7,7 @@ public class XWarpSign implements SignWarpDefinition {
 	@Override
 	public WarpDestination getDestination(String[] lines) {
 		// xWarp
-		if ((lines.length == 2 || lines.length == 3) && ((lines[0].equalsIgnoreCase("xWarp") || lines[0].matches("(W|w)arp:?")))) {
+		if ((lines.length == 2 || lines.length == 3) && ((lines[0].equalsIgnoreCase("xWarp") || lines[0].matches("x?(W|w)arp:?")))) {
 			String creator = "";
 			if (lines.length == 3) {
 				creator = lines[2];
