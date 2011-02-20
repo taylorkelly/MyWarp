@@ -1,6 +1,7 @@
 package me.taylorkelly.mywarp;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 import org.bukkit.Location;
@@ -173,4 +174,24 @@ public class Warp {
 	public Location getLocation() {
 		return this.location.clone();
 	}
+	
+	public static final WarpComparator WARP_NAME_COMPARATOR = new WarpComparator() {
+
+		@Override
+		public int compare(Warp warp1, Warp warp2) {
+			return warp1.name.compareTo(warp2.name);
+		}
+		
+	};
+	
+	public static final WarpComparator WARP_INDEX_COMPARATOR = new WarpComparator() {
+		
+		@Override
+		public int compare(Warp warp1, Warp warp2) {
+			return new Integer(warp1.index).compareTo(warp2.index);
+		}
+	};
+	
 }
+
+interface WarpComparator extends Comparator<Warp> {}

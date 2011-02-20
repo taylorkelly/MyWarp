@@ -6,6 +6,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 
@@ -110,6 +112,48 @@ public class WarpDataSource {
 				}
 			}
 		}
+	}
+	
+	public static List<Warp> getWarps(Server server) {
+		List<Warp> result = new ArrayList<Warp>();
+		Statement statement = null;
+		ResultSet set = null;
+		try {
+			statement = ConnectionManager.getConnection().createStatement();
+			set = statement.executeQuery("SELECT * FROM warpTable");
+			int size = 0;
+			int globalSize = 0;
+			while (set.next()) {
+				size++;
+				int index = set.getInt("id");
+				String name = set.getString("name");
+				String creator = set.getString("creator");
+				World world = server.getWorld(set.getString("world"));
+				double x = set.getDouble("x");
+				int y = set.getInt("y");
+				double z = set.getDouble("z");
+				int yaw = set.getInt("yaw");
+				int pitch = set.getInt("pitch");
+				Location loc = new Location(world, x, y, z, yaw, pitch);
+				Visibility visibility = Visibility.parseLevel(set.getInt("publicLevel"));
+				String permissions = set.getString("permissions");
+				String welcomeMessage = set.getString("welcomeMessage");
+				result.add(new Warp(index, name, creator, loc, visibility, permissions, welcomeMessage));
+			}
+			MyWarp.logger.info(size + " warps loaded (" + globalSize + " global)");
+		} catch (SQLException ex) {
+			MyWarp.logger.severe("Warp Load Exception", ex);
+		} finally {
+			try {
+				if (statement != null)
+					statement.close();
+				if (set != null)
+					set.close();
+			} catch (SQLException ex) {
+				MyWarp.logger.severe("Warp Load Exception (on close)");
+			}
+		}
+		return result;
 	}
 
 	public static void getMap(Map<String, Warp> global, Map<String, Map<String, Warp>> personal, Server server) {

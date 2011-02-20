@@ -3,7 +3,6 @@ package me.taylorkelly.mywarp;
 import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,8 +20,6 @@ public class WarpList {
 	private Map<String, Warp> global;
 	private Map<String, Map<String, Warp>> personal;
 	private Server server;
-	
-	private static final WarpComparator warpComparator = new WarpComparator();
 
 	public WarpList(Server server) {
 		this.server = server;
@@ -320,7 +317,7 @@ public class WarpList {
 		
 		final Collator collator = Collator.getInstance();
 		collator.setStrength(Collator.SECONDARY);
-		Collections.sort(names, WarpList.warpComparator);
+		Collections.sort(names, Warp.WARP_NAME_COMPARATOR);
 
 		int index = 0;
 		int currentCount = 0;
@@ -387,7 +384,7 @@ public class WarpList {
 
 		final Collator collator = Collator.getInstance();
 		collator.setStrength(Collator.SECONDARY);
-		Collections.sort(all, WarpList.warpComparator);
+		Collections.sort(all, Warp.WARP_NAME_COMPARATOR);
 
 		for (int i = 0; i < all.size(); i++) {
 			Warp warp = all.get(i);
@@ -576,17 +573,4 @@ public class WarpList {
 			return "somebody";
 		}
 	}
-}
-
-/**
- * Compares to warps about the name.
- * 
- * @author Fabian Neundorf.
- */
-class WarpComparator implements Comparator<Warp> {
-
-	@Override
-	public int compare(Warp o1, Warp o2) {
-		return o1.name.compareTo(o2.name);
-	}	
 }
