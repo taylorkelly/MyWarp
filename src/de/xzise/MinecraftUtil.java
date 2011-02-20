@@ -56,25 +56,20 @@ public final class MinecraftUtil {
 //    if (toFile.isDirectory())
 //      toFile = new File(toFile, fromFile.getName());
 //
-//    if (toFile.exists()) {
-//      if (!toFile.canWrite())
-//        throw new IOException("FileCopy: "
-//            + "destination file is unwriteable: " + toFileName);
-//    } else {
-//      String parent = toFile.getParent();
-//      if (parent == null)
-//        parent = System.getProperty("user.dir");
-//      File dir = new File(parent);
-//      if (!dir.exists())
-//        throw new IOException("FileCopy: "
-//            + "destination directory doesn't exist: " + parent);
-//      if (dir.isFile())
-//        throw new IOException("FileCopy: "
-//            + "destination is not a directory: " + parent);
-//      if (!dir.canWrite())
-//        throw new IOException("FileCopy: "
-//            + "destination directory is unwriteable: " + parent);
-//    }
+		if (toFile.exists()) {
+			if (!toFile.canWrite())
+				throw new IOException("FileCopy: " + "destination file is unwriteable: " + toFile.getName());
+		} else {
+			File parent = toFile.getParentFile();
+			if (parent == null)
+				parent = new File(System.getProperty("user.dir"));
+			if (!parent.exists())
+				throw new IOException("FileCopy: " + "destination directory doesn't exist: " + parent);
+			if (parent.isFile())
+				throw new IOException("FileCopy: " + "destination is not a directory: " + parent);
+			if (!parent.canWrite())
+				throw new IOException("FileCopy: " + "destination directory is unwriteable: " + parent);
+		}
 
     FileInputStream from = null;
     FileOutputStream to = null;

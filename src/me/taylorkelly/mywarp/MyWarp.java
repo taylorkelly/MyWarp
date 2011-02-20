@@ -49,18 +49,22 @@ public class MyWarp extends JavaPlugin {
 	public void onEnable() {
 		logger = new XLogger(this.name);
 
-		if(new File("MyWarp").exists() && new File("MyWarp", "warps.db").exists()) {
-			updateFiles();
+		if (!this.getDataFolder().exists()) {
+			this.getDataFolder().mkdir();
 		}
 		
-		File old = new File("homes-warps.db"); 
-		File newFile = new File(this.getDataFolder(), "warps.db");
-		if (old.exists() && !newFile.exists()) {
-			MyWarp.logger.info("No database found. Copying old database.");
-			try {
-				MinecraftUtil.copy(old, newFile);
-			} catch (IOException e) {
-				MyWarp.logger.severe("Unable to copy database", e);
+		if(new File("MyWarp").exists() && new File("MyWarp", "warps.db").exists()) {
+			this.updateFiles();
+		} else {
+			File old = new File("homes-warps.db"); 
+			File newFile = new File(this.getDataFolder(), "warps.db");
+			if (old.exists() && !newFile.exists()) {
+				MyWarp.logger.info("No database found. Copying old database.");
+				try {
+					MinecraftUtil.copy(old, newFile);
+				} catch (IOException e) {
+					MyWarp.logger.severe("Unable to copy database", e);
+				}
 			}
 		}
 		
