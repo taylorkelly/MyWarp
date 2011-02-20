@@ -1,5 +1,6 @@
 package de.xzise.xwarp.dataconnections;
 
+import java.io.File;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
@@ -44,9 +45,16 @@ public class SQLiteConnection implements DataConnection {
 	private Server server;
 	private Connection connection;
 	
-	public SQLiteConnection(Server server) {
-        this.connection = SQLiteConnection.createConnection();
-        if (this.connection == null) {
+	public SQLiteConnection(Server server, File file) {
+        try {
+            Class.forName("org.sqlite.JDBC");
+            this.connection = DriverManager.getConnection("jdbc:sqlite:" + file.getAbsolutePath() + "/warps.db");
+            this.connection.setAutoCommit(false);
+        } catch (ClassNotFoundException e) {
+        	MyWarp.logger.severe("Class not found", e);
+        	throw new IllegalArgumentException("Couldn't load database.");
+        } catch (SQLException e) {
+            MyWarp.logger.severe("Generic SQLException", e);
         	throw new IllegalArgumentException("Couldn't load database.");
         }
 		this.server = server;
@@ -203,21 +211,6 @@ public class SQLiteConnection implements DataConnection {
 		}
 		return version;
 	}
-	
-    private static Connection createConnection() {
-        try {
-            Class.forName("org.sqlite.JDBC");
-            Connection ret = DriverManager.getConnection(SQLiteConnection.DATABASE);
-            ret.setAutoCommit(false);
-            return ret;
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-            return null;
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
 	
 	@Override
 	public List<Warp> getWarps() {
