@@ -2,7 +2,9 @@ package de.xzise.xwarp.commands;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import me.taylorkelly.mywarp.WMPlayerListener;
 import me.taylorkelly.mywarp.WarpList;
@@ -16,10 +18,12 @@ import de.xzise.MinecraftUtil;
 public class HelpCommand extends SubCommand {
 	
 	private Collection<SubCommand> commands;
+	private Map<String, SubCommand> commandMap;
 
 	public HelpCommand(WarpList list, Server server) {
 		super(list, server, "help", "?");
 		this.commands = new ArrayList<SubCommand>();
+		this.commandMap = new HashMap<String, SubCommand>();
 	}
 
 	@Override
@@ -49,19 +53,27 @@ public class HelpCommand extends SubCommand {
 					return true;
 				}
 			} else {
-				sender.sendMessage(ChatColor.RED + "Please input a valid number");
+				SubCommand command = this.commandMap.get(parameters[1]);
+				if (command != null) {
+					for (String line : command.getFullHelp()) {
+						sender.sendMessage(line);
+					}
+				} else {
+					sender.sendMessage(ChatColor.RED + "Please input a valid number/command");
+				}
 				return true;
 			}
 		}
-		sender.sendMessage(ChatColor.WHITE + "------------------ " + ChatColor.GREEN + "xWarp Help " + page + "/" + maxPage + ChatColor.WHITE + "------------------");
+		sender.sendMessage(ChatColor.WHITE + "------------------ " + ChatColor.GREEN + "xWarp Help " + page + "/" + maxPage + ChatColor.WHITE + " ------------------");
 		for (int i = (page - 1) * (MinecraftUtil.MAX_LINES_VISIBLE - 1); i < lines.size() && i < page * (MinecraftUtil.MAX_LINES_VISIBLE - 1); i++) {
 			sender.sendMessage(lines.get(i));
 		}
 		return true;
 	}
 	
-	public void setCommands(Collection<SubCommand> commands) {
+	public void setCommands(Collection<SubCommand> commands, Map<String, SubCommand> map) {
 		this.commands.addAll(commands);
+		this.commandMap.putAll(map);
 	}
 	
 	public void showCommandHelp(CommandSender sender, SubCommand command) {

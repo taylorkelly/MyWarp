@@ -91,16 +91,21 @@ public class Warp {
 		return ret.toString();
 	}
 
-	public boolean playerCanWarp(Player player) {
-		if (this.creator.equals(player.getName()) && MyWarp.permissions.permission(player, PermissionTypes.TO_OWN))
+	public boolean playerCanWarp(Player player, boolean viaSign) {	
+		if (this.creator.equals(player.getName()) && MyWarp.permissions.permission(player, viaSign ? PermissionTypes.SIGN_WARP_OWN : PermissionTypes.TO_OWN))
 			return true;
-		if (this.permissions.contains(player.getName()) && MyWarp.permissions.permission(player, PermissionTypes.TO_INVITED))
+		if (this.permissions.contains(player.getName()) && MyWarp.permissions.permission(player, viaSign ? PermissionTypes.SIGN_WARP_INVITED : PermissionTypes.TO_INVITED))
 			return true;
-		if (this.visibility == Visibility.PUBLIC && MyWarp.permissions.permission(player, PermissionTypes.TO_OTHER))
+		if (this.visibility == Visibility.PUBLIC && MyWarp.permissions.permission(player, viaSign ? PermissionTypes.SIGN_WARP_OTHER : PermissionTypes.TO_OTHER))
 			return true;
-		if (this.visibility == Visibility.GLOBAL && MyWarp.permissions.permission(player, PermissionTypes.TO_GLOBAL))
+		if (this.visibility == Visibility.GLOBAL && MyWarp.permissions.permission(player, viaSign ? PermissionTypes.SIGN_WARP_GLOBAL : PermissionTypes.TO_GLOBAL))
 			return true;
 		return MyWarp.permissions.permission(player, PermissionTypes.ADMIN_TO_ALL);
+	}
+	
+	public boolean playerCanWarp(Player player) {
+		//TODO: More elegant version?
+		return playerCanWarp(player, true) || playerCanWarp(player, false);
 	}
 
 	public void warp(Player player) {

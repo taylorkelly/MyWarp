@@ -70,7 +70,7 @@ public class CommandMap {
 			this.registerCommand(subCommand);
 		}
 		
-		this.helper.setCommands(subCommands);
+		this.helper.setCommands(subCommands, this.commands);
 	}
 	
 	private void registerCommand(SubCommand command) {

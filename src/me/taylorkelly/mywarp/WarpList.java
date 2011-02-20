@@ -117,10 +117,10 @@ public class WarpList {
 		}
 	}
 
-	public void warpTo(String name, String creator, Player player) {
+	public void warpTo(String name, String creator, Player player, boolean viaSign) {
 		Warp warp = this.getWarp(name, creator);
 		if (warp != null) {
-			if (warp.playerCanWarp(player)) {
+			if (warp.playerCanWarp(player, viaSign)) {
 				warp.warp(player);
 				player.sendMessage(ChatColor.AQUA + warp.welcomeMessage);
 			} else {
@@ -326,7 +326,7 @@ public class WarpList {
 		int currentCount = 0;
 		while (index < names.size() && ret.size() < size) {
 			Warp warp = names.get(index);
-			if (warp.listWarp(sender) || (sender instanceof Player && warp.playerCanWarp((Player) sender))) {
+			if (warp.listWarp(sender)) {
 				if (currentCount >= start) {
 					ret.add(warp);
 				} else {
@@ -391,7 +391,7 @@ public class WarpList {
 
 		for (int i = 0; i < all.size(); i++) {
 			Warp warp = all.get(i);
-			if (warp.listWarp(sender) || (sender instanceof Player && warp.playerCanWarp((Player) sender))) {
+			if (warp.listWarp(sender)) {
 				if (warp.name.equalsIgnoreCase(name)) {
 					exactMatches.add(warp);
 				} else if (warp.name.toLowerCase().contains(name.toLowerCase())) {

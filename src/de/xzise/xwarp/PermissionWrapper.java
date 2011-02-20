@@ -23,9 +23,15 @@ public class PermissionWrapper {
 		// Warp to public warps
 		TO_OTHER("warp.to.other"),
 		
-		// Warp with sign
-		SIGN_WARP("warp.sign"),
-
+		// Warp with sign to global
+		SIGN_WARP_GLOBAL("warp.sign.global"),
+		// Warp to own warps
+		SIGN_WARP_OWN("warp.sign.own"),
+		// Warp to invited warps
+		SIGN_WARP_INVITED("warp.sign.invited"),
+		// Warp to public warps
+		SIGN_WARP_OTHER("warp.sign.other"),
+		
 		// Create/Edit private warps
 		CREATE_PRIVATE("warp.create.private"),
 		// Create/Edit public warps
@@ -101,10 +107,13 @@ public class PermissionWrapper {
 		PermissionTypes.TO_OWN,
 		PermissionTypes.TO_OTHER,
 		PermissionTypes.TO_INVITED,
+		PermissionTypes.SIGN_WARP_GLOBAL,
+		PermissionTypes.SIGN_WARP_OWN,
+		PermissionTypes.SIGN_WARP_OTHER,
+		PermissionTypes.SIGN_WARP_INVITED,
 		PermissionTypes.CREATE_PRIVATE,
 		PermissionTypes.CREATE_PUBLIC,
 		PermissionTypes.CREATE_GLOBAL,
-		PermissionTypes.SIGN_WARP,
 	};
 	
 	private PermissionHandler handler = null;

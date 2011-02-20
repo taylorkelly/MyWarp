@@ -41,15 +41,15 @@ public class GenericLister {
 		}
 		
 		// Generate header with the same length every time
-		String intro = GenericLister.charList(charsPerLine / 2 - GenericLister.getWidth(page, 10), '-') + " Page " + page + "/" + maxPages + " " + GenericLister.charList(charsPerLine / 2 - GenericLister.getWidth(maxPages, 10), '-');
+		String intro = GenericLister.charList(charsPerLine / 2 - GenericLister.getWidth(page, 10), '-') + " " + ChatColor.GREEN + "Page " + page + "/" + maxPages + ChatColor.WHITE + " " + GenericLister.charList(charsPerLine / 2 - GenericLister.getWidth(maxPages, 10), '-');
 		
-		sender.sendMessage(ChatColor.YELLOW + intro);
+		sender.sendMessage(ChatColor.WHITE + intro);
 		
 		int width = widther.getWidth(intro); 
 		
 		for (ListSection listSection : sections) {
 			if (listSection.title != null && !listSection.title.isEmpty()) {
-				sender.sendMessage(ChatColor.GREEN + listSection.title);
+				sender.sendMessage(listSection.title);
 			}
 			
 			for (Warp warp : listSection) {
@@ -186,7 +186,7 @@ class ConsoleWidth implements WidthCalculator {
 		// Assume that the font is non proportional!
 		
 		//TODO: Remove color codes!
-		return text.length();
+		return text.replaceAll("(?i)\u00A7[0-F]", "").length();
 	}
 	
 }

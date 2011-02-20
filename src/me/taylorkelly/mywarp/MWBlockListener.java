@@ -20,7 +20,7 @@ public class MWBlockListener extends BlockListener {
     
     public void onBlockRightClick(BlockRightClickEvent event) {
         Block block = event.getBlock();
-        if(block.getState() instanceof Sign && MyWarp.permissions.permission(event.getPlayer(), PermissionTypes.SIGN_WARP)) {
+        if(block.getState() instanceof Sign && MyWarp.permissions.permissionOr(event.getPlayer(), PermissionTypes.SIGN_WARP_GLOBAL, PermissionTypes.SIGN_WARP_INVITED, PermissionTypes.SIGN_WARP_OTHER, PermissionTypes.SIGN_WARP_OWN)) {
         	SignWarp signWarp = new SignWarp((Sign) block.getState());
         	signWarp.warp(this.list, event.getPlayer());
         }
@@ -42,7 +42,7 @@ public class MWBlockListener extends BlockListener {
     
     public void onSignChange(SignChangeEvent event) {
     	Block block = event.getBlock();
-    	if (block.getState() instanceof Sign && MyWarp.permissions.permission(event.getPlayer(), PermissionTypes.SIGN_WARP)) {    		
+    	if (block.getState() instanceof Sign && MyWarp.permissions.permissionOr(event.getPlayer(), PermissionTypes.SIGN_WARP_GLOBAL, PermissionTypes.SIGN_WARP_INVITED, PermissionTypes.SIGN_WARP_OTHER, PermissionTypes.SIGN_WARP_OWN)) {    		
     		WarpDestination destination = SignWarp.getDestination(SignWarp.getFilledLines(event.getLines()));
     		if (destination != null) {
     			event.getPlayer().sendMessage("Warp sign found.");
