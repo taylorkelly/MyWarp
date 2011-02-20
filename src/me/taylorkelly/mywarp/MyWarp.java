@@ -2,15 +2,11 @@ package me.taylorkelly.mywarp;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.logging.Logger;
 
-import org.bukkit.Server;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.event.Event;
 import org.bukkit.event.Event.Priority;
-import org.bukkit.plugin.PluginDescriptionFile;
-import org.bukkit.plugin.PluginLoader;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import de.xzise.MinecraftUtil;
@@ -30,11 +26,6 @@ public class MyWarp extends JavaPlugin {
 	private DataConnection dataConnection;
 	public final String name = this.getDescription().getName();
 	public final String version = this.getDescription().getVersion();
-	
-	public MyWarp(PluginLoader pluginLoader, Server instance, PluginDescriptionFile desc, File directory, File plugin, ClassLoader cLoader) {
-		super(pluginLoader, instance, desc, directory, plugin, cLoader);
-		Logger.getLogger("Minecraft").info("[xWarp]: Temporary: this naging message is ****... Tell bukkit dev team that they don't use the newer method if the older exists.");
-	}
 
 	public MyWarp() {
 		super();
