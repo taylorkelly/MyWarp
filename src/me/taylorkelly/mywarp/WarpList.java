@@ -16,24 +16,38 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import de.xzise.xwarp.PermissionWrapper.PermissionTypes;
+import de.xzise.xwarp.dataconnections.DataConnection;
 
 public class WarpList {
 	private Map<String, Warp> global;
 	private Map<String, Map<String, Warp>> personal;
 	private Server server;
+	private DataConnection data;
 	
 	private static final WarpComparator warpComparator = new WarpComparator();
 
-	public WarpList(Server server) {
+	public WarpList(Server server, DataConnection dataConnection) {
 		this.server = server;
+		this.data = dataConnection;
+		this.global = new HashMap<String, Warp>();
+		this.personal = new HashMap<String, Map<String,Warp>>();
 		this.loadFromDatabase();
 	}
 
 	private void loadFromDatabase() {
-		WarpDataSource.initialize(this.server);
-		this.global = new HashMap<String, Warp>();
-		this.personal = new HashMap<String, Map<String,Warp>>();
-		WarpDataSource.getMap(this.global, this.personal, this.server);
+		this.global.clear();
+		this.personal.clear();
+		for (Warp warp : this.data.getWarps()) {
+			if (warp.visibility == Visibility.GLOBAL) {
+				this.global.put(warp.name.toLowerCase(), warp);
+			}
+			Map<String, Warp> personalWarps = this.personal.get(warp.creator.toLowerCase());
+			if (personalWarps == null) {
+				personalWarps = new HashMap<String, Warp>();
+				this.personal.put(warp.creator.toLowerCase(), personalWarps);
+			}
+			personalWarps.put(warp.name.toLowerCase(), warp);
+		}
 	}
 	
 	public void loadFromDatabase(CommandSender sender) {
@@ -71,7 +85,7 @@ public class WarpList {
 			} else {
 				warp = new Warp(name, newOwner, player.getLocation());
 				putIntoPersonal(this.personal, warp);
-				WarpDataSource.addWarp(warp);
+				this.data.addWarp(warp);
 				player.sendMessage(ChatColor.AQUA + "Successfully created '"
 						+ warp.name + "'");
 				switch (visibility) {
@@ -142,7 +156,7 @@ public class WarpList {
 					creator = warp.creator;
 				}
 				this.personal.get(creator.toLowerCase()).remove(warp.name.toLowerCase());
-				WarpDataSource.deleteWarp(warp);
+				this.data.deleteWarp(warp);
 				sender.sendMessage(ChatColor.AQUA + "You have deleted '" + name
 						+ "'");
 			} else {
@@ -161,7 +175,7 @@ public class WarpList {
 				if (warp.visibility == Visibility.GLOBAL)
 					this.global.remove(warp.name.toLowerCase());
 				warp.visibility = Visibility.PRIVATE;
-				WarpDataSource.updateVisibility(warp, warp.visibility);
+				this.data.updateVisibility(warp);
 				sender.sendMessage(ChatColor.AQUA + "You have privatized '"
 						+ name + "'");
 				sender.sendMessage("If you'd like to invite others to it,");
@@ -189,7 +203,7 @@ public class WarpList {
 							+ " is the creator, of course he's the invited!");
 				} else {
 					warp.invite(inviteeName);
-					WarpDataSource.updatePermissions(warp);
+					this.data.updatePermissions(warp);
 					sender.sendMessage(ChatColor.AQUA + "You have invited "
 							+ inviteeName + " to '" + name + "'");
 					if (warp.visibility != Visibility.PRIVATE) {
@@ -222,7 +236,7 @@ public class WarpList {
 				if (warp.visibility == Visibility.GLOBAL)
 					this.global.remove(warp.name.toLowerCase());
 				warp.visibility = Visibility.PUBLIC;
-				WarpDataSource.updateVisibility(warp, warp.visibility);
+				this.data.updateVisibility(warp);
 				sender.sendMessage(ChatColor.AQUA + "You have publicized '"
 						+ warp.name + "'");
 			} else {
@@ -242,7 +256,7 @@ public class WarpList {
 				Warp existing = this.getWarp(name);
 				if (existing == null || existing.visibility != Visibility.GLOBAL) {
 					warp.visibility = Visibility.GLOBAL;
-					WarpDataSource.updateVisibility(warp, warp.visibility);
+					this.data.updateVisibility(warp);
 					this.global.put(name.toLowerCase(), warp);
 					sender.sendMessage(ChatColor.AQUA + "You have globalized '"
 							+ warp.name + "'");	
@@ -273,7 +287,7 @@ public class WarpList {
 							+ "You can't uninvite yourself. You're the creator!");
 				} else {
 					warp.uninvite(inviteeName);
-					WarpDataSource.updatePermissions(warp);
+					this.data.updatePermissions(warp);
 					sender.sendMessage(ChatColor.AQUA + "You have uninvited "
 							+ inviteeName + " from '" + name + "'");
 					if (warp.visibility != Visibility.PRIVATE) {
@@ -413,7 +427,7 @@ public class WarpList {
 					Warp giveeWarp = this.getWarp(name, giveeName);
 					if (giveeWarp == null) {
 						warp.setCreator(giveeName);
-						WarpDataSource.updateCreator(warp);
+						this.data.updateCreator(warp);
 						sender.sendMessage(ChatColor.AQUA + "You have given '"
 								+ warp.name + "' to " + giveeName);
 						Player match = server.getPlayer(giveeName);
@@ -442,7 +456,7 @@ public class WarpList {
 			if (MyWarp.permissions.permission(player, PermissionTypes.ADMIN_MESSAGE)
 					|| warp.playerCanModify(player)) {
 				warp.setMessage(message);
-				WarpDataSource.updateMessage(warp);
+				this.data.updateMessage(warp);
 				player.sendMessage(ChatColor.AQUA
 						+ "You have set the welcome message for '" + warp.name + "'");
 				player.sendMessage(message);
@@ -463,7 +477,7 @@ public class WarpList {
 					PermissionTypes.ADMIN_UPDATE)
 					|| warp.playerCanModify(player)) {
 				warp.update(player);
-				WarpDataSource.updateWarp(warp);
+				this.data.updateLocation(warp);
 				player.sendMessage(ChatColor.AQUA + "You have updated '" + warp.name + "'");
 			} else {
 				player.sendMessage(ChatColor.RED
@@ -502,7 +516,7 @@ public class WarpList {
 					this.personal.get(creator.toLowerCase()).put(newName.toLowerCase(), warp);
 					
 					warp.rename(newName);
-					WarpDataSource.updateWarp(warp);
+					this.data.updateName(warp);
 					sender.sendMessage(ChatColor.AQUA + "You have renamed '" + warp.name + "'");
 				}
 			} else {

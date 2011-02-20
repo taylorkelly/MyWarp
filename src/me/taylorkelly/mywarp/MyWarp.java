@@ -1,7 +1,6 @@
 package me.taylorkelly.mywarp;
 
 import java.io.File;
-import java.sql.Connection;
 
 import org.bukkit.Server;
 import org.bukkit.command.Command;
@@ -12,19 +11,20 @@ import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.PluginLoader;
 import org.bukkit.plugin.java.JavaPlugin;
 
-
-import de.xzise.DatabaseConnection;
 import de.xzise.XLogger;
 import de.xzise.xwarp.CommandMap;
 import de.xzise.xwarp.PermissionWrapper;
+import de.xzise.xwarp.dataconnections.DataConnection;
+import de.xzise.xwarp.dataconnections.SQLiteConnection;
 
-public class MyWarp extends JavaPlugin implements DatabaseConnection {
+public class MyWarp extends JavaPlugin {
 	
 	public static PermissionWrapper permissions = new PermissionWrapper();
 	public static XLogger logger;
 	
 	private WMPlayerListener playerListener;
 	private CommandMap commands;
+	private DataConnection dataConnection;
 	public final String name = this.getDescription().getName();
 	public final String version = this.getDescription().getVersion();
 	
@@ -35,7 +35,7 @@ public class MyWarp extends JavaPlugin implements DatabaseConnection {
 
 	@Override
 	public void onDisable() {
-	    ConnectionManager.freeConnection();
+	    this.dataConnection.free();
 	}
 
 	@Override
@@ -44,9 +44,11 @@ public class MyWarp extends JavaPlugin implements DatabaseConnection {
 		if(new File("MyWarp").exists() && new File("MyWarp", "warps.db").exists()) {
 			updateFiles();
 		}
-
+		
 		// Init connection here
-		if (ConnectionManager.initializeConnection(this.getServer()) == null) {
+		try {
+			this.dataConnection = new SQLiteConnection(this.getServer());
+		} catch (Exception e) {
 			MyWarp.logger.severe("Could not establish SQL connection. Disabling " + name + "!");
 			this.getServer().getPluginManager().disablePlugin(this);
 			return;
@@ -54,12 +56,12 @@ public class MyWarp extends JavaPlugin implements DatabaseConnection {
 		
 		permissions.init(this.getServer());
 		
-		WarpList warpList = new WarpList(getServer());
+		WarpList warpList = new WarpList(this.getServer(), this.dataConnection);
 
 		// Create commands
 		this.commands = null;
 		try {
-			this.commands = new CommandMap(warpList, this.getServer());
+			this.commands = new CommandMap(warpList, this.getServer(), this.dataConnection);
 		} catch (IllegalArgumentException iae) {
 			MyWarp.logger.severe("Couldn't initalize commands.", iae);
 			this.getServer().getPluginManager().disablePlugin(this);
@@ -86,10 +88,4 @@ public class MyWarp extends JavaPlugin implements DatabaseConnection {
 		file.renameTo(new File("homes-warps.db"));
 		folder.delete();
 	}
-
-	@Override
-	public Connection getConnection() {
-		return ConnectionManager.getConnection();
-	}
-
 }

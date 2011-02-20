@@ -1,21 +1,26 @@
-package me.taylorkelly.mywarp;
+package de.xzise.xwarp.dataconnections;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
+import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 
 import org.bukkit.Location;
 import org.bukkit.Server;
 import org.bukkit.World;
 
+import me.taylorkelly.mywarp.MyWarp;
+import me.taylorkelly.mywarp.Warp;
 import me.taylorkelly.mywarp.Warp.Visibility;
 
-public class WarpDataSource {
+public class SQLiteConnection implements DataConnection {
+
 	public final static String DATABASE = "jdbc:sqlite:homes-warps.db";
 	private final static String WARP_TABLE = "CREATE TABLE `warpTable` ("
 			+ "`id` INTEGER PRIMARY KEY,"
@@ -34,8 +39,41 @@ public class WarpDataSource {
 	private final static String VERSION_TABLE = "CREATE TABLE `meta` (`name` varchar(32) NOT NULL, `value` int NOT NULL);";
 
 	private final static int TARGET_VERSION = 1;
+
 	
-	public static void initialize(Server server) {
+	private Server server;
+	private Connection connection;
+	
+	public SQLiteConnection(Server server) {
+        this.connection = SQLiteConnection.createConnection();
+        if (this.connection == null) {
+        	throw new IllegalArgumentException("Couldn't load database.");
+        }
+		this.server = server;
+        this.update();
+	}
+	
+	public void free() {
+        if (this.connection != null) {
+        	MyWarp.logger.info("Close connection!");
+            try {
+            	this.connection.close();
+            	this.connection = null;
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        } else {
+        	this.connection = null;
+        }
+	}
+	
+	protected void finalize() throws Throwable
+	{
+		this.free();
+		super.finalize();
+	}
+	
+	private void update() {
 		int version = getVersion();
 		
 		if (version < TARGET_VERSION) {
@@ -44,8 +82,7 @@ public class WarpDataSource {
 			PreparedStatement convertedWarp = null;
 			ResultSet set = null;
 			try {
-				Connection conn = ConnectionManager.getConnection();
-				statement = conn.createStatement();
+				statement = this.connection.createStatement();
 				
 				// Copy old database
 				if (tableExists("warpTable")) {
@@ -59,7 +96,7 @@ public class WarpDataSource {
 					// Select line by line
 					String world = server.getWorlds().get(0).getName();
 					set = statement.executeQuery("SELECT * FROM warpTable_backup");
-					convertedWarp = conn.prepareStatement("INSERT INTO warpTable (id, name, creator, world, x, y, z, yaw, pitch, publicLevel, permissions, welcomeMessage) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)");
+					convertedWarp = this.connection.prepareStatement("INSERT INTO warpTable (id, name, creator, world, x, y, z, yaw, pitch, publicLevel, permissions, welcomeMessage) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)");
 					while (set.next()) {
 						convertedWarp.setInt(1, set.getInt("id"));
 						convertedWarp.setString(2, set.getString("name"));
@@ -87,11 +124,11 @@ public class WarpDataSource {
 					MyWarp.logger.info("Recovering the backup.");
 				}
 				if (version < 0) {
-				statement.executeUpdate("INSERT INTO meta (name, value) VALUES (\"version\", " + TARGET_VERSION + ")");
+					statement.executeUpdate("INSERT INTO meta (name, value) VALUES (\"version\", " + TARGET_VERSION + ")");
 				} else {
 					statement.executeUpdate("UPDATE meta SET value = " + TARGET_VERSION + " WHERE name = \"version\"");
 				}
-				conn.commit();
+				this.connection.commit();
 			} catch (SQLException ex) {
 //				try {
 //					statement.execute("ROLLBACK");
@@ -111,63 +148,34 @@ public class WarpDataSource {
 			}
 		}
 	}
-
-	public static void getMap(Map<String, Warp> global, Map<String, Map<String, Warp>> personal, Server server) {
-		Statement statement = null;
-		ResultSet set = null;
+	
+	private boolean tableExists(String name) {
+		ResultSet rs = null;
 		try {
-			statement = ConnectionManager.getConnection().createStatement();
-			set = statement.executeQuery("SELECT * FROM warpTable");
-			int size = 0;
-			int globalSize = 0;
-			while (set.next()) {
-				size++;
-				int index = set.getInt("id");
-				String name = set.getString("name");
-				String creator = set.getString("creator");
-				World world = server.getWorld(set.getString("world"));
-				double x = set.getDouble("x");
-				int y = set.getInt("y");
-				double z = set.getDouble("z");
-				int yaw = set.getInt("yaw");
-				int pitch = set.getInt("pitch");
-				Location loc = new Location(world, x, y, z, yaw, pitch);
-				Visibility visibility = Visibility.parseLevel(set.getInt("publicLevel"));
-				String permissions = set.getString("permissions");
-				String welcomeMessage = set.getString("welcomeMessage");
-				Warp warp = new Warp(index, name, creator, loc, visibility, permissions, welcomeMessage);
-//				if (visibility == Visibility.GLOBAL || !global.containsKey(name.toLowerCase())) {
-				// Load only REAL global warps
-				if (visibility == Visibility.GLOBAL) {
-					global.put(name.toLowerCase(), warp);
-					if (visibility == Visibility.GLOBAL) {
-						globalSize++;
-					}
-				}
-				WarpList.putIntoPersonal(personal, warp);
-			}
-			MyWarp.logger.info(size + " warps loaded (" + globalSize + " global)");
+			DatabaseMetaData dbm = this.connection.getMetaData();
+			rs = dbm.getTables(null, null, name, null);
+			if (!rs.next())
+				return false;
+			return true;
 		} catch (SQLException ex) {
-			MyWarp.logger.severe("Warp Load Exception", ex);
+			MyWarp.logger.log(Level.SEVERE, "Table Check Exception", ex);
+			return false;
 		} finally {
 			try {
-				if (statement != null)
-					statement.close();
-				if (set != null)
-					set.close();
+				if (rs != null)
+					rs.close();
 			} catch (SQLException ex) {
-				MyWarp.logger.severe("Warp Load Exception (on close)");
+				MyWarp.logger.severe("Table Check SQL Exception (on closing)");
 			}
 		}
 	}
 	
-	private static int getVersion() {
+	public int getVersion() {
 		Statement statement = null;
 		int version = -1;
 		ResultSet set = null;
 		try {
-			Connection conn = ConnectionManager.getConnection();
-			statement = conn.createStatement();
+			statement = this.connection.createStatement();
 			if (tableExists("meta")) {
 				set = statement.executeQuery("SELECT * FROM meta WHERE name = \"version\"");
 
@@ -177,7 +185,7 @@ public class WarpDataSource {
 			} else {
 				MyWarp.logger.info("Meta table doesn't exists... Creating new");
 				statement.executeUpdate(VERSION_TABLE);
-				conn.commit();
+				this.connection.commit();
 				version = -1;
 			}
 		} catch (SQLException ex) {
@@ -195,118 +203,116 @@ public class WarpDataSource {
 		}
 		return version;
 	}
-
-	private static boolean tableExists(String name) {
-		ResultSet rs = null;
-		try {
-			DatabaseMetaData dbm = ConnectionManager.getConnection().getMetaData();
-			rs = dbm.getTables(null, null, name, null);
-			if (!rs.next())
-				return false;
-			return true;
-		} catch (SQLException ex) {
-			MyWarp.logger.log(Level.SEVERE, "Table Check Exception", ex);
-			return false;
-		} finally {
-			try {
-				if (rs != null)
-					rs.close();
-			} catch (SQLException ex) {
-				MyWarp.logger.severe("Table Check SQL Exception (on closing)");
-			}
-		}
-	}
-
-//	private static void createTable() {
-//		Statement st = null;
-//		try {
-//			st = ConnectionManager.getConnection().createStatement();
-//			st.executeUpdate(WARP_TABLE);
-//		} catch (SQLException e) {
-//			MyWarp.logger.log(Level.SEVERE, "Create Table Exception", e);
-//		} finally {
-//			try {
-//				if (st != null)
-//					st.close();
-//			} catch (SQLException e) {
-//				MyWarp.logger.severe("Could not create the table (on close)");
-//			}
-//		}
-//	}
-
-	public static void addWarp(Warp warp) {
-		PreparedStatement ps = null;
-		try {
-			Connection conn = ConnectionManager.getConnection();
-			
-			ps = conn.prepareStatement("INSERT INTO warpTable (id, name, creator, world, x, y, z, yaw, pitch, publicLevel, permissions, welcomeMessage) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)");
-			ps.setInt(1, warp.index);
-			ps.setString(2, warp.name);
-			ps.setString(3, warp.creator);
-			setLocation(warp.getLocation(), 4, ps);
-			ps.setInt(10, warp.visibility.level);
-			ps.setString(11, warp.permissionsString());
-			ps.setString(12, warp.welcomeMessage);
-			ps.executeUpdate();
-			conn.commit();
-		} catch (SQLException ex) {
-			MyWarp.logger.log(Level.SEVERE, "Warp Insert Exception", ex);
-		} finally {
-			try {
-				if (ps != null) {
-					ps.close();
-				}
-			} catch (SQLException ex) {
-				MyWarp.logger.log(Level.SEVERE, "Warp Insert Exception (on close)", ex);
-			}
-		}
-	}
 	
-	public static void setLocation(Location location, int offset, PreparedStatement ps) throws SQLException {
+    private static Connection createConnection() {
+        try {
+            Class.forName("org.sqlite.JDBC");
+            Connection ret = DriverManager.getConnection(SQLiteConnection.DATABASE);
+            ret.setAutoCommit(false);
+            return ret;
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+            return null;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+	
+	@Override
+	public List<Warp> getWarps() {
+		List<Warp> result = new ArrayList<Warp>();
+		Statement statement = null;
+		ResultSet set = null;
+		try {
+			statement = this.connection.createStatement();
+			set = statement.executeQuery("SELECT * FROM warpTable");
+			int size = 0;
+			while (set.next()) {
+				size++;
+				int index = set.getInt("id");
+				String name = set.getString("name");
+				String creator = set.getString("creator");
+				World world = server.getWorld(set.getString("world"));
+				double x = set.getDouble("x");
+				int y = set.getInt("y");
+				double z = set.getDouble("z");
+				int yaw = set.getInt("yaw");
+				int pitch = set.getInt("pitch");
+				Location loc = new Location(world, x, y, z, yaw, pitch);
+				Visibility visibility = Visibility.parseLevel(set.getInt("publicLevel"));
+				String permissions = set.getString("permissions");
+				String welcomeMessage = set.getString("welcomeMessage");
+				result.add(new Warp(index, name, creator, loc, visibility, permissions, welcomeMessage));
+			}
+			MyWarp.logger.info(size + " warps loaded");
+		} catch (SQLException ex) {
+			MyWarp.logger.severe("Warp Load Exception", ex);
+		} finally {
+			try {
+				if (statement != null)
+					statement.close();
+				if (set != null)
+					set.close();
+			} catch (SQLException ex) {
+				MyWarp.logger.severe("Warp Load Exception (on close)");
+			}
+		}
+		return result;
+	}
+
+	@Override
+	public void addWarp(Warp... warps) {
+		if (warps.length > 0) {
+			PreparedStatement ps = null;
+			try {		
+				ps = this.connection.prepareStatement("INSERT INTO warpTable (id, name, creator, world, x, y, z, yaw, pitch, publicLevel, permissions, welcomeMessage) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)");
+				for (Warp warp : warps) {
+					ps.setInt(1, warp.index);
+					ps.setString(2, warp.name);
+					ps.setString(3, warp.creator);
+					setLocation(warp.getLocation(), 4, ps);
+					ps.setInt(10, warp.visibility.level);
+					ps.setString(11, warp.permissionsString());
+					ps.setString(12, warp.welcomeMessage);
+					ps.addBatch();
+				}
+				ps.executeBatch();
+				this.connection.commit();
+			} catch (SQLException ex) {
+				MyWarp.logger.log(Level.SEVERE, "Warp Insert Exception", ex);
+			} finally {
+				try {
+					if (ps != null) {
+						ps.close();
+					}
+				} catch (SQLException ex) {
+					MyWarp.logger.log(Level.SEVERE, "Warp Insert Exception (on close)", ex);
+				}
+			}
+		}
+	}
+
+	private static void setLocation(Location location, int offset, PreparedStatement ps) throws SQLException {
 		ps.setString(offset++, location.getWorld().getName());
 		ps.setDouble(offset++, location.getX());
 		ps.setInt(offset++, (int) location.getY());
 		ps.setDouble(offset++, location.getZ());
 		ps.setInt(offset++, (int) location.getYaw());
-		ps.setInt(offset++, (int) location.getPitch());
+		ps.setInt(offset++, (int) location.getPitch());	
 	}
-	
-	public static void updateWarp(Warp warp) {
-		PreparedStatement ps = null;
-		try {
-			Connection conn = ConnectionManager.getConnection();
-			
-			ps = conn.prepareStatement("UPDATE warpTable SET world = ?, x = ?, y = ?, z = ?, yaw = ?, pitch = ? WHERE id = ?");
-			Location loc = warp.getLocation();
-			setLocation(loc, 1, ps);
-			ps.setInt(7, warp.index);
-			ps.executeUpdate();
-			conn.commit();
-		} catch (SQLException ex) {
-			MyWarp.logger.log(Level.SEVERE, "Warp Update Exception", ex);
-		} finally {
-			try {
-				if (ps != null) {
-					ps.close();
-				}
-			} catch (SQLException ex) {
-				MyWarp.logger.log(Level.SEVERE, "Warp Insert Exception (on close)", ex);
-			}
-		}
-	}
-	
-	public static void updateName(Warp warp) {
+
+	@Override
+	public void deleteWarp(Warp warp) {
 		PreparedStatement ps = null;
 		ResultSet set = null;
 		try {
-			Connection conn = ConnectionManager.getConnection();
-			ps = conn.prepareStatement("UPDATE warpTable SET name = ? WHERE id = ?");
-			ps.setString(1, warp.name);
-			ps.setInt(2, warp.index);
+			ps = this.connection.prepareStatement("DELETE FROM warpTable WHERE id = ?");
+			ps.setInt(1, warp.index);
 			ps.executeUpdate();
-			conn.commit();
+			this.connection.commit();
 		} catch (SQLException ex) {
-			MyWarp.logger.log(Level.SEVERE, "Warp Name Exception", ex);
+			MyWarp.logger.log(Level.SEVERE, "Warp Delete Exception", ex);
 		} finally {
 			try {
 				if (ps != null) {
@@ -316,99 +322,21 @@ public class WarpDataSource {
 					set.close();
 				}
 			} catch (SQLException ex) {
-				MyWarp.logger.log(Level.SEVERE, "Warp Name Exception (on close)", ex);
-			}
-		}
-	}
-	
-	public static void updateMessage(Warp warp) {
-		PreparedStatement ps = null;
-		ResultSet set = null;
-		try {
-			Connection conn = ConnectionManager.getConnection();
-			ps = conn.prepareStatement("UPDATE warpTable SET welcomeMessage = ? WHERE id = ?");
-			ps.setString(1, warp.welcomeMessage);
-			ps.setInt(2, warp.index);
-			ps.executeUpdate();
-			conn.commit();
-		} catch (SQLException ex) {
-			MyWarp.logger.log(Level.SEVERE, "Warp Welcome Message Exception", ex);
-		} finally {
-			try {
-				if (ps != null) {
-					ps.close();
-				}
-				if (set != null) {
-					set.close();
-				}
-			} catch (SQLException ex) {
-				MyWarp.logger.log(Level.SEVERE, "Warp Welcome Message Exception (on close)", ex);
-			}
-		}
-	}
-	
-	public static void updateVisibility(Warp warp, Visibility visibility) {
-		PreparedStatement ps = null;
-		ResultSet set = null;
-		try {
-			Connection conn = ConnectionManager.getConnection();
-			ps = conn.prepareStatement("UPDATE warpTable SET publicLevel = ? WHERE id = ?");
-			ps.setInt(1, visibility.level);
-			ps.setInt(2, warp.index);
-			ps.executeUpdate();
-			conn.commit();
-		} catch (SQLException ex) {
-			MyWarp.logger.log(Level.SEVERE, "Warp Visibility Exception", ex);
-		} finally {
-			try {
-				if (ps != null) {
-					ps.close();
-				}
-				if (set != null) {
-					set.close();
-				}
-			} catch (SQLException ex) {
-				MyWarp.logger.log(Level.SEVERE, "Warp Visibility (on close)", ex);
+				MyWarp.logger.log(Level.SEVERE, "Warp Delete Exception (on close)", ex);
 			}
 		}
 	}
 
-	public static void updatePermissions(Warp warp) {
+	@Override
+	public void updateCreator(Warp warp) {
 		PreparedStatement ps = null;
 		ResultSet set = null;
 		try {
-			Connection conn = ConnectionManager.getConnection();
-			ps = conn.prepareStatement("UPDATE warpTable SET permissions = ? WHERE id = ?");
-			ps.setString(1, warp.permissionsString());
-			ps.setInt(2, warp.index);
-			ps.executeUpdate();
-			conn.commit();
-		} catch (SQLException ex) {
-			MyWarp.logger.log(Level.SEVERE, "Warp Permissions Exception", ex);
-		} finally {
-			try {
-				if (ps != null) {
-					ps.close();
-				}
-				if (set != null) {
-					set.close();
-				}
-			} catch (SQLException ex) {
-				MyWarp.logger.log(Level.SEVERE, "Warp Permissions Exception (on close)", ex);
-			}
-		}
-	}
-
-	public static void updateCreator(Warp warp) {
-		PreparedStatement ps = null;
-		ResultSet set = null;
-		try {
-			Connection conn = ConnectionManager.getConnection();
-			ps = conn.prepareStatement("UPDATE warpTable SET creator = ? WHERE id = ?");
+			ps = this.connection.prepareStatement("UPDATE warpTable SET creator = ? WHERE id = ?");
 			ps.setString(1, warp.creator);
 			ps.setInt(2, warp.index);
 			ps.executeUpdate();
-			conn.commit();
+			this.connection.commit();
 		} catch (SQLException ex) {
 			MyWarp.logger.log(Level.SEVERE, "Warp Creator Exception", ex);
 		} finally {
@@ -425,17 +353,18 @@ public class WarpDataSource {
 		}
 	}
 
-	public static void deleteWarp(Warp warp) {
+	@Override
+	public void updateMessage(Warp warp) {
 		PreparedStatement ps = null;
 		ResultSet set = null;
 		try {
-			Connection conn = ConnectionManager.getConnection();
-			ps = conn.prepareStatement("DELETE FROM warpTable WHERE id = ?");
-			ps.setInt(1, warp.index);
+			ps = this.connection.prepareStatement("UPDATE warpTable SET welcomeMessage = ? WHERE id = ?");
+			ps.setString(1, warp.welcomeMessage);
+			ps.setInt(2, warp.index);
 			ps.executeUpdate();
-			conn.commit();
+			this.connection.commit();
 		} catch (SQLException ex) {
-			MyWarp.logger.log(Level.SEVERE, "Warp Delete Exception", ex);
+			MyWarp.logger.log(Level.SEVERE, "Warp Welcome Message Exception", ex);
 		} finally {
 			try {
 				if (ps != null) {
@@ -445,8 +374,110 @@ public class WarpDataSource {
 					set.close();
 				}
 			} catch (SQLException ex) {
-				MyWarp.logger.log(Level.SEVERE, "Warp Delete Exception (on close)", ex);
+				MyWarp.logger.log(Level.SEVERE, "Warp Welcome Message Exception (on close)", ex);
 			}
 		}
 	}
+
+	@Override
+	public void updateName(Warp warp) {
+		PreparedStatement ps = null;
+		ResultSet set = null;
+		try {
+			ps = this.connection.prepareStatement("UPDATE warpTable SET name = ? WHERE id = ?");
+			ps.setString(1, warp.name);
+			ps.setInt(2, warp.index);
+			ps.executeUpdate();
+			this.connection.commit();
+		} catch (SQLException ex) {
+			MyWarp.logger.log(Level.SEVERE, "Warp Name Exception", ex);
+		} finally {
+			try {
+				if (ps != null) {
+					ps.close();
+				}
+				if (set != null) {
+					set.close();
+				}
+			} catch (SQLException ex) {
+				MyWarp.logger.log(Level.SEVERE, "Warp Name Exception (on close)", ex);
+			}
+		}
+	}
+
+	@Override
+	public void updatePermissions(Warp warp) {
+		PreparedStatement ps = null;
+		ResultSet set = null;
+		try {
+			ps = this.connection.prepareStatement("UPDATE warpTable SET permissions = ? WHERE id = ?");
+			ps.setString(1, warp.permissionsString());
+			ps.setInt(2, warp.index);
+			ps.executeUpdate();
+			this.connection.commit();
+		} catch (SQLException ex) {
+			MyWarp.logger.log(Level.SEVERE, "Warp Permissions Exception", ex);
+		} finally {
+			try {
+				if (ps != null) {
+					ps.close();
+				}
+				if (set != null) {
+					set.close();
+				}
+			} catch (SQLException ex) {
+				MyWarp.logger.log(Level.SEVERE, "Warp Permissions Exception (on close)", ex);
+			}
+		}
+	}
+
+	@Override
+	public void updateVisibility(Warp warp) {
+		PreparedStatement ps = null;
+		ResultSet set = null;
+		try {
+			ps = this.connection.prepareStatement("UPDATE warpTable SET publicLevel = ? WHERE id = ?");
+			ps.setInt(1, warp.visibility.level);
+			ps.setInt(2, warp.index);
+			ps.executeUpdate();
+			this.connection.commit();
+		} catch (SQLException ex) {
+			MyWarp.logger.log(Level.SEVERE, "Warp Visibility Exception", ex);
+		} finally {
+			try {
+				if (ps != null) {
+					ps.close();
+				}
+				if (set != null) {
+					set.close();
+				}
+			} catch (SQLException ex) {
+				MyWarp.logger.log(Level.SEVERE, "Warp Visibility (on close)", ex);
+			}
+		}
+	}
+
+	@Override
+	public void updateLocation(Warp warp) {
+		PreparedStatement ps = null;
+		try {
+			ps = this.connection.prepareStatement("UPDATE warpTable SET world = ?, x = ?, y = ?, z = ?, yaw = ?, pitch = ? WHERE id = ?");
+			Location loc = warp.getLocation();
+			setLocation(loc, 1, ps);
+			ps.setInt(7, warp.index);
+			ps.executeUpdate();
+			this.connection.commit();
+		} catch (SQLException ex) {
+			MyWarp.logger.log(Level.SEVERE, "Warp Update Exception", ex);
+		} finally {
+			try {
+				if (ps != null) {
+					ps.close();
+				}
+			} catch (SQLException ex) {
+				MyWarp.logger.log(Level.SEVERE, "Warp Insert Exception (on close)", ex);
+			}
+		}
+	}
+
 }

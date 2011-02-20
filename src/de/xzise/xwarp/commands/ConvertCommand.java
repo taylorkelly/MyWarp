@@ -1,23 +1,29 @@
 package de.xzise.xwarp.commands;
 
+import java.util.List;
+
 import org.bukkit.ChatColor;
 import org.bukkit.Server;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import de.xzise.xwarp.PermissionWrapper.PermissionTypes;
+import de.xzise.xwarp.dataconnections.DataConnection;
 
 import me.taylorkelly.mywarp.Converter;
 import me.taylorkelly.mywarp.MyWarp;
+import me.taylorkelly.mywarp.Warp;
 import me.taylorkelly.mywarp.WarpList;
 
 public class ConvertCommand extends SubCommand {
 
 	private boolean warning;
+	private final DataConnection data;
 
-	public ConvertCommand(WarpList list, Server server) {
+	public ConvertCommand(WarpList list, Server server, DataConnection data) {
 		super(list, server, "convert");
 		this.warning = false;
+		this.data = data;
 	}
 
 	@Override
@@ -37,7 +43,11 @@ public class ConvertCommand extends SubCommand {
 						+ " again to confirm.");
 				warning = true;
 			} else {
-				Converter.convert(sender, this.server, this.list, owner);
+				List<Warp> warps = Converter.convert(sender, this.server, owner);
+				for (Warp warp : warps) {
+					this.list.blindAdd(warp);
+				}
+				this.data.addWarp(warps.toArray(new Warp[warps.size()]));
 				warning = false;
 			}
 			return true;

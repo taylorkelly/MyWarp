@@ -29,6 +29,7 @@ import de.xzise.xwarp.commands.SubCommand;
 import de.xzise.xwarp.commands.UninviteCommand;
 import de.xzise.xwarp.commands.UpdateCommand;
 import de.xzise.xwarp.commands.WarpToCommand;
+import de.xzise.xwarp.dataconnections.DataConnection;
 
 public class CommandMap {
 	
@@ -36,7 +37,7 @@ public class CommandMap {
 	private HelpCommand helper;
 	private WarpToCommand warper;
 	
-	public CommandMap(WarpList list, Server server) {
+	public CommandMap(WarpList list, Server server, DataConnection data) {
 		this.commands = new HashMap<String, SubCommand>();
 		
 		this.helper = new HelpCommand(list, server);
@@ -64,7 +65,7 @@ public class CommandMap {
 		subCommands.add(new InfoCommand(list, server));
 		subCommands.add(new ReloadCommand(list, server));
 		subCommands.add(new PermissionsCommand(list, server));
-		subCommands.add(new ConvertCommand(list, server));
+		subCommands.add(new ConvertCommand(list, server, data));
 		
 		for (SubCommand subCommand : subCommands) {
 			this.registerCommand(subCommand);
