@@ -5,7 +5,6 @@ import java.util.List;
 
 import me.taylorkelly.mywarp.MyWarp;
 import me.taylorkelly.mywarp.Warp;
-import me.taylorkelly.mywarp.WarpList;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -13,17 +12,19 @@ import org.bukkit.Server;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import de.xzise.MinecraftUtil;
+import de.xzise.xwarp.WarpManager;
 import de.xzise.xwarp.lister.GenericLister;
 
 public class InfoCommand extends WarpCommand {
 
-	public InfoCommand(WarpList list, Server server) {
+	public InfoCommand(WarpManager list, Server server) {
 		super(list, server, "", "info");
 	}
 
 	@Override
 	protected boolean executeEdit(CommandSender sender, String warpName, String creator, String parameter) {
-		Warp warp = this.list.getWarp(warpName, creator);
+		Warp warp = this.list.getWarp(warpName, creator, MinecraftUtil.getPlayerName(sender));
 		sender.sendMessage("Warp info: " + ChatColor.GREEN + warp.name);
 		
 		// Group?

@@ -1,13 +1,13 @@
 package de.xzise.xwarp.commands;
 
-import me.taylorkelly.mywarp.WarpList;
-
 import org.bukkit.Server;
 import org.bukkit.command.CommandSender;
 
+import de.xzise.xwarp.WarpManager;
+
 public class RenameCommand extends WarpCommand {
 
-	public RenameCommand(WarpList list, Server server) {
+	public RenameCommand(WarpManager list, Server server) {
 		super(list, server, "new name", "rename");
 	}
 

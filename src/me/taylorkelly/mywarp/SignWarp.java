@@ -6,6 +6,7 @@ import java.util.List;
 import org.bukkit.block.Sign;
 import org.bukkit.entity.Player;
 
+import de.xzise.xwarp.WarpManager;
 import de.xzise.xwarp.signwarps.MyWarpSign;
 import de.xzise.xwarp.signwarps.SignWarpDefinition;
 import de.xzise.xwarp.signwarps.SingleLineSign;
@@ -29,7 +30,7 @@ public class SignWarp {
 		return SignWarp.getDestination(SignWarp.getFilledLines(this.sign));
 	}
 	
-	public boolean warp(WarpList list, Player player) {
+	public boolean warp(WarpManager list, Player player) {
 		String[] lines = SignWarp.getFilledLines(this.sign);
 		WarpDestination destination = SignWarp.getDestination(lines);
 	

@@ -8,7 +8,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerChatEvent;
 import org.bukkit.event.player.PlayerListener;
 
-import de.xzise.MinecraftUtil;
 import de.xzise.xwarp.CommandMap;
 
 public class WMPlayerListener extends PlayerListener {
@@ -114,9 +113,5 @@ public class WMPlayerListener extends PlayerListener {
 			values.add(value);
 		}
 		return values.toArray(new String[0]);
-	}
-
-	public static boolean isInteger(String string) {
-		return MinecraftUtil.tryAndGetInteger(string) != null;
 	}
 }

@@ -1,13 +1,13 @@
 package de.xzise.xwarp.commands;
 
-import me.taylorkelly.mywarp.WarpList;
-
 import org.bukkit.Server;
 import org.bukkit.command.CommandSender;
 
+import de.xzise.xwarp.WarpManager;
+
 public class GiveCommand extends WarpCommand {
 
-	public GiveCommand(WarpList list, Server server) {
+	public GiveCommand(WarpManager list, Server server) {
 		super(list, server, "player", "give");
 	}
 

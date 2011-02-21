@@ -1,13 +1,13 @@
 package de.xzise.xwarp.commands;
 
-import me.taylorkelly.mywarp.WarpList;
-
 import org.bukkit.Server;
 import org.bukkit.command.CommandSender;
 
+import de.xzise.xwarp.WarpManager;
+
 public class PublicizeCommand extends WarpCommand {
 
-	public PublicizeCommand(WarpList list, Server server) {
+	public PublicizeCommand(WarpManager list, Server server) {
 		super(list, server, "", "public");
 	}
 

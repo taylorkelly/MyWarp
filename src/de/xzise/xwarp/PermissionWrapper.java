@@ -11,6 +11,8 @@ import org.bukkit.plugin.Plugin;
 import com.nijiko.permissions.PermissionHandler;
 import com.nijikokun.bukkit.Permissions.Permissions;
 
+import de.xzise.MinecraftUtil;
+
 public class PermissionWrapper {
 
 	public enum PermissionTypes {
@@ -127,9 +129,9 @@ public class PermissionWrapper {
 	}
 	
 	private boolean permissionX(CommandSender sender, PermissionTypes permission) {
-		if (contains(permission, DEFAULT_PERMISSIONS)) {
+		if (MinecraftUtil.contains(permission, DEFAULT_PERMISSIONS) >= 0) {
 			return true;
-		} else if (contains(permission, ADMIN_PERMISSIONS)) {
+		} else if (MinecraftUtil.contains(permission, ADMIN_PERMISSIONS) >= 0) {
 			return sender.isOp();
 		} else {
 			return false;
@@ -179,8 +181,12 @@ public class PermissionWrapper {
 	public void init(Server server) {
 		Plugin test = server.getPluginManager().getPlugin("Permissions");
 		if (test != null) {
-			this.handler = ((Permissions) test).getHandler();
-			MyWarp.logger.info("Permissions enabled.");
+			if (test.isEnabled()) {
+				this.handler = ((Permissions) test).getHandler();
+				MyWarp.logger.info("Permissions enabled.");
+			} else {
+				MyWarp.logger.info("Permissions system found, but not enabled. Use defaults.");
+			}
 		} else {
 			MyWarp.logger.severe("Permission system not found. Use defaults.");
 		}
@@ -188,15 +194,5 @@ public class PermissionWrapper {
 	
 	public boolean useOfficial() {
 		return this.handler != null;
-	}
-
-	public static <T> boolean contains(T o, T[] a) {
-		for (T t : a) {
-			if (t != null && t.equals(o)) {
-				return true;
-			}
-		}
-		return false;
-	}
-	
+	}	
 }

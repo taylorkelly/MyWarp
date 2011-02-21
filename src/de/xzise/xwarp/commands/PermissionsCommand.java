@@ -1,7 +1,6 @@
 package de.xzise.xwarp.commands;
 
 import me.taylorkelly.mywarp.MyWarp;
-import me.taylorkelly.mywarp.WarpList;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Server;
@@ -11,10 +10,11 @@ import org.bukkit.entity.Player;
 import de.xzise.xwarp.PermissionWrapper;
 import de.xzise.xwarp.PermissionWrapper.PermissionTypes;
 
+//TODO: Create a superclass for subcommand without the list?
 public class PermissionsCommand extends SubCommand {
 
-	public PermissionsCommand(WarpList list, Server server) {
-		super(list, server, "permissions");
+	public PermissionsCommand(Server server) {
+		super(null, server, "permissions");
 	}
 
 	@Override

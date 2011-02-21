@@ -40,5 +40,9 @@ public class XLogger {
 	public void log(Level level, String msg, Throwable exception) {
 		this.logger.log(level, this.formatMessage(msg), exception);
 	}
+
+	public void warning(String msg, Throwable exception) {
+		this.log(Level.WARNING, msg, exception);
+	}
 	
 }

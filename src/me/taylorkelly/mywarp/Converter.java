@@ -2,9 +2,8 @@ package me.taylorkelly.mywarp;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 import org.bukkit.ChatColor;
@@ -15,15 +14,12 @@ import org.bukkit.command.CommandSender;
 
 public class Converter {
 
-	public static void convert(CommandSender sender, Server server, WarpList lister, String owner) {
+	public static List<Warp> convert(CommandSender sender, Server server, String owner) {
+		List<Warp> result = new ArrayList<Warp>();
 		File file = new File("warps.txt");
-		PreparedStatement ps = null;
+		Scanner scanner;
 		try {
-			Connection conn = ConnectionManager.getConnection();
-			ps = conn
-					.prepareStatement("INSERT INTO warpTable (id, name, creator, world, x, y, z, yaw, pitch, publicLevel, permissions, welcomeMessage) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)");
-
-			Scanner scanner = new Scanner(file);
+			scanner = new Scanner(file);
 			int size = 0;
 			while (scanner.hasNext()) {
 				String line = scanner.nextLine();
@@ -36,41 +32,20 @@ public class Converter {
 				double z = Double.parseDouble(pieces[3]);
 				double yaw = Double.parseDouble(pieces[4]);
 				double pitch = Double.parseDouble(pieces[5]);
-
+	
 				yaw = (yaw < 0) ? (360 + (yaw % 360)) : (yaw % 360);
-
+	
 				World world = server.getWorlds().get(0);
 				Location location = new Location(world, x, y, z, (float) yaw, (float) pitch);
-				Warp warp = new Warp(name, owner, location);
-				lister.blindAdd(warp);
-
-				ps.setInt(1, warp.index);
-				ps.setString(2, warp.name);
-				ps.setString(3, warp.creator);
-				WarpDataSource.setLocation(warp.getLocation(), 4, ps);
-				ps.setInt(10, warp.visibility.level);
-				ps.setString(11, warp.permissionsString());
-				ps.setString(12, warp.welcomeMessage);
-				ps.addBatch();
-				size++;
+				result.add(new Warp(name, owner, location));
 			}
-			ps.executeBatch();
-			conn.commit();
 			file.delete();
-			sender.sendMessage("Successfully imported " + size + " warps.");
+			sender.sendMessage("Successfully loaded " + ChatColor.GREEN + size + ChatColor.WHITE + " warps.");
 		} catch (FileNotFoundException e) {
-			sender.sendMessage(ChatColor.RED + "Error: 'warps.txt' doesn't exist.");
-		} catch (SQLException e) {
-			sender.sendMessage(ChatColor.RED + "Error: SQLite Exception");
-		} finally {
-			try {
-				if (ps != null) {
-					ps.close();
-				}
-			} catch (SQLException ex) {
-				sender.sendMessage(ChatColor.RED + "Error: SQLite Exception (on close)");
-			}
+			sender.sendMessage(ChatColor.RED + "Problem loading file.");
+			MyWarp.logger.severe("File not found", e);
 		}
+		return result;
 	}
 
 }

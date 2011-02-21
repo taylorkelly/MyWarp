@@ -8,13 +8,14 @@ import org.bukkit.event.block.BlockListener;
 import org.bukkit.event.block.BlockRightClickEvent;
 import org.bukkit.event.block.SignChangeEvent;
 
+import de.xzise.xwarp.WarpManager;
 import de.xzise.xwarp.PermissionWrapper.PermissionTypes;
 
 public class MWBlockListener extends BlockListener {
 	
-    private WarpList list;
+    private WarpManager list;
     
-    public MWBlockListener(WarpList list) {
+    public MWBlockListener(WarpManager list) {
         this.list = list;
     }
     
@@ -46,7 +47,7 @@ public class MWBlockListener extends BlockListener {
     		WarpDestination destination = SignWarp.getDestination(SignWarp.getFilledLines(event.getLines()));
     		if (destination != null) {
     			event.getPlayer().sendMessage("Warp sign found.");
-    			Warp warp = this.list.getWarp(destination.name, destination.creator);
+    			Warp warp = this.list.getWarp(destination.name, destination.creator, null);
     			if (warp == null) {
 	    			String creator = "";
 	    			if (!destination.creator.isEmpty()) {
