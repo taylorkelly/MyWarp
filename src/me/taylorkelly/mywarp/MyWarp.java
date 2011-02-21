@@ -13,6 +13,7 @@ import de.xzise.MinecraftUtil;
 import de.xzise.XLogger;
 import de.xzise.xwarp.CommandMap;
 import de.xzise.xwarp.PermissionWrapper;
+import de.xzise.xwarp.PluginProperties;
 import de.xzise.xwarp.dataconnections.DataConnection;
 import de.xzise.xwarp.dataconnections.SQLiteConnection;
 
@@ -24,8 +25,8 @@ public class MyWarp extends JavaPlugin {
 	private WMPlayerListener playerListener;
 	private CommandMap commands;
 	private DataConnection dataConnection;
-	public final String name = this.getDescription().getName();
-	public final String version = this.getDescription().getVersion();
+	public String name;
+	public String version;
 
 	public MyWarp() {
 		super();
@@ -38,6 +39,8 @@ public class MyWarp extends JavaPlugin {
 
 	@Override
 	public void onEnable() {
+		this.name = this.getDescription().getName();
+		this.version = this.getDescription().getVersion();
 		logger = new XLogger(this.name);
 
 		if (!this.getDataFolder().exists()) {
@@ -59,13 +62,18 @@ public class MyWarp extends JavaPlugin {
 			}
 		}
 		
-		// Init connection here
-		try {
-			this.dataConnection = new SQLiteConnection(this.getServer(), this.getDataFolder());
-		} catch (Exception e) {
-			MyWarp.logger.severe("Could not establish SQL connection. Disabling " + name + "!");
-			this.getServer().getPluginManager().disablePlugin(this);
-			return;
+		PluginProperties properties = new PluginProperties(this.getDataFolder(), this.getServer());
+		
+		this.dataConnection = properties.getDataConnection();
+
+		if (this.dataConnection instanceof SQLiteConnection) {
+			try {
+				((SQLiteConnection) this.dataConnection).init(this.getDataFolder());
+			} catch (IllegalArgumentException iae) {
+				MyWarp.logger.severe("Could not establish SQL connection. Disabling " + this.name + "!", iae);
+				this.getServer().getPluginManager().disablePlugin(this);
+				return;
+			}
 		}
 		
 		permissions.init(this.getServer());

@@ -45,10 +45,16 @@ public class SQLiteConnection implements DataConnection {
 	private Server server;
 	private Connection connection;
 	
-	public SQLiteConnection(Server server, File file) {
+	public SQLiteConnection(Server server) {
+		// Nothing to do here
+		this.server = server;
+	}
+	
+	public void init(File dataPath) {
+		this.free();
         try {
             Class.forName("org.sqlite.JDBC");
-            this.connection = DriverManager.getConnection("jdbc:sqlite:" + file.getAbsolutePath() + "/warps.db");
+            this.connection = DriverManager.getConnection("jdbc:sqlite:" + dataPath.getAbsolutePath() + "/warps.db");
             this.connection.setAutoCommit(false);
         } catch (ClassNotFoundException e) {
         	MyWarp.logger.severe("Class not found", e);
@@ -57,7 +63,6 @@ public class SQLiteConnection implements DataConnection {
             MyWarp.logger.severe("Generic SQLException", e);
         	throw new IllegalArgumentException("Couldn't load database.");
         }
-		this.server = server;
         this.update();
 	}
 	
@@ -319,19 +324,21 @@ public class SQLiteConnection implements DataConnection {
 			}
 		}
 	}
-
-	@Override
-	public void updateCreator(Warp warp) {
+	
+	private interface UpdateFiller {
+		void fillStatement(Warp warp, PreparedStatement statement) throws SQLException;
+	}
+	
+	private void updateWarp(Warp warp, String name, String sql, UpdateFiller filler) {
 		PreparedStatement ps = null;
 		ResultSet set = null;
 		try {
-			ps = this.connection.prepareStatement("UPDATE warpTable SET creator = ? WHERE id = ?");
-			ps.setString(1, warp.creator);
-			ps.setInt(2, warp.index);
+			ps = this.connection.prepareStatement(sql);
+			filler.fillStatement(warp, ps);
 			ps.executeUpdate();
 			this.connection.commit();
 		} catch (SQLException ex) {
-			MyWarp.logger.log(Level.SEVERE, "Warp Creator Exception", ex);
+			MyWarp.logger.log(Level.SEVERE, "Warp " + name + " Exception", ex);
 		} finally {
 			try {
 				if (ps != null) {
@@ -341,136 +348,82 @@ public class SQLiteConnection implements DataConnection {
 					set.close();
 				}
 			} catch (SQLException ex) {
-				MyWarp.logger.log(Level.SEVERE,	"Warp Creator Exception (on close)", ex);
+				MyWarp.logger.log(Level.SEVERE,	"Warp " + name + " Exception (on close)", ex);
 			}
 		}
+	}
+
+	@Override
+	public void updateCreator(Warp warp) {
+		this.updateWarp(warp, "Creator", "UPDATE warpTable SET creator = ? WHERE id = ?", new UpdateFiller() {
+			
+			@Override
+			public void fillStatement(Warp warp, PreparedStatement statement) throws SQLException {
+				statement.setString(1, warp.creator);
+				statement.setInt(2, warp.index);
+			}
+		});
 	}
 
 	@Override
 	public void updateMessage(Warp warp) {
-		PreparedStatement ps = null;
-		ResultSet set = null;
-		try {
-			ps = this.connection.prepareStatement("UPDATE warpTable SET welcomeMessage = ? WHERE id = ?");
-			ps.setString(1, warp.welcomeMessage);
-			ps.setInt(2, warp.index);
-			ps.executeUpdate();
-			this.connection.commit();
-		} catch (SQLException ex) {
-			MyWarp.logger.log(Level.SEVERE, "Warp Welcome Message Exception", ex);
-		} finally {
-			try {
-				if (ps != null) {
-					ps.close();
-				}
-				if (set != null) {
-					set.close();
-				}
-			} catch (SQLException ex) {
-				MyWarp.logger.log(Level.SEVERE, "Warp Welcome Message Exception (on close)", ex);
+		this.updateWarp(warp, "Welcome Message", "UPDATE warpTable SET welcomeMessage = ? WHERE id = ?", new UpdateFiller() {
+			
+			@Override
+			public void fillStatement(Warp warp, PreparedStatement statement) throws SQLException {
+				statement.setString(1, warp.welcomeMessage);
+				statement.setInt(2, warp.index);
 			}
-		}
+		});
 	}
 
 	@Override
 	public void updateName(Warp warp) {
-		PreparedStatement ps = null;
-		ResultSet set = null;
-		try {
-			ps = this.connection.prepareStatement("UPDATE warpTable SET name = ? WHERE id = ?");
-			ps.setString(1, warp.name);
-			ps.setInt(2, warp.index);
-			ps.executeUpdate();
-			this.connection.commit();
-		} catch (SQLException ex) {
-			MyWarp.logger.log(Level.SEVERE, "Warp Name Exception", ex);
-		} finally {
-			try {
-				if (ps != null) {
-					ps.close();
-				}
-				if (set != null) {
-					set.close();
-				}
-			} catch (SQLException ex) {
-				MyWarp.logger.log(Level.SEVERE, "Warp Name Exception (on close)", ex);
+		this.updateWarp(warp, "Name", "UPDATE warpTable SET name = ? WHERE id = ?", new UpdateFiller() {
+			
+			@Override
+			public void fillStatement(Warp warp, PreparedStatement statement) throws SQLException {
+				statement.setString(1, warp.name);
+				statement.setInt(2, warp.index);
 			}
-		}
+		});
 	}
 
 	@Override
 	public void updatePermissions(Warp warp) {
-		PreparedStatement ps = null;
-		ResultSet set = null;
-		try {
-			ps = this.connection.prepareStatement("UPDATE warpTable SET permissions = ? WHERE id = ?");
-			ps.setString(1, warp.permissionsString());
-			ps.setInt(2, warp.index);
-			ps.executeUpdate();
-			this.connection.commit();
-		} catch (SQLException ex) {
-			MyWarp.logger.log(Level.SEVERE, "Warp Permissions Exception", ex);
-		} finally {
-			try {
-				if (ps != null) {
-					ps.close();
-				}
-				if (set != null) {
-					set.close();
-				}
-			} catch (SQLException ex) {
-				MyWarp.logger.log(Level.SEVERE, "Warp Permissions Exception (on close)", ex);
+		this.updateWarp(warp, "Permissions", "UPDATE warpTable SET permissions = ? WHERE id = ?", new UpdateFiller() {
+			
+			@Override
+			public void fillStatement(Warp warp, PreparedStatement statement) throws SQLException {
+				statement.setString(1, warp.permissionsString());
+				statement.setInt(2, warp.index);
 			}
-		}
+		});
 	}
 
 	@Override
 	public void updateVisibility(Warp warp) {
-		PreparedStatement ps = null;
-		ResultSet set = null;
-		try {
-			ps = this.connection.prepareStatement("UPDATE warpTable SET publicLevel = ? WHERE id = ?");
-			ps.setInt(1, warp.visibility.level);
-			ps.setInt(2, warp.index);
-			ps.executeUpdate();
-			this.connection.commit();
-		} catch (SQLException ex) {
-			MyWarp.logger.log(Level.SEVERE, "Warp Visibility Exception", ex);
-		} finally {
-			try {
-				if (ps != null) {
-					ps.close();
-				}
-				if (set != null) {
-					set.close();
-				}
-			} catch (SQLException ex) {
-				MyWarp.logger.log(Level.SEVERE, "Warp Visibility (on close)", ex);
+		this.updateWarp(warp, "Visibility", "UPDATE warpTable SET publicLevel = ? WHERE id = ?", new UpdateFiller() {
+			
+			@Override
+			public void fillStatement(Warp warp, PreparedStatement statement) throws SQLException {
+				statement.setInt(1, warp.visibility.level);
+				statement.setInt(2, warp.index);
 			}
-		}
+		});
 	}
 
 	@Override
 	public void updateLocation(Warp warp) {
-		PreparedStatement ps = null;
-		try {
-			ps = this.connection.prepareStatement("UPDATE warpTable SET world = ?, x = ?, y = ?, z = ?, yaw = ?, pitch = ? WHERE id = ?");
-			Location loc = warp.getLocation();
-			setLocation(loc, 1, ps);
-			ps.setInt(7, warp.index);
-			ps.executeUpdate();
-			this.connection.commit();
-		} catch (SQLException ex) {
-			MyWarp.logger.log(Level.SEVERE, "Warp Update Exception", ex);
-		} finally {
-			try {
-				if (ps != null) {
-					ps.close();
-				}
-			} catch (SQLException ex) {
-				MyWarp.logger.log(Level.SEVERE, "Warp Insert Exception (on close)", ex);
+		this.updateWarp(warp, "Location", "UPDATE warpTable SET world = ?, x = ?, y = ?, z = ?, yaw = ?, pitch = ? WHERE id = ?", new UpdateFiller() {
+			
+			@Override
+			public void fillStatement(Warp warp, PreparedStatement statement) throws SQLException {
+				Location loc = warp.getLocation();
+				SQLiteConnection.setLocation(loc, 1, statement);
+				statement.setInt(7, warp.index);
 			}
-		}
+		});
 	}
 
 }
