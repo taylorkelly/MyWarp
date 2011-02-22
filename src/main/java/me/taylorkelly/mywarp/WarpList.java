@@ -52,7 +52,7 @@ public class WarpList {
     }
 
     private boolean playerCanBuildPublicWarp(Player player) {
-        if(WarpPermissions.isAdmin(player) && WarpSettings.adminsObeyLimits) {
+        if(WarpPermissions.isAdmin(player) && !WarpSettings.adminsObeyLimits) {
             return true;
         } else{
             return numPublicWarpsPlayer(player) < WarpPermissions.maxPublicWarps(player);
@@ -60,7 +60,7 @@ public class WarpList {
     }
 
     private boolean playerCanBuildPrivateWarp(Player player) {
-        if(WarpPermissions.isAdmin(player) && WarpSettings.adminsObeyLimits) {
+        if(WarpPermissions.isAdmin(player) && !WarpSettings.adminsObeyLimits) {
             return true;
         } else{
             return numPrivateWarpsPlayer(player) < WarpPermissions.maxPrivateWarps(player);
