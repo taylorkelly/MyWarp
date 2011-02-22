@@ -295,7 +295,7 @@ public class MyWarp extends JavaPlugin {
                         if (i + 1 < split.length)
                             name += " ";
                     }
-                    warpList.warpTo(name, invitee);
+                    warpList.adminWarpTo(name, invitee, player);
 
                     /**
                      * /warp help

@@ -34,18 +34,19 @@ public class WarpList {
                 player.sendMessage("Use: " + ChatColor.RED + "/warp private " + name);
             }
         } else {
-            player.sendMessage(ChatColor.RED + "You have reached your max # of public warps " + ChatColor.YELLOW + "("
-                    + WarpPermissions.maxPublicWarps(player) + ")");
+            player.sendMessage(ChatColor.RED + "You have reached your max # of public warps " + ChatColor.YELLOW + "(" + WarpPermissions.maxPublicWarps(player)
+                    + ")");
             player.sendMessage("Delete some of your warps to make more");
         }
     }
 
     private int numPublicWarpsPlayer(Player player) {
         int size = 0;
-        for(Warp warp: warpList.values()) {
+        for (Warp warp : warpList.values()) {
             boolean publicAll = warp.publicAll;
             String creator = warp.creator;
-            if(creator.equals(player.getName()) && publicAll) size++;
+            if (creator.equals(player.getName()) && publicAll)
+                size++;
         }
         return size;
     }
@@ -71,10 +72,11 @@ public class WarpList {
 
     private int numPrivateWarpsPlayer(Player player) {
         int size = 0;
-        for(Warp warp: warpList.values()) {
+        for (Warp warp : warpList.values()) {
             boolean privateAll = !warp.publicAll;
             String creator = warp.creator;
-            if(creator.equals(player.getName()) && privateAll) size++;
+            if (creator.equals(player.getName()) && privateAll)
+                size++;
         }
         return size;
     }
@@ -383,6 +385,19 @@ public class WarpList {
             }
         } else {
             player.sendMessage(ChatColor.RED + "No such warp '" + name + "'");
+        }
+    }
+
+    public void adminWarpTo(String name, Player invitee, Player admin) {
+        MatchList matches = this.getMatches(name, admin);
+        name = matches.getMatch(name);
+        if (warpList.containsKey(name)) {
+            Warp warp = warpList.get(name);
+            warp.warp(invitee);
+            invitee.sendMessage(ChatColor.AQUA + warp.welcomeMessage);
+            admin.sendMessage(ChatColor.AQUA + "Successfully warped " + invitee.getName());
+        } else {
+            admin.sendMessage(ChatColor.RED + "No such warp '" + name + "'");
         }
     }
 }
