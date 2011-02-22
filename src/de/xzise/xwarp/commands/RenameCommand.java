@@ -12,8 +12,8 @@ public class RenameCommand extends WarpCommand {
 	}
 
 	@Override
-	protected boolean executeEdit(CommandSender sender, String warpName, String creator, String parameter) {
-		this.list.rename(warpName, creator, sender, parameter);
+	protected boolean executeEdit(CommandSender sender, String warpName, String creator, String[] parameters) {
+		this.list.rename(warpName, creator, sender, parameters[0]);
 		return true;
 	}
 

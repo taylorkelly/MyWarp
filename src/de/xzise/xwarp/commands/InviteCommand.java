@@ -13,8 +13,8 @@ public class InviteCommand extends WarpCommand {
 	}
 
 	@Override
-	protected boolean executeEdit(CommandSender sender, String warpName, String creator, String parameter) {
-		this.list.invite(warpName, creator, sender, this.getPlayer(parameter));
+	protected boolean executeEdit(CommandSender sender, String warpName, String creator, String[] parameters) {
+		this.list.invite(warpName, creator, sender, this.getPlayer(parameters[0]));
 		return true;
 	}
 

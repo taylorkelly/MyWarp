@@ -22,7 +22,7 @@ public class InfoCommand extends WarpCommand {
 	}
 
 	@Override
-	protected boolean executeEdit(CommandSender sender, String warpName, String creator, String parameter) {
+	protected boolean executeEdit(CommandSender sender, String warpName, String creator, String[] parameters) {
 		Warp warp = this.list.getWarp(warpName, creator);
 		sender.sendMessage("Warp info: " + ChatColor.GREEN + warp.name);
 		
