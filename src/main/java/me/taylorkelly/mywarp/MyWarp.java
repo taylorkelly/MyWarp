@@ -12,14 +12,11 @@ import java.util.logging.Logger;
 import me.taylorkelly.mywarp.griefcraft.Updater;
 
 import org.bukkit.ChatColor;
-import org.bukkit.Server;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event.Priority;
 import org.bukkit.event.Event.Type;
-import org.bukkit.plugin.PluginDescriptionFile;
-import org.bukkit.plugin.PluginLoader;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class MyWarp extends JavaPlugin {
@@ -27,16 +24,21 @@ public class MyWarp extends JavaPlugin {
     private WarpList warpList;
     private MWPlayerListener playerListener;
     private MWBlockListener blockListener;
-    public final String name = this.getDescription().getName();
-    public final String version = this.getDescription().getVersion();
+    public String name;
+    public String version;
     private Updater updater;
-    public static Logger log = Logger.getLogger("Minecraft");
+    public static final Logger log = Logger.getLogger("Minecraft");
 
+    @Override
     public void onDisable() {
         ConnectionManager.closeConnection();
     }
 
+    @Override
     public void onEnable() {
+        name = this.getDescription().getName();
+        version = this.getDescription().getVersion();
+
         updater = new Updater();
         try {
             updater.check();
