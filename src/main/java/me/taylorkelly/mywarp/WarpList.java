@@ -22,7 +22,7 @@ public class WarpList {
     }
 
     public void addWarp(String name, Player player) {
-        if (numPublicWarpsPlayer(player) < WarpPermissions.maxPublicWarps(player)) {
+        if (playerCanBuildPublicWarp(player)) {
             if (warpList.containsKey(name)) {
                 player.sendMessage(ChatColor.RED + "Warp called '" + name + "' already exists.");
             } else {
@@ -51,8 +51,25 @@ public class WarpList {
         return size;
     }
 
+    private boolean playerCanBuildPublicWarp(Player player) {
+        if(WarpPermissions.isAdmin(player) && WarpSettings.adminsObeyLimits) {
+            return true;
+        } else{
+            return numPublicWarpsPlayer(player) < WarpPermissions.maxPublicWarps(player);
+        }
+    }
+
+    private boolean playerCanBuildPrivateWarp(Player player) {
+        if(WarpPermissions.isAdmin(player) && WarpSettings.adminsObeyLimits) {
+            return true;
+        } else{
+            return numPrivateWarpsPlayer(player) < WarpPermissions.maxPrivateWarps(player);
+        }
+    }
+
+
     public void addWarpPrivate(String name, Player player) {
-        if (numPrivateWarpsPlayer(player) < WarpPermissions.maxPrivateWarps(player)) {
+        if (playerCanBuildPrivateWarp(player)) {
             if (warpList.containsKey(name)) {
                 player.sendMessage(ChatColor.RED + "Warp called '" + name + "' already exists.");
             } else {
