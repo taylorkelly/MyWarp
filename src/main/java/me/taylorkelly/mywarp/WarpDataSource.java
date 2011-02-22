@@ -41,7 +41,7 @@ public class WarpDataSource {
                 int index = set.getInt("id");
                 String name = set.getString("name");
                 String creator = set.getString("creator");
-                int world = set.getInt("world");
+                String world = set.getString("world");
                 double x = set.getDouble("x");
                 int y = set.getInt("y");
                 double z = set.getDouble("z");
@@ -126,7 +126,7 @@ public class WarpDataSource {
             ps.setInt(1, warp.index);
             ps.setString(2, warp.name);
             ps.setString(3, warp.creator);
-            ps.setInt(4, warp.world);
+            ps.setString(4, warp.world);
             ps.setDouble(5, warp.x);
             ps.setInt(6, warp.y);
             ps.setDouble(7, warp.z);

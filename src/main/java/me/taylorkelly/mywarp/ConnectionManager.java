@@ -1,61 +1,41 @@
 package me.taylorkelly.mywarp;
 
+import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
-import me.taylorkelly.myhome.MyHome;
-
-import org.bukkit.Server;
-import org.bukkit.plugin.Plugin;
 
 public class ConnectionManager {
+    private static Connection conn;
 
-    private static Connection connection;
-
-    public static synchronized Connection initializeConnection(Server server) {
-        if (connection == null) {
-            Plugin test = server.getPluginManager().getPlugin("MyHome");
-            if (test != null && test.isEnabled()) {
-                Logger log = Logger.getLogger("Minecraft");
-                connection = MyHome.getConnection();
-                log.log(Level.INFO, "[MYWARP] Connection with MyHome established.");
-            } else {
-                connection = createConnection();
-            }
-        }
-        return connection;
-    }
-
-    public static synchronized Connection getConnection() {
-        return connection;
-    }
-
-    private static Connection createConnection() {
+    public static Connection initialize(File dataFolder) {
         try {
             Class.forName("org.sqlite.JDBC");
-            Connection ret = DriverManager.getConnection(WarpDataSource.DATABASE);
-            ret.setAutoCommit(false);
-            return ret;
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-            return null;
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return null;
+            conn = DriverManager.getConnection("jdbc:sqlite:" + dataFolder.getAbsolutePath() + "/warps.db");
+            conn.setAutoCommit(false);
+            return conn;
+        } catch (SQLException ex) {
+            MyWarp.severe("SQLite exception on initialize", ex);
+        } catch (ClassNotFoundException ex) {
+            MyWarp.severe("You need the SQLite library.", ex);
         }
+        return conn;
     }
 
-    public static synchronized void freeConnection() {
-        if (connection != null) {
+    public static Connection getConnection() {
+        return conn;
+    }
+
+    public static void closeConnection() {
+        if(conn != null) {
             try {
-                connection.close();
-                connection = null;
-            } catch (SQLException e) {
-                e.printStackTrace();
+                conn.close();
+            } catch (SQLException ex) {
+                MyWarp.severe("Error on Connection close", ex);
             }
         }
     }
+
+
 }

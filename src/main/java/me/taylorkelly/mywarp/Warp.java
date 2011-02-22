@@ -6,10 +6,11 @@ import org.bukkit.*;
 import org.bukkit.entity.Player;
 
 public class Warp {
+
     public int index;
     public String name;
     public String creator;
-    public int world;
+    public String world;
     public double x;
     public int y;
     public double z;
@@ -18,10 +19,9 @@ public class Warp {
     public boolean publicAll;
     public String welcomeMessage;
     public ArrayList<String> permissions;
-
     public static int nextIndex = 1;
 
-    public Warp(int index, String name, String creator, int world, double x, int y, double z, int yaw, int pitch, boolean publicAll, String permissions,
+    public Warp(int index, String name, String creator, String world, double x, int y, double z, int yaw, int pitch, boolean publicAll, String permissions,
             String welcomeMessage) {
         this.index = index;
         this.name = name;
@@ -35,8 +35,9 @@ public class Warp {
         this.publicAll = publicAll;
         this.permissions = processList(permissions);
         this.welcomeMessage = welcomeMessage;
-        if (index > nextIndex)
+        if (index > nextIndex) {
             nextIndex = index;
+        }
         nextIndex++;
     }
 
@@ -45,8 +46,7 @@ public class Warp {
         nextIndex++;
         this.name = name;
         this.creator = creator.getName();
-        // TODO better world handling
-        this.world = 0;
+        this.world = creator.getWorld().getName();
         this.x = creator.getLocation().getX();
         this.y = creator.getLocation().getBlockY();
         this.z = creator.getLocation().getZ();
@@ -62,8 +62,7 @@ public class Warp {
         nextIndex++;
         this.name = name;
         this.creator = "No Player";
-        // TODO better world handling
-        this.world = 0;
+        this.world = location.getWorld().getName();
         this.x = location.getX();
         this.y = location.getBlockY();
         this.z = location.getZ();
@@ -79,8 +78,7 @@ public class Warp {
         nextIndex++;
         this.name = name;
         this.creator = creator.getName();
-        // TODO better world handling
-        this.world = 0;
+        this.world = creator.getWorld().getName();
         this.x = creator.getLocation().getX();
         this.y = creator.getLocation().getBlockY();
         this.z = creator.getLocation().getZ();
@@ -95,8 +93,9 @@ public class Warp {
         String[] names = permissions.split(",");
         ArrayList<String> ret = new ArrayList<String>();
         for (String name : names) {
-            if (name.equals(""))
+            if (name.equals("")) {
                 continue;
+            }
             ret.add(name.trim());
         }
         return ret;
@@ -112,26 +111,38 @@ public class Warp {
     }
 
     public boolean playerCanWarp(Player player) {
-        if (creator.equals(player.getName()))
+        if (creator.equals(player.getName())) {
             return true;
-        if (permissions.contains(player.getName()))
+        }
+        if (permissions.contains(player.getName())) {
             return true;
-        if (WarpPermissions.isAdmin(player) && WarpSettings.adminPrivateWarps)
+        }
+        if (WarpPermissions.isAdmin(player) && WarpSettings.adminPrivateWarps) {
             return true;
+        }
 
         return publicAll;
     }
 
-    public void warp(Player player) {
-        // Better world support
-        World world = player.getWorld();
-        Location location = new Location(world, x, y, z, yaw, pitch);
-        player.teleportTo(location);
+    public void warp(Player player, Server server) {
+        World currWorld = null;
+        if (world.equals("0")) {
+            currWorld = server.getWorlds().get(0);
+        } else {
+            currWorld = server.getWorld(world);
+        }
+        if (currWorld != null) {
+            Location location = new Location(currWorld, x, y, z, yaw, pitch);
+            player.teleportTo(location);
+        } else {
+            player.sendMessage(ChatColor.RED + "World " + world + " doesn't exist.");
+        }
     }
 
     public boolean playerIsCreator(String name) {
-        if (creator.equals(name))
+        if (creator.equals(name)) {
             return true;
+        }
         return false;
     }
 
@@ -148,10 +159,12 @@ public class Warp {
     }
 
     public boolean playerCanModify(Player player) {
-        if (creator.equals(player.getName()))
+        if (creator.equals(player.getName())) {
             return true;
-        if (WarpPermissions.isAdmin(player))
+        }
+        if (WarpPermissions.isAdmin(player)) {
             return true;
+        }
         return false;
     }
 
@@ -163,9 +176,18 @@ public class Warp {
         return name;
     }
 
-    public Location getLocation(Player player) {
-        World world = player.getWorld();
-        Location location = new Location(world, x, y, z, yaw, pitch);
-        return location;
+    public Location getLocation(Server server) {
+        World currWorld = null;
+        if (world.equals("0")) {
+            currWorld = server.getWorlds().get(0);
+        } else {
+            currWorld = server.getWorld(world);
+        }
+        if (currWorld == null) {
+            return null;
+        } else {
+            Location location = new Location(currWorld, x, y, z, yaw, pitch);
+            return location;
+        }
     }
 }

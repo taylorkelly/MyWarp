@@ -91,7 +91,7 @@ public class WarpList {
         if (warpList.containsKey(name)) {
             Warp warp = warpList.get(name);
             if (warp.playerCanWarp(player)) {
-                warp.warp(player);
+                warp.warp(player, server);
                 player.sendMessage(ChatColor.AQUA + warp.welcomeMessage);
             } else {
                 player.sendMessage(ChatColor.RED + "You do not have permission to warp to '" + name + "'");
@@ -378,7 +378,7 @@ public class WarpList {
         if (warpList.containsKey(name)) {
             Warp warp = warpList.get(name);
             if (warp.playerCanWarp(player)) {
-                player.setCompassTarget(warp.getLocation(player));
+                player.setCompassTarget(warp.getLocation(server));
                 player.sendMessage(ChatColor.AQUA + "Your compass now guides you to '" + name + "'");
             } else {
                 player.sendMessage(ChatColor.RED + "You do not have permission to point to '" + name + "'");
@@ -393,7 +393,7 @@ public class WarpList {
         name = matches.getMatch(name);
         if (warpList.containsKey(name)) {
             Warp warp = warpList.get(name);
-            warp.warp(invitee);
+            warp.warp(invitee, server);
             invitee.sendMessage(ChatColor.AQUA + warp.welcomeMessage);
             admin.sendMessage(ChatColor.AQUA + "Successfully warped " + invitee.getName());
         } else {

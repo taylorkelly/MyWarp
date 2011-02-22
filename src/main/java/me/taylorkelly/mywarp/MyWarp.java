@@ -1,6 +1,9 @@
 package me.taylorkelly.mywarp;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.logging.Level;
@@ -20,28 +23,21 @@ import org.bukkit.plugin.PluginLoader;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class MyWarp extends JavaPlugin {
+
     private WarpList warpList;
     private MWPlayerListener playerListener;
     private MWBlockListener blockListener;
-
     public final String name = this.getDescription().getName();
     public final String version = this.getDescription().getVersion();
-
     private Updater updater;
-
-    public MyWarp(PluginLoader pluginLoader, Server instance, PluginDescriptionFile desc, File folder, File plugin, ClassLoader cLoader) {
-        super(pluginLoader, instance, desc, folder, plugin, cLoader);
-        updater = new Updater();
-
-    }
+    public static Logger log = Logger.getLogger("Minecraft");
 
     public void onDisable() {
-        ConnectionManager.freeConnection();
+        ConnectionManager.closeConnection();
     }
 
     public void onEnable() {
-        Logger log = Logger.getLogger("Minecraft");
-
+        updater = new Updater();
         try {
             updater.check();
             updater.update();
@@ -49,15 +45,18 @@ public class MyWarp extends JavaPlugin {
             e.printStackTrace();
         }
 
-        Connection conn = ConnectionManager.initializeConnection(getServer());
+        File newDatabase = new File(getDataFolder(), "warps.db");
+        File oldDatabase = new File("homes-warps.db");
+        if (!newDatabase.exists() && oldDatabase.exists()) {
+            updateFiles(oldDatabase, newDatabase);
+        }
+
+
+        Connection conn = ConnectionManager.initialize(getDataFolder());
         if (conn == null) {
             log.log(Level.SEVERE, "[MYWARP] Could not establish SQL connection. Disabling MyWarp");
             getServer().getPluginManager().disablePlugin(this);
             return;
-        }
-
-        if (new File("MyWarp").exists() && new File("MyWarp", "warps.db").exists()) {
-            updateFiles();
         }
 
         warpList = new WarpList(getServer());
@@ -72,13 +71,57 @@ public class MyWarp extends JavaPlugin {
         log.info(name + " " + version + " enabled");
     }
 
-    private void updateFiles() {
-        File file = new File("MyWarp", "warps.db");
-        File folder = new File("MyWarp");
-        file.renameTo(new File("homes-warps.db"));
-        folder.delete();
+
+    private void updateFiles(File oldDatabase, File newDatabase) {
+        if (!getDataFolder().exists()) {
+            getDataFolder().mkdirs();
+        }
+        if (newDatabase.exists()) {
+            newDatabase.delete();
+        }
+        try {
+            newDatabase.createNewFile();
+        } catch (IOException ex) {
+            severe("Could not create new database file", ex);
+        }
+        copyFile(oldDatabase, newDatabase);
     }
 
+    /**
+     * File copier from xZise
+     * @param fromFile
+     * @param toFile
+     */
+    private static void copyFile(File fromFile, File toFile) {
+        FileInputStream from = null;
+        FileOutputStream to = null;
+        try {
+            from = new FileInputStream(fromFile);
+            to = new FileOutputStream(toFile);
+            byte[] buffer = new byte[4096];
+            int bytesRead;
+
+            while ((bytesRead = from.read(buffer)) != -1) {
+                to.write(buffer, 0, bytesRead);
+            }
+        } catch (IOException ex) {
+            Logger.getLogger(MyWarp.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            if (from != null) {
+                try {
+                    from.close();
+                } catch (IOException e) {
+                }
+            }
+            if (to != null) {
+                try {
+                    to.close();
+                } catch (IOException e) {
+                }
+            }
+        }
+    }
+    
     private boolean warning;
 
     public boolean onCommand(CommandSender sender, Command command, String commandLabel, String[] args) {
@@ -136,8 +179,9 @@ public class MyWarp extends JavaPlugin {
                     String name = "";
                     for (int i = 1; i < split.length; i++) {
                         name += split[i];
-                        if (i + 1 < split.length)
+                        if (i + 1 < split.length) {
                             name += " ";
+                        }
                     }
 
                     Searcher searcher = new Searcher(warpList);
@@ -152,8 +196,9 @@ public class MyWarp extends JavaPlugin {
                     String name = "";
                     for (int i = 1; i < split.length; i++) {
                         name += split[i];
-                        if (i + 1 < split.length)
+                        if (i + 1 < split.length) {
                             name += " ";
+                        }
                     }
                     if (WarpPermissions.publicCreate(player)) {
                         warpList.addWarp(name, player);
@@ -167,8 +212,9 @@ public class MyWarp extends JavaPlugin {
                     String name = "";
                     for (int i = 1; i < split.length; i++) {
                         name += split[i];
-                        if (i + 1 < split.length)
+                        if (i + 1 < split.length) {
                             name += " ";
+                        }
                     }
                     warpList.point(name, player);
                     /**
@@ -178,8 +224,9 @@ public class MyWarp extends JavaPlugin {
                     String name = "";
                     for (int i = 1; i < split.length; i++) {
                         name += split[i];
-                        if (i + 1 < split.length)
+                        if (i + 1 < split.length) {
                             name += " ";
+                        }
                     }
 
                     warpList.addWarpPrivate(name, player);
@@ -190,8 +237,9 @@ public class MyWarp extends JavaPlugin {
                     String name = "";
                     for (int i = 1; i < split.length; i++) {
                         name += split[i];
-                        if (i + 1 < split.length)
+                        if (i + 1 < split.length) {
                             name += " ";
+                        }
                     }
 
                     warpList.deleteWarp(name, player);
@@ -202,8 +250,9 @@ public class MyWarp extends JavaPlugin {
                     String name = "";
                     for (int i = 1; i < split.length; i++) {
                         name += split[i];
-                        if (i + 1 < split.length)
+                        if (i + 1 < split.length) {
                             name += " ";
+                        }
                     }
 
                     warpList.welcomeMessage(name, player);
@@ -214,8 +263,9 @@ public class MyWarp extends JavaPlugin {
                     String name = "";
                     for (int i = 1; i < split.length; i++) {
                         name += split[i];
-                        if (i + 1 < split.length)
+                        if (i + 1 < split.length) {
                             name += " ";
+                        }
                     }
 
                     warpList.privatize(name, player);
@@ -226,8 +276,9 @@ public class MyWarp extends JavaPlugin {
                     String name = "";
                     for (int i = 1; i < split.length; i++) {
                         name += split[i];
-                        if (i + 1 < split.length)
+                        if (i + 1 < split.length) {
                             name += " ";
+                        }
                     }
 
                     warpList.publicize(name, player);
@@ -243,8 +294,9 @@ public class MyWarp extends JavaPlugin {
                     String name = "";
                     for (int i = 2; i < split.length; i++) {
                         name += split[i];
-                        if (i + 1 < split.length)
+                        if (i + 1 < split.length) {
                             name += " ";
+                        }
                     }
 
                     warpList.give(name, player, giveeName);
@@ -260,8 +312,9 @@ public class MyWarp extends JavaPlugin {
                     String name = "";
                     for (int i = 2; i < split.length; i++) {
                         name += split[i];
-                        if (i + 1 < split.length)
+                        if (i + 1 < split.length) {
                             name += " ";
+                        }
                     }
 
                     warpList.invite(name, player, inviteeName);
@@ -275,8 +328,9 @@ public class MyWarp extends JavaPlugin {
                     String name = "";
                     for (int i = 2; i < split.length; i++) {
                         name += split[i];
-                        if (i + 1 < split.length)
+                        if (i + 1 < split.length) {
                             name += " ";
+                        }
                     }
 
                     warpList.uninvite(name, player, inviteeName);
@@ -292,8 +346,9 @@ public class MyWarp extends JavaPlugin {
                     String name = "";
                     for (int i = 2; i < split.length; i++) {
                         name += split[i];
-                        if (i + 1 < split.length)
+                        if (i + 1 < split.length) {
                             name += " ";
+                        }
                     }
                     warpList.adminWarpTo(name, invitee, player);
 
@@ -361,8 +416,9 @@ public class MyWarp extends JavaPlugin {
                     String name = "";
                     for (int i = 0; i < split.length; i++) {
                         name += split[i];
-                        if (i + 1 < split.length)
+                        if (i + 1 < split.length) {
                             name += " ";
+                        }
                     }
                     warpList.warpTo(name, player);
                 } else {
@@ -383,7 +439,12 @@ public class MyWarp extends JavaPlugin {
         return true;
     }
 
-    public static Connection getConnection() {
-        return ConnectionManager.getConnection();
+    public static void severe(String string, Exception ex) {
+        log.log(Level.SEVERE, "[MYHOME]" + string, ex);
+
+    }
+
+    public static void severe(String string) {
+        log.log(Level.SEVERE, "[MYHOME]" + string);
     }
 }
