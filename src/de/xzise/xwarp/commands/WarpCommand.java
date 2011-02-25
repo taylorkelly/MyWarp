@@ -1,5 +1,6 @@
 package de.xzise.xwarp.commands;
 
+import org.bukkit.ChatColor;
 import org.bukkit.Server;
 import org.bukkit.command.CommandSender;
 
@@ -15,21 +16,19 @@ import de.xzise.xwarp.WarpManager;
 public abstract class WarpCommand extends SubCommand {
 
 	private final int length;
-	private final boolean parameter;
-	private final String parameterText;
+	private final String[] parametersText;
 	
-	protected WarpCommand(WarpManager manager, Server server, String parameterText, String... commands) {
-		super(manager, server, commands);
-		this.parameter = parameterText != null && !parameterText.isEmpty();
-		if (this.parameter) {
-			// Warp, Parameter
-			this.length = 2;
-			this.parameterText = " <" + parameterText + ">";
-		} else {
-			// Warp
-			this.length = 1;
-			this.parameterText = "";
+	protected WarpCommand(WarpManager list, Server server, String[] parameters, String... commands) {
+		super(list, server, commands);
+		this.parametersText = new String[parameters.length];
+		for (int i = 0; i < parameters.length; i++) {
+			this.parametersText[i] = "<" + parameters[i] + ">";
 		}
+		this.length = this.parametersText.length + 1;
+	}
+	
+	protected WarpCommand(WarpManager list, Server server, String parameterText, String... commands) {
+		this(list, server, parameterText == null || parameterText.isEmpty() ? new String[0] : new String[] { parameterText }, commands);
 	}
 	
 	@Override
@@ -38,22 +37,31 @@ public abstract class WarpCommand extends SubCommand {
 			return false;
 		}
 		String creator = "";
-		int parameterIndex = 2;
+		int parameterStartIndex = 2;
 		if (parameters.length == this.length + 2) {
 			creator = this.getPlayer(parameters[2]);
-			parameterIndex++;
+			parameterStartIndex++;
 		}
-		String parameter = "";
-		if (this.parameter) {
-			parameter = parameters[parameterIndex];
+		String[] parameters2 = new String[this.parametersText.length];
+		for (int i = 0; i < parameters2.length; i++) {
+			parameters2[i] = parameters[i + parameterStartIndex];
 		}
-		return this.executeEdit(sender, parameters[1], creator, parameter);
+		return this.executeEdit(sender, parameters[1], creator, parameters2);
 	}
 	
-	protected abstract boolean executeEdit(CommandSender sender, String warpName, String creator, String parameter);
+	protected abstract boolean executeEdit(CommandSender sender, String warpName, String creator, String[] parameters);
+	
+	protected String getParameterText(boolean colorBeginning, boolean colorEnding, int index) {
+		return (colorBeginning ? ChatColor.GREEN : "") + this.parametersText[index] + (colorEnding ? ChatColor.WHITE : "");
+	}
 	
 	@Override
 	protected String getCommand() {
-		return "warp " + this.commands[0] + " <name> [owner]" + parameterText;
+		StringBuilder commandLine = new StringBuilder("warp " + this.commands[0] + " <name> [owner]");
+		for (int i = 0; i < this.parametersText.length; i++) {
+			commandLine.append(" " + this.parametersText[i]);
+		}
+		
+		return commandLine.toString();
 	}
 }

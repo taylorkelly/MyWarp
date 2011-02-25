@@ -226,7 +226,7 @@ public class WarpManager {
 					sender.sendMessage(ChatColor.RED + inviteeName + " is the creator, of course he's the invited!");
 				} else {
 					warp.invite(inviteeName);
-					this.data.updatePermissions(warp);
+					this.data.updateEditor(warp, inviteeName);
 					sender.sendMessage("You have invited " + ChatColor.GREEN + inviteeName + ChatColor.WHITE + " to '"+ ChatColor.GREEN + warp.name + ChatColor.WHITE + "'.");
 					if (warp.visibility != Visibility.PRIVATE) {
 						sender.sendMessage(ChatColor.RED + "But '" + warp.name	+ "' is still public.");
@@ -254,8 +254,8 @@ public class WarpManager {
 				} else if (warp.playerIsCreator(inviteeName)) {
 					sender.sendMessage(ChatColor.RED +  "You can't uninvite yourself. You're the creator!");
 				} else {
-					warp.uninvite(inviteeName);
-					this.data.updatePermissions(warp);
+					warp.addEditor(inviteeName, "w");
+					this.data.updateEditor(warp, inviteeName);
 					sender.sendMessage("You have uninvited " + ChatColor.GREEN + inviteeName + ChatColor.WHITE + " from '" + ChatColor.GREEN + warp.name + ChatColor.WHITE + "'.");
 					if (warp.visibility != Visibility.PRIVATE) {
 						sender.sendMessage(ChatColor.RED + "But '" + warp.name + "' is still public.");
@@ -315,6 +315,36 @@ public class WarpManager {
 			}
 		} else {
 			this.sendMissingWarp(name, creator, player);
+		}
+	}
+	
+	public void addEditor(String name, String owner, CommandSender sender, String editor, String permissions) {
+		Warp warp = this.getWarp(name, owner, MinecraftUtil.getPlayerName(sender));
+		if (warp != null) {
+			if (WarpManager.playerCanModifyWarp(sender, warp, PermissionTypes.ADMIN_EDITORS_ADD)) {
+				warp.addEditor(editor, permissions);
+				this.data.updateEditor(warp, editor);
+				sender.sendMessage("You have added " + ChatColor.GREEN + editor + ChatColor.WHITE + " to '" + warp.name + ChatColor.WHITE + "'.");
+			} else {
+				sender.sendMessage(ChatColor.RED + "You do not have permission to add an editor from '" + warp.name + "'");
+			}
+		} else {
+			this.sendMissingWarp(name, owner, sender);
+		}
+	}
+
+	public void removeEditor(String name, String owner, CommandSender sender, String editor) {
+		Warp warp = this.getWarp(name, owner, MinecraftUtil.getPlayerName(sender));
+		if (warp != null) {
+			if (WarpManager.playerCanModifyWarp(sender, warp, PermissionTypes.ADMIN_EDITORS_REMOVE)) {
+				warp.removeEditor(editor);
+				this.data.updateEditor(warp, editor);
+				sender.sendMessage("You have removed " + ChatColor.GREEN + editor + ChatColor.WHITE + " from '" + warp.name + ChatColor.WHITE + "'.");
+			} else {
+				sender.sendMessage(ChatColor.RED + "You do not have permission to remove an editor from '" + warp.name + "'");
+			}
+		} else {
+			this.sendMissingWarp(name, owner, sender);
 		}
 	}
 	

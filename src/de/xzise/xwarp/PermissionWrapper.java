@@ -66,7 +66,11 @@ public class PermissionWrapper {
 		// Reload database
 		ADMIN_RELOAD("warp.admin.reload"), 
 		// Converts from hmod file
-		ADMIN_CONVERT("warp.admin.convert");
+		ADMIN_CONVERT("warp.admin.convert"),
+		// Converts from hmod file
+		ADMIN_EDITORS_REMOVE("warp.admin.editors.remove"),
+		// Converts from hmod file
+		ADMIN_EDITORS_ADD("warp.admin.editors.add");
 
 		// Maybe upcoming permissions:
 		// Different admin permissions for each warp (only edit public warps
@@ -102,6 +106,8 @@ public class PermissionWrapper {
 		PermissionTypes.ADMIN_RELOAD,
 		PermissionTypes.ADMIN_RENAME,
 		PermissionTypes.ADMIN_CONVERT,
+		PermissionTypes.ADMIN_EDITORS_ADD,
+		PermissionTypes.ADMIN_EDITORS_REMOVE,
 	};
 	
 	private static PermissionTypes[] DEFAULT_PERMISSIONS = new PermissionTypes[] {
@@ -180,16 +186,20 @@ public class PermissionWrapper {
 
 	public void init(Server server) {
 		Plugin test = server.getPluginManager().getPlugin("Permissions");
-		if (test != null) {
-			if (test.isEnabled()) {
-				this.handler = ((Permissions) test).getHandler();
+		this.init(test);
+	}
+	
+	public void init(Plugin plugin) {
+		if (plugin != null) {
+			if (plugin.isEnabled()) {
+				this.handler = ((Permissions) plugin).getHandler();
 				MyWarp.logger.info("Permissions enabled.");
 			} else {
 				MyWarp.logger.info("Permissions system found, but not enabled. Use defaults.");
 			}
 		} else {
 			MyWarp.logger.severe("Permission system not found. Use defaults.");
-		}
+		}		
 	}
 	
 	public boolean useOfficial() {

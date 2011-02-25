@@ -12,7 +12,7 @@ public class PrivatizeCommand extends WarpCommand {
 	}
 
 	@Override
-	protected boolean executeEdit(CommandSender sender, String warpName, String creator, String parameter) {
+	protected boolean executeEdit(CommandSender sender, String warpName, String creator, String[] parameters) {
 		this.list.privatize(warpName, creator, sender);
 		return true;
 	}

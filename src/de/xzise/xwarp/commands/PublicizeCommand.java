@@ -12,7 +12,7 @@ public class PublicizeCommand extends WarpCommand {
 	}
 
 	@Override
-	protected boolean executeEdit(CommandSender sender, String warpName, String creator, String parameter) {
+	protected boolean executeEdit(CommandSender sender, String warpName, String creator, String[] parameters) {
 		this.list.publicize(warpName, creator, sender);
 		return true;
 	}

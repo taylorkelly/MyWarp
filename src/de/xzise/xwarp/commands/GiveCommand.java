@@ -12,8 +12,8 @@ public class GiveCommand extends WarpCommand {
 	}
 
 	@Override
-	protected boolean executeEdit(CommandSender sender, String warpName, String creator, String parameter) {
-		this.list.give(warpName, creator, sender, this.getPlayer(parameter));
+	protected boolean executeEdit(CommandSender sender, String warpName, String creator, String[] parameters) {
+		this.list.give(warpName, creator, sender, this.getPlayer(parameters[0]));
 		return true;
 	}
 

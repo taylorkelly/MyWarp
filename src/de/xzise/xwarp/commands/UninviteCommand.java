@@ -12,8 +12,8 @@ public class UninviteCommand extends WarpCommand {
 	}
 
 	@Override
-	protected boolean executeEdit(CommandSender sender, String warpName, String creator, String parameter) {
-		this.list.uninvite(warpName, creator, sender, this.getPlayer(parameter));
+	protected boolean executeEdit(CommandSender sender, String warpName, String creator, String[] parameters) {
+		this.list.uninvite(warpName, creator, sender, this.getPlayer(parameters[0]));
 		return true;
 	}
 

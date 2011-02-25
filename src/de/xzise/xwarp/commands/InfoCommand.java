@@ -1,8 +1,5 @@
 package de.xzise.xwarp.commands;
 
-import java.util.Iterator;
-import java.util.List;
-
 import me.taylorkelly.mywarp.MyWarp;
 import me.taylorkelly.mywarp.Warp;
 
@@ -13,6 +10,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import de.xzise.MinecraftUtil;
+import de.xzise.xwarp.Permissions;
 import de.xzise.xwarp.WarpManager;
 import de.xzise.xwarp.lister.GenericLister;
 
@@ -23,7 +21,7 @@ public class InfoCommand extends WarpCommand {
 	}
 
 	@Override
-	protected boolean executeEdit(CommandSender sender, String warpName, String creator, String parameter) {
+	protected boolean executeEdit(CommandSender sender, String warpName, String creator, String[] parameters) {
 		Warp warp = this.list.getWarp(warpName, creator, MinecraftUtil.getPlayerName(sender));
 		sender.sendMessage("Warp info: " + ChatColor.GREEN + warp.name);
 		
@@ -51,36 +49,52 @@ public class InfoCommand extends WarpCommand {
 			visibility = GenericLister.getColor(warp, (Player) sender) + visibility;
 		}
 		sender.sendMessage("Visibility: " + visibility);
-		List<String> permissions = warp.permissions;
-		String invitees = "";
-		if (permissions.size() == 0) {
-			invitees = "None";
-		} else {
-			Iterator<String> i = permissions.iterator();
-			while (i.hasNext()) {
-				String name = i.next();
-				invitees = invitees + ChatColor.GREEN + name;
-				if (i.hasNext()) {
-					invitees += ChatColor.WHITE + ", ";
-				}
-			}
-		}
-		sender.sendMessage("Invitees: " + invitees);
+		//TODO: Add invitees?
+//		List<String> permissions = warp.permissions;
+//		String invitees = "";
+//		if (permissions.size() == 0) {
+//			invitees = "None";
+//		} else {
+//			Iterator<String> i = permissions.iterator();
+//			while (i.hasNext()) {
+//				String name = i.next();
+//				invitees = invitees + ChatColor.GREEN + name;
+//				if (i.hasNext()) {
+//					invitees += ChatColor.WHITE + ", ";
+//				}
+//			}
+//		}
+//		sender.sendMessage("Invitees: " + invitees);
 
-		List<String> editors = warp.editors;
+		String[] editors = warp.getEditors();
 		String editor = "";
-		if (editors.size() == 0) {
+		String invitees = "";
+		if (editors.length == 0) {
 			editor = "None";
 		} else {
-			Iterator<String> i = editors.iterator();
-			while (i.hasNext()) {
-				String name = i.next();
-				editor = editor + ChatColor.GREEN + name;
-				if (i.hasNext()) {
+			for (int i = 0; i < editors.length; i++) {
+				String string = editors[i];
+				Permissions[] pms = warp.getEditorPermissions(string).getByValue(true);
+				if (pms.length > 0) {
+					editor += ChatColor.GREEN + string + " ";
+					char[] editorPermissions = new char[pms.length];
+					for (int j = 0; j < pms.length; j++) {
+						editorPermissions[j] = pms[j].value;
+						if (pms[j] == Permissions.WARP) {
+							if (!invitees.isEmpty()) {
+								invitees += ", ";
+							}
+							invitees += string;
+						}
+					}
+					editor += new String(editorPermissions);
+				}
+				if (i < editors.length - 1) {
 					editor += ChatColor.WHITE + ", ";
 				}
 			}
 		}
+		sender.sendMessage("Invitees: " + (invitees.isEmpty() ? "None" : invitees));
 		sender.sendMessage("Editors: " + editor);
 		
 		Location location = warp.getLocation();

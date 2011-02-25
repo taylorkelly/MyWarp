@@ -2,11 +2,18 @@ package me.taylorkelly.mywarp;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.logging.Logger;
 
+import org.bukkit.Server;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.event.Event;
 import org.bukkit.event.Event.Priority;
+import org.bukkit.event.player.PlayerListener;
+import org.bukkit.event.server.PluginEvent;
+import org.bukkit.event.server.ServerListener;
+import org.bukkit.plugin.PluginDescriptionFile;
+import org.bukkit.plugin.PluginLoader;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import de.xzise.MinecraftUtil;
@@ -23,11 +30,24 @@ public class MyWarp extends JavaPlugin {
 	public static PermissionWrapper permissions = new PermissionWrapper();
 	public static XLogger logger;
 	
-	private WMPlayerListener playerListener;
 	private CommandMap commands;
 	private DataConnection dataConnection;
+
 	public String name;
 	public String version;
+	
+	public MyWarp(PluginLoader pluginLoader, Server instance, PluginDescriptionFile desc, File directory, File plugin, ClassLoader cLoader) {
+		super(pluginLoader, instance, desc, directory, plugin, cLoader);
+		
+		// Naging strike back!
+		try {
+			if (JavaPlugin.class.getConstructor() != null) {
+				Logger.getLogger("Minecraft").info("[xWarp]: Temporary: Don't nag xZise/tkelly about the warning that it's using the wrong constructor: Bukkit calls the wrong constructor.");	
+			}
+		} catch (Exception e) {
+			; // Do nothing here, if there is a problem, wayne :D
+		}
+	}
 
 	public MyWarp() {
 		super();
@@ -77,8 +97,6 @@ public class MyWarp extends JavaPlugin {
 			}
 		}
 		
-		permissions.init(this.getServer());
-		
 		WarpManager warpList = new WarpManager(this.getServer(), this.dataConnection);
 
 		// Create commands
@@ -90,11 +108,19 @@ public class MyWarp extends JavaPlugin {
 			this.getServer().getPluginManager().disablePlugin(this);
 		}
 		
-		this.playerListener = new WMPlayerListener(this.commands);
+		PlayerListener playerListener = new WMPlayerListener(this.commands);
 		MWBlockListener blockListener = new MWBlockListener(warpList);
+		ServerListener serverListner = new ServerListener() {
+			public void onPluginEnabled(PluginEvent event) {
+				if(event.getPlugin().getDescription().getName().equals("Permissions")) {
+					MyWarp.permissions.init(event.getPlugin());
+				}
+		    }
+		};
 		this.getServer().getPluginManager().registerEvent(Event.Type.PLAYER_COMMAND, playerListener, Priority.Normal, this);
 		this.getServer().getPluginManager().registerEvent(Event.Type.BLOCK_RIGHTCLICKED, blockListener, Priority.Normal, this);
 		this.getServer().getPluginManager().registerEvent(Event.Type.SIGN_CHANGE, blockListener, Priority.Low, this);
+		this.getServer().getPluginManager().registerEvent(Event.Type.PLUGIN_ENABLE, serverListner, Priority.Low, this);
 //		this.getServer().getPluginManager().registerEvent(Event.Type.BLOCK_CANBUILD, blockListener, Priority.Normal, this);
 //		this.getServer().getPluginManager().registerEvent(Event.Type.BLOCK_PLACED, blockListener, Priority.Low, this);
 		MyWarp.logger.info(name + " " + version + " enabled");
