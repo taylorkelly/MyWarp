@@ -35,7 +35,7 @@ public class SQLiteConnection implements DataConnection {
 			+ "`creator` varchar(32) NOT NULL DEFAULT 'Player',"
 			+ "`world` varchar(32) NOT NULL,"
 			+ "`x` DPUBLE NOT NULL DEFAULT '0',"
-			+ "`y` tinyint NOT NULL DEFAULT '0',"
+			+ "`y` DOUBLE NOT NULL DEFAULT '0',"
 			+ "`z` DOUBLE NOT NULL DEFAULT '0',"
 			+ "`yaw` smallint NOT NULL DEFAULT '0',"
 			+ "`pitch` smallint NOT NULL DEFAULT '0',"
@@ -309,7 +309,7 @@ public class SQLiteConnection implements DataConnection {
 				String creator = set.getString("creator");
 				World world = server.getWorld(set.getString("world"));
 				double x = set.getDouble("x");
-				int y = set.getInt("y");
+				double y = set.getInt("y");
 				double z = set.getDouble("z");
 				int yaw = set.getInt("yaw");
 				int pitch = set.getInt("pitch");
@@ -386,7 +386,7 @@ public class SQLiteConnection implements DataConnection {
 	private static void setLocation(Location location, int offset, PreparedStatement ps) throws SQLException {
 		ps.setString(offset++, location.getWorld().getName());
 		ps.setDouble(offset++, location.getX());
-		ps.setInt(offset++, (int) location.getY());
+		ps.setDouble(offset++, location.getY());
 		ps.setDouble(offset++, location.getZ());
 		ps.setInt(offset++, (int) location.getYaw());
 		ps.setInt(offset++, (int) location.getPitch());	
@@ -394,27 +394,13 @@ public class SQLiteConnection implements DataConnection {
 
 	@Override
 	public void deleteWarp(Warp warp) {
-		PreparedStatement ps = null;
-		ResultSet set = null;
-		try {
-			ps = this.connection.prepareStatement("DELETE FROM warpTable WHERE id = ?");
-			ps.setInt(1, warp.index);
-			ps.executeUpdate();
-			this.connection.commit();
-		} catch (SQLException ex) {
-			MyWarp.logger.log(Level.SEVERE, "Warp Delete Exception", ex);
-		} finally {
-			try {
-				if (ps != null) {
-					ps.close();
-				}
-				if (set != null) {
-					set.close();
-				}
-			} catch (SQLException ex) {
-				MyWarp.logger.log(Level.SEVERE, "Warp Delete Exception (on close)", ex);
+		this.updateWarp(warp, "Delete", "DELETE FROM warpTable WHERE id = ?", new UpdateFiller() {
+			
+			@Override
+			public void fillStatement(Warp warp, PreparedStatement statement) throws SQLException {
+				statement.setInt(1, warp.index);
 			}
-		}
+		});
 	}
 	
 	private interface UpdateFiller {

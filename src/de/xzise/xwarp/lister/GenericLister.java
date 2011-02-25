@@ -184,9 +184,7 @@ class ConsoleWidth implements WidthCalculator {
 	@Override
 	public int getWidth(String text) {
 		// Assume that the font is non proportional!
-		
-		//TODO: Remove color codes!
-		return text.replaceAll("(?i)\u00A7[0-F]", "").length();
+		return ChatColor.stripColor(text).length();
 	}
 	
 }
