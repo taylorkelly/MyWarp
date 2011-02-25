@@ -340,7 +340,7 @@ public class SQLiteConnection implements DataConnection {
 			PreparedStatement ps = null;
 			PreparedStatement insertPermissions = null;
 			try {		
-				ps = this.connection.prepareStatement("INSERT INTO warpTable (id, name, creator, world, x, y, z, yaw, pitch, publicLevel, permissions, welcomeMessage) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)");
+				ps = this.connection.prepareStatement("INSERT INTO warpTable (id, name, creator, world, x, y, z, yaw, pitch, publicLevel, welcomeMessage) VALUES (?,?,?,?,?,?,?,?,?,?,?)");
 				insertPermissions = this.connection.prepareStatement("INSERT INTO permissions (id, editor, value) VALUES (?,?,?)");
 				for (Warp warp : warps) {
 					ps.setInt(1, warp.index);
