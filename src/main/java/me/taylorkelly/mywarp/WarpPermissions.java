@@ -162,4 +162,12 @@ public class WarpPermissions {
     public static int maxPublicWarps(Player player) {
         return WarpSettings.maxPublic;
     }
+
+    static boolean createSignWarp(Player player) {
+        if (permissionsEnabled) {
+            return permission(player, "mywarp.warp.sign.create");
+        } else {
+            return true;
+        }
+    }
 }
