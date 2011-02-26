@@ -281,10 +281,12 @@ public class WarpList {
             }
         }
         if (exactMatches.size() > 1) {
-            for (Warp warp : exactMatches) {
+            for (int i = 0; i < exactMatches.size(); i++) {
+                Warp warp = exactMatches.get(i);
                 if (!warp.name.equals(name)) {
                     exactMatches.remove(warp);
                     matches.add(0, warp);
+                    i--;
                 }
             }
         }
