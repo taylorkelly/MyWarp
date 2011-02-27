@@ -126,7 +126,7 @@ public class PermissionWrapper {
 		}
 	}
 	
-	private boolean permissionX(CommandSender sender, PermissionTypes permission) {
+	private boolean permissionInternal(CommandSender sender, PermissionTypes permission) {
 		if (contains(permission, DEFAULT_PERMISSIONS)) {
 			return true;
 		} else if (contains(permission, ADMIN_PERMISSIONS)) {
@@ -141,12 +141,12 @@ public class PermissionWrapper {
 			if (this.handler != null) {
 				return this.handler.has((Player) sender, permission.name);
 			} else {
-				return this.permissionX(sender, permission);
+				return this.permissionInternal(sender, permission);
 			}
 		} else if (sender instanceof ConsoleCommandSender) {
 			return true;
 		} else {
-			return this.permissionX(sender, permission);
+			return this.permissionInternal(sender, permission);
 		}
 	}
 	
