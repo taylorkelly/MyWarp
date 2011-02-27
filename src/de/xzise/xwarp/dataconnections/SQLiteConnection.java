@@ -348,7 +348,7 @@ public class SQLiteConnection implements DataConnection {
 					ps.setString(3, warp.creator);
 					setLocation(warp.getLocation(), 4, ps);
 					ps.setInt(10, warp.visibility.level);
-					ps.setString(12, warp.welcomeMessage);
+					ps.setString(11, warp.welcomeMessage);
 					ps.addBatch();
 					
 					for (String editor : warp.getEditors()) {

@@ -14,7 +14,7 @@ public class AddEditorCommand extends WarpCommand {
 	@Override
 	protected boolean executeEdit(CommandSender sender, String warpName, String creator, String[] parameters) {
 		this.list.addEditor(warpName, creator, sender, this.getPlayer(parameters[0]), parameters[1]);
-		return false;
+		return true;
 	}
 
 	@Override

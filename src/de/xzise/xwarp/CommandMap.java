@@ -8,6 +8,7 @@ import java.util.Map;
 import org.bukkit.Server;
 import org.bukkit.command.CommandSender;
 
+import de.xzise.xwarp.commands.AddEditorCommand;
 import de.xzise.xwarp.commands.ConvertCommand;
 import de.xzise.xwarp.commands.CreateCommand;
 import de.xzise.xwarp.commands.DeleteCommand;
@@ -21,6 +22,7 @@ import de.xzise.xwarp.commands.PermissionsCommand;
 import de.xzise.xwarp.commands.PrivatizeCommand;
 import de.xzise.xwarp.commands.PublicizeCommand;
 import de.xzise.xwarp.commands.ReloadCommand;
+import de.xzise.xwarp.commands.RemoveEditorCommand;
 import de.xzise.xwarp.commands.RenameCommand;
 import de.xzise.xwarp.commands.SearchCommand;
 import de.xzise.xwarp.commands.SubCommand;
@@ -55,6 +57,8 @@ public class CommandMap {
 		subCommands.add(new UninviteCommand(list, server));
 		subCommands.add(new InviteCommand(list, server));
 		subCommands.add(new GiveCommand(list, server));
+		subCommands.add(new AddEditorCommand(list, server));
+		subCommands.add(new RemoveEditorCommand(list, server));
 		subCommands.add(new PrivatizeCommand(list, server));
 		subCommands.add(new PublicizeCommand(list, server));
 		subCommands.add(new GlobalizeCommand(list, server));

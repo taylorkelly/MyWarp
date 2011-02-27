@@ -38,19 +38,16 @@ public class WarpList {
 		}
 		
 		public Warp getWarp(String playerName) {
-			if (this.global != null || playerName == null || playerName.isEmpty()) {
+			if (this.global != null) {
 				return this.global;
 			}
 			
 			if (this.all.size() == 1) {
 				return this.all.values().toArray(new Warp[1])[0];
+			} else if (playerName == null || playerName.isEmpty()) {
+				return this.all.get(playerName.toLowerCase());	
 			} else {
-				Warp yourWarp = this.all.get(playerName.toLowerCase());
-				if (yourWarp != null) {
-					return yourWarp;
-				} else {
-					return null;
-				}
+				return null;
 			}
 		}
 		
