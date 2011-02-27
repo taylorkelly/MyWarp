@@ -6,28 +6,36 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import de.xzise.xwarp.PermissionWrapper.PermissionTypes;
+
 public enum Permissions {
-	UPDATE('l', 0),
-	RENAME('r', 1),
-	UNINVITE('u', 2),
-	INVITE('i', 3),
-	PRIVATE('+', 4),
-	PUBLIC('-', 5),
-	GLOBAL('!', 6),
-	GIVE('g', 7),
-	DELETE('d', 8),
-	WARP('w', 9);
+	UPDATE('l', 0, PermissionTypes.ADMIN_UPDATE, null),
+	RENAME('r', 1, PermissionTypes.ADMIN_RENAME, null),
+	UNINVITE('u', 2, PermissionTypes.ADMIN_UNINVITE, null),
+	INVITE('i', 3, PermissionTypes.ADMIN_INVITE, null),
+	PRIVATE('0', 4, PermissionTypes.ADMIN_PRIVATE, PermissionTypes.CREATE_PRIVATE),
+	PUBLIC('1', 5, PermissionTypes.ADMIN_PUBLIC, PermissionTypes.CREATE_PUBLIC),
+	GLOBAL('2', 6, PermissionTypes.ADMIN_GLOBAL, PermissionTypes.CREATE_GLOBAL),
+	GIVE('g', 7, PermissionTypes.ADMIN_GIVE, null),
+	DELETE('d', 8, PermissionTypes.ADMIN_DELETE, null),
+	WARP('w', 9, PermissionTypes.ADMIN_TO_ALL, null),
+	ADD_EDITOR('a', 10, PermissionTypes.ADMIN_UNINVITE, null),
+	REMOVE_EDITOR('f', 11, PermissionTypes.ADMIN_INVITE, null);
 	
 	public final char value;
 	public final int id;
+	public final PermissionTypes adminPermission;
+	public final PermissionTypes defaultPermission;
 
 	public static final Set<Permissions> DEFAULT;
 	private static final Map<Character, Permissions> CHAR_MAP = new HashMap<Character, Permissions>();
 	private static final Map<Integer, Permissions> INT_MAP = new HashMap<Integer, Permissions>();
 	
-	private Permissions(char value, int id) {
+	private Permissions(char value, int id, PermissionTypes adminPermission, PermissionTypes defaultPermission) {
 		this.value = value;
 		this.id = id;
+		this.adminPermission = adminPermission;
+		this.defaultPermission = defaultPermission;
 	}
 	
 	static {

@@ -198,7 +198,7 @@ public class PermissionWrapper {
 				MyWarp.logger.info("Permissions system found, but not enabled. Use defaults.");
 			}
 		} else {
-			MyWarp.logger.severe("Permission system not found. Use defaults.");
+			MyWarp.logger.warning("Permission system not found. Use defaults.");
 		}		
 	}
 	

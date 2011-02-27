@@ -127,9 +127,13 @@ public class Warp {
 		this.getPermissions(inviteeName).put(Permissions.WARP, false);
 	}
 
-	public boolean playerCanModify(Player player) {
-		if (creator.equals(player.getName()))
+	public boolean playerCanModify(Player player, Permissions permission) {
+		if (this.creator.equals(player.getName()))
 			return true;
+		EditorPermissions ep = this.editors.get(player.getName().toLowerCase());
+		if (ep != null) {
+			return ep.get(permission);
+		}
 		return false;
 	}
 	
