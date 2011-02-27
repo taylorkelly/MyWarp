@@ -9,6 +9,7 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.event.Event;
 import org.bukkit.event.Event.Priority;
+import org.bukkit.event.player.PlayerListener;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.PluginLoader;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -26,7 +27,6 @@ public class MyWarp extends JavaPlugin {
 	public static PermissionWrapper permissions = new PermissionWrapper();
 	public static XLogger logger;
 	
-	private WMPlayerListener playerListener;
 	private CommandMap commands;
 	private DataConnection dataConnection;
 
@@ -107,9 +107,17 @@ public class MyWarp extends JavaPlugin {
 			this.getServer().getPluginManager().disablePlugin(this);
 		}
 		
-		this.playerListener = new WMPlayerListener(this.commands);
+		PlayerListener playerListener = new WMPlayerListener(this.commands);
 		MWBlockListener blockListener = new MWBlockListener(warpList);
-		this.getServer().getPluginManager().registerEvent(Event.Type.PLAYER_COMMAND, playerListener, Priority.Normal, this);
+		try {
+			this.getServer().getPluginManager().registerEvent(Event.Type.PLAYER_COMMAND, playerListener, Priority.Normal, this);
+		} catch (NoSuchFieldError nsfe) {
+			try {
+				this.getServer().getPluginManager().registerEvent(Event.Type.PLAYER_COMMAND_PREPROCESS, playerListener, Priority.Normal, this);
+			} catch (NoSuchFieldError nsfe2) {
+				MyWarp.logger.warning("Unable to register any player command. Only xWarp available");
+			}
+		}
 		this.getServer().getPluginManager().registerEvent(Event.Type.BLOCK_RIGHTCLICKED, blockListener, Priority.Normal, this);
 		this.getServer().getPluginManager().registerEvent(Event.Type.SIGN_CHANGE, blockListener, Priority.Low, this);
 //		this.getServer().getPluginManager().registerEvent(Event.Type.BLOCK_CANBUILD, blockListener, Priority.Normal, this);

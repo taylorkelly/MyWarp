@@ -41,6 +41,10 @@ public class WMPlayerListener extends PlayerListener {
 		}
 	}
 	
+	public void onPlayerCommandPreprocess(PlayerChatEvent event) {
+		this.onPlayerCommand(event);
+    }
+	
 	/**
 	 * Parses a command line. Reads the two first commands like "split" and the
 	 * following with quotes/escaping.
