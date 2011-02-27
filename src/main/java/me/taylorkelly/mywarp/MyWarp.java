@@ -70,6 +70,8 @@ public class MyWarp extends JavaPlugin {
 
         getServer().getPluginManager().registerEvent(Type.PLAYER_CHAT, playerListener, Priority.Low, this);
         getServer().getPluginManager().registerEvent(Type.BLOCK_RIGHTCLICKED, blockListener, Priority.High, this);
+        getServer().getPluginManager().registerEvent(Type.SIGN_CHANGE, blockListener, Priority.High, this);
+
         log.info(name + " " + version + " enabled");
     }
 
