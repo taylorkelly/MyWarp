@@ -134,13 +134,17 @@ public class WarpList {
 	public void warpTo(String name, String creator, Player player, boolean viaSign) {
 		Warp warp = this.getWarp(name, creator);
 		if (warp != null) {
-			if (warp.playerCanWarp(player, viaSign)) {
-				warp.warp(player);
-				player.sendMessage(ChatColor.AQUA + warp.welcomeMessage);
+			if (warp.isValid()) {
+				if (warp.playerCanWarp(player, viaSign)) {
+					warp.warp(player);
+					player.sendMessage(ChatColor.AQUA + warp.welcomeMessage);
+				} else {
+					player.sendMessage(ChatColor.RED
+							+ "You do not have permission to warp to '" + warp.name
+							+ "'");
+				}
 			} else {
-				player.sendMessage(ChatColor.RED
-						+ "You do not have permission to warp to '" + warp.name
-						+ "'");
+				player.sendMessage(ChatColor.RED + "Warp '" + warp.name + "' is in an invalid world.");
 			}
 		} else {
 			this.sendMissingWarp(name, creator, player);

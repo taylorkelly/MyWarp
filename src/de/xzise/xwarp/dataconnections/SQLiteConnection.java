@@ -226,6 +226,7 @@ public class SQLiteConnection implements DataConnection {
 			statement = this.connection.createStatement();
 			set = statement.executeQuery("SELECT * FROM warpTable");
 			int size = 0;
+			int invalidSize = 0;
 			while (set.next()) {
 				size++;
 				int index = set.getInt("id");
@@ -241,9 +242,16 @@ public class SQLiteConnection implements DataConnection {
 				Visibility visibility = Visibility.parseLevel(set.getInt("publicLevel"));
 				String permissions = set.getString("permissions");
 				String welcomeMessage = set.getString("welcomeMessage");
-				result.add(new Warp(index, name, creator, loc, visibility, permissions, welcomeMessage));
+				Warp warp = new Warp(index, name, creator, loc, visibility, permissions, welcomeMessage);
+				result.add(warp);
+				if (!warp.isValid()) {
+					invalidSize++;
+				}
 			}
 			MyWarp.logger.info(size + " warps loaded");
+			if (invalidSize > 0) {
+				MyWarp.logger.warning(invalidSize + " invalid warps found.");
+			}
 		} catch (SQLException ex) {
 			MyWarp.logger.severe("Warp Load Exception", ex);
 		} finally {

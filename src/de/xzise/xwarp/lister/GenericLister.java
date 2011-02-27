@@ -157,7 +157,11 @@ public class GenericLister {
 	}
 	
 	public static String getLocationString(Warp warp) {
-		return getLocationString(warp.getLocation());
+		if (warp.isValid()) {
+			return getLocationString(warp.getLocation());
+		} else {
+			return " @(invalid world)";
+		}
 	}
 	
 	public static String getLocationString(Location location) {

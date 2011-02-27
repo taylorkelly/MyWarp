@@ -173,4 +173,8 @@ public class Warp {
 	public Location getLocation() {
 		return this.location.clone();
 	}
+	
+	public boolean isValid() {
+		return this.location.getWorld() != null;
+	}
 }
