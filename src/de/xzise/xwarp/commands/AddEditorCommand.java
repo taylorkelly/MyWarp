@@ -19,7 +19,7 @@ public class AddEditorCommand extends WarpCommand {
 
 	@Override
 	protected String[] getFullHelpText() {
-		return new String[] { "Adds the editor to the warps editors list.", "The permissions define the allowed commands.", "Update (l), Rename (r), Uninvite (u), Invite (i), Private (-), Public (+), Global (!), Give (g), Delete (d), Warp (w).", "* allows all commands, s sets lruiw, all after a slash removes the permission", "Example: */d allows everthing except delete." };
+		return new String[] { "Adds the editor to the warps editors list.", "The permissions define the allowed commands.", "Update (l), Rename (r), Uninvite (u), Invite (i), Private (0), Public (1), Global (2), Give (g), Delete (d), Warp (w).", "* allows all commands, s sets lruiw, all after a slash removes the permission", "Example: */d allows everthing except delete." };
 	}
 
 	@Override
