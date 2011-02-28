@@ -5,11 +5,10 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import me.taylorkelly.mywarp.WarpList;
-
 import org.bukkit.Server;
 import org.bukkit.command.CommandSender;
 
+import de.xzise.xwarp.commands.AddEditorCommand;
 import de.xzise.xwarp.commands.ConvertCommand;
 import de.xzise.xwarp.commands.CreateCommand;
 import de.xzise.xwarp.commands.DeleteCommand;
@@ -23,6 +22,7 @@ import de.xzise.xwarp.commands.PermissionsCommand;
 import de.xzise.xwarp.commands.PrivatizeCommand;
 import de.xzise.xwarp.commands.PublicizeCommand;
 import de.xzise.xwarp.commands.ReloadCommand;
+import de.xzise.xwarp.commands.RemoveEditorCommand;
 import de.xzise.xwarp.commands.RenameCommand;
 import de.xzise.xwarp.commands.SearchCommand;
 import de.xzise.xwarp.commands.SubCommand;
@@ -37,7 +37,7 @@ public class CommandMap {
 	private HelpCommand helper;
 	private WarpToCommand warper;
 	
-	public CommandMap(WarpList list, Server server, DataConnection data) {
+	public CommandMap(WarpManager list, Server server, DataConnection data) {
 		this.commands = new HashMap<String, SubCommand>();
 		
 		this.helper = new HelpCommand(list, server);
@@ -57,6 +57,8 @@ public class CommandMap {
 		subCommands.add(new UninviteCommand(list, server));
 		subCommands.add(new InviteCommand(list, server));
 		subCommands.add(new GiveCommand(list, server));
+		subCommands.add(new AddEditorCommand(list, server));
+		subCommands.add(new RemoveEditorCommand(list, server));
 		subCommands.add(new PrivatizeCommand(list, server));
 		subCommands.add(new PublicizeCommand(list, server));
 		subCommands.add(new GlobalizeCommand(list, server));
@@ -64,7 +66,7 @@ public class CommandMap {
 		subCommands.add(new ListCommand(list, server));
 		subCommands.add(new InfoCommand(list, server));
 		subCommands.add(new ReloadCommand(list, server));
-		subCommands.add(new PermissionsCommand(list, server));
+		subCommands.add(new PermissionsCommand(server));
 		subCommands.add(new ConvertCommand(list, server, data));
 		
 		for (SubCommand subCommand : subCommands) {

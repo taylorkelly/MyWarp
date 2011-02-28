@@ -1,14 +1,16 @@
 package me.taylorkelly.mywarp;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.bukkit.Location;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import de.xzise.xwarp.EditorPermissions;
+import de.xzise.xwarp.Permissions;
 import de.xzise.xwarp.PermissionWrapper.PermissionTypes;
-
 
 public class Warp {
 	
@@ -39,20 +41,22 @@ public class Warp {
 	private Location location;
 	public Visibility visibility;
 	public String welcomeMessage;
-	public List<String> permissions;
-	public List<String> editors;
+	public Map<String, EditorPermissions> editors;
 
 	public static int nextIndex = 1;
 
 	public Warp(int index, String name, String creator, Location location, Visibility visibility,
-			String permissions, String welcomeMessage) {
+			Map<String, EditorPermissions> permissions, String welcomeMessage) {
 		this.index = index;
 		this.name = name;
 		this.creator = creator;
 		this.location = location.clone();
 		this.visibility = visibility;
-		this.permissions = processList(permissions);
-		this.editors = new ArrayList<String>();
+		if (permissions == null) {
+			this.editors = new HashMap<String, EditorPermissions>();
+		} else {
+			this.editors = new HashMap<String, EditorPermissions>(permissions);
+		}
 		this.welcomeMessage = welcomeMessage;
 		if (index > nextIndex)
 			nextIndex = index;
@@ -60,7 +64,7 @@ public class Warp {
 	}
 	
 	public Warp(String name, String creator, Location location) {
-		this(nextIndex, name, creator, location, Visibility.PUBLIC, "", "Welcome to '" + name + "'");
+		this(nextIndex, name, creator, location, Visibility.PUBLIC, null, "Welcome to '" + name + "'");
 	}
 
 	public Warp(String name, Player creator) {
@@ -70,31 +74,20 @@ public class Warp {
 	public Warp(String name, Location location) {
 		this(name, "No Player", location);
 	}
-
-	private static List<String> processList(String permissions) {
-		String[] names = permissions.split(",");
-		List<String> ret = new ArrayList<String>();
-		for (String name : names) {
-			if (name.equals(""))
-				continue;
-			ret.add(name.trim());
+	
+	public boolean playerIsInvited(String name) {
+		EditorPermissions ep = this.editors.get(name.toLowerCase());
+		if (ep != null) {
+			return ep.get(Permissions.WARP);
+		} else {
+			return false;
 		}
-		return ret;
-	}
-
-	public String permissionsString() {
-		StringBuilder ret = new StringBuilder();
-		for (String name : permissions) {
-			ret.append(name);
-			ret.append(",");
-		}
-		return ret.toString();
 	}
 
 	public boolean playerCanWarp(Player player, boolean viaSign) {	
 		if (this.creator.equals(player.getName()) && MyWarp.permissions.permission(player, viaSign ? PermissionTypes.SIGN_WARP_OWN : PermissionTypes.TO_OWN))
 			return true;
-		if (this.permissions.contains(player.getName()) && MyWarp.permissions.permission(player, viaSign ? PermissionTypes.SIGN_WARP_INVITED : PermissionTypes.TO_INVITED))
+		if (this.playerIsInvited(player.getName()) && MyWarp.permissions.permission(player, viaSign ? PermissionTypes.SIGN_WARP_INVITED : PermissionTypes.TO_INVITED))
 			return true;
 		if (this.visibility == Visibility.PUBLIC && MyWarp.permissions.permission(player, viaSign ? PermissionTypes.SIGN_WARP_OTHER : PermissionTypes.TO_OTHER))
 			return true;
@@ -127,20 +120,20 @@ public class Warp {
 	}
 
 	public void invite(String player) {
-		permissions.add(player);
-	}
-
-	public boolean playerIsInvited(String player) {
-		return permissions.contains(player);
+		this.getPermissions(player).put(Permissions.WARP, true);
 	}
 
 	public void uninvite(String inviteeName) {
-		permissions.remove(inviteeName);
+		this.getPermissions(inviteeName).put(Permissions.WARP, false);
 	}
 
-	public boolean playerCanModify(Player player) {
-		if (creator.equals(player.getName()))
+	public boolean playerCanModify(Player player, Permissions permission) {
+		if (this.creator.equals(player.getName()))
 			return true;
+		EditorPermissions ep = this.editors.get(player.getName().toLowerCase());
+		if (ep != null) {
+			return ep.get(permission);
+		}
 		return false;
 	}
 	
@@ -177,4 +170,52 @@ public class Warp {
 	public boolean isValid() {
 		return this.location.getWorld() != null;
 	}
+
+	public EditorPermissions getEditorPermissions(String name) {
+		EditorPermissions player = this.editors.get(name.toLowerCase());
+		if (player == null) {
+			return null;
+		}
+		return player;
+	}
+	
+	public String[] getEditors() {
+		return this.editors.keySet().toArray(new String[0]);
+	}
+	
+	private EditorPermissions getPermissions(String name) {
+		EditorPermissions player = this.editors.get(name.toLowerCase());
+		if (player == null) {
+			player = new EditorPermissions();
+			this.editors.put(name.toLowerCase(), player);
+		}
+		return player;
+	}
+	
+	public void addEditor(String name, String permissions) {
+		this.getPermissions(name).parseString(permissions, true);
+	}
+	
+	public void removeEditor(String name) {
+		this.editors.remove(name.toLowerCase());
+	}
+	
+	public static final WarpComparator WARP_NAME_COMPARATOR = new WarpComparator() {
+
+		@Override
+		public int compare(Warp warp1, Warp warp2) {
+			return warp1.name.compareTo(warp2.name);
+		}
+		
+	};
+	
+	public static final WarpComparator WARP_INDEX_COMPARATOR = new WarpComparator() {
+		
+		@Override
+		public int compare(Warp warp1, Warp warp2) {
+			return new Integer(warp1.index).compareTo(warp2.index);
+		}
+	};
 }
+
+interface WarpComparator extends Comparator<Warp> {}

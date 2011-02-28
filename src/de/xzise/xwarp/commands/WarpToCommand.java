@@ -1,17 +1,17 @@
 package de.xzise.xwarp.commands;
 
 import me.taylorkelly.mywarp.MyWarp;
-import me.taylorkelly.mywarp.WarpList;
 
 import org.bukkit.Server;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import de.xzise.xwarp.WarpManager;
 import de.xzise.xwarp.PermissionWrapper.PermissionTypes;
 
 public class WarpToCommand extends SubCommand {
 
-	public WarpToCommand(WarpList list, Server server) {
+	public WarpToCommand(WarpManager list, Server server) {
 		super(list, server, "to");
 	}
 

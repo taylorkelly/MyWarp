@@ -16,8 +16,9 @@ public interface DataConnection {
 	void updateCreator(Warp warp);
 	void updateMessage(Warp warp);
 	void updateName(Warp warp);
-	void updatePermissions(Warp warp);
 	void updateVisibility(Warp warp);
 	void updateLocation(Warp warp);
+	
+	void updateEditor(Warp warp, String name);
 
 }

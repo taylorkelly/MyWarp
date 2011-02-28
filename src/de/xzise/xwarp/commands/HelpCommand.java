@@ -6,21 +6,19 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import me.taylorkelly.mywarp.WMPlayerListener;
-import me.taylorkelly.mywarp.WarpList;
-
 import org.bukkit.ChatColor;
 import org.bukkit.Server;
 import org.bukkit.command.CommandSender;
 
 import de.xzise.MinecraftUtil;
+import de.xzise.xwarp.WarpManager;
 
 public class HelpCommand extends SubCommand {
 	
 	private Collection<SubCommand> commands;
 	private Map<String, SubCommand> commandMap;
 
-	public HelpCommand(WarpList list, Server server) {
+	public HelpCommand(WarpManager list, Server server) {
 		super(list, server, "help", "?");
 		this.commands = new ArrayList<SubCommand>();
 		this.commandMap = new HashMap<String, SubCommand>();
@@ -40,11 +38,10 @@ public class HelpCommand extends SubCommand {
 			}
 		}
 		
-		int page = 1;
+		Integer page = null;
 		int maxPage = lines.size() / (MinecraftUtil.MAX_LINES_VISIBLE - 1);
 		if (parameters.length == 2) {
-			if (WMPlayerListener.isInteger(parameters[1])) {
-				page = Integer.parseInt(parameters[1]);
+			if ((page = MinecraftUtil.tryAndGetInteger(parameters[1])) != null) {
 				if (page < 1) {
 					sender.sendMessage(ChatColor.RED + "Page number can't be below 1.");
 					return true;
@@ -63,6 +60,9 @@ public class HelpCommand extends SubCommand {
 				}
 				return true;
 			}
+		}
+		if (page == null) {
+			page = 1;
 		}
 		sender.sendMessage(ChatColor.WHITE + "------------------ " + ChatColor.GREEN + "xWarp Help " + page + "/" + maxPage + ChatColor.WHITE + " ------------------");
 		for (int i = (page - 1) * (MinecraftUtil.MAX_LINES_VISIBLE - 1); i < lines.size() && i < page * (MinecraftUtil.MAX_LINES_VISIBLE - 1); i++) {

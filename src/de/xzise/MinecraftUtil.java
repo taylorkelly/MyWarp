@@ -7,11 +7,46 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 
+import org.bukkit.command.CommandSender;
+import org.bukkit.command.ConsoleCommandSender;
+import org.bukkit.entity.Player;
+
 public final class MinecraftUtil {
 	
 	public static final int MAX_LINES_VISIBLE = 10;
 	
 	private MinecraftUtil() {}
+	
+	/*
+	 * Minecraft specific
+	 */
+	
+	/**
+	 * Returns the name to a sender. If the sender has no name it returns null.
+	 * @param sender The given sender.
+	 * @return Returns the name of the sender and null if there is no name.
+	 */
+	public static String getPlayerName(CommandSender sender) {
+		if (sender instanceof Player) {
+			return ((Player) sender).getName();
+		} else {
+			return null;
+		}
+	}
+	
+	public static String getName(CommandSender sender) {
+		if (sender instanceof Player) {
+			return ((Player) sender).getName();
+		} else if (sender instanceof ConsoleCommandSender) {
+			return "[SERVER]";
+		} else {
+			return "Somebody";
+		}
+	}
+	
+	/*
+	 * Java specific
+	 */
 	
 	/**
 	 * Tries to convert a string into an integer. If the string is invalid it returns <code>null</code>.
@@ -24,6 +59,23 @@ public final class MinecraftUtil {
 		} catch (NumberFormatException e) {
 			return null;
 		}
+	}
+
+	/**
+	 * Tests where the first object is inside the array.
+	 * @param o Searched object.
+	 * @param a Searched array.
+	 * @return the first position found.
+	 */
+	public static <T> int contains(T o, T[] a) {
+		int idx = 0;
+		for (T t : a) {
+			if (t != null && t.equals(o)) {
+				return idx;
+			}
+			idx++;
+		}
+		return -1;
 	}
 	
 	public static void copyFile(File source, File destination) throws IOException {
@@ -96,4 +148,8 @@ public final class MinecraftUtil {
         }
     }
   }
+
+	public static boolean isInteger(String string) {
+		return MinecraftUtil.tryAndGetInteger(string) != null;
+	}
 }

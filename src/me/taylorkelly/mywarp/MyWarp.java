@@ -10,6 +10,8 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.event.Event;
 import org.bukkit.event.Event.Priority;
 import org.bukkit.event.player.PlayerListener;
+import org.bukkit.event.server.PluginEvent;
+import org.bukkit.event.server.ServerListener;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.PluginLoader;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -19,6 +21,7 @@ import de.xzise.XLogger;
 import de.xzise.xwarp.CommandMap;
 import de.xzise.xwarp.PermissionWrapper;
 import de.xzise.xwarp.PluginProperties;
+import de.xzise.xwarp.WarpManager;
 import de.xzise.xwarp.dataconnections.DataConnection;
 import de.xzise.xwarp.dataconnections.SQLiteConnection;
 
@@ -94,9 +97,7 @@ public class MyWarp extends JavaPlugin {
 			}
 		}
 		
-		permissions.init(this.getServer());
-		
-		WarpList warpList = new WarpList(this.getServer(), this.dataConnection);
+		WarpManager warpList = new WarpManager(this.getServer(), this.dataConnection);
 
 		// Create commands
 		this.commands = null;
@@ -109,6 +110,14 @@ public class MyWarp extends JavaPlugin {
 		
 		PlayerListener playerListener = new WMPlayerListener(this.commands);
 		MWBlockListener blockListener = new MWBlockListener(warpList);
+		ServerListener serverListner = new ServerListener() {
+			public void onPluginEnabled(PluginEvent event) {
+				if(event.getPlugin().getDescription().getName().equals("Permissions")) {
+					MyWarp.permissions.init(event.getPlugin());
+				}
+		    }
+		};
+		
 		try {
 			this.getServer().getPluginManager().registerEvent(Event.Type.PLAYER_COMMAND, playerListener, Priority.Normal, this);
 		} catch (NoSuchFieldError nsfe) {
@@ -120,6 +129,7 @@ public class MyWarp extends JavaPlugin {
 		}
 		this.getServer().getPluginManager().registerEvent(Event.Type.BLOCK_RIGHTCLICKED, blockListener, Priority.Normal, this);
 		this.getServer().getPluginManager().registerEvent(Event.Type.SIGN_CHANGE, blockListener, Priority.Low, this);
+		this.getServer().getPluginManager().registerEvent(Event.Type.PLUGIN_ENABLE, serverListner, Priority.Low, this);
 //		this.getServer().getPluginManager().registerEvent(Event.Type.BLOCK_CANBUILD, blockListener, Priority.Normal, this);
 //		this.getServer().getPluginManager().registerEvent(Event.Type.BLOCK_PLACED, blockListener, Priority.Low, this);
 		MyWarp.logger.info(name + " " + version + " enabled");

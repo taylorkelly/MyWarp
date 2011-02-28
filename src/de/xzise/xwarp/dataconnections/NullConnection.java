@@ -48,11 +48,6 @@ public class NullConnection implements DataConnection {
 	}
 
 	@Override
-	public void updatePermissions(Warp warp) {
-
-	}
-
-	@Override
 	public void updateVisibility(Warp warp) {
 
 	}
@@ -60,6 +55,11 @@ public class NullConnection implements DataConnection {
 	@Override
 	public void updateLocation(Warp warp) {
 
+	}
+
+	@Override
+	public void updateEditor(Warp warp, String name) {
+		
 	}
 
 }

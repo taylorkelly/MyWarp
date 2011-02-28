@@ -4,11 +4,11 @@ import org.bukkit.ChatColor;
 import org.bukkit.Server;
 import org.bukkit.command.CommandSender;
 
-import me.taylorkelly.mywarp.WarpList;
+import de.xzise.xwarp.WarpManager;
 
 public class InviteCommand extends WarpCommand {
 
-	public InviteCommand(WarpList list, Server server) {
+	public InviteCommand(WarpManager list, Server server) {
 		super(list, server, "invited", "invite");
 	}
 

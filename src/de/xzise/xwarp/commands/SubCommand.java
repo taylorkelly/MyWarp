@@ -8,7 +8,7 @@ import org.bukkit.Server;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import me.taylorkelly.mywarp.WarpList;
+import de.xzise.xwarp.WarpManager;
 
 /**
  * Command like list/create etc.
@@ -17,14 +17,14 @@ import me.taylorkelly.mywarp.WarpList;
  */
 public abstract class SubCommand {
 
-	protected final WarpList list;
+	protected final WarpManager list;
 	protected final Server server;
 	protected final String[] commands;
 
 	/**
 	 * Creates a subcommand.
 	 * 
-	 * @param list
+	 * @param manager
 	 *            The list to all warps.
 	 * @param server
 	 *            The server instance.
@@ -33,11 +33,11 @@ public abstract class SubCommand {
 	 * @throws IllegalArgumentException
 	 *             If commands is empty.
 	 */
-	protected SubCommand(WarpList list, Server server, String... commands) {
+	protected SubCommand(WarpManager manager, Server server, String... commands) {
 		if (commands.length <= 0) {
 			throw new IllegalArgumentException("No command given!");
 		}
-		this.list = list;
+		this.list = manager;
 		this.server = server;
 		this.commands = commands;
 	}
