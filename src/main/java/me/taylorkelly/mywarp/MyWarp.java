@@ -66,6 +66,7 @@ public class MyWarp extends JavaPlugin {
         playerListener = new MWPlayerListener(warpList);
 
         WarpPermissions.initialize(getServer());
+        WarpHelp.initialize(this);
         WarpSettings.initialize(getDataFolder());
 
         getServer().getPluginManager().registerEvent(Type.PLAYER_CHAT, playerListener, Priority.Low, this);
@@ -363,49 +364,49 @@ public class MyWarp extends JavaPlugin {
                     ArrayList<String> messages = new ArrayList<String>();
                     messages.add(ChatColor.RED + "-------------------- " + ChatColor.WHITE + "/WARP HELP" + ChatColor.RED + " --------------------");
                     if (WarpPermissions.warp(player)) {
-                        messages.add(ChatColor.RED + "/warp <name>" + ChatColor.WHITE + "  -  Warp to " + ChatColor.GRAY + "<name>");
+                        messages.add(ChatColor.RED + "/warp [name]" + ChatColor.WHITE + "  -  Warp to " + ChatColor.GRAY + "[name]");
                     }
                     if (WarpPermissions.publicCreate(player) || WarpPermissions.privateCreate(player)) {
-                        messages.add(ChatColor.RED + "/warp create <name>" + ChatColor.WHITE + "  -  Create warp " + ChatColor.GRAY + "<name>");
+                        messages.add(ChatColor.RED + "/warp create [name]" + ChatColor.WHITE + "  -  Create warp " + ChatColor.GRAY + "[name]");
                     }
                     if (WarpPermissions.privateCreate(player)) {
-                        messages.add(ChatColor.RED + "/warp pcreate <name>" + ChatColor.WHITE + "  -  Create warp " + ChatColor.GRAY + "<name>");
+                        messages.add(ChatColor.RED + "/warp pcreate [name]" + ChatColor.WHITE + "  -  Create warp " + ChatColor.GRAY + "[name]");
                     }
 
                     if (WarpPermissions.delete(player)) {
-                        messages.add(ChatColor.RED + "/warp delete <name>" + ChatColor.WHITE + "  -  Delete warp " + ChatColor.GRAY + "<name>");
+                        messages.add(ChatColor.RED + "/warp delete [name]" + ChatColor.WHITE + "  -  Delete warp " + ChatColor.GRAY + "[name]");
                     }
 
                     if (WarpPermissions.welcome(player)) {
-                        messages.add(ChatColor.RED + "/warp welcome <name>" + ChatColor.WHITE + "  -  Change the welcome message of " + ChatColor.GRAY
-                                + "<name>");
+                        messages.add(ChatColor.RED + "/warp welcome [name]" + ChatColor.WHITE + "  -  Change the welcome message of " + ChatColor.GRAY
+                                + "[name]");
                     }
 
                     if (WarpPermissions.list(player)) {
-                        messages.add(ChatColor.RED + "/warp list <#>" + ChatColor.WHITE + "  -  Views warp page " + ChatColor.GRAY + "<#>");
+                        messages.add(ChatColor.RED + "/warp list (#)" + ChatColor.WHITE + "  -  Views warp page " + ChatColor.GRAY + "(#)");
                     }
 
                     if (WarpPermissions.search(player)) {
-                        messages.add(ChatColor.RED + "/warp search <query>" + ChatColor.WHITE + "  -  Search for " + ChatColor.GRAY + "<query>");
+                        messages.add(ChatColor.RED + "/warp search [query]" + ChatColor.WHITE + "  -  Search for " + ChatColor.GRAY + "[query]");
                     }
                     if (WarpPermissions.give(player)) {
-                        messages.add(ChatColor.RED + "/warp give <player> <name>" + ChatColor.WHITE + "  -  Give " + ChatColor.GRAY + "<player>"
-                                + ChatColor.WHITE + " your " + ChatColor.GRAY + "<name>");
+                        messages.add(ChatColor.RED + "/warp give [player] [name[" + ChatColor.WHITE + "  -  Give " + ChatColor.GRAY + "[player]"
+                                + ChatColor.WHITE + " your " + ChatColor.GRAY + "[name]");
                     }
                     if (WarpPermissions.invite(player)) {
-                        messages.add(ChatColor.RED + "/warp invite <player> <name>" + ChatColor.WHITE + "  -  Invite " + ChatColor.GRAY + "<player>"
-                                + ChatColor.WHITE + " to " + ChatColor.GRAY + "<name>");
+                        messages.add(ChatColor.RED + "/warp invite [player] [name]" + ChatColor.WHITE + "  -  Invite " + ChatColor.GRAY + "[player]"
+                                + ChatColor.WHITE + " to " + ChatColor.GRAY + "[name]");
                     }
                     if (WarpPermissions.uninvite(player)) {
-                        messages.add(ChatColor.RED + "/warp uninvite <player> <name>" + ChatColor.WHITE + "  -  Uninvite " + ChatColor.GRAY + "<player>"
-                                + ChatColor.WHITE + " to " + ChatColor.GRAY + "<name>");
+                        messages.add(ChatColor.RED + "/warp uninvite [player] [name[" + ChatColor.WHITE + "  -  Uninvite " + ChatColor.GRAY + "[player]"
+                                + ChatColor.WHITE + " to " + ChatColor.GRAY + "[name]");
                     }
                     if (WarpPermissions.canPublic(player)) {
-                        messages.add(ChatColor.RED + "/warp public <name>" + ChatColor.WHITE + "  -  Makes warp " + ChatColor.GRAY + "<name>" + ChatColor.WHITE
+                        messages.add(ChatColor.RED + "/warp public [name]" + ChatColor.WHITE + "  -  Makes warp " + ChatColor.GRAY + "[name]" + ChatColor.WHITE
                                 + " public");
                     }
                     if (WarpPermissions.canPrivate(player)) {
-                        messages.add(ChatColor.RED + "/warp private <name>" + ChatColor.WHITE + "  -  Makes warp " + ChatColor.GRAY + "<name>"
+                        messages.add(ChatColor.RED + "/warp private [name]" + ChatColor.WHITE + "  -  Makes warp " + ChatColor.GRAY + "[name]"
                                 + ChatColor.WHITE + " private");
                     }
                     for (String message : messages) {
