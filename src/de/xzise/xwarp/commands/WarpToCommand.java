@@ -9,7 +9,7 @@ import org.bukkit.entity.Player;
 
 import de.xzise.xwarp.PermissionWrapper.PermissionTypes;
 
-public class WarpToCommand extends SubCommand {
+public class WarpToCommand extends DefaultSubCommand {
 
 	public WarpToCommand(WarpList list, Server server) {
 		super(list, server, "to");

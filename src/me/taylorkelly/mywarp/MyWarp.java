@@ -20,7 +20,6 @@ import de.xzise.xwarp.CommandMap;
 import de.xzise.xwarp.PermissionWrapper;
 import de.xzise.xwarp.PluginProperties;
 import de.xzise.xwarp.dataconnections.DataConnection;
-import de.xzise.xwarp.dataconnections.SQLiteConnection;
 
 public class MyWarp extends JavaPlugin {
 	
@@ -83,15 +82,10 @@ public class MyWarp extends JavaPlugin {
 		PluginProperties properties = new PluginProperties(this.getDataFolder(), this.getServer());
 		
 		this.dataConnection = properties.getDataConnection();
-
-		if (this.dataConnection instanceof SQLiteConnection) {
-			try {
-				((SQLiteConnection) this.dataConnection).init(this.getDataFolder());
-			} catch (IllegalArgumentException iae) {
-				MyWarp.logger.severe("Could not establish SQL connection. Disabling " + this.name + "!", iae);
-				this.getServer().getPluginManager().disablePlugin(this);
-				return;
-			}
+		
+		if (!this.dataConnection.loadDefault(this.getDataFolder())) {
+			MyWarp.logger.severe("Unable to initialize dataconnection. Disabling plugin!");
+			this.getServer().getPluginManager().disablePlugin(this);
 		}
 		
 		permissions.init(this.getServer());
@@ -101,7 +95,7 @@ public class MyWarp extends JavaPlugin {
 		// Create commands
 		this.commands = null;
 		try {
-			this.commands = new CommandMap(warpList, this.getServer(), this.dataConnection);
+			this.commands = new CommandMap(warpList, this.getServer(), this.getDataFolder(), this.dataConnection);
 		} catch (IllegalArgumentException iae) {
 			MyWarp.logger.severe("Couldn't initalize commands.", iae);
 			this.getServer().getPluginManager().disablePlugin(this);

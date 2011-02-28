@@ -50,22 +50,6 @@ public class SQLiteConnection implements DataConnection {
 		this.server = server;
 	}
 	
-	public void init(File dataPath) {
-		this.free();
-        try {
-            Class.forName("org.sqlite.JDBC");
-            this.connection = DriverManager.getConnection("jdbc:sqlite:" + dataPath.getAbsolutePath() + "/warps.db");
-            this.connection.setAutoCommit(false);
-        } catch (ClassNotFoundException e) {
-        	MyWarp.logger.severe("Class not found", e);
-        	throw new IllegalArgumentException("Couldn't load database.");
-        } catch (SQLException e) {
-            MyWarp.logger.severe("Generic SQLException", e);
-        	throw new IllegalArgumentException("Couldn't load database.");
-        }
-        this.update();
-	}
-	
 	public void free() {
         if (this.connection != null) {
         	MyWarp.logger.info("Close connection!");
@@ -362,7 +346,7 @@ public class SQLiteConnection implements DataConnection {
 	}
 
 	@Override
-	public void updateCreator(Warp warp) {
+	public boolean updateCreator(Warp warp) {
 		this.updateWarp(warp, "Creator", "UPDATE warpTable SET creator = ? WHERE id = ?", new UpdateFiller() {
 			
 			@Override
@@ -371,10 +355,11 @@ public class SQLiteConnection implements DataConnection {
 				statement.setInt(2, warp.index);
 			}
 		});
+		return true;
 	}
 
 	@Override
-	public void updateMessage(Warp warp) {
+	public boolean updateMessage(Warp warp) {
 		this.updateWarp(warp, "Welcome Message", "UPDATE warpTable SET welcomeMessage = ? WHERE id = ?", new UpdateFiller() {
 			
 			@Override
@@ -383,10 +368,11 @@ public class SQLiteConnection implements DataConnection {
 				statement.setInt(2, warp.index);
 			}
 		});
+		return true;
 	}
 
 	@Override
-	public void updateName(Warp warp) {
+	public boolean updateName(Warp warp) {
 		this.updateWarp(warp, "Name", "UPDATE warpTable SET name = ? WHERE id = ?", new UpdateFiller() {
 			
 			@Override
@@ -395,10 +381,11 @@ public class SQLiteConnection implements DataConnection {
 				statement.setInt(2, warp.index);
 			}
 		});
+		return true;
 	}
 
 	@Override
-	public void updatePermissions(Warp warp) {
+	public boolean updatePermissions(Warp warp) {
 		this.updateWarp(warp, "Permissions", "UPDATE warpTable SET permissions = ? WHERE id = ?", new UpdateFiller() {
 			
 			@Override
@@ -407,10 +394,11 @@ public class SQLiteConnection implements DataConnection {
 				statement.setInt(2, warp.index);
 			}
 		});
+		return true;
 	}
 
 	@Override
-	public void updateVisibility(Warp warp) {
+	public boolean updateVisibility(Warp warp) {
 		this.updateWarp(warp, "Visibility", "UPDATE warpTable SET publicLevel = ? WHERE id = ?", new UpdateFiller() {
 			
 			@Override
@@ -419,10 +407,11 @@ public class SQLiteConnection implements DataConnection {
 				statement.setInt(2, warp.index);
 			}
 		});
+		return true;
 	}
 
 	@Override
-	public void updateLocation(Warp warp) {
+	public boolean updateLocation(Warp warp) {
 		this.updateWarp(warp, "Location", "UPDATE warpTable SET world = ?, x = ?, y = ?, z = ?, yaw = ?, pitch = ? WHERE id = ?", new UpdateFiller() {
 			
 			@Override
@@ -432,6 +421,30 @@ public class SQLiteConnection implements DataConnection {
 				statement.setInt(7, warp.index);
 			}
 		});
+		return true;
+	}
+
+	@Override
+	public boolean load(File file) {
+		this.free();
+        try {
+            Class.forName("org.sqlite.JDBC");
+            this.connection = DriverManager.getConnection("jdbc:sqlite:" + file.getAbsolutePath());
+            this.connection.setAutoCommit(false);
+        } catch (ClassNotFoundException e) {
+        	MyWarp.logger.severe("Class not found", e);
+        	return false;
+        } catch (SQLException e) {
+            MyWarp.logger.severe("Generic SQLException", e);
+        	return false;
+        }
+        this.update();
+        return true;
+	}
+
+	@Override
+	public boolean loadDefault(File directory) {
+		return this.load(new File(directory, "warps.db"));
 	}
 
 }

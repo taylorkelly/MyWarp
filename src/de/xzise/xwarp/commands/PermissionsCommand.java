@@ -1,10 +1,8 @@
 package de.xzise.xwarp.commands;
 
 import me.taylorkelly.mywarp.MyWarp;
-import me.taylorkelly.mywarp.WarpList;
 
 import org.bukkit.ChatColor;
-import org.bukkit.Server;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
@@ -13,8 +11,8 @@ import de.xzise.xwarp.PermissionWrapper.PermissionTypes;
 
 public class PermissionsCommand extends SubCommand {
 
-	public PermissionsCommand(WarpList list, Server server) {
-		super(list, server, "permissions");
+	public PermissionsCommand() {
+		super("permissions");
 	}
 
 	@Override

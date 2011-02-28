@@ -7,10 +7,8 @@ import java.util.List;
 import java.util.Map;
 
 import me.taylorkelly.mywarp.WMPlayerListener;
-import me.taylorkelly.mywarp.WarpList;
 
 import org.bukkit.ChatColor;
-import org.bukkit.Server;
 import org.bukkit.command.CommandSender;
 
 import de.xzise.MinecraftUtil;
@@ -20,8 +18,8 @@ public class HelpCommand extends SubCommand {
 	private Collection<SubCommand> commands;
 	private Map<String, SubCommand> commandMap;
 
-	public HelpCommand(WarpList list, Server server) {
-		super(list, server, "help", "?");
+	public HelpCommand() {
+		super("help", "?");
 		this.commands = new ArrayList<SubCommand>();
 		this.commandMap = new HashMap<String, SubCommand>();
 	}

@@ -12,7 +12,7 @@ import de.xzise.MinecraftUtil;
 import de.xzise.xwarp.lister.GenericLister;
 import de.xzise.xwarp.lister.ListSection;
 
-public class ListCommand extends SubCommand {
+public class ListCommand extends DefaultSubCommand {
 	
 	public ListCommand(WarpList list, Server server) {
 		super(list, server, "list", "ls");

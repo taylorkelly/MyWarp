@@ -8,7 +8,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.Server;
 import org.bukkit.command.CommandSender;
 
-public class SearchCommand extends SubCommand {
+public class SearchCommand extends DefaultSubCommand {
 
 	public SearchCommand(WarpList list, Server server) {
 		super(list, server, "search");

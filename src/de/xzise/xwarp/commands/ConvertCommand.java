@@ -15,7 +15,7 @@ import me.taylorkelly.mywarp.MyWarp;
 import me.taylorkelly.mywarp.Warp;
 import me.taylorkelly.mywarp.WarpList;
 
-public class ConvertCommand extends SubCommand {
+public class ConvertCommand extends DefaultSubCommand {
 
 	private boolean warning;
 	private final DataConnection data;

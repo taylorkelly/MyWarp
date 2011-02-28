@@ -113,7 +113,7 @@ public class Warp {
 	}
 
 	public void update(Player player) {
-		this.location = player.getLocation().clone();		
+		this.setLocation(player.getLocation());		
 	}
 	
 	public void rename(String newName) {
@@ -176,5 +176,19 @@ public class Warp {
 	
 	public boolean isValid() {
 		return this.location.getWorld() != null;
+	}
+	
+	public void setLocation(Location location) {
+		this.location = location.clone();
+	}
+	
+	@Override
+	public boolean equals(Object o) {
+		if (o instanceof Warp) {
+			Warp w = (Warp) o;
+			return w.name.equals(this.name) && w.creator.equals(this.creator);
+		} else {
+			return false;
+		}
 	}
 }

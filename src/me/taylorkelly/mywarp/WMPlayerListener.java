@@ -21,7 +21,7 @@ public class WMPlayerListener extends PlayerListener {
 	
 	public void onPlayerCommand(PlayerChatEvent event) {
 		Player player = event.getPlayer();
-		String[] values = parseLine(event.getMessage());		
+		String[] values = parseCommand(event.getMessage());		
 
 		if (values[0].equalsIgnoreCase("/warp")) {
 			
@@ -45,9 +45,12 @@ public class WMPlayerListener extends PlayerListener {
 		this.onPlayerCommand(event);
     }
 	
+	public static String[] parseCommand(String line) {
+		return parseLine(line, ' ');
+	}
+	
 	/**
-	 * Parses a command line. Reads the two first commands like "split" and the
-	 * following with quotes/escaping.
+	 * Parses a command line. Reads with quotes/escaping.
 	 * 
 	 * <ul>
 	 * <li>Example 1:
@@ -68,7 +71,7 @@ public class WMPlayerListener extends PlayerListener {
 	 *            The command line.
 	 * @return The parsed segments.
 	 */
-	public static String[] parseLine(String line) {
+	public static String[] parseLine(String line, char delimiter) {
 		boolean quoted = false;
 		boolean escaped = false;
 		int lastStart = 0;
@@ -77,40 +80,29 @@ public class WMPlayerListener extends PlayerListener {
 		List<String> values = new ArrayList<String>(2);
 		for (int i = 0; i < line.length(); i++) {
 			char c = line.charAt(i);
-			if (word < 1) {
-				if (c == ' ') {
-					values.add(value);
-					value = "";
-					word++;
-				} else {
-					value += c;
-				}
+			if (escaped) {
+				value += c;
+				escaped = false;
 			} else {
-				if (escaped) {
-					value += c;
-					escaped = false;
-				} else {
-					switch (c) {
-					case '"':
-						quoted = !quoted;
-						break;
-					case '\\':
-						escaped = true;
-						break;
-					case ' ':
-						if (!quoted) {
-							if (lastStart < i) {
-								values.add(value);
-								value = "";
-								word++;
-							}
-							lastStart = i + 1;
-							break;
+				switch (c) {
+				case '"':
+					quoted = !quoted;
+					break;
+				case '\\':
+					escaped = true;
+					break;
+				default:
+					if (c == delimiter && !quoted) {
+						if (lastStart < i) {
+							values.add(value);
+							value = "";
+							word++;
 						}
-					default:
+						lastStart = i + 1;						
+					} else {
 						value += c;
-						break;
 					}
+					break;
 				}
 			}
 		}
