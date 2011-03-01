@@ -64,7 +64,7 @@ public class WarpManager {
 		}
 		if (MyWarp.permissions.permission(player, type)) {
 			Warp warp = this.list.getWarp(name, newOwner, player.getName());
-			Warp globalWarp = this.list.getWarp(name);
+			Warp globalWarp = (visibility == Visibility.GLOBAL ? this.list.getWarp(name) : null);
 			if (warp != null) {
 				player.sendMessage(ChatColor.RED + "Warp called '" + name
 						+ "' already exists (" + warp.name + ").");
@@ -76,8 +76,7 @@ public class WarpManager {
 				warp.visibility = visibility;
 				this.list.addWarp(warp);
 				this.data.addWarp(warp);
-				player.sendMessage(ChatColor.AQUA + "Successfully created '"
-						+ warp.name + "'");
+				player.sendMessage("Successfully created '" + ChatColor.GREEN + warp.name + ChatColor.WHITE + "'.");
 				switch (visibility) {
 				case PRIVATE :
 					WarpManager.printPrivatizeMessage(player, warp);

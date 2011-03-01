@@ -44,7 +44,7 @@ public class WarpList {
 			
 			if (this.all.size() == 1) {
 				return this.all.values().toArray(new Warp[1])[0];
-			} else if (playerName == null || playerName.isEmpty()) {
+			} else if (playerName != null && !playerName.isEmpty()) {
 				return this.all.get(playerName.toLowerCase());	
 			} else {
 				return null;
