@@ -2,7 +2,6 @@ package de.xzise.xwarp;
 
 import me.taylorkelly.mywarp.MyWarp;
 
-import org.bukkit.Server;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
@@ -183,11 +182,6 @@ public class PermissionWrapper {
 		}
 		return true;
 	}
-
-	public void init(Server server) {
-		Plugin test = server.getPluginManager().getPlugin("Permissions");
-		this.init(test);
-	}
 	
 	public void init(Plugin plugin) {
 		if (plugin != null) {
@@ -195,9 +189,11 @@ public class PermissionWrapper {
 				this.handler = ((Permissions) plugin).getHandler();
 				MyWarp.logger.info("Permissions enabled.");
 			} else {
+				this.handler = null;
 				MyWarp.logger.info("Permissions system found, but not enabled. Use defaults.");
 			}
 		} else {
+			this.handler = null;
 			MyWarp.logger.warning("Permission system not found. Use defaults.");
 		}		
 	}

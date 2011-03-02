@@ -116,6 +116,12 @@ public class MyWarp extends JavaPlugin {
 					MyWarp.permissions.init(event.getPlugin());
 				}
 		    }
+			
+			public void onPluginDisabled(PluginEvent event) {
+				if(event.getPlugin().getDescription().getName().equals("Permissions")) {
+					MyWarp.permissions.init(null);
+				}
+		    }
 		};
 		
 		try {
