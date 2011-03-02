@@ -1,5 +1,5 @@
 name: xWarp
-version: 2.6.1
+version: 2.6.2-on-command
 main: me.taylorkelly.mywarp.MyWarp
 authors:
   - 'xZise'

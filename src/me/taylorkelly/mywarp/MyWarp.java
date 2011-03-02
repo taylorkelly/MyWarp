@@ -136,8 +136,17 @@ public class MyWarp extends JavaPlugin {
 	}
 	
 	@Override
-    public boolean onCommand(CommandSender sender, Command cmd, String commandLabel, String[] args) {		
-		return this.commands.executeCommand(sender, args);
+    public boolean onCommand(CommandSender sender, Command cmd, String commandLabel, String[] args) {
+		StringBuilder line = new StringBuilder();
+		for (int i = 0; i < args.length; i++) {
+			String arg = args[i];
+			line.append(arg);
+			if (i < args.length - 1) {
+				line.append(' ');
+			}
+		}
+		
+		return this.commands.executeCommand(sender, WMPlayerListener.parseLine(line.toString()));
     }
 
 	private void updateFiles() {
