@@ -1,26 +1,25 @@
 package de.xzise.xwarp.commands;
 
 import me.taylorkelly.mywarp.Searcher;
-import me.taylorkelly.mywarp.WMPlayerListener;
-import me.taylorkelly.mywarp.WarpList;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Server;
 import org.bukkit.command.CommandSender;
 
+import de.xzise.MinecraftUtil;
+import de.xzise.xwarp.WarpManager;
+
 public class SearchCommand extends DefaultSubCommand {
 
-	public SearchCommand(WarpList list, Server server) {
+	public SearchCommand(WarpManager list, Server server) {
 		super(list, server, "search");
 	}
 
 	@Override
 	protected boolean internalExecute(CommandSender sender, String[] parameters) {
-		if (parameters.length == 2 || (parameters.length == 3 && WMPlayerListener.isInteger(parameters[2]))) {
-			int page;
-			if (parameters.length == 3) {
-				page = Integer.parseInt(parameters[2]);
-			} else {
+		Integer page = null;
+		if (parameters.length == 2 || (parameters.length == 3 && (page = MinecraftUtil.tryAndGetInteger(parameters[2])) != null)) {
+			if (page == null) {
 				page = 1;
 			}
 			

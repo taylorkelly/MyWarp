@@ -6,13 +6,16 @@ import java.util.List;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 
+/**
+ * Basical subcommand without any list.
+ * @author Fabian Neundorf.
+ */
 public abstract class SubCommand {
 
 	protected final String[] commands;
 
 	/**
 	 * Creates a subcommand.
-	 *
 	 * @param commands
 	 *            The commands.
 	 * @throws IllegalArgumentException
@@ -49,7 +52,7 @@ public abstract class SubCommand {
 
 	public final String[] getFullHelp() {
 		List<String> lines = new ArrayList<String>();
-		lines.add(ChatColor.GREEN + this.getCommand());
+		lines.add("xWarp help: " + ChatColor.GREEN + this.getCommand());
 		for (String string : this.getFullHelpText()) {
 			lines.add(string);
 		}

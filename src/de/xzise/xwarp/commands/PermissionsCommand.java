@@ -9,6 +9,7 @@ import org.bukkit.entity.Player;
 import de.xzise.xwarp.PermissionWrapper;
 import de.xzise.xwarp.PermissionWrapper.PermissionTypes;
 
+//TODO: Create a superclass for subcommand without the list?
 public class PermissionsCommand extends SubCommand {
 
 	public PermissionsCommand() {

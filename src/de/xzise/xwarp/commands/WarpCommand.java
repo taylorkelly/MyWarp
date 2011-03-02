@@ -1,14 +1,14 @@
 package de.xzise.xwarp.commands;
 
-import me.taylorkelly.mywarp.WarpList;
-
 import org.bukkit.ChatColor;
 import org.bukkit.Server;
 import org.bukkit.command.CommandSender;
 
+import de.xzise.xwarp.WarpManager;
+
 /**
  * Default command structure with a warp definition. The command structure is:
- * <blockquote><code>/warp &lt;command&gt; &lt;warpname&gt; [command] &lt;parameter&gt;</code></blockquote>
+ * <blockquote><code>/warp &lt;command&gt; &lt;warpname&gt; [creator] &lt;parameter&gt;</code></blockquote>
  * The parameter could be disabled.    
  * 
  * @author Fabian Neundorf
@@ -18,7 +18,7 @@ public abstract class WarpCommand extends DefaultSubCommand {
 	private final int length;
 	private final String[] parametersText;
 	
-	protected WarpCommand(WarpList list, Server server, String[] parameters, String... commands) {
+	protected WarpCommand(WarpManager list, Server server, String[] parameters, String... commands) {
 		super(list, server, commands);
 		this.parametersText = new String[parameters.length];
 		for (int i = 0; i < parameters.length; i++) {
@@ -27,8 +27,8 @@ public abstract class WarpCommand extends DefaultSubCommand {
 		this.length = this.parametersText.length + 1;
 	}
 	
-	protected WarpCommand(WarpList list, Server server, String parameterText, String... commands) {
-		this(list, server, new String[] { parameterText }, commands);
+	protected WarpCommand(WarpManager list, Server server, String parameterText, String... commands) {
+		this(list, server, parameterText == null || parameterText.isEmpty() ? new String[0] : new String[] { parameterText }, commands);
 	}
 	
 	@Override

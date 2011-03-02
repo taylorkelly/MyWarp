@@ -9,12 +9,18 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.logging.Level;
 
 import org.bukkit.Location;
 import org.bukkit.Server;
 import org.bukkit.World;
+
+import de.xzise.xwarp.EditorPermissions;
+import de.xzise.xwarp.Permissions;
 
 import me.taylorkelly.mywarp.MyWarp;
 import me.taylorkelly.mywarp.Warp;
@@ -29,17 +35,20 @@ public class SQLiteConnection implements DataConnection {
 			+ "`creator` varchar(32) NOT NULL DEFAULT 'Player',"
 			+ "`world` varchar(32) NOT NULL,"
 			+ "`x` DPUBLE NOT NULL DEFAULT '0',"
-			+ "`y` tinyint NOT NULL DEFAULT '0',"
+			+ "`y` DOUBLE NOT NULL DEFAULT '0',"
 			+ "`z` DOUBLE NOT NULL DEFAULT '0',"
 			+ "`yaw` smallint NOT NULL DEFAULT '0',"
 			+ "`pitch` smallint NOT NULL DEFAULT '0',"
 			+ "`publicLevel` smallint NOT NULL DEFAULT '1',"
-			+ "`permissions` varchar(150) NOT NULL DEFAULT '',"
 			+ "`welcomeMessage` varchar(100) NOT NULL DEFAULT ''" + ");";
+	private final static String PERMISSIONS_TABLE = "CREATE TABLE `permissions` ("
+			+ "`id` INTEGER NOT NULL,"
+			+ "`editor` varchar(32) NOT NULL,"
+			+ "`value` " + ");";
 	
 	private final static String VERSION_TABLE = "CREATE TABLE `meta` (`name` varchar(32) NOT NULL, `value` int NOT NULL);";
 
-	private final static int TARGET_VERSION = 1;
+	private final static int TARGET_VERSION = 2;
 
 	
 	private Server server;
@@ -70,6 +79,16 @@ public class SQLiteConnection implements DataConnection {
 		super.finalize();
 	}
 	
+	private class WarpPermission {
+		public final int id;
+		public final String editor;
+		
+		public WarpPermission(int id, String editor) {
+			this.id = id;
+			this.editor = editor;
+		}
+	}
+	
 	private void update() {
 		int version = getVersion();
 		
@@ -77,6 +96,7 @@ public class SQLiteConnection implements DataConnection {
 			MyWarp.logger.info("Database layout is outdated (" + version + ")! Updating to " + TARGET_VERSION + ".");
 			Statement statement = null;
 			PreparedStatement convertedWarp = null;
+			PreparedStatement permissionsInsert = null;
 			ResultSet set = null;
 			try {
 				statement = this.connection.createStatement();
@@ -93,12 +113,18 @@ public class SQLiteConnection implements DataConnection {
 					// Select line by line
 					String world = server.getWorlds().get(0).getName();
 					set = statement.executeQuery("SELECT * FROM warpTable_backup");
-					convertedWarp = this.connection.prepareStatement("INSERT INTO warpTable (id, name, creator, world, x, y, z, yaw, pitch, publicLevel, permissions, welcomeMessage) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)");
+					List<WarpPermission> list = new ArrayList<WarpPermission>();
+					convertedWarp = this.connection.prepareStatement("INSERT INTO warpTable (id, name, creator, world, x, y, z, yaw, pitch, publicLevel, welcomeMessage) VALUES (?,?,?,?,?,?,?,?,?,?,?)");
 					while (set.next()) {
-						convertedWarp.setInt(1, set.getInt("id"));
+						int id = set.getInt("id");
+						convertedWarp.setInt(1, id);
 						convertedWarp.setString(2, set.getString("name"));
 						convertedWarp.setString(3, set.getString("creator"));
-						convertedWarp.setString(4, world);						
+						if (version < 1) {
+							convertedWarp.setString(4, world);
+						} else {
+							convertedWarp.setString(4, set.getString("world"));
+						}
 						convertedWarp.setDouble(5, set.getDouble("x"));
 						convertedWarp.setInt(6, set.getInt("y"));
 						convertedWarp.setDouble(7, set.getDouble("z"));
@@ -113,10 +139,33 @@ public class SQLiteConnection implements DataConnection {
 						} else {
 							convertedWarp.setInt(10, set.getInt("publicLevel"));
 						}
-						convertedWarp.setString(11, set.getString("permissions"));
-						convertedWarp.setString(12, set.getString("welcomeMessage"));
+						if (version < 2) {
+							List<String> p = processList(set.getString("permissions"));
+							for (String string : p) {
+								list.add(new WarpPermission(id, string));
+							}
+						}
+						convertedWarp.setString(11, set.getString("welcomeMessage"));
 						convertedWarp.executeUpdate();						
 					}
+					
+					if (version < 2) {
+						statement.executeUpdate(PERMISSIONS_TABLE);
+						MyWarp.logger.info("Adding permissions table");
+						
+						if (list.size() > 0) {
+							permissionsInsert = this.connection.prepareStatement("INSERT OR IGNORE INTO permissions (id, editor, value) VALUES (?,?,?)");
+							
+							for (WarpPermission warpPermission : list) {
+								permissionsInsert.setInt(1, warpPermission.id);
+								permissionsInsert.setString(2, warpPermission.editor);
+								permissionsInsert.setInt(3, Permissions.WARP.id);
+								permissionsInsert.addBatch();
+							}
+							permissionsInsert.executeBatch();
+						}
+					}
+					
 					statement.executeUpdate("DROP TABLE warpTable_backup");
 					MyWarp.logger.info("Recovering the backup.");
 				}
@@ -135,6 +184,10 @@ public class SQLiteConnection implements DataConnection {
 				MyWarp.logger.log(Level.SEVERE, "Warp Load Exception", ex);
 			} finally {
 				try {
+					if (permissionsInsert != null)
+						permissionsInsert.close();
+					if (convertedWarp != null)
+						convertedWarp.close();
 					if (statement != null)
 						statement.close();
 					if (set != null)
@@ -145,7 +198,7 @@ public class SQLiteConnection implements DataConnection {
 			}
 		}
 	}
-	
+
 	private boolean tableExists(String name) {
 		ResultSet rs = null;
 		try {
@@ -208,6 +261,29 @@ public class SQLiteConnection implements DataConnection {
 		ResultSet set = null;
 		try {
 			statement = this.connection.createStatement();
+			set = statement.executeQuery("SELECT * FROM permissions");
+			Map<Integer, Map<String, EditorPermissions>> m = new HashMap<Integer, Map<String, EditorPermissions>>();
+			while (set.next()) {
+				int index = set.getInt("id");
+				Map<String, EditorPermissions> n = m.get(index);
+				if (n == null) {
+					n = new HashMap<String, EditorPermissions>();
+					m.put(index, n);
+				}
+				String editor = set.getString("editor");
+				EditorPermissions o = n.get(editor.toLowerCase());
+				if (o == null) {
+					o = new EditorPermissions();
+					n.put(editor.toLowerCase(), o);
+				}
+				int value = set.getInt("value");
+				o.put(Permissions.getById(value), true);
+			}
+			
+			if (set != null) {
+				set.close();
+			}
+			
 			set = statement.executeQuery("SELECT * FROM warpTable");
 			int size = 0;
 			int invalidSize = 0;
@@ -218,15 +294,14 @@ public class SQLiteConnection implements DataConnection {
 				String creator = set.getString("creator");
 				World world = server.getWorld(set.getString("world"));
 				double x = set.getDouble("x");
-				int y = set.getInt("y");
+				double y = set.getInt("y");
 				double z = set.getDouble("z");
 				int yaw = set.getInt("yaw");
 				int pitch = set.getInt("pitch");
 				Location loc = new Location(world, x, y, z, yaw, pitch);
 				Visibility visibility = Visibility.parseLevel(set.getInt("publicLevel"));
-				String permissions = set.getString("permissions");
 				String welcomeMessage = set.getString("welcomeMessage");
-				Warp warp = new Warp(index, name, creator, loc, visibility, permissions, welcomeMessage);
+				Warp warp = new Warp(index, name, creator, loc, visibility, m.get(index), welcomeMessage);
 				result.add(warp);
 				if (!warp.isValid()) {
 					invalidSize++;
@@ -255,19 +330,36 @@ public class SQLiteConnection implements DataConnection {
 	public void addWarp(Warp... warps) {
 		if (warps.length > 0) {
 			PreparedStatement ps = null;
+			PreparedStatement insertPermissions = null;
 			try {		
-				ps = this.connection.prepareStatement("INSERT INTO warpTable (id, name, creator, world, x, y, z, yaw, pitch, publicLevel, permissions, welcomeMessage) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)");
+				ps = this.connection.prepareStatement("INSERT INTO warpTable (id, name, creator, world, x, y, z, yaw, pitch, publicLevel, welcomeMessage) VALUES (?,?,?,?,?,?,?,?,?,?,?)");
+				insertPermissions = this.connection.prepareStatement("INSERT INTO permissions (id, editor, value) VALUES (?,?,?)");
 				for (Warp warp : warps) {
 					ps.setInt(1, warp.index);
 					ps.setString(2, warp.name);
 					ps.setString(3, warp.creator);
 					setLocation(warp.getLocation(), 4, ps);
 					ps.setInt(10, warp.visibility.level);
-					ps.setString(11, warp.permissionsString());
-					ps.setString(12, warp.welcomeMessage);
+					ps.setString(11, warp.welcomeMessage);
 					ps.addBatch();
+					
+					for (String editor : warp.getEditors()) {
+						EditorPermissions ep = warp.getEditorPermissions(editor);
+						if (ep != null) {
+							for (Entry<Permissions, Boolean> p : ep.entrySet()) {
+								if (p.getValue() != null && p.getValue() == true) {
+									insertPermissions.setInt(1, warp.index);
+									insertPermissions.setString(2, editor);	
+									insertPermissions.setInt(3, p.getKey().id);
+									insertPermissions.addBatch();
+								}
+							}							
+						}
+					}
 				}
 				ps.executeBatch();
+				insertPermissions.executeBatch();				
+				
 				this.connection.commit();
 			} catch (SQLException ex) {
 				MyWarp.logger.log(Level.SEVERE, "Warp Insert Exception", ex);
@@ -286,7 +378,7 @@ public class SQLiteConnection implements DataConnection {
 	private static void setLocation(Location location, int offset, PreparedStatement ps) throws SQLException {
 		ps.setString(offset++, location.getWorld().getName());
 		ps.setDouble(offset++, location.getX());
-		ps.setInt(offset++, (int) location.getY());
+		ps.setDouble(offset++, location.getY());
 		ps.setDouble(offset++, location.getZ());
 		ps.setInt(offset++, (int) location.getYaw());
 		ps.setInt(offset++, (int) location.getPitch());	
@@ -294,27 +386,13 @@ public class SQLiteConnection implements DataConnection {
 
 	@Override
 	public void deleteWarp(Warp warp) {
-		PreparedStatement ps = null;
-		ResultSet set = null;
-		try {
-			ps = this.connection.prepareStatement("DELETE FROM warpTable WHERE id = ?");
-			ps.setInt(1, warp.index);
-			ps.executeUpdate();
-			this.connection.commit();
-		} catch (SQLException ex) {
-			MyWarp.logger.log(Level.SEVERE, "Warp Delete Exception", ex);
-		} finally {
-			try {
-				if (ps != null) {
-					ps.close();
-				}
-				if (set != null) {
-					set.close();
-				}
-			} catch (SQLException ex) {
-				MyWarp.logger.log(Level.SEVERE, "Warp Delete Exception (on close)", ex);
+		this.updateWarp(warp, "Delete", "DELETE FROM warpTable WHERE id = ?", new UpdateFiller() {
+			
+			@Override
+			public void fillStatement(Warp warp, PreparedStatement statement) throws SQLException {
+				statement.setInt(1, warp.index);
 			}
-		}
+		});
 	}
 	
 	private interface UpdateFiller {
@@ -346,7 +424,7 @@ public class SQLiteConnection implements DataConnection {
 	}
 
 	@Override
-	public boolean updateCreator(Warp warp) {
+	public void updateCreator(Warp warp) {
 		this.updateWarp(warp, "Creator", "UPDATE warpTable SET creator = ? WHERE id = ?", new UpdateFiller() {
 			
 			@Override
@@ -355,11 +433,10 @@ public class SQLiteConnection implements DataConnection {
 				statement.setInt(2, warp.index);
 			}
 		});
-		return true;
 	}
 
 	@Override
-	public boolean updateMessage(Warp warp) {
+	public void updateMessage(Warp warp) {
 		this.updateWarp(warp, "Welcome Message", "UPDATE warpTable SET welcomeMessage = ? WHERE id = ?", new UpdateFiller() {
 			
 			@Override
@@ -368,11 +445,10 @@ public class SQLiteConnection implements DataConnection {
 				statement.setInt(2, warp.index);
 			}
 		});
-		return true;
 	}
 
 	@Override
-	public boolean updateName(Warp warp) {
+	public void updateName(Warp warp) {
 		this.updateWarp(warp, "Name", "UPDATE warpTable SET name = ? WHERE id = ?", new UpdateFiller() {
 			
 			@Override
@@ -381,24 +457,10 @@ public class SQLiteConnection implements DataConnection {
 				statement.setInt(2, warp.index);
 			}
 		});
-		return true;
 	}
 
 	@Override
-	public boolean updatePermissions(Warp warp) {
-		this.updateWarp(warp, "Permissions", "UPDATE warpTable SET permissions = ? WHERE id = ?", new UpdateFiller() {
-			
-			@Override
-			public void fillStatement(Warp warp, PreparedStatement statement) throws SQLException {
-				statement.setString(1, warp.permissionsString());
-				statement.setInt(2, warp.index);
-			}
-		});
-		return true;
-	}
-
-	@Override
-	public boolean updateVisibility(Warp warp) {
+	public void updateVisibility(Warp warp) {
 		this.updateWarp(warp, "Visibility", "UPDATE warpTable SET publicLevel = ? WHERE id = ?", new UpdateFiller() {
 			
 			@Override
@@ -407,11 +469,10 @@ public class SQLiteConnection implements DataConnection {
 				statement.setInt(2, warp.index);
 			}
 		});
-		return true;
 	}
 
 	@Override
-	public boolean updateLocation(Warp warp) {
+	public void updateLocation(Warp warp) {
 		this.updateWarp(warp, "Location", "UPDATE warpTable SET world = ?, x = ?, y = ?, z = ?, yaw = ?, pitch = ? WHERE id = ?", new UpdateFiller() {
 			
 			@Override
@@ -421,7 +482,6 @@ public class SQLiteConnection implements DataConnection {
 				statement.setInt(7, warp.index);
 			}
 		});
-		return true;
 	}
 
 	@Override
@@ -445,6 +505,61 @@ public class SQLiteConnection implements DataConnection {
 	@Override
 	public boolean loadDefault(File directory) {
 		return this.load(new File(directory, "warps.db"));
+	}
+
+	@Override
+	public void updateEditor(Warp warp, String name) {
+		PreparedStatement ps = null;
+		ResultSet set = null;
+		try {
+			ps = this.connection.prepareStatement("DELETE FROM permissions WHERE id = ? AND editor = ?");
+			ps.executeUpdate();
+			
+			EditorPermissions p = warp.getEditorPermissions(name);
+			if (p != null) {
+				ps = this.connection.prepareStatement("INSERT OR IGNORE INTO permissions (id, editor, value) VALUES (?,?,?)");
+				
+				for (Entry<Permissions, Boolean> entry : p.entrySet()) {
+					ps.setInt(1, warp.index);
+					ps.setString(2, name);
+					ps.setInt(3, entry.getKey().id);
+				}
+				
+				ps.executeUpdate();
+			}
+			
+			this.connection.commit();
+		} catch (SQLException ex) {
+			MyWarp.logger.log(Level.SEVERE, "Warp Editor Exception", ex);
+		} finally {
+			try {
+				if (ps != null) {
+					ps.close();
+				}
+				if (set != null) {
+					set.close();
+				}
+			} catch (SQLException ex) {
+				MyWarp.logger.log(Level.SEVERE,	"Warp Editor Exception (on close)", ex);
+			}
+		}		
+	}
+	
+	public static List<String> processList(String permissions) {
+		String[] names = permissions.split(",");
+		List<String> ret = new ArrayList<String>();
+		for (String name : names) {
+			if (name.equals(""))
+				continue;
+			ret.add(name.trim());
+		}
+		return ret;
+	}
+
+	@Override
+	public boolean isUpdateAvailable(Permissions permission) {
+		// everything supported
+		return true;
 	}
 
 }

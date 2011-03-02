@@ -8,19 +8,19 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import de.xzise.xwarp.PermissionWrapper.PermissionTypes;
+import de.xzise.xwarp.WarpManager;
 import de.xzise.xwarp.dataconnections.DataConnection;
 
 import me.taylorkelly.mywarp.Converter;
 import me.taylorkelly.mywarp.MyWarp;
 import me.taylorkelly.mywarp.Warp;
-import me.taylorkelly.mywarp.WarpList;
 
 public class ConvertCommand extends DefaultSubCommand {
 
 	private boolean warning;
 	private final DataConnection data;
 
-	public ConvertCommand(WarpList list, Server server, DataConnection data) {
+	public ConvertCommand(WarpManager list, Server server, DataConnection data) {
 		super(list, server, "convert");
 		this.warning = false;
 		this.data = data;

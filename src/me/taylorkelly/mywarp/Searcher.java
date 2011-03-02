@@ -7,19 +7,21 @@ import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 
 import de.xzise.MinecraftUtil;
+import de.xzise.xwarp.MatchList;
+import de.xzise.xwarp.WarpManager;
 import de.xzise.xwarp.lister.GenericLister;
 import de.xzise.xwarp.lister.ListSection;
 
 public class Searcher {
-	private WarpList warpList;
+	private WarpManager warpList;
 	private CommandSender sender;
 
-	private ArrayList<Warp> exactMatches;
-	private ArrayList<Warp> matches;
+	private List<Warp> exactMatches;
+	private List<Warp> matches;
 
 	private String query;
 
-	public Searcher(WarpList warpList) {
+	public Searcher(WarpManager warpList) {
 		this.warpList = warpList;
 	}
 
@@ -29,7 +31,7 @@ public class Searcher {
 
 	public void setQuery(String name) {
 		this.query = name;
-		MatchList matches = warpList.getMatches(name, sender);
+		MatchList matches = this.warpList.getMatches(name, sender);
 		this.exactMatches = matches.exactMatches;
 		this.matches = matches.matches;
 	}
@@ -76,14 +78,4 @@ public class Searcher {
 			GenericLister.listPage(page, maxPages, sections.toArray(new ListSection[0]), this.sender);
 		}
 	}
-}
-
-class MatchList {
-	public MatchList(ArrayList<Warp> exactMatches, ArrayList<Warp> matches) {
-		this.exactMatches = exactMatches;
-		this.matches = matches;
-	}
-
-	public ArrayList<Warp> exactMatches;
-	public ArrayList<Warp> matches;
 }

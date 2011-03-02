@@ -1,7 +1,6 @@
 package de.xzise.xwarp.commands;
 
 import me.taylorkelly.mywarp.MyWarp;
-import me.taylorkelly.mywarp.WarpList;
 import me.taylorkelly.mywarp.Warp.Visibility;
 
 import org.bukkit.Server;
@@ -9,25 +8,26 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import de.xzise.xwarp.PermissionWrapper.PermissionTypes;
+import de.xzise.xwarp.WarpManager;
 
 public class CreateCommand extends DefaultSubCommand {
 
 	private final Visibility visibility;
 	
-	protected CreateCommand(WarpList list, Server server, String suffix, Visibility visibility) {
+	protected CreateCommand(WarpManager list, Server server, String suffix, Visibility visibility) {
 		super(list, server, CreateCommand.getCreateCommands(suffix));
 		this.visibility = visibility;
 	}
 	
-	public static CreateCommand newCreatePrivate(WarpList list, Server server) {
+	public static CreateCommand newCreatePrivate(WarpManager list, Server server) {
 		return new CreateCommand(list, server, "p", Visibility.PRIVATE);
 	}
 	
-	public static CreateCommand newCreatePublic(WarpList list, Server server) {
+	public static CreateCommand newCreatePublic(WarpManager list, Server server) {
 		return new CreateCommand(list, server, "", Visibility.PUBLIC);
 	}
 	
-	public static CreateCommand newCreateGlobal(WarpList list, Server server) {
+	public static CreateCommand newCreateGlobal(WarpManager list, Server server) {
 		return new CreateCommand(list, server, "g", Visibility.GLOBAL);
 	}
 	

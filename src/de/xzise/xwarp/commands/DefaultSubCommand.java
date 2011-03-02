@@ -3,7 +3,7 @@ package de.xzise.xwarp.commands;
 import org.bukkit.Server;
 import org.bukkit.entity.Player;
 
-import me.taylorkelly.mywarp.WarpList;
+import de.xzise.xwarp.WarpManager;
 
 /**
  * Command like list/create etc.
@@ -12,7 +12,7 @@ import me.taylorkelly.mywarp.WarpList;
  */
 public abstract class DefaultSubCommand extends SubCommand {
 
-	protected final WarpList list;
+	protected final WarpManager list;
 	protected final Server server;
 
 	/**
@@ -27,7 +27,7 @@ public abstract class DefaultSubCommand extends SubCommand {
 	 * @throws IllegalArgumentException
 	 *             If commands is empty.
 	 */
-	protected DefaultSubCommand(WarpList list, Server server, String... commands) {
+	protected DefaultSubCommand(WarpManager list, Server server, String... commands) {
 		super(commands);
 		this.list = list;
 		this.server = server;

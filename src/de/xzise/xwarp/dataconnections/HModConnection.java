@@ -14,15 +14,23 @@ import org.bukkit.Location;
 import org.bukkit.Server;
 import org.bukkit.World;
 
+import de.xzise.xwarp.Permissions;
+
 import me.taylorkelly.mywarp.MyWarp;
 import me.taylorkelly.mywarp.WMPlayerListener;
 import me.taylorkelly.mywarp.Warp;
+import me.taylorkelly.mywarp.Warp.Visibility;
 
 public class HModConnection implements DataConnection {
 
 	private File file;
 	private Server server;
 	private static final char SEPARATOR = ':';
+	// Name, X, Y, Z, Yaw, Pitch
+	private static final int GEN_1_LENGTH = 6;
+	// Gen1 + World, Creator, Visibility, Message
+	/** Minimum length of second generation map. */
+	private static final int GEN_2_LENGTH = GEN_1_LENGTH + 4;
 	
 	public HModConnection(Server server) {
 		this.server = server;
@@ -31,7 +39,16 @@ public class HModConnection implements DataConnection {
 	@Override
 	public boolean load(File file) {
 		this.file = file;
-		return this.file.canWrite();
+		if (!this.file.exists()) {
+			try {
+				return this.file.createNewFile();
+			} catch (IOException e) {
+				MyWarp.logger.severe("Unable to load the hmod connection", e);
+				return false;
+			}
+		} else {
+			return this.file.canWrite();
+		}
 	}
 
 	@Override
@@ -44,7 +61,9 @@ public class HModConnection implements DataConnection {
 
 	@Override
 	public List<Warp> getWarps() {
-		return this.getWarps(null);
+//		List<HModWarpElement> elements = this.g
+		List<Warp> result = new ArrayList<Warp>(this.getWarps(null));
+		return result;
 	}
 	
 	public List<Warp> getWarps(String owner) {
@@ -54,33 +73,60 @@ public class HModConnection implements DataConnection {
 			scanner = new Scanner(this.file);
 			int size = 0;
 			int invalidSize = 0;
+			boolean valid;
 			World defaultWorld = this.server.getWorlds().get(0);
 			while (scanner.hasNext()) {
 				String[] pieces = WMPlayerListener.parseLine(scanner.nextLine(), ':');
-				if ((pieces.length == 8) || (pieces.length == 6 && owner != null && !owner.isEmpty())) {
-					String name = pieces[0];
-					
-					double x = Double.parseDouble(pieces[1]);
-					double y = Double.parseDouble(pieces[2]);
-					double z = Double.parseDouble(pieces[3]);
-					double yaw = Double.parseDouble(pieces[4]);
-					double pitch = Double.parseDouble(pieces[5]);
-		
-					yaw = (yaw < 0) ? (360 + (yaw % 360)) : (yaw % 360);
-		
-					World world = defaultWorld;
-					String warpOwner = owner;
-					// hmod gen 2
-					if (pieces.length == 8) {
-						world = this.server.getWorld(pieces[6]);
-						warpOwner = pieces[7];
+				if ((pieces.length >= GEN_2_LENGTH && pieces.length % 2 == 0) || (pieces.length == GEN_1_LENGTH && owner != null && !owner.isEmpty())) {
+					Warp warp = null;
+					valid = true;
+					try {
+						String name = pieces[0];
+						
+						double x = Double.parseDouble(pieces[1]);
+						double y = Double.parseDouble(pieces[2]);
+						double z = Double.parseDouble(pieces[3]);
+						double yaw = Double.parseDouble(pieces[4]);
+						double pitch = Double.parseDouble(pieces[5]);
+						
+						yaw = (yaw < 0) ? (360 + (yaw % 360)) : (yaw % 360);
+			
+						World world = defaultWorld;
+						String warpOwner = owner;
+						// hmod gen 2
+						if (pieces.length >= GEN_2_LENGTH && pieces.length % 2 == 0) {
+							world = this.server.getWorld(pieces[6]);
+							warpOwner = pieces[7];
+						}
+						Location location = new Location(world, x, y, z, (float) yaw, (float) pitch);
+						warp = new Warp(name, warpOwner, location);
+						// hmod gen 2
+						if (pieces.length >= GEN_2_LENGTH && pieces.length % 2 == 0) {
+							Visibility v = Visibility.parseLevel(Integer.parseInt(pieces[8]));
+							if (v != null) {
+								warp.visibility = v;
+								warp.setMessage(pieces[9]);
+								for (int i = GEN_2_LENGTH; i < pieces.length; i += 2) {
+									warp.addEditor(pieces[i], pieces[2]);							
+								}
+							} else {
+								MyWarp.logger.warning("Illegal visibilty found (" + warp.name + " by " + warp.creator + ")");
+								valid = false;
+							}
+						}
+					} catch (NumberFormatException nfe) {
+						valid = false;
+						MyWarp.logger.warning("Unable to parse a location value (" + nfe.getMessage() + ")");
+					} catch (Exception e) {
+						MyWarp.logger.severe("Catched an unhandled exception", e);
+						valid = false;
 					}
-					Location location = new Location(world, x, y, z, (float) yaw, (float) pitch);
-					Warp warp = new Warp(name, warpOwner, location);
-					result.add(warp);
-					size++;
-					if (!warp.isValid()) {
-						invalidSize++;
+					if (valid && warp != null) {
+						result.add(warp);
+						size++;
+						if (!warp.isValid()) {
+							invalidSize++;
+						}
 					}
 				} else {
 					MyWarp.logger.warning("Invalid line found");
@@ -102,6 +148,7 @@ public class HModConnection implements DataConnection {
 			for (Warp warp : warps) {
 				writeWarp(warp, writer);
 			}
+			writer.close();
 		} catch (IOException e) {
 			MyWarp.logger.severe("Unable to write the file", e);
 		}		
@@ -118,7 +165,14 @@ public class HModConnection implements DataConnection {
 		warpLine.append(makeParsable(l.getPitch()) + SEPARATOR);
 		warpLine.append(makeParsable(l.getWorld().getName()) + SEPARATOR);
 		warpLine.append(makeParsable(warp.creator) + SEPARATOR);
-		writer.append(warpLine);
+		warpLine.append(makeParsable(warp.visibility.level) + SEPARATOR);
+		warpLine.append(makeParsable(warp.welcomeMessage) + SEPARATOR);
+		// Editors
+		writer.append(warpLine + "\n");
+	}
+	
+	private static String makeParsable(int input) {
+		return Integer.toString(input);
 	}
 	
 	private static String makeParsable(double input) {
@@ -152,6 +206,7 @@ public class HModConnection implements DataConnection {
 				for (Warp warp : warps) {
 					writeWarp(warp, writer);
 				}
+				writer.close();
 			} catch (IOException e) {
 				MyWarp.logger.severe("Unable to write the file", e);
 			}
@@ -167,47 +222,52 @@ public class HModConnection implements DataConnection {
 	}
 
 	@Override
-	public boolean updateCreator(Warp warp) {
+	public void updateCreator(Warp warp) {
 		List<Warp> warps = this.getWarps();
 		Warp updated = warps.get(warps.indexOf(warp));
 		updated.creator = warp.creator;
 		this.writeWarps(warps);
-		return true;
 	}
 
 	@Override
-	public boolean updateName(Warp warp) {
+	public void updateName(Warp warp) {
 		List<Warp> warps = this.getWarps();
 		Warp updated = warps.get(warps.indexOf(warp));
 		updated.name = warp.name;
 		this.writeWarps(warps);
-		return true;
 	}
 
 	@Override
-	public boolean updateLocation(Warp warp) {
+	public void updateLocation(Warp warp) {
 		List<Warp> warps = this.getWarps();
 		Warp updated = warps.get(warps.indexOf(warp));
 		updated.setLocation(warp.getLocation());
 		this.writeWarps(warps);
-		return true;
 	}
 
 	@Override
 	// Not supported in hmod
-	public boolean updateMessage(Warp warp) {
-		return false;
+	public void updateMessage(Warp warp) {
+		List<Warp> warps = this.getWarps();
+		Warp updated = warps.get(warps.indexOf(warp));
+		updated.setMessage(warp.welcomeMessage);
+		this.writeWarps(warps);
+	}
+
+	@Override
+	public void updateVisibility(Warp warp) {
+		List<Warp> warps = this.getWarps();
+		Warp updated = warps.get(warps.indexOf(warp));
+		updated.visibility = warp.visibility;
+		this.writeWarps(warps);
 	}
 
 	@Override
 	// Not supported in hmod
-	public boolean updatePermissions(Warp warp) {
-		return false;
-	}
+	public void updateEditor(Warp warp, String name) {}
 
 	@Override
-	// Not supported in hmod
-	public boolean updateVisibility(Warp warp) {
-		return false;
+	public boolean isUpdateAvailable(Permissions permission) {
+		return permission == Permissions.RENAME || permission == Permissions.UPDATE || permission == Permissions.GIVE;
 	}
 }

@@ -3,6 +3,8 @@ package de.xzise.xwarp.dataconnections;
 import java.io.File;
 import java.util.List;
 
+import de.xzise.xwarp.Permissions;
+
 import me.taylorkelly.mywarp.Warp;
 
 public interface DataConnection {
@@ -27,11 +29,13 @@ public interface DataConnection {
 	void addWarp(Warp... warp);
 	void deleteWarp(Warp warp);
 
-	boolean updateCreator(Warp warp);
-	boolean updateMessage(Warp warp);
-	boolean updateName(Warp warp);
-	boolean updatePermissions(Warp warp);
-	boolean updateVisibility(Warp warp);
-	boolean updateLocation(Warp warp);
+	void updateCreator(Warp warp);
+	void updateMessage(Warp warp);
+	void updateName(Warp warp);
+	void updateVisibility(Warp warp);
+	void updateLocation(Warp warp);	
+	void updateEditor(Warp warp, String name);
 
+	boolean isUpdateAvailable(Permissions permission);
+	
 }

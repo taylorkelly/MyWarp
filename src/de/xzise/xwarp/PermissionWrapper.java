@@ -11,6 +11,8 @@ import org.bukkit.plugin.Plugin;
 import com.nijiko.permissions.PermissionHandler;
 import com.nijikokun.bukkit.Permissions.Permissions;
 
+import de.xzise.MinecraftUtil;
+
 public class PermissionWrapper {
 
 	public enum PermissionTypes {
@@ -64,7 +66,11 @@ public class PermissionWrapper {
 		// Reload database
 		ADMIN_RELOAD("warp.admin.reload"), 
 		// Converts from hmod file
-		ADMIN_CONVERT("warp.admin.convert");
+		ADMIN_CONVERT("warp.admin.convert"),
+		// Converts from hmod file
+		ADMIN_EDITORS_REMOVE("warp.admin.editors.remove"),
+		// Converts from hmod file
+		ADMIN_EDITORS_ADD("warp.admin.editors.add");
 
 		// Maybe upcoming permissions:
 		// Different admin permissions for each warp (only edit public warps
@@ -100,6 +106,8 @@ public class PermissionWrapper {
 		PermissionTypes.ADMIN_RELOAD,
 		PermissionTypes.ADMIN_RENAME,
 		PermissionTypes.ADMIN_CONVERT,
+		PermissionTypes.ADMIN_EDITORS_ADD,
+		PermissionTypes.ADMIN_EDITORS_REMOVE,
 	};
 	
 	private static PermissionTypes[] DEFAULT_PERMISSIONS = new PermissionTypes[] {
@@ -127,9 +135,9 @@ public class PermissionWrapper {
 	}
 	
 	private boolean permissionInternal(CommandSender sender, PermissionTypes permission) {
-		if (contains(permission, DEFAULT_PERMISSIONS)) {
+		if (MinecraftUtil.contains(permission, DEFAULT_PERMISSIONS) >= 0) {
 			return true;
-		} else if (contains(permission, ADMIN_PERMISSIONS)) {
+		} else if (MinecraftUtil.contains(permission, ADMIN_PERMISSIONS) >= 0) {
 			return sender.isOp();
 		} else {
 			return false;
@@ -178,25 +186,23 @@ public class PermissionWrapper {
 
 	public void init(Server server) {
 		Plugin test = server.getPluginManager().getPlugin("Permissions");
-		if (test != null) {
-			this.handler = ((Permissions) test).getHandler();
-			MyWarp.logger.info("Permissions enabled.");
+		this.init(test);
+	}
+	
+	public void init(Plugin plugin) {
+		if (plugin != null) {
+			if (plugin.isEnabled()) {
+				this.handler = ((Permissions) plugin).getHandler();
+				MyWarp.logger.info("Permissions enabled.");
+			} else {
+				MyWarp.logger.info("Permissions system found, but not enabled. Use defaults.");
+			}
 		} else {
-			MyWarp.logger.severe("Permission system not found. Use defaults.");
-		}
+			MyWarp.logger.warning("Permission system not found. Use defaults.");
+		}		
 	}
 	
 	public boolean useOfficial() {
 		return this.handler != null;
-	}
-
-	public static <T> boolean contains(T o, T[] a) {
-		for (T t : a) {
-			if (t != null && t.equals(o)) {
-				return true;
-			}
-		}
-		return false;
-	}
-	
+	}	
 }

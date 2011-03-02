@@ -1,26 +1,24 @@
 package de.xzise.xwarp.commands;
 
-import me.taylorkelly.mywarp.WMPlayerListener;
-import me.taylorkelly.mywarp.WarpList;
-
 import org.bukkit.ChatColor;
 import org.bukkit.Server;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 
 import de.xzise.MinecraftUtil;
+import de.xzise.xwarp.WarpManager;
 import de.xzise.xwarp.lister.GenericLister;
 import de.xzise.xwarp.lister.ListSection;
 
 public class ListCommand extends DefaultSubCommand {
 	
-	public ListCommand(WarpList list, Server server) {
+	public ListCommand(WarpManager list, Server server) {
 		super(list, server, "list", "ls");
 	}
 
 	@Override
 	protected boolean internalExecute(CommandSender sender, String[] parameters) {
-		if (parameters.length == 3 && !WMPlayerListener.isInteger(parameters[2])) {
+		if (parameters.length == 3 && !MinecraftUtil.isInteger(parameters[2])) {
 			return false;
 		}
 		
@@ -38,7 +36,7 @@ public class ListCommand extends DefaultSubCommand {
 			
 			ListSection section = new ListSection("");
 			
-			if (parameters.length == 3 || (parameters.length == 2 && !WMPlayerListener.isInteger(parameters[1]))) {
+			if (parameters.length == 3 || (parameters.length == 2 && !MinecraftUtil.isInteger(parameters[1]))) {
 				creator = this.getPlayer(parameters[1]);
 				if (parameters.length == 3) {
 					page = Integer.parseInt(parameters[2]);
