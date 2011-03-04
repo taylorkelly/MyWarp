@@ -94,6 +94,7 @@ public class ImportCommand extends DefaultSubCommand {
 					}
 				}
 			}
+			connection.free();
 			return true;
 		} else {
 			return false;

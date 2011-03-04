@@ -14,6 +14,7 @@ import org.bukkit.Location;
 import org.bukkit.Server;
 import org.bukkit.World;
 
+import de.xzise.xwarp.EditorPermissions;
 import de.xzise.xwarp.Permissions;
 
 import me.taylorkelly.mywarp.MyWarp;
@@ -167,7 +168,13 @@ public class HModConnection implements DataConnection {
 		warpLine.append(makeParsable(warp.creator) + SEPARATOR);
 		warpLine.append(makeParsable(warp.visibility.level) + SEPARATOR);
 		warpLine.append(makeParsable(warp.welcomeMessage) + SEPARATOR);
-		// Editors
+		for (String editor : warp.getEditors()) {
+			EditorPermissions ep = warp.getEditorPermissions(editor);
+			if (ep != null) {
+				warpLine.append(makeParsable(editor) + SEPARATOR);
+				warpLine.append(makeParsable(ep.getPermissionString()) + SEPARATOR);
+			}
+		}
 		writer.append(warpLine + "\n");
 	}
 	

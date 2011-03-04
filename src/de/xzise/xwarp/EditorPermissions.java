@@ -16,6 +16,15 @@ public class EditorPermissions implements Map<Permissions, Boolean> {
 		this.values = new Boolean[Permissions.values().length];
 	}
 	
+	public String getPermissionString() {
+		Permissions[] pms = this.getByValue(true);
+		char[] editorPermissions = new char[pms.length];
+		for (int j = 0; j < pms.length; j++) {
+			editorPermissions[j] = pms[j].value;
+		}
+		return new String(editorPermissions);
+	}
+	
 	@Override
 	public int size() {
 		return this.values.length;

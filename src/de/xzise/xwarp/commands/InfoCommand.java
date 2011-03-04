@@ -10,6 +10,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import de.xzise.MinecraftUtil;
+import de.xzise.xwarp.EditorPermissions;
 import de.xzise.xwarp.Permissions;
 import de.xzise.xwarp.WarpManager;
 import de.xzise.xwarp.lister.GenericLister;
@@ -67,35 +68,31 @@ public class InfoCommand extends WarpCommand {
 //		sender.sendMessage("Invitees: " + invitees);
 
 		String[] editors = warp.getEditors();
-		String editor = "";
-		String invitees = "";
+		String editorsLine = "";
+		String inviteesLine = "";
 		if (editors.length == 0) {
-			editor = "None";
+			editorsLine = "None";
 		} else {
 			for (int i = 0; i < editors.length; i++) {
-				String string = editors[i];
-				Permissions[] pms = warp.getEditorPermissions(string).getByValue(true);
-				if (pms.length > 0) {
-					editor += ChatColor.GREEN + string + " ";
-					char[] editorPermissions = new char[pms.length];
-					for (int j = 0; j < pms.length; j++) {
-						editorPermissions[j] = pms[j].value;
-						if (pms[j] == Permissions.WARP) {
-							if (!invitees.isEmpty()) {
-								invitees += ", ";
-							}
-							invitees += string;
+				String editor = editors[i];
+				EditorPermissions editorPermissions = warp.getEditorPermissions(editor);
+				String permissionsString = editorPermissions.getPermissionString();
+				if (!permissionsString.isEmpty()) {
+					editor += " " + permissionsString;
+					if (editorPermissions.get(Permissions.WARP)) {
+						if (!inviteesLine.isEmpty()) {
+							inviteesLine += ", ";
 						}
+						inviteesLine += editor;
 					}
-					editor += new String(editorPermissions);
 				}
 				if (i < editors.length - 1) {
-					editor += ChatColor.WHITE + ", ";
+					editorsLine += ChatColor.WHITE + ", ";
 				}
 			}
 		}
-		sender.sendMessage("Invitees: " + (invitees.isEmpty() ? "None" : invitees));
-		sender.sendMessage("Editors: " + editor);
+		sender.sendMessage("Invitees: " + (inviteesLine.isEmpty() ? "None" : inviteesLine));
+		sender.sendMessage("Editors: " + editorsLine);
 		
 		Location location = warp.getLocation();
 		sender.sendMessage("Location: World = " + ChatColor.GREEN + location.getWorld().getName() + ChatColor.WHITE + ", x = " + ChatColor.GREEN + location.getBlockX() + ChatColor.WHITE + ", y = " + ChatColor.GREEN + location.getBlockY() + ChatColor.WHITE + ", z = " + ChatColor.GREEN + location.getBlockZ());
