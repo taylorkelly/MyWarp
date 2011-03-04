@@ -2,7 +2,6 @@ package de.xzise.xwarp;
 
 import me.taylorkelly.mywarp.MyWarp;
 
-import org.bukkit.Server;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
@@ -126,11 +125,11 @@ public class PermissionWrapper {
 	
 	private PermissionHandler handler = null;
 	
-	public String getGroup(String player) {
+	public String getGroup(String world, String player) {
 		if (this.handler == null) {
 			return null;
 		} else {
-			return this.handler.getGroup(player);
+			return this.handler.getGroup(world, player);
 		}
 	}
 	
@@ -157,10 +156,6 @@ public class PermissionWrapper {
 			return this.permissionInternal(sender, permission);
 		}
 	}
-	
-	public int getInteger(Player player, PermissionTypes permission) {
-		return this.handler.getPermissionInteger(player.getName(), permission.name);
-	}
 
 	public boolean hasAdminPermission(CommandSender sender) {
 		return this.permissionOr(sender, ADMIN_PERMISSIONS);
@@ -183,11 +178,6 @@ public class PermissionWrapper {
 		}
 		return true;
 	}
-
-	public void init(Server server) {
-		Plugin test = server.getPluginManager().getPlugin("Permissions");
-		this.init(test);
-	}
 	
 	public void init(Plugin plugin) {
 		if (plugin != null) {
@@ -195,9 +185,11 @@ public class PermissionWrapper {
 				this.handler = ((Permissions) plugin).getHandler();
 				MyWarp.logger.info("Permissions enabled.");
 			} else {
+				this.handler = null;
 				MyWarp.logger.info("Permissions system found, but not enabled. Use defaults.");
 			}
 		} else {
+			this.handler = null;
 			MyWarp.logger.warning("Permission system not found. Use defaults.");
 		}		
 	}

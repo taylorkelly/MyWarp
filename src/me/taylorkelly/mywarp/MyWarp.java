@@ -2,9 +2,7 @@ package me.taylorkelly.mywarp;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.logging.Logger;
 
-import org.bukkit.Server;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.event.Event;
@@ -12,8 +10,6 @@ import org.bukkit.event.Event.Priority;
 import org.bukkit.event.player.PlayerListener;
 import org.bukkit.event.server.PluginEvent;
 import org.bukkit.event.server.ServerListener;
-import org.bukkit.plugin.PluginDescriptionFile;
-import org.bukkit.plugin.PluginLoader;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import de.xzise.MinecraftUtil;
@@ -34,19 +30,6 @@ public class MyWarp extends JavaPlugin {
 
 	public String name;
 	public String version;
-	
-	public MyWarp(PluginLoader pluginLoader, Server instance, PluginDescriptionFile desc, File directory, File plugin, ClassLoader cLoader) {
-		super(pluginLoader, instance, desc, directory, plugin, cLoader);
-
-		// Naging strike back!
-		try {
-			if (JavaPlugin.class.getConstructor() != null) {
-				Logger.getLogger("Minecraft").info("[xWarp]: Temporary: Don't nag xZise/tkelly about the warning that it's using the wrong constructor: Bukkit calls the wrong constructor.");	
-			}
-		} catch (Exception e) {
-			; // Do nothing here, if there is a problem, wayne :D
-		}
-	}
 
 	public MyWarp() {
 		super();
@@ -99,7 +82,7 @@ public class MyWarp extends JavaPlugin {
 		try {
 			this.commands = new CommandMap(warpList, this.getServer(), this.getDataFolder(), this.dataConnection);
 		} catch (IllegalArgumentException iae) {
-			MyWarp.logger.severe("Couldn't initalize commands.", iae);
+			MyWarp.logger.severe("Couldn't initalize commands. Disabling " + this.name + "!", iae);
 			this.getServer().getPluginManager().disablePlugin(this);
 			return;
 		}
@@ -112,17 +95,20 @@ public class MyWarp extends JavaPlugin {
 					MyWarp.permissions.init(event.getPlugin());
 				}
 		    }
+			
+			public void onPluginDisabled(PluginEvent event) {
+				if(event.getPlugin().getDescription().getName().equals("Permissions")) {
+					MyWarp.permissions.init(null);
+				}
+		    }
 		};
-		
+
 		try {
-			this.getServer().getPluginManager().registerEvent(Event.Type.PLAYER_COMMAND, playerListener, Priority.Normal, this);
-		} catch (NoSuchFieldError nsfe) {
-			try {
-				this.getServer().getPluginManager().registerEvent(Event.Type.PLAYER_COMMAND_PREPROCESS, playerListener, Priority.Normal, this);
-			} catch (NoSuchFieldError nsfe2) {
-				MyWarp.logger.warning("Unable to register any player command. Only xWarp available");
-			}
+			this.getServer().getPluginManager().registerEvent(Event.Type.PLAYER_COMMAND_PREPROCESS, playerListener, Priority.Normal, this);
+		} catch (NoSuchFieldError nsfe2) {
+			MyWarp.logger.warning("Unable to register any player command. Only xwarp-command available");
 		}
+		
 		this.getServer().getPluginManager().registerEvent(Event.Type.BLOCK_RIGHTCLICKED, blockListener, Priority.Normal, this);
 		this.getServer().getPluginManager().registerEvent(Event.Type.SIGN_CHANGE, blockListener, Priority.Low, this);
 		this.getServer().getPluginManager().registerEvent(Event.Type.PLUGIN_ENABLE, serverListner, Priority.Low, this);
@@ -132,8 +118,18 @@ public class MyWarp extends JavaPlugin {
 	}
 	
 	@Override
-    public boolean onCommand(CommandSender sender, Command cmd, String commandLabel, String[] args) {		
-		return this.commands.executeCommand(sender, args);
+    public boolean onCommand(CommandSender sender, Command cmd, String commandLabel, String[] args) {
+		// workaround until I get the complete line or a parsed one
+		StringBuilder line = new StringBuilder();
+		for (int i = 0; i < args.length; i++) {
+			String arg = args[i];
+			line.append(arg);
+			if (i < args.length - 1) {
+				line.append(' ');
+			}
+		}
+		
+		return this.commands.executeCommand(sender, WMPlayerListener.parseCommand(line.toString()));
     }
 
 	private void updateFiles() {

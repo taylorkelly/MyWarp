@@ -80,8 +80,15 @@ public class WMPlayerListener extends PlayerListener {
 		for (int i = 0; i < line.length(); i++) {
 			char c = line.charAt(i);
 			if (escaped) {
-				value += c;
 				escaped = false;
+				switch (c) {
+				case 's' :
+					value += ' ';
+					break;
+				default :
+					value += c;
+					break;
+				}
 			} else {
 				switch (c) {
 				case '"':
