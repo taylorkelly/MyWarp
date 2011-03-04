@@ -125,11 +125,11 @@ public class PermissionWrapper {
 	
 	private PermissionHandler handler = null;
 	
-	public String getGroup(String player) {
+	public String getGroup(String world, String player) {
 		if (this.handler == null) {
 			return null;
 		} else {
-			return this.handler.getGroup(player);
+			return this.handler.getGroup(world, player);
 		}
 	}
 	
@@ -155,10 +155,6 @@ public class PermissionWrapper {
 		} else {
 			return this.permissionInternal(sender, permission);
 		}
-	}
-	
-	public int getInteger(Player player, PermissionTypes permission) {
-		return this.handler.getPermissionInteger(player.getName(), permission.name);
 	}
 
 	public boolean hasAdminPermission(CommandSender sender) {
