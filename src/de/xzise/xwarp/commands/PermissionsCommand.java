@@ -9,34 +9,72 @@ import org.bukkit.entity.Player;
 
 import de.xzise.xwarp.PermissionWrapper;
 import de.xzise.xwarp.PermissionWrapper.PermissionTypes;
+import de.xzise.xwarp.WarpManager;
 
-//TODO: Create a superclass for subcommand without the list?
 public class PermissionsCommand extends SubCommand {
 
-	public PermissionsCommand(Server server) {
-		super(null, server, "permissions");
+	public PermissionsCommand(WarpManager list, Server server) {
+		super(list, server, "permissions");
 	}
 
 	@Override
 	protected boolean internalExecute(CommandSender sender, String[] parameters) {
-		if (parameters.length == 1 && sender instanceof Player) {
+		Player player = null;
+		boolean showGranted = true;
+		boolean showDenied = true;
+		switch (parameters.length) {
+		case 2:
+			if (!(parameters[1].equalsIgnoreCase("n") || parameters[1].equalsIgnoreCase("y"))) {
+				player = this.server.getPlayer(parameters[1]);
+				if (player == null) {
+					sender.sendMessage("Player is not logged in.");
+					return true;
+				}
+				break;
+			} else {
+				showGranted = parameters[1].equalsIgnoreCase("y");
+				showDenied = parameters[1].equalsIgnoreCase("n");
+			}
+		case 1:
+			if (sender instanceof Player) {
+				player = (Player) sender;
+			} else {
+				sender.sendMessage("You are not a player");
+				return true;
+			}
+			break;
+		case 3:
+			if (parameters[2].equalsIgnoreCase("n") || parameters[2].equalsIgnoreCase("y")) {
+				player = this.server.getPlayer(parameters[1]);
+				if (player == null) {
+					sender.sendMessage("Player is not logged in.");
+					return true;
+				}				
+
+				showGranted = parameters[2].equalsIgnoreCase("y");
+				showDenied = parameters[2].equalsIgnoreCase("n");
+				break;
+			} else {
+				return false;
+			}
+		}
+		
+		if (player != null)	{
 			sender.sendMessage("Your permissions:");
 			if (!MyWarp.permissions.useOfficial()) {
 				sender.sendMessage("(Use build in permissions!)");
 			}
 			for (PermissionTypes type : PermissionWrapper.PermissionTypes.values()) {
-				PermissionsCommand.printPermission(type, (Player) sender);
+				boolean hasPermission = MyWarp.permissions.permission(player, type);
+				if ((hasPermission && showGranted) || (!hasPermission && showDenied)) {
+					String message = (hasPermission ? ChatColor.GREEN : ChatColor.RED) + type.name + ": " + (hasPermission ? "Yes": "No");
+					player.sendMessage(message);
+				}
 			}
 			return true;
 		} else {
 			return false;
 		}
-	}
-	
-	public static void printPermission(PermissionTypes permission, Player player) {
-		boolean hasPermission = MyWarp.permissions.permission(player, permission);
-		String message = (hasPermission ? ChatColor.GREEN : ChatColor.RED) + permission.name + ": " + (hasPermission ? "Yes": "No");
-		player.sendMessage(message);
 	}
 
 	@Override
