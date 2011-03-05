@@ -93,7 +93,7 @@ public class HModConnection implements DataConnection {
 						MyWarp.logger.severe("Invalid version tag.");
 					}
 				} else if (!line.startsWith("##")) {
-					String[] pieces = WMPlayerListener.parseLine(scanner.nextLine(), ':');
+					String[] pieces = WMPlayerListener.parseLine(line, ':');
 					if ((pieces.length >= GEN_2_LENGTH && pieces.length % 2 == 0 && version > 0) || (pieces.length == GEN_1_LENGTH && owner != null && !owner.isEmpty())) {
 						Warp warp = null;
 						valid = true;
@@ -216,6 +216,7 @@ public class HModConnection implements DataConnection {
 			case ':' :
 			case '\\' :
 			case '"' :
+			case '#' :
 				output[length++] = '\\';
 			}
 			output[length++] = c;

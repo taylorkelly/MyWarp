@@ -68,9 +68,9 @@ public class CommandMap {
 		subCommands.add(new ListCommand(list, server));
 		subCommands.add(new InfoCommand(list, server));
 		subCommands.add(new ReloadCommand(list, server));
-		subCommands.add(new PermissionsCommand());
 		subCommands.add(new ImportCommand(list, directory, data, server));
 		subCommands.add(new ConvertCommand(list, server, data));
+		subCommands.add(new PermissionsCommand(list, server));
 		
 		for (SubCommand subCommand : subCommands) {
 			this.registerCommand(subCommand);
