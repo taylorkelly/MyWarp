@@ -60,7 +60,11 @@ public class PermissionsCommand extends SubCommand {
 		}
 		
 		if (player != null)	{
-			sender.sendMessage("Your permissions:");
+			if (sender == player) {
+				sender.sendMessage("Your permissions:");
+			} else {
+				sender.sendMessage(player.getName() + " permissions:");
+			}
 			if (!MyWarp.permissions.useOfficial()) {
 				sender.sendMessage("(Use build in permissions!)");
 			}
@@ -68,7 +72,7 @@ public class PermissionsCommand extends SubCommand {
 				boolean hasPermission = MyWarp.permissions.permission(player, type);
 				if ((hasPermission && showGranted) || (!hasPermission && showDenied)) {
 					String message = (hasPermission ? ChatColor.GREEN : ChatColor.RED) + type.name + ": " + (hasPermission ? "Yes": "No");
-					player.sendMessage(message);
+					sender.sendMessage(message);
 				}
 			}
 			return true;
