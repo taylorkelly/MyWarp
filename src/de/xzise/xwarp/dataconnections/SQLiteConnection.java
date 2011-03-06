@@ -59,11 +59,11 @@ public class SQLiteConnection implements DataConnection {
 		this.server = server;
 	}
 	
-	public void init(File dataPath) {
+	private void initFile(File file) {
 		this.free();
         try {
             Class.forName("org.sqlite.JDBC");
-            this.connection = DriverManager.getConnection("jdbc:sqlite:" + dataPath.getAbsolutePath() + "/warps.db");
+            this.connection = DriverManager.getConnection("jdbc:sqlite:" + file.getAbsolutePath());
             this.connection.setAutoCommit(false);
         } catch (ClassNotFoundException e) {
         	MyWarp.logger.severe("Class not found", e);
@@ -535,7 +535,7 @@ public class SQLiteConnection implements DataConnection {
 			} catch (SQLException ex) {
 				MyWarp.logger.log(Level.SEVERE,	"Warp Editor Exception (on close)", ex);
 			}
-		}		
+		}
 	}
 	
 	public static List<String> processList(String permissions) {
@@ -549,4 +549,36 @@ public class SQLiteConnection implements DataConnection {
 		return ret;
 	}
 
+	@Override
+	public void load(File file) {
+		this.initFile(file);
+	}
+
+	@Override
+	public String getFilename() {
+		return "warps.db";
+	}
+
+	@Override
+	public void clear() {
+		Statement statement = null;
+		ResultSet set = null;
+		try {
+			statement = this.connection.createStatement();
+			statement.execute("DELETE FROM warpTable");
+			this.connection.commit();
+		} catch (SQLException ex) {
+			MyWarp.logger.log(Level.SEVERE, "Table Clear Exception", ex);
+		} finally {
+			try {
+				if (statement != null) {
+					statement.close();
+				}
+				if (set != null)
+					set.close();
+			} catch (SQLException ex) {
+				MyWarp.logger.severe("Table Clear Exception (on closing)");
+			}
+		}
+	}
 }

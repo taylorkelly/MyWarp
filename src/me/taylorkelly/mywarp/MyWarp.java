@@ -19,7 +19,6 @@ import de.xzise.xwarp.PermissionWrapper;
 import de.xzise.xwarp.PluginProperties;
 import de.xzise.xwarp.WarpManager;
 import de.xzise.xwarp.dataconnections.DataConnection;
-import de.xzise.xwarp.dataconnections.SQLiteConnection;
 
 public class MyWarp extends JavaPlugin {
 	
@@ -69,15 +68,12 @@ public class MyWarp extends JavaPlugin {
 		PluginProperties properties = new PluginProperties(this.getDataFolder(), this.getServer());
 		
 		this.dataConnection = properties.getDataConnection();
-
-		if (this.dataConnection instanceof SQLiteConnection) {
-			try {
-				((SQLiteConnection) this.dataConnection).init(this.getDataFolder());
-			} catch (IllegalArgumentException iae) {
-				MyWarp.logger.severe("Could not establish SQL connection. Disabling " + this.name + "!", iae);
-				this.getServer().getPluginManager().disablePlugin(this);
-				return;
-			}
+		try {
+			this.dataConnection.load(new File(this.getDataFolder(), this.dataConnection.getFilename()));
+		} catch (IllegalArgumentException iae) {
+			MyWarp.logger.severe("Could not load data. Disabling " + this.name + "!", iae);
+			this.getServer().getPluginManager().disablePlugin(this);
+			return;
 		}
 		
 		WarpManager warpList = new WarpManager(this.getServer(), this.dataConnection);
