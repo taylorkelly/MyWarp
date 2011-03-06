@@ -26,8 +26,14 @@ public class InfoCommand extends WarpCommand {
 		Warp warp = this.list.getWarp(warpName, creator, MinecraftUtil.getPlayerName(sender));
 		sender.sendMessage("Warp info: " + ChatColor.GREEN + warp.name);
 		
-		// Group?
-		String group = MyWarp.permissions.getGroup(warp.getLocation().getWorld().getName(), warp.creator);
+		String group = null;
+		if (warp.isValid()) {
+			group = MyWarp.permissions.getGroup(warp.getLocation().getWorld().getName(), warp.creator);
+		} else {
+			sender.sendMessage(ChatColor.RED + "The location is invalid!");
+			group = MyWarp.permissions.getGroup(server.getWorlds().get(0).getName(), warp.creator);
+		}
+		
 		String groupText = "";
 		if (group != null) {
 			groupText = ChatColor.WHITE + " (Group: " + ChatColor.GREEN + group + ChatColor.WHITE + ")";
@@ -94,8 +100,10 @@ public class InfoCommand extends WarpCommand {
 		sender.sendMessage("Invitees: " + (inviteesLine.isEmpty() ? "None" : inviteesLine));
 		sender.sendMessage("Editors: " + editorsLine);
 		
-		Location location = warp.getLocation();
-		sender.sendMessage("Location: World = " + ChatColor.GREEN + location.getWorld().getName() + ChatColor.WHITE + ", x = " + ChatColor.GREEN + location.getBlockX() + ChatColor.WHITE + ", y = " + ChatColor.GREEN + location.getBlockY() + ChatColor.WHITE + ", z = " + ChatColor.GREEN + location.getBlockZ());
+		if (warp.isValid()) {
+			Location location = warp.getLocation();
+			sender.sendMessage("Location: World = " + ChatColor.GREEN + location.getWorld().getName() + ChatColor.WHITE + ", x = " + ChatColor.GREEN + location.getBlockX() + ChatColor.WHITE + ", y = " + ChatColor.GREEN + location.getBlockY() + ChatColor.WHITE + ", z = " + ChatColor.GREEN + location.getBlockZ());
+		}
 		
 		return true;
 	}

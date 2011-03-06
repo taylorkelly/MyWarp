@@ -217,6 +217,7 @@ public class HModConnection implements DataConnection {
 			case '\\' :
 			case '"' :
 			case '#' :
+			case '!' :
 				output[length++] = '\\';
 			}
 			output[length++] = c;
