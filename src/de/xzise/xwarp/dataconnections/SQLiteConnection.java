@@ -50,13 +50,16 @@ public class SQLiteConnection implements DataConnection {
 
 	private final static int TARGET_VERSION = 2;
 
-	
 	private Server server;
 	private Connection connection;
 	
 	public SQLiteConnection(Server server) {
 		// Nothing to do here
 		this.server = server;
+	}
+	
+	private static IllegalArgumentException newLoadException() {
+		return new IllegalArgumentException("Couldn't load database");
 	}
 	
 	private void initFile(File file) {
@@ -67,12 +70,11 @@ public class SQLiteConnection implements DataConnection {
             this.connection.setAutoCommit(false);
         } catch (ClassNotFoundException e) {
         	MyWarp.logger.severe("Class not found", e);
-        	throw new IllegalArgumentException("Couldn't load database.");
+        	throw newLoadException();
         } catch (SQLException e) {
             MyWarp.logger.severe("Generic SQLException", e);
-        	throw new IllegalArgumentException("Couldn't load database.");
+        	throw newLoadException();
         }
-        this.update();
 	}
 	
 	public void free() {
@@ -551,7 +553,12 @@ public class SQLiteConnection implements DataConnection {
 
 	@Override
 	public void load(File file) {
-		this.initFile(file);
+		if (file.exists()) {
+			this.initFile(file);
+	        this.update();
+		} else {
+			this.create(file);
+		}
 	}
 
 	@Override
@@ -578,6 +585,40 @@ public class SQLiteConnection implements DataConnection {
 					set.close();
 			} catch (SQLException ex) {
 				MyWarp.logger.severe("Table Clear Exception (on closing)");
+			}
+		}
+	}
+
+	@Override
+	public void create(File file) {
+		this.initFile(file);
+		int version = this.getVersion();
+		Statement statement = null;
+		ResultSet set = null;
+		try {
+			statement = this.connection.createStatement();
+			// Drop warpTable → create new one
+			statement.execute("DROP TABLE warpTable");
+			statement.execute(WARP_TABLE);
+			if (version < 0) {
+				statement.executeUpdate("INSERT INTO meta (name, value) VALUES (\"version\", " + TARGET_VERSION + ")");
+			} else {
+				statement.executeUpdate("UPDATE meta SET value = " + TARGET_VERSION + " WHERE name = \"version\"");
+			}
+			this.connection.commit();
+		} catch (SQLException ex) {
+			MyWarp.logger.log(Level.SEVERE, "Table Drop/Create Exception", ex);
+			throw newLoadException();
+		} finally {
+			try {
+				if (statement != null) {
+					statement.close();
+				}
+				if (set != null)
+					set.close();
+			} catch (SQLException ex) {
+				MyWarp.logger.severe("Table Drop/Create Exception (on closing)");
+				throw newLoadException();
 			}
 		}
 	}

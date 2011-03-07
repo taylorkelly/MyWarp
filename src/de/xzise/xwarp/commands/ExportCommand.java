@@ -38,8 +38,7 @@ public class ExportCommand extends SubCommand {
 					file = new File(pluginPath, connection.getFilename());
 				}
 				try {
-					connection.load(file);
-					connection.clear();
+					connection.create(file);
 					connection.addWarp(this.list.getWarps().toArray(new Warp[0]));
 					connection.free();
 				} catch (Exception e) {
@@ -65,6 +64,6 @@ public class ExportCommand extends SubCommand {
 
 	@Override
 	protected String getCommand() {
-		return "warp export <type> [file] [version]";
+		return "warp export <type> [file]";
 	}
 }

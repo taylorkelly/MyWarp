@@ -78,4 +78,9 @@ public class NullConnection implements DataConnection {
 		
 	}
 
+	@Override
+	public void create(File file) {
+		
+	}
+
 }

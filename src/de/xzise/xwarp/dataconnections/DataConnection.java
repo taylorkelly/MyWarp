@@ -7,7 +7,8 @@ import me.taylorkelly.mywarp.Warp;
 
 public interface DataConnection {
 
-	void load(File file);	
+	void load(File file);
+	void create(File file);
 	void free();
 	
 	String getFilename();
