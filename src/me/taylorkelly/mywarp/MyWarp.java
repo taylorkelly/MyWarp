@@ -104,6 +104,9 @@ public class MyWarp extends JavaPlugin {
 		    }
 		};
 
+		// Unless an event is called, to tell all enabled plugins
+		MyWarp.permissions.init(this.getServer().getPluginManager().getPlugin("Permissions"));
+		
 		try {
 			this.getServer().getPluginManager().registerEvent(Event.Type.PLAYER_COMMAND_PREPROCESS, playerListener, Priority.Normal, this);
 		} catch (NoSuchFieldError nsfe2) {
@@ -113,6 +116,7 @@ public class MyWarp extends JavaPlugin {
 		this.getServer().getPluginManager().registerEvent(Event.Type.BLOCK_RIGHTCLICKED, blockListener, Priority.Normal, this);
 		this.getServer().getPluginManager().registerEvent(Event.Type.SIGN_CHANGE, blockListener, Priority.Low, this);
 		this.getServer().getPluginManager().registerEvent(Event.Type.PLUGIN_ENABLE, serverListner, Priority.Low, this);
+		this.getServer().getPluginManager().registerEvent(Event.Type.PLUGIN_DISABLE, serverListner, Priority.Low, this);
 //		this.getServer().getPluginManager().registerEvent(Event.Type.BLOCK_CANBUILD, blockListener, Priority.Normal, this);
 //		this.getServer().getPluginManager().registerEvent(Event.Type.BLOCK_PLACED, blockListener, Priority.Low, this);
 		MyWarp.logger.info(name + " " + version + " enabled");
