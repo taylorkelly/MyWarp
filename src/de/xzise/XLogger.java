@@ -3,22 +3,28 @@ package de.xzise;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.bukkit.plugin.Plugin;
+
 public class XLogger {
 
 	private final Logger logger;
 	private final String pluginName;
 	
 	public XLogger(String loggerName, String pluginName) {
-		this.logger = Logger.getLogger(loggerName);
+		this(Logger.getLogger(loggerName), pluginName);
+	}
+	
+	public XLogger(Plugin plugin) {
+		this(plugin.getServer().getLogger(), plugin.getDescription().getName());
+	}
+	
+	private XLogger(Logger logger, String pluginName) {
+		this.logger = logger;
 		this.pluginName = pluginName;
 	}
 	
-	public XLogger(String pluginName) {
-		this("Minecraft", pluginName);
-	}
-	
 	private String formatMessage(String message) {
-		return "[" + pluginName + "]: " + message;
+		return "[" + this.pluginName + "]: " + message;
 	}
 	
 	public void info(String msg) {

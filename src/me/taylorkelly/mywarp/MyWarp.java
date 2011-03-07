@@ -44,7 +44,7 @@ public class MyWarp extends JavaPlugin {
 	public void onEnable() {
 		this.name = this.getDescription().getName();
 		this.version = this.getDescription().getVersion();
-		logger = new XLogger(this.name);
+		logger = new XLogger(this);
 
 		if (!this.getDataFolder().exists()) {
 			this.getDataFolder().mkdir();
@@ -88,7 +88,7 @@ public class MyWarp extends JavaPlugin {
 			return;
 		}
 		
-		PlayerListener playerListener = new WMPlayerListener(this.commands);
+		PlayerListener playerListener = new WMPlayerListener(this.commands, warpList);
 		MWBlockListener blockListener = new MWBlockListener(warpList);
 		ServerListener serverListner = new ServerListener() {
 			public void onPluginEnabled(PluginEvent event) {
@@ -110,11 +110,10 @@ public class MyWarp extends JavaPlugin {
 			MyWarp.logger.warning("Unable to register any player command. Only xwarp-command available");
 		}
 		
-		this.getServer().getPluginManager().registerEvent(Event.Type.BLOCK_RIGHTCLICKED, blockListener, Priority.Normal, this);
+		
+		this.getServer().getPluginManager().registerEvent(Event.Type.PLAYER_INTERACT, playerListener, Priority.Normal, this);
 		this.getServer().getPluginManager().registerEvent(Event.Type.SIGN_CHANGE, blockListener, Priority.Low, this);
 		this.getServer().getPluginManager().registerEvent(Event.Type.PLUGIN_ENABLE, serverListner, Priority.Low, this);
-//		this.getServer().getPluginManager().registerEvent(Event.Type.BLOCK_CANBUILD, blockListener, Priority.Normal, this);
-//		this.getServer().getPluginManager().registerEvent(Event.Type.BLOCK_PLACED, blockListener, Priority.Low, this);
 		MyWarp.logger.info(name + " " + version + " enabled");
 	}
 	

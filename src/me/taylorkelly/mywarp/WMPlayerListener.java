@@ -4,19 +4,37 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.bukkit.block.Block;
+import org.bukkit.block.Sign;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Event.Result;
 import org.bukkit.event.player.PlayerChatEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerListener;
 
 import de.xzise.xwarp.CommandMap;
+import de.xzise.xwarp.WarpManager;
+import de.xzise.xwarp.PermissionWrapper.PermissionTypes;
 
 public class WMPlayerListener extends PlayerListener {
 	
-	private CommandMap commands;
+	private final CommandMap commands;
+	private final WarpManager manager;
 
-	public WMPlayerListener(CommandMap commands) {
+	public WMPlayerListener(CommandMap commands, WarpManager manager) {
 		this.commands = commands;
+		this.manager = manager;
 	}
+	
+	public void onPlayerItem(PlayerInteractEvent event) {		
+		Block block = event.getBlockClicked();
+        if(block.getState() instanceof Sign && MyWarp.permissions.permissionOr(event.getPlayer(), PermissionTypes.SIGN_WARP_GLOBAL, PermissionTypes.SIGN_WARP_INVITED, PermissionTypes.SIGN_WARP_OTHER, PermissionTypes.SIGN_WARP_OWN)) {
+        	SignWarp signWarp = new SignWarp((Sign) block.getState());
+        	signWarp.warp(this.manager, event.getPlayer());
+        	event.setUseInteractedBlock(Result.DENY);
+        	event.setCancelled(true);
+        }
+    }
 	
 	public void onPlayerCommand(PlayerChatEvent event) {
 		Player player = event.getPlayer();
