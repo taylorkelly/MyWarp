@@ -1,5 +1,6 @@
 package de.xzise.xwarp;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -12,6 +13,7 @@ import de.xzise.xwarp.commands.AddEditorCommand;
 import de.xzise.xwarp.commands.ConvertCommand;
 import de.xzise.xwarp.commands.CreateCommand;
 import de.xzise.xwarp.commands.DeleteCommand;
+import de.xzise.xwarp.commands.ExportCommand;
 import de.xzise.xwarp.commands.GiveCommand;
 import de.xzise.xwarp.commands.GlobalizeCommand;
 import de.xzise.xwarp.commands.HelpCommand;
@@ -37,7 +39,7 @@ public class CommandMap {
 	private HelpCommand helper;
 	private WarpToCommand warper;
 	
-	public CommandMap(WarpManager list, Server server, DataConnection data) {
+	public CommandMap(WarpManager list, Server server, DataConnection data, File pluginPath) {
 		this.commands = new HashMap<String, SubCommand>();
 		
 		this.helper = new HelpCommand(list, server);
@@ -67,6 +69,7 @@ public class CommandMap {
 		subCommands.add(new InfoCommand(list, server));
 		subCommands.add(new ReloadCommand(list, server));
 		subCommands.add(new PermissionsCommand(list, server));
+		subCommands.add(new ExportCommand(list, server, pluginPath));
 		subCommands.add(new ConvertCommand(list, server, data));
 		
 		for (SubCommand subCommand : subCommands) {
