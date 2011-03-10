@@ -12,6 +12,8 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
 
+import de.xzise.xwarp.warpable.WarperFactory;
+
 public class GenericLister {
 	
 	public static final ChatColor GLOBAL_OWN = ChatColor.DARK_BLUE;
@@ -144,7 +146,7 @@ public class GenericLister {
 		} else {
 			switch (warp.visibility) {
 			case PRIVATE :
-				if (player != null && warp.playerCanWarp(player)) {
+				if (player != null && warp.playerCanWarp(WarperFactory.getWarpable(player))) {
 					return GenericLister.PRIVATE_INVITED;
 				} else {
 					return GenericLister.PRIVATE_OTHER;

@@ -48,6 +48,7 @@ public class ExportCommand extends SubCommand {
 			} else {
 				sender.sendMessage(ChatColor.RED + "Invalid type given.");
 			}
+			return true;
 		}
 		return false;
 	}

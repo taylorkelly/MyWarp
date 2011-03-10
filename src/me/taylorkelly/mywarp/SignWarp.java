@@ -11,6 +11,7 @@ import de.xzise.xwarp.signwarps.MyWarpSign;
 import de.xzise.xwarp.signwarps.SignWarpDefinition;
 import de.xzise.xwarp.signwarps.SingleLineSign;
 import de.xzise.xwarp.signwarps.XWarpSign;
+import de.xzise.xwarp.warpable.WarperFactory;
 
 public class SignWarp {
 	
@@ -35,7 +36,7 @@ public class SignWarp {
 		WarpDestination destination = SignWarp.getDestination(lines);
 	
 		if (destination != null) {
-			list.warpTo(destination.name, destination.creator, player, true);
+			list.warpTo(destination.name, destination.creator, WarperFactory.getWarpable(player), true);
 			return true;
 		} else {
 			return false;

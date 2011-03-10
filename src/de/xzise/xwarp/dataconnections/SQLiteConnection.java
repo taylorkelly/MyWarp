@@ -346,32 +346,41 @@ public class SQLiteConnection implements DataConnection {
 
 	@Override
 	public void addWarp(Warp... warps) {
-		if (warps.length > 0) {
+		int validWarpCount = warps.length;
+		for (Warp warp : warps) {
+			if (!warp.isValid()) {
+				validWarpCount--;
+			}
+		}
+		
+		if (validWarpCount > 0) {
 			PreparedStatement ps = null;
 			PreparedStatement insertPermissions = null;
 			try {		
 				ps = this.connection.prepareStatement("INSERT INTO warpTable (id, name, creator, world, x, y, z, yaw, pitch, publicLevel, welcomeMessage) VALUES (?,?,?,?,?,?,?,?,?,?,?)");
 				insertPermissions = this.connection.prepareStatement("INSERT INTO permissions (id, editor, value) VALUES (?,?,?)");
 				for (Warp warp : warps) {
-					ps.setInt(1, warp.index);
-					ps.setString(2, warp.name);
-					ps.setString(3, warp.creator);
-					setLocation(warp.getLocation(), 4, ps);
-					ps.setInt(10, warp.visibility.level);
-					ps.setString(11, warp.welcomeMessage);
-					ps.addBatch();
-					
-					for (String editor : warp.getEditors()) {
-						EditorPermissions ep = warp.getEditorPermissions(editor);
-						if (ep != null) {
-							for (Entry<Permissions, Boolean> p : ep.entrySet()) {
-								if (p.getValue() != null && p.getValue() == true) {
-									insertPermissions.setInt(1, warp.index);
-									insertPermissions.setString(2, editor);	
-									insertPermissions.setInt(3, p.getKey().id);
-									insertPermissions.addBatch();
-								}
-							}							
+					if (warp.isValid()) {
+						ps.setInt(1, warp.index);
+						ps.setString(2, warp.name);
+						ps.setString(3, warp.creator);
+						setLocation(warp.getLocation(), 4, ps);
+						ps.setInt(10, warp.visibility.level);
+						ps.setString(11, warp.welcomeMessage);
+						ps.addBatch();
+						
+						for (String editor : warp.getEditors()) {
+							EditorPermissions ep = warp.getEditorPermissions(editor);
+							if (ep != null) {
+								for (Entry<Permissions, Boolean> p : ep.entrySet()) {
+									if (p.getValue() != null && p.getValue() == true) {
+										insertPermissions.setInt(1, warp.index);
+										insertPermissions.setString(2, editor);	
+										insertPermissions.setInt(3, p.getKey().id);
+										insertPermissions.addBatch();
+									}
+								}							
+							}
 						}
 					}
 				}
@@ -598,8 +607,11 @@ public class SQLiteConnection implements DataConnection {
 		try {
 			statement = this.connection.createStatement();
 			// Drop warpTable → create new one
-			statement.execute("DROP TABLE warpTable");
+			statement.execute("DROP TABLE IF EXISTS warpTable");
 			statement.execute(WARP_TABLE);
+			// Drop permissions → create new one
+			statement.execute("DROP TABLE IF EXISTS permissions");
+			statement.execute(PERMISSIONS_TABLE);
 			if (version < 0) {
 				statement.executeUpdate("INSERT INTO meta (name, value) VALUES (\"version\", " + TARGET_VERSION + ")");
 			} else {

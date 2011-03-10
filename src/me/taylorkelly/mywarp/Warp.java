@@ -11,6 +11,9 @@ import org.bukkit.entity.Player;
 import de.xzise.xwarp.EditorPermissions;
 import de.xzise.xwarp.Permissions;
 import de.xzise.xwarp.PermissionWrapper.PermissionTypes;
+import de.xzise.xwarp.warpable.Positionable;
+import de.xzise.xwarp.warpable.Warpable;
+import de.xzise.xwarp.warpable.WarpablePlayer;
 
 public class Warp {
 	
@@ -84,29 +87,33 @@ public class Warp {
 		}
 	}
 
-	public boolean playerCanWarp(Player player, boolean viaSign) {	
-		if (this.creator.equals(player.getName()) && MyWarp.permissions.permission(player, viaSign ? PermissionTypes.SIGN_WARP_OWN : PermissionTypes.TO_OWN))
+	public boolean playerCanWarp(Warpable warpable, boolean viaSign) {	
+		if (warpable instanceof WarpablePlayer && this.creator.equals(((WarpablePlayer) warpable).getName()) && MyWarp.permissions.permission(warpable, viaSign ? PermissionTypes.SIGN_WARP_OWN : PermissionTypes.TO_OWN))
 			return true;
-		if (this.playerIsInvited(player.getName()) && MyWarp.permissions.permission(player, viaSign ? PermissionTypes.SIGN_WARP_INVITED : PermissionTypes.TO_INVITED))
+		if (warpable instanceof WarpablePlayer && this.playerIsInvited(((WarpablePlayer) warpable).getName()) && MyWarp.permissions.permission(warpable, viaSign ? PermissionTypes.SIGN_WARP_INVITED : PermissionTypes.TO_INVITED))
 			return true;
-		if (this.visibility == Visibility.PUBLIC && MyWarp.permissions.permission(player, viaSign ? PermissionTypes.SIGN_WARP_OTHER : PermissionTypes.TO_OTHER))
+		if (this.visibility == Visibility.PUBLIC && MyWarp.permissions.permission(warpable, viaSign ? PermissionTypes.SIGN_WARP_OTHER : PermissionTypes.TO_OTHER))
 			return true;
-		if (this.visibility == Visibility.GLOBAL && MyWarp.permissions.permission(player, viaSign ? PermissionTypes.SIGN_WARP_GLOBAL : PermissionTypes.TO_GLOBAL))
+		if (this.visibility == Visibility.GLOBAL && MyWarp.permissions.permission(warpable, viaSign ? PermissionTypes.SIGN_WARP_GLOBAL : PermissionTypes.TO_GLOBAL))
 			return true;
-		return MyWarp.permissions.permission(player, PermissionTypes.ADMIN_TO_ALL);
+		return MyWarp.permissions.permission(warpable, PermissionTypes.ADMIN_TO_ALL);
 	}
 	
-	public boolean playerCanWarp(Player player) {
+	public boolean playerCanWarp(Warpable player) {
 		//TODO: More elegant version?
 		return playerCanWarp(player, true) || playerCanWarp(player, false);
 	}
 
-	public void warp(Player player) {
-		player.teleportTo(this.location);
+	public void warp(Warpable warpable) {
+	    warpable.teleport(this.location);
 	}
-
-	public void update(Player player) {
-		this.location = player.getLocation().clone();		
+	
+	public void setLocation(Location location) {
+	    this.location = location.clone();
+	}
+	
+	public void setLocation(Positionable positionable) {
+	    this.location = positionable.getLocation().clone();
 	}
 	
 	public void rename(String newName) {
@@ -143,13 +150,15 @@ public class Warp {
 		if (MyWarp.permissions.hasAdminPermission(sender))
 			return true;
 		
-		if (sender instanceof Player) {
+		if (sender instanceof Warpable) {
 			// Can warp
-			if (this.playerCanWarp((Player) sender))
+			if (this.playerCanWarp((Warpable) sender))
 				return true;
-			// Creator permissions
-			if (this.playerIsCreator(((Player) sender).getName()))
-				return true;
+			if (sender instanceof WarpablePlayer) {
+        			// Creator permissions
+        			if (this.playerIsCreator(((WarpablePlayer) sender).getName()))
+        				return true;
+			}
 		}
 			
 		return false;
