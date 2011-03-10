@@ -9,3 +9,4 @@ commands:
   warp:
     description: Warp commands
     usage: /<command> help - Displays the help for xWarp
+    aliases: [xwarp]

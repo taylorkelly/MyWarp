@@ -123,7 +123,7 @@ public class WarpManager {
                 sender.sendMessage(ChatColor.RED + "You do not have permission to delete '" + warp.name + "'");
             }
         } else {
-            this.sendMissingWarp(name, creator, sender);
+            WarpManager.sendMissingWarp(name, creator, sender);
         }
     }
 
@@ -167,7 +167,7 @@ public class WarpManager {
                 sender.sendMessage(ChatColor.RED + "You do not have permission to privatize '" + name + "'");
             }
         } else {
-            this.sendMissingWarp(name, creator, sender);
+            WarpManager.sendMissingWarp(name, creator, sender);
         }
     }
 
@@ -183,7 +183,7 @@ public class WarpManager {
                 sender.sendMessage(ChatColor.RED + "You do not have permission to publicize '" + warp.name + "'");
             }
         } else {
-            this.sendMissingWarp(name, creator, sender);
+            WarpManager.sendMissingWarp(name, creator, sender);
         }
     }
 
@@ -206,7 +206,7 @@ public class WarpManager {
                 sender.sendMessage(ChatColor.RED + "You do not have permission to globalize '" + warp.name + "'");
             }
         } else {
-            this.sendMissingWarp(name, creator, sender);
+            WarpManager.sendMissingWarp(name, creator, sender);
         }
     }
 
@@ -235,7 +235,7 @@ public class WarpManager {
                 sender.sendMessage(ChatColor.RED + "You do not have permission to invite players to '" + name + "'.");
             }
         } else {
-            this.sendMissingWarp(name, creator, sender);
+            WarpManager.sendMissingWarp(name, creator, sender);
         }
     }
 
@@ -263,7 +263,7 @@ public class WarpManager {
                 sender.sendMessage(ChatColor.RED + "You do not have permission to uninvite players from '" + warp.name + "'.");
             }
         } else {
-            this.sendMissingWarp(name, creator, sender);
+            WarpManager.sendMissingWarp(name, creator, sender);
         }
     }
 
@@ -306,7 +306,7 @@ public class WarpManager {
                 player.sendMessage(ChatColor.RED + "You do not have permission to change the position from '" + warp.name + "'");
             }
         } else {
-            this.sendMissingWarp(name, creator, player);
+            WarpManager.sendMissingWarp(name, creator, player);
         }
     }
 
@@ -321,7 +321,7 @@ public class WarpManager {
                 sender.sendMessage(ChatColor.RED + "You do not have permission to add an editor from '" + warp.name + "'");
             }
         } else {
-            this.sendMissingWarp(name, owner, sender);
+            WarpManager.sendMissingWarp(name, owner, sender);
         }
     }
 
@@ -336,7 +336,7 @@ public class WarpManager {
                 sender.sendMessage(ChatColor.RED + "You do not have permission to remove an editor from '" + warp.name + "'");
             }
         } else {
-            this.sendMissingWarp(name, owner, sender);
+            WarpManager.sendMissingWarp(name, owner, sender);
         }
     }
 
@@ -359,7 +359,7 @@ public class WarpManager {
                 warpable.sendMessage(ChatColor.RED + "You do not have permission to warp to '" + warp.name + "'.");
             }
         } else {
-            this.sendMissingWarp(name, creator, warpable);
+            WarpManager.sendMissingWarp(name, creator, warpable);
         }
     }
 
@@ -422,7 +422,7 @@ public class WarpManager {
         return ret;
     }
 
-    private void sendMissingWarp(String name, String creator, CommandSender sender) {
+    public static void sendMissingWarp(String name, String creator, CommandSender sender) {
         if (creator == null || creator.isEmpty()) {
             sender.sendMessage(ChatColor.RED + "Global warp '" + name + "' doesn't exist.");
         } else {
