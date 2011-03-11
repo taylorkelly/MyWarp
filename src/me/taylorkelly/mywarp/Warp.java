@@ -14,6 +14,7 @@ import de.xzise.xwarp.PermissionWrapper.PermissionTypes;
 import de.xzise.xwarp.warpable.Positionable;
 import de.xzise.xwarp.warpable.Warpable;
 import de.xzise.xwarp.warpable.WarpablePlayer;
+import de.xzise.xwarp.warpable.WarperFactory;
 
 public class Warp {
 	
@@ -140,25 +141,27 @@ public class Warp {
 		return false;
 	}
 	
-	public boolean listWarp(CommandSender sender) {
-		
-		// Admin permissions
-		if (MyWarp.permissions.hasAdminPermission(sender))
-			return true;
-		
-		if (sender instanceof Warpable) {
-			// Can warp
-			if (this.playerCanWarp((Warpable) sender))
-				return true;
-			if (sender instanceof WarpablePlayer) {
-        			// Creator permissions
-        			if (this.playerIsCreator(((WarpablePlayer) sender).getName()))
-        				return true;
-			}
-		}
-			
-		return false;
-	}
+    public boolean listWarp(CommandSender sender) {
+
+        // Admin permissions
+        if (MyWarp.permissions.hasAdminPermission(sender))
+            return true;
+
+        Warpable warpable = WarperFactory.getWarpable(sender);
+
+        if (warpable != null) {
+            // Can warp
+            if (this.playerCanWarp(warpable))
+                return true;
+            if (sender instanceof WarpablePlayer) {
+                // Creator permissions
+                if (this.playerIsCreator(((WarpablePlayer) sender).getName()))
+                    return true;
+            }
+        }
+
+        return false;
+    }
 
 	public void setCreator(String giveeName) {
 		this.creator = giveeName;
