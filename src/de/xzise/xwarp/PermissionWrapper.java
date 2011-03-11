@@ -66,6 +66,8 @@ public class PermissionWrapper {
 		ADMIN_RELOAD("warp.admin.reload"), 
 		// Converts from hmod file
 		ADMIN_CONVERT("warp.admin.convert"),
+		// Export warps
+		ADMIN_EXPORT("warp.admin.export"),
 		// Converts from hmod file
 		ADMIN_EDITORS_REMOVE("warp.admin.editors.remove"),
 		// Converts from hmod file
@@ -105,6 +107,7 @@ public class PermissionWrapper {
 		PermissionTypes.ADMIN_RELOAD,
 		PermissionTypes.ADMIN_RENAME,
 		PermissionTypes.ADMIN_CONVERT,
+		PermissionTypes.ADMIN_EXPORT,
 		PermissionTypes.ADMIN_EDITORS_ADD,
 		PermissionTypes.ADMIN_EDITORS_REMOVE,
 	};
@@ -180,16 +183,15 @@ public class PermissionWrapper {
 	}
 	
 	public void init(Plugin plugin) {
+		this.handler = null;
 		if (plugin != null) {
 			if (plugin.isEnabled()) {
 				this.handler = ((Permissions) plugin).getHandler();
 				MyWarp.logger.info("Permissions enabled.");
 			} else {
-				this.handler = null;
 				MyWarp.logger.info("Permissions system found, but not enabled. Use defaults.");
 			}
 		} else {
-			this.handler = null;
 			MyWarp.logger.warning("Permission system not found. Use defaults.");
 		}		
 	}

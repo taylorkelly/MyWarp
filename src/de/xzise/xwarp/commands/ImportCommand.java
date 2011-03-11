@@ -53,7 +53,7 @@ public class ImportCommand extends DefaultSubCommand {
 			if (parameters.length >= 3) {
 				connection.load(new File(parameters[2]));
 			} else {
-				connection.loadDefault(this.directory);
+				connection.load(new File(this.directory, connection.getFilename()));
 			}
 			
 			List<Warp> warps;
