@@ -1,5 +1,5 @@
 name: xWarp
-version: 2.7.0-hmod b15
+version: 2.7.0
 main: me.taylorkelly.mywarp.MyWarp
 description: Implementation to create warp points!
 authors:

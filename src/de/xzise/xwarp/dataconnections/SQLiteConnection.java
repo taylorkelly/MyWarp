@@ -100,6 +100,10 @@ public class SQLiteConnection implements DataConnection {
             ResultSet set = null;
             try {
                 statement = this.connection.createStatement();
+                
+                if (!tableExists("permissions")) {
+                    statement.execute(PERMISSIONS_TABLE);
+                }
 
                 // Copy old database
                 if (tableExists("warpTable")) {
