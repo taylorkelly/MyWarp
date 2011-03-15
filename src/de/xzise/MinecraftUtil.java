@@ -44,12 +44,15 @@ public final class MinecraftUtil {
     }
 
     public static String getName(CommandSender sender) {
-        if (sender instanceof Player) {
-            return ((Player) sender).getName();
-        } else if (sender instanceof ConsoleCommandSender) {
-            return "[SERVER]";
+        String name = MinecraftUtil.getPlayerName(sender);
+        if (name == null) {
+            if (sender instanceof ConsoleCommandSender) {
+                return "[SERVER]";
+            } else {
+                return "Somebody";
+            }
         } else {
-            return "Somebody";
+            return name;
         }
     }
 

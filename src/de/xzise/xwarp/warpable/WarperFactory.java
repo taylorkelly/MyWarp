@@ -25,5 +25,14 @@ public final class WarperFactory {
             return null;
         }
     }
-    
+
+    public static Player getPlayer(Object sender) {
+        if (sender instanceof WarpablePlayer) {
+            return ((WarpablePlayer) sender).getSender();
+        } else if (sender instanceof Player) {
+            return (Player) sender;
+        } else {
+            return null;
+        }
+    }
 }

@@ -19,6 +19,7 @@ import de.xzise.xwarp.PermissionWrapper.PermissionTypes;
 import de.xzise.xwarp.dataconnections.DataConnection;
 import de.xzise.xwarp.warpable.Positionable;
 import de.xzise.xwarp.warpable.Warpable;
+import de.xzise.xwarp.warpable.WarperFactory;
 
 /**
  * Wraps around {@link WarpList} to provide permissions support.
@@ -469,10 +470,16 @@ public class WarpManager {
     }
 
     private static boolean playerCanModifyWarp(CommandSender sender, Warp warp, Permissions permission) {
+        Player player = WarperFactory.getPlayer(sender);
+        boolean canModify = false;
+        if (player != null) {
+            canModify = warp.playerCanModify(player, permission);
+        }
+        
         if (permission.defaultPermission != null) {
-            return ((sender instanceof Player && warp.playerCanModify((Player) sender, permission) && MyWarp.permissions.permission(sender, permission.defaultPermission)) || MyWarp.permissions.permission(sender, permission.adminPermission));
+            return ((canModify && MyWarp.permissions.permission(sender, permission.defaultPermission)) || MyWarp.permissions.permission(sender, permission.adminPermission));
         } else {
-            return ((sender instanceof Player && warp.playerCanModify((Player) sender, permission)) || MyWarp.permissions.permission(sender, permission.adminPermission));
+            return (canModify || MyWarp.permissions.permission(sender, permission.adminPermission));
         }
     }
 }

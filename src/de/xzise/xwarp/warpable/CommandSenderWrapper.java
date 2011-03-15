@@ -3,12 +3,16 @@ package de.xzise.xwarp.warpable;
 import org.bukkit.Server;
 import org.bukkit.command.CommandSender;
 
-public abstract class CommandSenderWrapper<T extends CommandSender> implements CommandSender {
+public class CommandSenderWrapper<T extends CommandSender> implements CommandSender {
 
     protected final T sender;
     
     protected CommandSenderWrapper(T sender) {
         this.sender = sender;
+    }
+    
+    public T getSender() {
+        return this.sender;
     }
     
     @Override

@@ -8,7 +8,7 @@ public class WarpablePlayer extends CommandSenderWrapper<Player> implements Warp
     public WarpablePlayer(Player player) {
         super(player);
     }
-
+    
     public String getName() {
         return this.sender.getName();
     }
