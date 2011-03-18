@@ -119,7 +119,7 @@ public class HModConnection implements DataConnection {
                                     warp.visibility = v;
                                     warp.setMessage(pieces[9]);
                                     for (int i = GEN_2_LENGTH; i < pieces.length; i += 2) {
-                                        warp.addEditor(pieces[i], pieces[2]);
+                                        warp.addEditor(pieces[i], pieces[i+1]);
                                     }
                                 } else {
                                     MyWarp.logger.warning("Illegal visibilty found (" + warp.name + " by " + warp.creator + ")");
