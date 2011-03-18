@@ -26,12 +26,6 @@ public class CommandSenderWrapper<T extends CommandSender> implements CommandSen
     }
 
     @Override
-    @Deprecated
-    public boolean isPlayer() {
-        return this.sender.isPlayer();
-    }
-
-    @Override
     public Server getServer() {
         return this.sender.getServer();
     }
