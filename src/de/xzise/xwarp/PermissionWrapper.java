@@ -137,9 +137,9 @@ public class PermissionWrapper {
 	}
 	
 	private boolean permissionInternal(CommandSender sender, PermissionTypes permission) {
-		if (MinecraftUtil.contains(permission, DEFAULT_PERMISSIONS) >= 0) {
+		if (MinecraftUtil.contains(permission, DEFAULT_PERMISSIONS)) {
 			return true;
-		} else if (MinecraftUtil.contains(permission, ADMIN_PERMISSIONS) >= 0) {
+		} else if (MinecraftUtil.contains(permission, ADMIN_PERMISSIONS)) {
 			return sender.isOp();
 		} else {
 			return false;

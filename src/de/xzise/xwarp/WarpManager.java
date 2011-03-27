@@ -17,6 +17,7 @@ import org.bukkit.entity.Player;
 import de.xzise.MinecraftUtil;
 import de.xzise.xwarp.PermissionWrapper.PermissionTypes;
 import de.xzise.xwarp.dataconnections.DataConnection;
+import de.xzise.xwarp.dataconnections.IdentificationInterface;
 import de.xzise.xwarp.warpable.Positionable;
 import de.xzise.xwarp.warpable.Warpable;
 import de.xzise.xwarp.warpable.WarperFactory;
@@ -143,8 +144,9 @@ public class WarpManager {
                 } else {
                     Warp giveeWarp = this.getWarp(name, giveeName, null);
                     if (giveeWarp == null) {
+                        IdentificationInterface ii = this.data.createIdentification(warp);
                         warp.setCreator(giveeName);
-                        this.data.updateCreator(warp);
+                        this.data.updateCreator(warp, ii);
                         sender.sendMessage("You have given '" + ChatColor.GREEN + warp.name + ChatColor.WHITE + "' to " + ChatColor.GREEN + giveeName + ChatColor.WHITE + ".");
                         Player match = server.getPlayer(giveeName);
                         if (match != null) {
@@ -287,11 +289,11 @@ public class WarpManager {
                 } else if (this.getWarp(newName, creator, null) != null) {
                     sender.sendMessage(ChatColor.RED + "You already have a warp with this name.");
                 } else {
+                    IdentificationInterface ii = this.data.createIdentification(warp);
                     this.list.deleteWarp(warp);
-                    this.list.addWarp(warp);
-
                     warp.rename(newName);
-                    this.data.updateName(warp);
+                    this.list.addWarp(warp);
+                    this.data.updateName(warp, ii);
                     sender.sendMessage(ChatColor.AQUA + "You have renamed '" + warp.name + "'");
                 }
             } else {

@@ -102,6 +102,7 @@ public class SQLiteConnection implements DataConnection {
                 statement = this.connection.createStatement();
                 
                 if (!tableExists("permissions")) {
+                    MyWarp.logger.info("Creating permission table.");
                     statement.execute(PERMISSIONS_TABLE);
                 }
 
@@ -154,7 +155,6 @@ public class SQLiteConnection implements DataConnection {
                     }
 
                     if (version < 2) {
-                        statement.executeUpdate(PERMISSIONS_TABLE);
                         MyWarp.logger.info("Adding permissions table");
 
                         if (list.size() > 0) {
@@ -437,7 +437,7 @@ public class SQLiteConnection implements DataConnection {
     }
 
     @Override
-    public void updateCreator(Warp warp) {
+    public void updateCreator(Warp warp, IdentificationInterface identification) {
         this.updateWarp(warp, "Creator", "UPDATE warpTable SET creator = ? WHERE id = ?", new UpdateFiller() {
 
             @Override
@@ -461,7 +461,7 @@ public class SQLiteConnection implements DataConnection {
     }
 
     @Override
-    public void updateName(Warp warp) {
+    public void updateName(Warp warp, IdentificationInterface identification) {
         this.updateWarp(warp, "Name", "UPDATE warpTable SET name = ? WHERE id = ?", new UpdateFiller() {
 
             @Override
@@ -623,5 +623,25 @@ public class SQLiteConnection implements DataConnection {
             }
         }
         return true;
+    }
+
+    private final class IdIdentification implements IdentificationInterface {
+
+        private final int id;
+        
+        public IdIdentification(Warp warp) {
+            this.id = warp.index;
+        }
+        
+        @Override
+        public boolean isIdentificated(Warp warp) {
+            return this.id == warp.index;
+        }
+        
+    }
+    
+    @Override
+    public IdentificationInterface createIdentification(Warp warp) {
+        return new IdIdentification(warp);
     }
 }

@@ -164,15 +164,13 @@ public final class MinecraftUtil {
      *            Searched array.
      * @return the first position found.
      */
-    public static <T> int contains(T o, T[] a) {
-        int idx = 0;
+    public static <T> boolean contains(T o, T[] a) {
         for (T t : a) {
             if (t != null && t.equals(o)) {
-                return idx;
+                return true;
             }
-            idx++;
         }
-        return -1;
+        return false;
     }
 
     public static void copyFile(File source, File destination) throws IOException {

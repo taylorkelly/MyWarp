@@ -169,26 +169,32 @@ public class HModConnection implements DataConnection {
     }
 
     private static void writeWarp(Warp warp, Writer writer) throws IOException {
-        StringBuilder warpLine = new StringBuilder();
-        Location l = warp.getLocation();
-        warpLine.append(makeParsable(warp.name) + SEPARATOR);
-        warpLine.append(makeParsable(l.getX()) + SEPARATOR);
-        warpLine.append(makeParsable(l.getY()) + SEPARATOR);
-        warpLine.append(makeParsable(l.getZ()) + SEPARATOR);
-        warpLine.append(makeParsable(l.getYaw()) + SEPARATOR);
-        warpLine.append(makeParsable(l.getPitch()) + SEPARATOR);
-        warpLine.append(makeParsable(l.getWorld().getName()) + SEPARATOR);
-        warpLine.append(makeParsable(warp.creator) + SEPARATOR);
-        warpLine.append(makeParsable(warp.visibility.level) + SEPARATOR);
-        warpLine.append(makeParsable(warp.welcomeMessage) + SEPARATOR);
-        for (String editor : warp.getEditors()) {
-            EditorPermissions ep = warp.getEditorPermissions(editor);
-            if (ep != null) {
-                warpLine.append(makeParsable(editor) + SEPARATOR);
-                warpLine.append(makeParsable(ep.getPermissionString()) + SEPARATOR);
+        try {
+            StringBuilder warpLine = new StringBuilder();
+            Location l = warp.getLocation();
+            warpLine.append(makeParsable(warp.name) + SEPARATOR);
+            warpLine.append(makeParsable(l.getX()) + SEPARATOR);
+            warpLine.append(makeParsable(l.getY()) + SEPARATOR);
+            warpLine.append(makeParsable(l.getZ()) + SEPARATOR);
+            warpLine.append(makeParsable(l.getYaw()) + SEPARATOR);
+            warpLine.append(makeParsable(l.getPitch()) + SEPARATOR);
+            warpLine.append(makeParsable(l.getWorld().getName()) + SEPARATOR);
+            warpLine.append(makeParsable(warp.creator) + SEPARATOR);
+            warpLine.append(makeParsable(warp.visibility.level) + SEPARATOR);
+            warpLine.append(makeParsable(warp.welcomeMessage) + SEPARATOR);
+            for (String editor : warp.getEditors()) {
+                EditorPermissions ep = warp.getEditorPermissions(editor);
+                if (ep != null) {
+                    warpLine.append(makeParsable(editor) + SEPARATOR);
+                    warpLine.append(makeParsable(ep.getPermissionString()) + SEPARATOR);
+                }
             }
+            writer.append(warpLine + "\n");
+        } catch (IOException ioe) {
+            throw ioe;
+        } catch (Exception e) {
+            MyWarp.logger.severe("Unable to write warp: '" + warp.name + "' by " + warp.creator, e);
         }
-        writer.append(warpLine + "\n");
     }
 
     private static String makeParsable(int input) {
@@ -244,18 +250,27 @@ public class HModConnection implements DataConnection {
         this.writeWarps(warps);
     }
 
+    private static Warp getWarp(List<Warp> warps, IdentificationInterface identification) {
+        for (Warp warp : warps) {
+            if (identification.isIdentificated(warp)) {
+                return warp;
+            }
+        }
+        return null;
+    }
+    
     @Override
-    public void updateCreator(Warp warp) {
+    public void updateCreator(Warp warp, IdentificationInterface identification) {
         List<Warp> warps = this.getWarps();
-        Warp updated = warps.get(warps.indexOf(warp));
+        Warp updated = getWarp(warps, identification);
         updated.creator = warp.creator;
         this.writeWarps(warps);
     }
 
     @Override
-    public void updateName(Warp warp) {
+    public void updateName(Warp warp, IdentificationInterface identification) {
         List<Warp> warps = this.getWarps();
-        Warp updated = warps.get(warps.indexOf(warp));
+        Warp updated = getWarp(warps, identification);
         updated.name = warp.name;
         this.writeWarps(warps);
     }
@@ -311,5 +326,31 @@ public class HModConnection implements DataConnection {
     @Override
     public void clear() {
         this.writeWarps(new ArrayList<Warp>(0));
+    }
+
+    private final class NameIdentification implements IdentificationInterface {
+        
+        private final String name;
+        private final String owner;
+        
+        public NameIdentification(Warp warp) {
+            this(warp.name, warp.creator);
+        }
+        
+        public NameIdentification(String name, String owner) {
+            this.name = name;
+            this.owner = owner;
+        }
+
+        @Override
+        public boolean isIdentificated(Warp warp) {
+            return warp.name.equalsIgnoreCase(this.name) && warp.creator.equals(this.owner);
+        }
+        
+    }
+    
+    @Override
+    public IdentificationInterface createIdentification(Warp warp) {
+        return new NameIdentification(warp);
     }
 }
