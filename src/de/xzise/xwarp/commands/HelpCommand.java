@@ -7,19 +7,17 @@ import java.util.List;
 import java.util.Map;
 
 import org.bukkit.ChatColor;
-import org.bukkit.Server;
 import org.bukkit.command.CommandSender;
 
 import de.xzise.MinecraftUtil;
-import de.xzise.xwarp.WarpManager;
 
 public class HelpCommand extends SubCommand {
 	
 	private Collection<SubCommand> commands;
 	private Map<String, SubCommand> commandMap;
 
-	public HelpCommand(WarpManager list, Server server) {
-		super(list, server, "help", "?");
+	public HelpCommand() {
+		super("help", "?");
 		this.commands = new ArrayList<SubCommand>();
 		this.commandMap = new HashMap<String, SubCommand>();
 	}

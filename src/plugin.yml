@@ -1,11 +1,12 @@
 name: xWarp
-version: 2.6.4 b1
+version: 2.7.2
 main: me.taylorkelly.mywarp.MyWarp
+description: Implementation to create warp points!
 authors:
   - 'xZise'
   - 'tkelly'
 commands:
-  xwarp:
+  warp:
     description: Warp commands
     usage: /<command> help - Displays the help for xWarp
-    parser: Quoted
+    aliases: [xwarp, w]

@@ -11,7 +11,7 @@ import org.bukkit.Server;
 import me.taylorkelly.mywarp.MyWarp;
 
 import de.xzise.xwarp.dataconnections.DataConnection;
-import de.xzise.xwarp.dataconnections.NullConnection;
+import de.xzise.xwarp.dataconnections.HModConnection;
 import de.xzise.xwarp.dataconnections.SQLiteConnection;
 
 public class PluginProperties {
@@ -52,9 +52,9 @@ public class PluginProperties {
 		}
 		String dataConnectionProperty = properties.getProperty("data-connection", "sqlite");
 		
-		if (dataConnectionProperty.equalsIgnoreCase("none")) {
+		if (dataConnectionProperty.equalsIgnoreCase("hmod")) {
 			// Not implemented (yet?)
-			this.dataConnection = new NullConnection();
+			this.dataConnection = new HModConnection(this.server);
 		} else {
 			if (!dataConnectionProperty.equalsIgnoreCase("sqlite")) {
 				MyWarp.logger.warning("Unrecognized data-connection selected (" + dataConnectionProperty + ")");

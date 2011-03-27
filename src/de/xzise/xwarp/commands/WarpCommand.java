@@ -13,7 +13,7 @@ import de.xzise.xwarp.WarpManager;
  * 
  * @author Fabian Neundorf
  */
-public abstract class WarpCommand extends SubCommand {
+public abstract class WarpCommand extends DefaultSubCommand {
 
 	private final int length;
 	private final String[] parametersText;

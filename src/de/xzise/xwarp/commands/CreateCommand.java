@@ -10,7 +10,7 @@ import org.bukkit.entity.Player;
 import de.xzise.xwarp.PermissionWrapper.PermissionTypes;
 import de.xzise.xwarp.WarpManager;
 
-public class CreateCommand extends SubCommand {
+public class CreateCommand extends DefaultSubCommand {
 
 	private final Visibility visibility;
 	

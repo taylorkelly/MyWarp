@@ -9,7 +9,7 @@ import org.bukkit.command.CommandSender;
 import de.xzise.MinecraftUtil;
 import de.xzise.xwarp.WarpManager;
 
-public class SearchCommand extends SubCommand {
+public class SearchCommand extends DefaultSubCommand {
 
 	public SearchCommand(WarpManager list, Server server) {
 		super(list, server, "search");

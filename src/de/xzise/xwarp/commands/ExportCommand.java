@@ -11,60 +11,57 @@ import org.bukkit.command.CommandSender;
 
 import de.xzise.xwarp.WarpManager;
 import de.xzise.xwarp.dataconnections.DataConnection;
-import de.xzise.xwarp.dataconnections.SQLiteConnection;
+import de.xzise.xwarp.dataconnections.DataConnectionFactory;
 
-public class ExportCommand extends SubCommand {
-	
-	private final File pluginPath;
+public class ExportCommand extends DefaultSubCommand {
 
-	public ExportCommand(WarpManager list, Server server, File pluginPath) {
-		super(list, server, "export");
-		this.pluginPath = pluginPath;
-	}
+    private final File pluginPath;
 
-	@Override
-	protected boolean internalExecute(CommandSender sender, String[] parameters) {
-		if (parameters.length > 1) {
-			DataConnection connection = null;
-			if (parameters[1].equalsIgnoreCase("sqlite")) {
-				connection = new SQLiteConnection(this.server);
-			}
-			
-			if (connection != null) {
-				File file;
-				if (parameters.length > 2) {
-					file = new File(parameters[2]);
-				} else {
-					file = new File(pluginPath, connection.getFilename());
-				}
-				try {
-					connection.load(file);
-					connection.clear();
-					connection.addWarp(this.list.getWarps().toArray(new Warp[0]));
-					connection.free();
-				} catch (Exception e) {
-					MyWarp.logger.severe("Unable to export warps.", e);
-					sender.sendMessage(ChatColor.RED + "Unable to export warps.");
-				}
-			} else {
-				sender.sendMessage(ChatColor.RED + "Invalid type given.");
-			}
-		}
-		return false;
-	}
+    public ExportCommand(WarpManager list, Server server, File pluginPath) {
+        super(list, server, "export");
+        this.pluginPath = pluginPath;
+    }
 
-	@Override
-	protected String[] getFullHelpText() {
-		return new String[] { "Exports the loaded warps to the given file.", "Valid types are: 'sqlite'" };
-	}
+    @Override
+    protected boolean internalExecute(CommandSender sender, String[] parameters) {
+        if (parameters.length > 1) {
+            DataConnection connection = DataConnectionFactory.getConnection(this.server, parameters[1]);
 
-	@Override
-	protected String getSmallHelpText() {
-		return "Export warps";
-	}
+            if (connection != null) {
+                File file;
+                if (parameters.length > 2) {
+                    file = new File(parameters[2]);
+                } else {
+                    file = new File(pluginPath, connection.getFilename());
+                }
+                try {
+                    connection.create(file);
+                    connection.addWarp(this.list.getWarps().toArray(new Warp[0]));
+                    connection.free();
+                } catch (Exception e) {
+                    MyWarp.logger.severe("Unable to export warps.", e);
+                    sender.sendMessage(ChatColor.RED + "Unable to export warps.");
+                }
+            } else {
+                sender.sendMessage(ChatColor.RED + "Invalid type given.");
+            }
+            return true;
+        }
+        return false;
+    }
 
-	@Override
-	protected String getCommand() {
-		return "warp export <type> [file] [version]";
-	}
+    @Override
+    protected String[] getFullHelpText() {
+        return new String[] { "Exports the loaded warps to the given file.", "Valid types are: 'sqlite', 'hmod'" };
+    }
+
+    @Override
+    protected String getSmallHelpText() {
+        return "Export warps";
+    }
+
+    @Override
+    protected String getCommand() {
+        return "warp export <type> [file]";
+    }
 }

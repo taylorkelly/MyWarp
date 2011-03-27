@@ -10,7 +10,7 @@ import de.xzise.xwarp.WarpManager;
 import de.xzise.xwarp.lister.GenericLister;
 import de.xzise.xwarp.lister.ListSection;
 
-public class ListCommand extends SubCommand {
+public class ListCommand extends DefaultSubCommand {
 	
 	public ListCommand(WarpManager list, Server server) {
 		super(list, server, "list", "ls");

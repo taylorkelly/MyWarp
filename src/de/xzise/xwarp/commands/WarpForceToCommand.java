@@ -10,31 +10,24 @@ import de.xzise.xwarp.WarpManager;
 import de.xzise.xwarp.PermissionWrapper.PermissionTypes;
 import de.xzise.xwarp.warpable.WarperFactory;
 
-public class WarpToCommand extends DefaultSubCommand {
+/* 
+ * Temporary extra command, to warp in another worlds. Maybe it work maybe not!
+ */
+public class WarpForceToCommand extends WarpCommand {
 
-    public WarpToCommand(WarpManager list, Server server) {
-        super(list, server, "to");
+    public WarpForceToCommand(WarpManager list, Server server) {
+        super(list, server, new String[0], "force-to", ">-t");
     }
 
     @Override
-    protected boolean internalExecute(CommandSender sender, String[] parameters) {
-        if (sender instanceof Player && (parameters.length == 1 || parameters.length == 2 || (parameters.length == 3 && parameters[0].equalsIgnoreCase("to")))) {
-            // TODO ChunkLoading
-            int start = 0;
-            if (parameters[0].equalsIgnoreCase("to") && (parameters.length == 2 || parameters.length == 3)) {
-                start++;
-            }
-            String creator = "";
-            if (parameters.length > start + 1) {
-                creator = this.getPlayer(parameters[start + 1]);
-            }
-            this.list.warpTo(parameters[start], creator, WarperFactory.getWarpable(sender), false);
+    protected boolean executeEdit(CommandSender sender, String warpName, String creator, String[] parameters) {
+        if (sender instanceof Player) {
+            this.list.warpTo(warpName, creator, WarperFactory.getWarpable(sender), false, true);
             return true;
         } else {
             return false;
         }
     }
-
     @Override
     protected String[] getFullHelpText() {
         return new String[] { "Warps the player to the given warp.", "This command is only ingame available." };
@@ -47,7 +40,7 @@ public class WarpToCommand extends DefaultSubCommand {
 
     @Override
     protected String getCommand() {
-        return "warp [to] <name> [creator]";
+        return "warp force-to <name> [creator]";
     }
 
     @Override

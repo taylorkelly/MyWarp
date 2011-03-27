@@ -4,51 +4,28 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.bukkit.ChatColor;
-import org.bukkit.Server;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
-
-import de.xzise.xwarp.WarpManager;
 
 /**
- * Command like list/create etc.
- * 
+ * Basical subcommand without any list.
  * @author Fabian Neundorf.
  */
 public abstract class SubCommand {
 
-	protected final WarpManager list;
-	protected final Server server;
 	protected final String[] commands;
 
 	/**
 	 * Creates a subcommand.
-	 * 
-	 * @param manager
-	 *            The list to all warps.
-	 * @param server
-	 *            The server instance.
 	 * @param commands
 	 *            The commands.
 	 * @throws IllegalArgumentException
 	 *             If commands is empty.
 	 */
-	protected SubCommand(WarpManager manager, Server server, String... commands) {
+	protected SubCommand(String... commands) {
 		if (commands.length <= 0) {
 			throw new IllegalArgumentException("No command given!");
 		}
-		this.list = manager;
-		this.server = server;
 		this.commands = commands;
-	}
-
-	protected String getPlayer(String name) {
-		Player player = this.server.getPlayer(name);
-		return player == null ? name : player.getName();
-	}
-
-	public String[] getCommands() {
-		return this.commands.clone();
 	}
 
 	/**
@@ -68,9 +45,14 @@ public abstract class SubCommand {
 		return this.internalExecute(sender, parameters);
 	}
 
+
+	public String[] getCommands() {
+		return this.commands.clone();
+	}
+
 	public final String[] getFullHelp() {
 		List<String> lines = new ArrayList<String>();
-		lines.add(ChatColor.GREEN + this.getCommand());
+		lines.add("xWarp help: " + ChatColor.GREEN + this.getCommand());
 		for (String string : this.getFullHelpText()) {
 			lines.add(string);
 		}
@@ -108,5 +90,5 @@ public abstract class SubCommand {
 	 */
 	protected boolean listHelp(CommandSender sender) {
 		return true;
-	}
+	}	
 }

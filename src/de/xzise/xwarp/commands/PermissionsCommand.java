@@ -11,7 +11,7 @@ import de.xzise.xwarp.PermissionWrapper;
 import de.xzise.xwarp.PermissionWrapper.PermissionTypes;
 import de.xzise.xwarp.WarpManager;
 
-public class PermissionsCommand extends SubCommand {
+public class PermissionsCommand extends DefaultSubCommand {
 
 	public PermissionsCommand(WarpManager list, Server server) {
 		super(list, server, "permissions");

@@ -8,7 +8,7 @@ import org.bukkit.command.CommandSender;
 import de.xzise.xwarp.WarpManager;
 import de.xzise.xwarp.PermissionWrapper.PermissionTypes;
 
-public class ReloadCommand extends SubCommand {
+public class ReloadCommand extends DefaultSubCommand {
 
 	public ReloadCommand(WarpManager list, Server server) {
 		super(list, server, "reload");

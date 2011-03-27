@@ -1,139 +1,107 @@
 package me.taylorkelly.mywarp;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
-import org.bukkit.entity.Player;
 import org.bukkit.event.Event.Result;
-import org.bukkit.event.player.PlayerChatEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerListener;
 
-import de.xzise.xwarp.CommandMap;
 import de.xzise.xwarp.WarpManager;
 import de.xzise.xwarp.PermissionWrapper.PermissionTypes;
 
 public class WMPlayerListener extends PlayerListener {
-	
-	private final CommandMap commands;
-	private final WarpManager manager;
 
-	public WMPlayerListener(CommandMap commands, WarpManager manager) {
-		this.commands = commands;
-		this.manager = manager;
-	}
-	
-	public void onPlayerItem(PlayerInteractEvent event) {		
-		Block block = event.getBlockClicked();
-        if(block.getState() instanceof Sign && MyWarp.permissions.permissionOr(event.getPlayer(), PermissionTypes.SIGN_WARP_GLOBAL, PermissionTypes.SIGN_WARP_INVITED, PermissionTypes.SIGN_WARP_OTHER, PermissionTypes.SIGN_WARP_OWN)) {
-        	SignWarp signWarp = new SignWarp((Sign) block.getState());
-        	signWarp.warp(this.manager, event.getPlayer());
-        	event.setUseInteractedBlock(Result.DENY);
-        	event.setCancelled(true);
+    private final WarpManager manager;
+
+    public WMPlayerListener(WarpManager manager) {
+        this.manager = manager;
+    }
+
+    @Override
+    public void onPlayerInteract(PlayerInteractEvent event) {
+        Block block = event.getClickedBlock();
+        if (block.getState() instanceof Sign && MyWarp.permissions.permissionOr(event.getPlayer(), PermissionTypes.SIGN_WARP_GLOBAL, PermissionTypes.SIGN_WARP_INVITED, PermissionTypes.SIGN_WARP_OTHER, PermissionTypes.SIGN_WARP_OWN)) {
+            SignWarp signWarp = new SignWarp((Sign) block.getState());
+            signWarp.warp(this.manager, event.getPlayer());
+            event.setUseInteractedBlock(Result.DENY);
+            event.setCancelled(true);
         }
     }
-	
-	public void onPlayerCommand(PlayerChatEvent event) {
-		Player player = event.getPlayer();
-		String[] values = parseLine(event.getMessage());		
 
-		if (values[0].equalsIgnoreCase("/warp")) {
-			
-			String[] parameters = Arrays.copyOfRange(values, 1, values.length);
-			
-			event.setCancelled(true);
-			
-//			for (int i = 0; i < parameters.length; i++) {
-//				player.sendMessage(i + "=" + parameters[i]);
-//			}
-//			
-//			for (int i = 0; i < parameters.length; i++) {
-//				MyWarp.logger.info(i + "=" + parameters[i]);
-//			}
-			
-			this.commands.executeCommand(player, parameters);
-		}
-	}
-	
-	public void onPlayerCommandPreprocess(PlayerChatEvent event) {
-		this.onPlayerCommand(event);
+    public static String[] parseCommand(String line) {
+        return parseLine(line, ' ');
     }
-	
-	/**
-	 * Parses a command line. Reads the two first commands like "split" and the
-	 * following with quotes/escaping.
-	 * 
-	 * <ul>
-	 * <li>Example 1:
-	 * <ul>
-	 * <li>/warp create "hello world"</li>
-	 * <li>/warp create hello\ world</li>
-	 * </ul>
-	 * produces:
-	 * <ol>
-	 * <li>/warp</li>
-	 * <li>create</li>
-	 * <li>hello world</li>
-	 * </ol>
-	 * </li>
-	 * </ul>
-	 * 
-	 * @param line
-	 *            The command line.
-	 * @return The parsed segments.
-	 */
-	public static String[] parseLine(String line) {
-		boolean quoted = false;
-		boolean escaped = false;
-		int lastStart = 0;
-		int word = 0;
-		String value = "";
-		List<String> values = new ArrayList<String>(2);
-		for (int i = 0; i < line.length(); i++) {
-			char c = line.charAt(i);
-			if (word < 1) {
-				if (c == ' ') {
-					values.add(value);
-					value = "";
-					word++;
-				} else {
-					value += c;
-				}
-			} else {
-				if (escaped) {
-					value += c;
-					escaped = false;
-				} else {
-					switch (c) {
-					case '"':
-						quoted = !quoted;
-						break;
-					case '\\':
-						escaped = true;
-						break;
-					case ' ':
-						if (!quoted) {
-							if (lastStart < i) {
-								values.add(value);
-								value = "";
-								word++;
-							}
-							lastStart = i + 1;
-							break;
-						}
-					default:
-						value += c;
-						break;
-					}
-				}
-			}
-		}
-		if (!value.isEmpty()) {
-			values.add(value);
-		}
-		return values.toArray(new String[0]);
-	}
+
+    /**
+     * Parses a command line. Reads with quotes/escaping.
+     * 
+     * <ul>
+     * <li>Example 1:
+     * <ul>
+     * <li>/warp create "hello world"</li>
+     * <li>/warp create hello\ world</li>
+     * </ul>
+     * produces:
+     * <ol>
+     * <li>/warp</li>
+     * <li>create</li>
+     * <li>hello world</li>
+     * </ol>
+     * </li>
+     * </ul>
+     * 
+     * @param line
+     *            The command line.
+     * @return The parsed segments.
+     */
+    public static String[] parseLine(String line, char delimiter) {
+        boolean quoted = false;
+        boolean escaped = false;
+        int lastStart = 0;
+        int word = 0;
+        String value = "";
+        List<String> values = new ArrayList<String>(2);
+        for (int i = 0; i < line.length(); i++) {
+            char c = line.charAt(i);
+            if (escaped) {
+                escaped = false;
+                switch (c) {
+                case 's':
+                    value += ' ';
+                    break;
+                default:
+                    value += c;
+                    break;
+                }
+            } else {
+                switch (c) {
+                case '"':
+                    quoted = !quoted;
+                    break;
+                case '\\':
+                    escaped = true;
+                    break;
+                default:
+                    if (c == delimiter && !quoted) {
+                        if (lastStart < i) {
+                            values.add(value);
+                            value = "";
+                            word++;
+                        }
+                        lastStart = i + 1;
+                    } else {
+                        value += c;
+                    }
+                    break;
+                }
+            }
+        }
+        if (!value.isEmpty()) {
+            values.add(value);
+        }
+        return values.toArray(new String[0]);
+    }
 }
