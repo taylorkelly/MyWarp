@@ -67,87 +67,91 @@ public class HModConnection implements DataConnection {
         Scanner scanner;
         try {
             scanner = new Scanner(this.file);
-            int size = 0;
-            int invalidSize = 0;
-            boolean valid;
-            int version = 0;
-            World defaultWorld = this.server.getWorlds().get(0);
-            while (scanner.hasNext()) {
-                String line = scanner.nextLine();
-                if (line.startsWith("!version")) {
-                    if (result.size() > 0) {
-                        MyWarp.logger.warning("Found version tag after adding warps.");
-                    }
-                    if (line.length() > 8) {
-                        try {
-                            version = Integer.parseInt(line.substring(8).trim());
-                        } catch (NumberFormatException nfe) {
-                            MyWarp.logger.severe("Version tag is invalid number.");
+            try {
+                int size = 0;
+                int invalidSize = 0;
+                boolean valid;
+                int version = 0;
+                World defaultWorld = this.server.getWorlds().get(0);
+                while (scanner.hasNext()) {
+                    String line = scanner.nextLine();
+                    if (line.startsWith("!version")) {
+                        if (result.size() > 0) {
+                            MyWarp.logger.warning("Found version tag after adding warps.");
                         }
-                    } else {
-                        MyWarp.logger.severe("Invalid version tag.");
-                    }
-                } else if (!line.startsWith("##")) {
-                    String[] pieces = WMPlayerListener.parseLine(line, ':');
-                    if ((pieces.length >= GEN_2_LENGTH && pieces.length % 2 == 0 && version > 0) || (pieces.length == GEN_1_LENGTH && owner != null && !owner.isEmpty())) {
-                        Warp warp = null;
-                        valid = true;
-                        try {
-                            String name = pieces[0];
-
-                            double x = Double.parseDouble(pieces[1]);
-                            double y = Double.parseDouble(pieces[2]);
-                            double z = Double.parseDouble(pieces[3]);
-                            double yaw = Double.parseDouble(pieces[4]);
-                            double pitch = Double.parseDouble(pieces[5]);
-
-                            yaw = (yaw < 0) ? (360 + (yaw % 360)) : (yaw % 360);
-
-                            World world = defaultWorld;
-                            String warpOwner = owner;
-                            // hmod gen 2
-                            if (pieces.length >= GEN_2_LENGTH && pieces.length % 2 == 0) {
-                                world = this.server.getWorld(pieces[6]);
-                                warpOwner = pieces[7];
+                        if (line.length() > 8) {
+                            try {
+                                version = Integer.parseInt(line.substring(8).trim());
+                            } catch (NumberFormatException nfe) {
+                                MyWarp.logger.severe("Version tag is invalid number.");
                             }
-                            Location location = new Location(world, x, y, z, (float) yaw, (float) pitch);
-                            warp = new Warp(name, warpOwner, location);
-                            // hmod gen 2
-                            if (pieces.length >= GEN_2_LENGTH && pieces.length % 2 == 0) {
-                                Visibility v = Visibility.parseLevel(Integer.parseInt(pieces[8]));
-                                if (v != null) {
-                                    warp.visibility = v;
-                                    warp.setMessage(pieces[9]);
-                                    for (int i = GEN_2_LENGTH; i < pieces.length; i += 2) {
-                                        warp.addEditor(pieces[i], pieces[i+1]);
+                        } else {
+                            MyWarp.logger.severe("Invalid version tag.");
+                        }
+                    } else if (!line.startsWith("##")) {
+                        String[] pieces = WMPlayerListener.parseLine(line, ':');
+                        if ((pieces.length >= GEN_2_LENGTH && pieces.length % 2 == 0 && version > 0) || (pieces.length == GEN_1_LENGTH && owner != null && !owner.isEmpty())) {
+                            Warp warp = null;
+                            valid = true;
+                            try {
+                                String name = pieces[0];
+    
+                                double x = Double.parseDouble(pieces[1]);
+                                double y = Double.parseDouble(pieces[2]);
+                                double z = Double.parseDouble(pieces[3]);
+                                double yaw = Double.parseDouble(pieces[4]);
+                                double pitch = Double.parseDouble(pieces[5]);
+    
+                                yaw = (yaw < 0) ? (360 + (yaw % 360)) : (yaw % 360);
+    
+                                World world = defaultWorld;
+                                String warpOwner = owner;
+                                // hmod gen 2
+                                if (pieces.length >= GEN_2_LENGTH && pieces.length % 2 == 0) {
+                                    world = this.server.getWorld(pieces[6]);
+                                    warpOwner = pieces[7];
+                                }
+                                Location location = new Location(world, x, y, z, (float) yaw, (float) pitch);
+                                warp = new Warp(name, warpOwner, location);
+                                // hmod gen 2
+                                if (pieces.length >= GEN_2_LENGTH && pieces.length % 2 == 0) {
+                                    Visibility v = Visibility.parseLevel(Integer.parseInt(pieces[8]));
+                                    if (v != null) {
+                                        warp.visibility = v;
+                                        warp.setMessage(pieces[9]);
+                                        for (int i = GEN_2_LENGTH; i < pieces.length; i += 2) {
+                                            warp.addEditor(pieces[i], pieces[i+1]);
+                                        }
+                                    } else {
+                                        MyWarp.logger.warning("Illegal visibilty found (" + warp.name + " by " + warp.creator + ")");
+                                        valid = false;
                                     }
-                                } else {
-                                    MyWarp.logger.warning("Illegal visibilty found (" + warp.name + " by " + warp.creator + ")");
-                                    valid = false;
+                                }
+                            } catch (NumberFormatException nfe) {
+                                valid = false;
+                                MyWarp.logger.warning("Unable to parse a location value (" + nfe.getMessage() + ")");
+                            } catch (Exception e) {
+                                MyWarp.logger.severe("Catched an unhandled exception", e);
+                                valid = false;
+                            }
+                            if (valid && warp != null) {
+                                result.add(warp);
+                                size++;
+                                if (!warp.isValid()) {
+                                    invalidSize++;
                                 }
                             }
-                        } catch (NumberFormatException nfe) {
-                            valid = false;
-                            MyWarp.logger.warning("Unable to parse a location value (" + nfe.getMessage() + ")");
-                        } catch (Exception e) {
-                            MyWarp.logger.severe("Catched an unhandled exception", e);
-                            valid = false;
+                        } else {
+                            MyWarp.logger.warning("Invalid line found");
                         }
-                        if (valid && warp != null) {
-                            result.add(warp);
-                            size++;
-                            if (!warp.isValid()) {
-                                invalidSize++;
-                            }
-                        }
-                    } else {
-                        MyWarp.logger.warning("Invalid line found");
                     }
                 }
-            }
-            MyWarp.logger.info(size + " warps loaded");
-            if (invalidSize > 0) {
-                MyWarp.logger.warning(invalidSize + " invalid warps found.");
+                MyWarp.logger.info(size + " warps loaded");
+                if (invalidSize > 0) {
+                    MyWarp.logger.warning(invalidSize + " invalid warps found.");
+                }
+            } finally {
+                scanner.close();
             }
         } catch (FileNotFoundException e) {
             MyWarp.logger.info("hmod file not found!");
@@ -158,11 +162,14 @@ public class HModConnection implements DataConnection {
     private void writeWarps(List<Warp> warps) {
         try {
             FileWriter writer = new FileWriter(this.file);
-            writer.write("!version 1\n");
-            for (Warp warp : warps) {
-                writeWarp(warp, writer);
+            try {
+                writer.write("!version 1\n");
+                for (Warp warp : warps) {
+                    writeWarp(warp, writer);
+                }
+            } finally {
+                writer.close();
             }
-            writer.close();
         } catch (IOException e) {
             MyWarp.logger.severe("Unable to write the file", e);
         }
@@ -232,10 +239,13 @@ public class HModConnection implements DataConnection {
         if (warps.length > 0) {
             try {
                 FileWriter writer = new FileWriter(this.file, true);
-                for (Warp warp : warps) {
-                    writeWarp(warp, writer);
+                try {
+                    for (Warp warp : warps) {
+                        writeWarp(warp, writer);
+                    }
+                } finally {
+                    writer.close();
                 }
-                writer.close();
             } catch (IOException e) {
                 MyWarp.logger.severe("Unable to write the file", e);
             }
