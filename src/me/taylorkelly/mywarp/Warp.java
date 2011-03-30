@@ -88,25 +88,28 @@ public class Warp {
 		}
 	}
 
-	public boolean playerCanWarp(Warpable warpable, boolean viaSign) {	
-		if (warpable instanceof WarpablePlayer && this.creator.equals(((WarpablePlayer) warpable).getName()) && MyWarp.permissions.permission(warpable, viaSign ? PermissionTypes.SIGN_WARP_OWN : PermissionTypes.TO_OWN))
+	public boolean playerCanWarp(CommandSender sender, boolean viaSign) {
+	    String name = null;
+	    if (sender instanceof WarpablePlayer) {
+	        name = ((WarpablePlayer) sender).getName();
+	    } else if (sender instanceof Player) {
+	        name = ((Player) sender).getName();
+	    }
+	    
+		if (name != null && this.creator.equals(name) && MyWarp.permissions.permission(sender, viaSign ? PermissionTypes.SIGN_WARP_OWN : PermissionTypes.TO_OWN))
 			return true;
-		if (warpable instanceof WarpablePlayer && this.playerIsInvited(((WarpablePlayer) warpable).getName()) && MyWarp.permissions.permission(warpable, viaSign ? PermissionTypes.SIGN_WARP_INVITED : PermissionTypes.TO_INVITED))
+		if (name != null && this.playerIsInvited(name) && MyWarp.permissions.permission(sender, viaSign ? PermissionTypes.SIGN_WARP_INVITED : PermissionTypes.TO_INVITED))
 			return true;
-		if (this.visibility == Visibility.PUBLIC && MyWarp.permissions.permission(warpable, viaSign ? PermissionTypes.SIGN_WARP_OTHER : PermissionTypes.TO_OTHER))
+		if (this.visibility == Visibility.PUBLIC && MyWarp.permissions.permission(sender, viaSign ? PermissionTypes.SIGN_WARP_OTHER : PermissionTypes.TO_OTHER))
 			return true;
-		if (this.visibility == Visibility.GLOBAL && MyWarp.permissions.permission(warpable, viaSign ? PermissionTypes.SIGN_WARP_GLOBAL : PermissionTypes.TO_GLOBAL))
+		if (this.visibility == Visibility.GLOBAL && MyWarp.permissions.permission(sender, viaSign ? PermissionTypes.SIGN_WARP_GLOBAL : PermissionTypes.TO_GLOBAL))
 			return true;
-		return MyWarp.permissions.permission(warpable, PermissionTypes.ADMIN_TO_ALL);
+		return MyWarp.permissions.permission(sender, PermissionTypes.ADMIN_TO_ALL);
 	}
 	
 	public boolean playerCanWarp(Warpable player) {
 		//TODO: More elegant version?
 		return playerCanWarp(player, true) || playerCanWarp(player, false);
-	}
-
-	public void warp(Warpable warpable) {
-	    warpable.teleport(this.location);
 	}
 	
 	public void setLocation(Positionable positionable) {

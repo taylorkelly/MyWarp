@@ -52,7 +52,7 @@ public class WarpManager {
         }
     }
 
-    public void addWarp(String name, Player player, String newOwner, Visibility visibility) {
+    public void addWarp(String name, Positionable player, String newOwner, Visibility visibility) {
         PermissionTypes type;
         switch (visibility) {
         case PRIVATE:
@@ -68,7 +68,7 @@ public class WarpManager {
             return;
         }
         if (MyWarp.permissions.permission(player, type)) {
-            Warp warp = this.list.getWarp(name, newOwner, player.getName());
+            Warp warp = this.list.getWarp(name, newOwner, null);
             Warp globalWarp = (visibility == Visibility.GLOBAL ? this.list.getWarp(name) : null);
             if (warp != null) {
                 player.sendMessage(ChatColor.RED + "Warp called '" + name + "' already exists (" + warp.name + ").");
@@ -422,26 +422,37 @@ public class WarpManager {
         }
     }
 
-    public void warpTo(String name, String creator, Warpable warpable, boolean viaSign) {
-        this.warpTo(name, creator, warpable, viaSign, false);
+    public void warpTo(String name, String creator, CommandSender warper, Warpable warped, boolean viaSign) {
+        this.warpTo(name, creator, warper, warped, viaSign, false);
     }
 
-    public void warpTo(String name, String creator, Warpable warpable, boolean viaSign, boolean worldForce) {
-        Warp warp = this.getWarp(name, creator, MinecraftUtil.getPlayerName(warpable));
+    public void warpTo(String name, String creator, CommandSender warper, Warpable warped, boolean viaSign, boolean worldForce) {
+        Warp warp = this.getWarp(name, creator, MinecraftUtil.getPlayerName(warper));
         if (warp != null) {
-            if (warp.playerCanWarp(warpable, viaSign)) {
-                if (warpable instanceof Player && warp.getLocation().getWorld() != ((Player) warpable).getLocation().getWorld()) {
-                    warpable.sendMessage(ChatColor.RED + "The selected warp is in another world.");
-                    warpable.sendMessage(ChatColor.RED + "To force warping use /warp force-to <warp> [owner].");
+            if (warped.equals(warper) || MyWarp.permissions.permission(warper, PermissionTypes.ADMIN_WARP_OTHERS)) {
+                if (warp.playerCanWarp(warper, viaSign)) {
+                    Positionable warpedPos = WarperFactory.getPositionable(warped);
+                    if (!worldForce && warpedPos != null && warp.getLocation().getWorld() != warpedPos.getLocation().getWorld()) {
+                        warper.sendMessage(ChatColor.RED + "The selected warp is in another world.");
+                        warper.sendMessage(ChatColor.RED + "To force warping use /warp force-to <warp> [owner].");
+                    } else {
+                        if (warped.teleport(warp.getLocation())) {
+                            warped.sendMessage(ChatColor.AQUA + warp.welcomeMessage);
+                            if (!warped.equals(warper)) {
+                                warper.sendMessage("Sucessfully warped '" + ChatColor.GREEN + MinecraftUtil.getName(warped) + ChatColor.WHITE + "'");
+                            }
+                        } else {
+                            warper.sendMessage(ChatColor.RED + "Unable to warp.");
+                        }
+                    }
                 } else {
-                    warp.warp(warpable);
-                    warpable.sendMessage(ChatColor.AQUA + warp.welcomeMessage);
+                    warped.sendMessage(ChatColor.RED + "You do not have permission to warp to '" + warp.name + "'.");
                 }
             } else {
-                warpable.sendMessage(ChatColor.RED + "You do not have permission to warp to '" + warp.name + "'.");
+                warper.sendMessage(ChatColor.RED + "You do not have permission to warp others.");
             }
         } else {
-            WarpManager.sendMissingWarp(name, creator, warpable);
+            WarpManager.sendMissingWarp(name, creator, warped);
         }
     }
 

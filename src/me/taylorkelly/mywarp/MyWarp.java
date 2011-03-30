@@ -93,12 +93,14 @@ public class MyWarp extends JavaPlugin {
 
         MWBlockListener blockListener = new MWBlockListener(warpList);
         ServerListener serverListner = new ServerListener() {
+            @Override
             public void onPluginEnabled(PluginEvent event) {
                 if (event.getPlugin().getDescription().getName().equals("Permissions")) {
                     MyWarp.permissions.init(event.getPlugin());
                 }
             }
 
+            @Override
             public void onPluginDisabled(PluginEvent event) {
                 if (event.getPlugin().getDescription().getName().equals("Permissions")) {
                     MyWarp.permissions.init(null);

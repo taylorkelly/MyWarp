@@ -71,7 +71,9 @@ public class PermissionWrapper {
 		// Converts from hmod file
 		ADMIN_EDITORS_REMOVE("warp.admin.editors.remove"),
 		// Converts from hmod file
-		ADMIN_EDITORS_ADD("warp.admin.editors.add");
+		ADMIN_EDITORS_ADD("warp.admin.editors.add"),
+		// Warp other players
+		ADMIN_WARP_OTHERS("warp.admin.warp.others");
 
 		// Maybe upcoming permissions:
 		// Different admin permissions for each warp (only edit public warps
@@ -110,6 +112,7 @@ public class PermissionWrapper {
 		PermissionTypes.ADMIN_EXPORT,
 		PermissionTypes.ADMIN_EDITORS_ADD,
 		PermissionTypes.ADMIN_EDITORS_REMOVE,
+		PermissionTypes.ADMIN_WARP_OTHERS,
 	};
 	
 	private static PermissionTypes[] DEFAULT_PERMISSIONS = new PermissionTypes[] {

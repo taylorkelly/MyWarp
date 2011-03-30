@@ -5,6 +5,6 @@ import org.bukkit.command.CommandSender;
 
 public interface Warpable extends CommandSender {
 
-    void teleport(Location location);
+    boolean teleport(Location location);
     
 }

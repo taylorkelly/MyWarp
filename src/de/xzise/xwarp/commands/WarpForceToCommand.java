@@ -4,10 +4,10 @@ import me.taylorkelly.mywarp.MyWarp;
 
 import org.bukkit.Server;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
 
 import de.xzise.xwarp.WarpManager;
 import de.xzise.xwarp.PermissionWrapper.PermissionTypes;
+import de.xzise.xwarp.warpable.Warpable;
 import de.xzise.xwarp.warpable.WarperFactory;
 
 /* 
@@ -21,12 +21,11 @@ public class WarpForceToCommand extends WarpCommand {
 
     @Override
     protected boolean executeEdit(CommandSender sender, String warpName, String creator, String[] parameters) {
-        if (sender instanceof Player) {
-            this.list.warpTo(warpName, creator, WarperFactory.getWarpable(sender), false, true);
-            return true;
-        } else {
-            return false;
+        Warpable warpable = WarperFactory.getWarpable(sender);
+        if (warpable != null) {
+            this.list.warpTo(warpName, creator, sender, warpable, false, true);
         }
+        return true;
     }
     @Override
     protected String[] getFullHelpText() {

@@ -14,8 +14,9 @@ public class WarpablePlayer extends CommandSenderWrapper<Player> implements Warp
     }
     
     @Override
-    public void teleport(Location location) {
+    public boolean teleport(Location location) {
         this.sender.teleportTo(location);
+        return true;
     }
 
     @Override
