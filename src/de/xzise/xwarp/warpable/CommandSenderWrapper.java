@@ -29,4 +29,15 @@ public class CommandSenderWrapper<T extends CommandSender> implements CommandSen
     public Server getServer() {
         return this.sender.getServer();
     }
+    
+    @Override
+    public boolean equals(Object o) {
+        if (o instanceof CommandSender) {
+            return o.equals(this.sender);
+        } else if (o instanceof CommandSenderWrapper<?>) {
+            return ((CommandSenderWrapper<?>) o).sender.equals(this.sender);
+        } else {
+            return false;
+        }
+    }
 }
