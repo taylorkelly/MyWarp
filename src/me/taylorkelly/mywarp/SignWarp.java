@@ -32,8 +32,7 @@ public class SignWarp {
 	}
 	
 	public boolean warp(WarpManager list, Player player) {
-		String[] lines = SignWarp.getFilledLines(this.sign);
-		WarpDestination destination = SignWarp.getDestination(lines);
+		WarpDestination destination = this.getDestination();
 	
 		if (destination != null) {
 			list.warpTo(destination.name, destination.creator, player, WarperFactory.getWarpable(player), true);

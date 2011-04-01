@@ -23,11 +23,12 @@ public class WMPlayerListener extends PlayerListener {
     @Override
     public void onPlayerInteract(PlayerInteractEvent event) {
         Block block = event.getClickedBlock();
-        if (block.getState() instanceof Sign && MyWarp.permissions.permissionOr(event.getPlayer(), PermissionTypes.SIGN_WARP_GLOBAL, PermissionTypes.SIGN_WARP_INVITED, PermissionTypes.SIGN_WARP_OTHER, PermissionTypes.SIGN_WARP_OWN)) {
+        if (block != null && event.getPlayer() != null && block.getState() instanceof Sign && MyWarp.permissions.permissionOr(event.getPlayer(), PermissionTypes.SIGN_WARP_GLOBAL, PermissionTypes.SIGN_WARP_INVITED, PermissionTypes.SIGN_WARP_OTHER, PermissionTypes.SIGN_WARP_OWN)) {
             SignWarp signWarp = new SignWarp((Sign) block.getState());
-            signWarp.warp(this.manager, event.getPlayer());
-            event.setUseInteractedBlock(Result.DENY);
-            event.setCancelled(true);
+            if (signWarp.warp(this.manager, event.getPlayer())) {
+                event.setUseInteractedBlock(Result.DENY);
+                event.setCancelled(true);
+            }
         }
     }
 
