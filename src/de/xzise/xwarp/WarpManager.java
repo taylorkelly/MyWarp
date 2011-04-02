@@ -13,11 +13,14 @@ import org.bukkit.ChatColor;
 import org.bukkit.Server;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.Plugin;
 
 import de.xzise.MinecraftUtil;
 import de.xzise.xwarp.PermissionWrapper.PermissionTypes;
 import de.xzise.xwarp.dataconnections.DataConnection;
 import de.xzise.xwarp.dataconnections.IdentificationInterface;
+import de.xzise.xwarp.timer.CoolDown;
+import de.xzise.xwarp.timer.WarmUp;
 import de.xzise.xwarp.warpable.Positionable;
 import de.xzise.xwarp.warpable.Warpable;
 import de.xzise.xwarp.warpable.WarperFactory;
@@ -32,12 +35,16 @@ public class WarpManager {
     private WarpList list;
     private Server server;
     private DataConnection data;
+    private CoolDown coolDown;
+    private WarmUp warmUp;
 
-    public WarpManager(Server server, DataConnection data) {
+    public WarpManager(Plugin plugin, PluginProperties properties, DataConnection data) {
         this.list = new WarpList();
-        this.server = server;
+        this.server = plugin.getServer();
         this.data = data;
         this.loadFromDatabase();
+        this.coolDown = new CoolDown(plugin, properties);
+        this.warmUp = new WarmUp(plugin, properties, this.coolDown);
     }
 
     private void loadFromDatabase() {
@@ -436,13 +443,10 @@ public class WarpManager {
                         warper.sendMessage(ChatColor.RED + "The selected warp is in another world.");
                         warper.sendMessage(ChatColor.RED + "To force warping use /warp force-to <warp> [owner].");
                     } else {
-                        if (warped.teleport(warp.getLocation())) {
-                            warped.sendMessage(ChatColor.AQUA + warp.welcomeMessage);
-                            if (!warped.equals(warper)) {
-                                warper.sendMessage("Sucessfully warped '" + ChatColor.GREEN + MinecraftUtil.getName(warped) + ChatColor.WHITE + "'");
-                            }
+                        if (this.coolDown.playerHasCooled(warper)) {
+                            this.warmUp.addPlayer(warper, warped, warp);
                         } else {
-                            warper.sendMessage(ChatColor.RED + "Unable to warp.");
+                            warper.sendMessage(ChatColor.RED + "You need to wait for the cooldown of " + this.coolDown.cooldownTime(warp.visibility, warper) + " s");
                         }
                     }
                 } else {

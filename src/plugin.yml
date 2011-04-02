@@ -1,5 +1,5 @@
 name: xWarp
-version: 2.7.4-interact-fix
+version: 2.7.5-timers
 main: me.taylorkelly.mywarp.MyWarp
 description: Implementation to create warp points!
 authors:

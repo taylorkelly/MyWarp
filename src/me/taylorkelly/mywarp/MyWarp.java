@@ -80,7 +80,7 @@ public class MyWarp extends JavaPlugin {
             return;
         }
 
-        WarpManager warpList = new WarpManager(this.getServer(), this.dataConnection);
+        WarpManager warpList = new WarpManager(this, properties, this.dataConnection);
 
         // Create commands
         this.commands = null;

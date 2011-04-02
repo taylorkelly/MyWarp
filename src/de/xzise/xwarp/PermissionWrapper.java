@@ -73,7 +73,9 @@ public class PermissionWrapper {
 		// Converts from hmod file
 		ADMIN_EDITORS_ADD("warp.admin.editors.add"),
 		// Warp other players
-		ADMIN_WARP_OTHERS("warp.admin.warp.others");
+		ADMIN_WARP_OTHERS("warp.admin.warp.others"),
+		
+		;
 
 		// Maybe upcoming permissions:
 		// Different admin permissions for each warp (only edit public warps
@@ -93,6 +95,35 @@ public class PermissionWrapper {
 			}
 			return null;
 		}
+	}
+	
+	public enum PermissionValues {
+	    /*
+             * VALUES
+             */
+            WARP_COOLDOWN_PRIVATE("warp.timers.cooldown.private"),
+            WARP_COOLDOWN_PUBLIC("warp.timers.cooldown.public"),
+            WARP_COOLDOWN_GLOBAL("warp.timers.cooldown.global"),
+            
+            WARP_WARMUP_PRIVATE("warp.timers.warpup.private"),
+            WARP_WARMUP_PUBLIC("warp.timers.warpup.public"),
+            WARP_WARMUP_GLOBAL("warp.timers.warpup.global"),
+            ;
+
+            public final String name;
+
+            PermissionValues(String name) {
+                    this.name = name;
+            }
+            
+            public static PermissionTypes getType(String name) {
+                    for (PermissionTypes type : PermissionTypes.values()) {
+                            if (type.name.equals(name)) {
+                                    return type;
+                            }
+                    }
+                    return null;
+            }
 	}
 	
 	private static PermissionTypes[] ADMIN_PERMISSIONS = new PermissionTypes[] {
@@ -183,6 +214,15 @@ public class PermissionWrapper {
 			}
 		}
 		return true;
+	}
+	
+	public int getInteger(CommandSender sender, PermissionValues value, int def) {
+	    if (sender instanceof Player) {
+        	    int result = this.handler.getPermissionInteger(((Player) sender).getWorld().getName(), ((Player) sender).getName(), value.name);
+        	    return result < 0 ? def : result;
+	    } else {
+	        return def;
+	    }
 	}
 	
 	public void init(Plugin plugin) {
