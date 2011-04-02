@@ -36,11 +36,11 @@ public class PluginProperties {
     }
 
     public boolean isCooldownNotify() {
-        return cooldownNotify;
+        return this.cooldownNotify;
     }
 
     public boolean isWarmupNotify() {
-        return warmupNotify;
+        return this.warmupNotify;
     }
 
     public void read() {
@@ -75,8 +75,8 @@ public class PluginProperties {
             this.dataConnection = new SQLiteConnection(server);
         }
 
-        cooldownNotify = parseString(properties.getProperty("cooldown-notify", "true"));
-        cooldownNotify = parseString(properties.getProperty("warmup-notify", "true"));
+        this.cooldownNotify = parseString(properties.getProperty("cooldown-notify", "true"));
+        this.warmupNotify = parseString(properties.getProperty("warmup-notify", "true"));
     }
 
     public static boolean parseString(String string) {

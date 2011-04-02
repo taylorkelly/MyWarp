@@ -35,7 +35,6 @@ public class WarmUp {
            if (this.players.containsKey(warper)) {
                plugin.getServer().getScheduler().cancelTask(this.players.get(warper));
            }
-           //TODO: Why doesn't this message show up?
            if (this.properties.isWarmupNotify()) {
                warper.sendMessage(ChatColor.AQUA + "You will have to warm up for " + warmup + " secs");
            }
