@@ -35,10 +35,11 @@ public class WarmUp {
            if (this.players.containsKey(warper)) {
                plugin.getServer().getScheduler().cancelTask(this.players.get(warper));
            }
+           //TODO: Why doesn't this message show up?
            if (this.properties.isWarmupNotify()) {
-               warper.sendMessage(ChatColor.RED + "You will have to warm up for " + warmup + " secs");
+               warper.sendMessage(ChatColor.AQUA + "You will have to warm up for " + warmup + " secs");
            }
-           int taskIndex = plugin.getServer().getScheduler().scheduleSyncDelayedTask(plugin, new WarmTask(warper, warped, warp, this), warmup * 20);
+           int taskIndex = this.plugin.getServer().getScheduler().scheduleSyncDelayedTask(plugin, new WarmTask(warper, warped, warp, this), warmup * 20);
            this.players.put(warper, taskIndex);
        } else {
            this.sendPlayer(warper, warped, warp);
