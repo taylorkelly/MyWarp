@@ -101,9 +101,17 @@ public class PermissionWrapper {
         /*
          * VALUES
          */
+        // Cooldown
         WARP_COOLDOWN_PRIVATE("warp.timers.cooldown.private"), WARP_COOLDOWN_PUBLIC("warp.timers.cooldown.public"), WARP_COOLDOWN_GLOBAL("warp.timers.cooldown.global"),
 
-        WARP_WARMUP_PRIVATE("warp.timers.warmup.private"), WARP_WARMUP_PUBLIC("warp.timers.warmup.public"), WARP_WARMUP_GLOBAL("warp.timers.warmup.global"), ;
+        // Warm up
+        WARP_WARMUP_PRIVATE("warp.timers.warmup.private"), WARP_WARMUP_PUBLIC("warp.timers.warmup.public"), WARP_WARMUP_GLOBAL("warp.timers.warmup.global"), 
+        
+        // Prices
+        WARP_PRICES_TO_PRIVATE("warp.prices.to.private"), WARP_PRICES_TO_PUBLIC("warp.prices.to.public"), WARP_PRICES_TO_GLOBAL("warp.prices.to.global"),
+        WARP_PRICES_CREATE_PRIVATE("warp.prices.create.private"), WARP_PRICES_CREATE_PUBLIC("warp.prices.create.public"), WARP_PRICES_CREATE_GLOBAL("warp.prices.create.global"),
+        
+        ;
 
         public final String name;
 

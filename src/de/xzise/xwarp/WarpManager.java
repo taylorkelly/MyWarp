@@ -17,6 +17,7 @@ import org.bukkit.plugin.Plugin;
 
 import de.xzise.MinecraftUtil;
 import de.xzise.xwarp.PermissionWrapper.PermissionTypes;
+import de.xzise.xwarp.PermissionWrapper.PermissionValues;
 import de.xzise.xwarp.dataconnections.DataConnection;
 import de.xzise.xwarp.dataconnections.IdentificationInterface;
 import de.xzise.xwarp.timer.CoolDown;
@@ -37,14 +38,16 @@ public class WarpManager {
     private DataConnection data;
     private CoolDown coolDown;
     private WarmUp warmUp;
+    private EconomyWrapper economy;
 
-    public WarpManager(Plugin plugin, PluginProperties properties, DataConnection data) {
+    public WarpManager(Plugin plugin, EconomyWrapper economy, PluginProperties properties, DataConnection data) {
         this.list = new WarpList();
         this.server = plugin.getServer();
         this.data = data;
-        this.loadFromDatabase();
         this.coolDown = new CoolDown(plugin, properties);
         this.warmUp = new WarmUp(plugin, properties, this.coolDown);
+        this.economy = economy;
+        this.loadFromDatabase();
     }
 
     private void loadFromDatabase() {
@@ -82,23 +85,43 @@ public class WarpManager {
             } else if (visibility == Visibility.GLOBAL && globalWarp != null) {
                 player.sendMessage(ChatColor.RED + "Global warp called '" + name + "' already exists (" + globalWarp.name + ").");
             } else {
-                warp = new Warp(name, newOwner, player.getLocation());
-                warp.visibility = visibility;
-                this.list.addWarp(warp);
-                this.data.addWarp(warp);
-                player.sendMessage("Successfully created '" + ChatColor.GREEN + warp.name + ChatColor.WHITE + "'.");
+                
+                int price = 0;
                 switch (visibility) {
-                case PRIVATE:
-                    WarpManager.printPrivatizeMessage(player, warp);
-                    break;
-                case PUBLIC:
-                    if (MyWarp.permissions.permissionOr(player, PermissionTypes.CREATE_PRIVATE, PermissionTypes.ADMIN_PRIVATE)) {
-                        player.sendMessage("If you'd like to privatize it, use:");
-                        player.sendMessage(ChatColor.GREEN + "/warp private \"" + warp.name + "\" " + warp.creator);
+                case GLOBAL :
+                    price = MyWarp.permissions.getInteger(player, PermissionValues.WARP_PRICES_CREATE_GLOBAL, 0);
+                case PRIVATE :
+                    price = MyWarp.permissions.getInteger(player, PermissionValues.WARP_PRICES_CREATE_PRIVATE, 0);
+                case PUBLIC :
+                    price = MyWarp.permissions.getInteger(player, PermissionValues.WARP_PRICES_CREATE_PUBLIC, 0);
+                }
+                
+                switch (this.economy.pay(player, price)) {
+                case PAID:
+                    player.sendMessage(ChatColor.GREEN + "You have paid " + ChatColor.GREEN + this.economy.format(price) + ChatColor.WHITE + ".");
+                case UNABLE:
+                    warp = new Warp(name, newOwner, player.getLocation());
+                    warp.visibility = visibility;
+                    this.list.addWarp(warp);
+                    this.data.addWarp(warp);
+                    player.sendMessage("Successfully created '" + ChatColor.GREEN + warp.name + ChatColor.WHITE + "'.");
+                    switch (visibility) {
+                    case PRIVATE:
+                        WarpManager.printPrivatizeMessage(player, warp);
+                        break;
+                    case PUBLIC:
+                        if (MyWarp.permissions.permissionOr(player, PermissionTypes.CREATE_PRIVATE, PermissionTypes.ADMIN_PRIVATE)) {
+                            player.sendMessage("If you'd like to privatize it, use:");
+                            player.sendMessage(ChatColor.GREEN + "/warp private \"" + warp.name + "\" " + warp.creator);
+                        }
+                        break;
+                    case GLOBAL:
+                        player.sendMessage("This warp is now global available.");
+                        break;
                     }
                     break;
-                case GLOBAL:
-                    player.sendMessage("This warp is now global available.");
+                case NOT_ENOUGH:
+                    player.sendMessage(ChatColor.RED + "You have not enough money to pay this creation.");
                     break;
                 }
             }
@@ -443,8 +466,30 @@ public class WarpManager {
                         warper.sendMessage(ChatColor.RED + "The selected warp is in another world.");
                         warper.sendMessage(ChatColor.RED + "To force warping use /warp force-to <warp> [owner].");
                     } else {
+                        int price = 0;
+                        switch (warp.visibility) {
+                        case PRIVATE :
+                            price += MyWarp.permissions.getInteger(warper, PermissionValues.WARP_PRICES_TO_PRIVATE, 0);
+                            break;
+                        case PUBLIC :
+                            price += MyWarp.permissions.getInteger(warper, PermissionValues.WARP_PRICES_TO_PUBLIC, 0);
+                            break;
+                        case GLOBAL :
+                            price += MyWarp.permissions.getInteger(warper, PermissionValues.WARP_PRICES_TO_GLOBAL, 0);
+                            break;
+                        }
+                        
                         if (this.coolDown.playerHasCooled(warper)) {
-                            this.warmUp.addPlayer(warper, warped, warp);
+                            switch (this.economy.pay(warper, warp.creator, warp.getPrice(), price)) {
+                            case PAID:
+                                warper.sendMessage(ChatColor.GREEN + "You have paid " + ChatColor.GREEN + this.economy.format(price + warp.getPrice()) + ChatColor.WHITE + ".");
+                            case UNABLE:
+                                this.warmUp.addPlayer(warper, warped, warp);
+                                break;
+                            case NOT_ENOUGH:
+                                warper.sendMessage(ChatColor.RED + "You have not enough money to pay this warp.");
+                                break;
+                            }
                         } else {
                             warper.sendMessage(ChatColor.RED + "You need to wait for the cooldown of " + this.coolDown.cooldownTime(warp.visibility, warper) + " s");
                         }

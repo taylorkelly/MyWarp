@@ -43,6 +43,8 @@ public class Warp {
 	public String name;
 	public String creator;
 	private Location location;
+	/** This price will be transfered to the creator. */
+        private int price;
 	public Visibility visibility;
 	public String welcomeMessage;
 	public Map<String, EditorPermissions> editors;
@@ -241,6 +243,14 @@ public class Warp {
 			return false;
 		}
 	}
+
+    public void setPrice(int price) {
+        this.price = price;
+    }
+
+    public int getPrice() {
+        return this.price;
+    }
 }
 
 interface WarpComparator extends Comparator<Warp> {}
