@@ -3,7 +3,6 @@ package de.xzise.xwarp;
 import me.taylorkelly.mywarp.MyWarp;
 
 import org.bukkit.command.CommandSender;
-import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 
@@ -11,6 +10,7 @@ import com.nijiko.permissions.PermissionHandler;
 import com.nijikokun.bukkit.Permissions.Permissions;
 
 import de.xzise.MinecraftUtil;
+import de.xzise.xwarp.warpable.CommandSenderWrapper;
 
 public class PermissionWrapper {
 
@@ -146,14 +146,10 @@ public class PermissionWrapper {
     }
 
     public boolean permission(CommandSender sender, PermissionTypes permission) {
-        if (sender instanceof Player) {
-            if (this.handler != null) {
-                return this.handler.has((Player) sender, permission.name);
-            } else {
-                return this.permissionInternal(sender, permission);
-            }
-        } else if (sender instanceof ConsoleCommandSender) {
-            return true;
+        if (sender instanceof CommandSenderWrapper) {
+            return this.permission(((CommandSenderWrapper<?>) sender).getSender(), permission);
+        } else if (sender instanceof Player && this.handler != null) {
+            return this.handler.has((Player) sender, permission.name);
         } else {
             return this.permissionInternal(sender, permission);
         }
