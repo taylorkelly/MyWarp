@@ -84,7 +84,7 @@ public class ImportCommand extends DefaultSubCommand {
             if (notAllowedWarps.size() > 0) {
                 sender.sendMessage(ChatColor.RED + "Found " + notAllowedWarps.size() + " which cause naming conflicts.");
                 // Max lines - 1 (for the header) - 1 (for the succeed message)
-                if (notAllowedWarps.size() < MinecraftUtil.MAX_LINES_VISIBLE - 1) {
+                if (notAllowedWarps.size() < MinecraftUtil.getMaximumLines(sender) - 1) {
                     for (Warp warp : notAllowedWarps) {
                         sender.sendMessage(ChatColor.GREEN + warp.name + ChatColor.WHITE + " by " + ChatColor.GREEN + warp.creator);
                     }

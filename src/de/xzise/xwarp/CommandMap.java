@@ -9,6 +9,7 @@ import java.util.Map;
 import org.bukkit.Server;
 import org.bukkit.command.CommandSender;
 
+import de.xzise.MinecraftUtil;
 import de.xzise.xwarp.commands.AddEditorCommand;
 import de.xzise.xwarp.commands.ConvertCommand;
 import de.xzise.xwarp.commands.CreateCommand;
@@ -87,6 +88,14 @@ public class CommandMap {
             if (this.commands.put(text, command) != null) {
                 throw new IllegalArgumentException("command was already registered!");
             }
+        }
+    }
+    
+    public SubCommand getCommand(String name) {
+        if (MinecraftUtil.isSet(name)) {
+            return this.commands.get(name);
+        } else {
+            return this.warper;
         }
     }
 

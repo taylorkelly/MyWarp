@@ -3,7 +3,6 @@ package me.taylorkelly.mywarp;
 import org.bukkit.ChatColor;
 import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
-import org.bukkit.event.block.BlockCanBuildEvent;
 import org.bukkit.event.block.BlockListener;
 import org.bukkit.event.block.SignChangeEvent;
 
@@ -16,20 +15,6 @@ public class MWBlockListener extends BlockListener {
     
     public MWBlockListener(WarpManager list) {
         this.list = list;
-    }
-    
-    public void onBlockCanBuild(BlockCanBuildEvent event) {
-    	Block block = event.getBlock();
-        if(block.getState() instanceof Sign /*&& MyWarp.permissions.permission(event.getPlayer(), PermissionTypes.SIGN_WARP)*/) {
-        	SignWarp signWarp = new SignWarp((Sign) block.getState());
-        	if (signWarp.getDestination() != null) {
-        		MyWarp.logger.info("cb");
-        		event.setBuildable(false);
-        	}
-        	MyWarp.logger.info("cb pre");
-        } else {
-        	MyWarp.logger.info("cb !sign");
-        }
     }
     
     public void onSignChange(SignChangeEvent event) {

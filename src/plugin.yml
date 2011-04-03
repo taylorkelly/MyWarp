@@ -10,3 +10,6 @@ commands:
     description: Warp commands
     usage: /<command> help - Displays the help for xWarp
     aliases: [xwarp, w]
+  go:
+    description: Warps you to the saved location.
+    usage: /<command> [to] <warpname> [owner] [warped player]

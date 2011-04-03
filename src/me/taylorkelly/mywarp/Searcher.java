@@ -37,9 +37,9 @@ public class Searcher {
 	}
 
 	public void search(int page) {
-		int startIndex = (page - 1) * (MinecraftUtil.MAX_LINES_VISIBLE - 1);
-		int elementsLeft = MinecraftUtil.MAX_LINES_VISIBLE - 1;
-		int maxPages = (int) Math.ceil((this.exactMatches.size() + this.matches.size()) / (double) (MinecraftUtil.MAX_LINES_VISIBLE - 1));
+		int startIndex = (page - 1) * (MinecraftUtil.getMaximumLines(sender) - 1);
+		int elementsLeft = MinecraftUtil.getMaximumLines(sender) - 1;
+		int maxPages = (int) Math.ceil((this.exactMatches.size() + this.matches.size()) / (double) (MinecraftUtil.getMaximumLines(sender) - 1));
 		
 		if (exactMatches.size() == 0 && matches.size() == 0) {
 			this.sender.sendMessage(ChatColor.RED + "No warp matches for search: " + ChatColor.GRAY + query);
@@ -49,7 +49,7 @@ public class Searcher {
 			List<ListSection> sections = new ArrayList<ListSection>(2);
 				
 			if (this.exactMatches.size() > startIndex) {
-				ListSection section = new ListSection("Exact matches for search: " + ChatColor.GREEN + this.query);
+				ListSection section = new ListSection("Exact matches for search: " + ChatColor.GREEN + this.query, MinecraftUtil.getMaximumLines(sender));
 				elementsLeft--;
 				for (Warp warp : exactMatches) {
 					if (elementsLeft > 0) {

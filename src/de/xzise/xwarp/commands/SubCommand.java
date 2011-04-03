@@ -4,13 +4,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.bukkit.ChatColor;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 
 /**
  * Basical subcommand without any list.
  * @author Fabian Neundorf.
  */
-public abstract class SubCommand {
+public abstract class SubCommand implements CommandExecutor {
 
 	protected final String[] commands;
 
@@ -90,5 +92,10 @@ public abstract class SubCommand {
 	 */
 	protected boolean listHelp(CommandSender sender) {
 		return true;
-	}	
+	}
+	
+	@Override
+	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+	    return this.execute(sender, args);
+	}
 }

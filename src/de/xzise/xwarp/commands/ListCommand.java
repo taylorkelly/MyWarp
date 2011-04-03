@@ -34,7 +34,7 @@ public class ListCommand extends DefaultSubCommand {
 			int page;
 			int maxPages = -1;
 			
-			ListSection section = new ListSection("");
+			ListSection section = new ListSection("", MinecraftUtil.getMaximumLines(sender));
 			
 			if (parameters.length == 3 || (parameters.length == 2 && !MinecraftUtil.isInteger(parameters[1]))) {
 				creator = this.getPlayer(parameters[1]);
@@ -49,7 +49,7 @@ public class ListCommand extends DefaultSubCommand {
 				page = 1;
 			}
 			
-			maxPages = getNumberOfPages(this.list.getSize(sender, creator));
+			maxPages = getNumberOfPages(this.list.getSize(sender, creator), sender);
 			
 			if (maxPages < 1) {
 				sender.sendMessage(ChatColor.RED + "There are no warps to list");
@@ -62,15 +62,15 @@ public class ListCommand extends DefaultSubCommand {
 				return true;
 			}			
 			
-			section.addWarps(this.list.getSortedWarps(sender, creator, (page - 1) * (MinecraftUtil.MAX_LINES_VISIBLE - 1), MinecraftUtil.MAX_LINES_VISIBLE - 1));
+			section.addWarps(this.list.getSortedWarps(sender, creator, (page - 1) * (MinecraftUtil.getMaximumLines(sender) - 1), MinecraftUtil.getMaximumLines(sender) - 1));
 			
 			GenericLister.listPage(page, maxPages, new ListSection[] { section }, sender);
 		}
 		return true;
 	}
 	
-	private static int getNumberOfPages(int elements) {
-		return (int) Math.ceil(elements / (double) (MinecraftUtil.MAX_LINES_VISIBLE - 1));
+	private static int getNumberOfPages(int elements, CommandSender sender) {
+		return (int) Math.ceil(elements / (double) (MinecraftUtil.getMaximumLines(sender) - 1));
 	}
 
 	@Override

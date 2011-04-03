@@ -91,6 +91,8 @@ public class MyWarp extends JavaPlugin {
             this.getServer().getPluginManager().disablePlugin(this);
             return;
         }
+        
+        this.getCommand("go").setExecutor(this.commands.getCommand(""));
 
         MWBlockListener blockListener = new MWBlockListener(warpList);
         ServerListener serverListner = new ServerListener() {
@@ -121,10 +123,6 @@ public class MyWarp extends JavaPlugin {
         this.getServer().getPluginManager().registerEvent(Event.Type.SIGN_CHANGE, blockListener, Priority.Low, this);
         this.getServer().getPluginManager().registerEvent(Event.Type.PLUGIN_ENABLE, serverListner, Priority.Low, this);
         this.getServer().getPluginManager().registerEvent(Event.Type.PLUGIN_DISABLE, serverListner, Priority.Low, this);
-        // this.getServer().getPluginManager().registerEvent(Event.Type.BLOCK_CANBUILD,
-        // blockListener, Priority.Normal, this);
-        // this.getServer().getPluginManager().registerEvent(Event.Type.BLOCK_PLACED,
-        // blockListener, Priority.Low, this);
         MyWarp.logger.info(name + " " + version + " enabled");
     }
 

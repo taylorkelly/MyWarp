@@ -37,7 +37,7 @@ public class HelpCommand extends SubCommand {
 		}
 		
 		Integer page = null;
-		int maxPage = lines.size() / (MinecraftUtil.MAX_LINES_VISIBLE - 1);
+		int maxPage = lines.size() / (MinecraftUtil.getMaximumLines(sender) - 1);
 		if (parameters.length == 2) {
 			if ((page = MinecraftUtil.tryAndGetInteger(parameters[1])) != null) {
 				if (page < 1) {
@@ -63,7 +63,7 @@ public class HelpCommand extends SubCommand {
 			page = 1;
 		}
 		sender.sendMessage(ChatColor.WHITE + "------------------ " + ChatColor.GREEN + "xWarp Help " + page + "/" + maxPage + ChatColor.WHITE + " ------------------");
-		for (int i = (page - 1) * (MinecraftUtil.MAX_LINES_VISIBLE - 1); i < lines.size() && i < page * (MinecraftUtil.MAX_LINES_VISIBLE - 1); i++) {
+		for (int i = (page - 1) * (MinecraftUtil.getMaximumLines(sender) - 1); i < lines.size() && i < page * (MinecraftUtil.getMaximumLines(sender) - 1); i++) {
 			sender.sendMessage(lines.get(i));
 		}
 		return true;
