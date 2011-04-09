@@ -36,20 +36,20 @@ public abstract class WarpCommand extends DefaultSubCommand {
 		if (parameters.length != this.length + 1 && parameters.length != this.length + 2) {
 			return false;
 		}
-		String creator = "";
+		String owner = "";
 		int parameterStartIndex = 2;
 		if (parameters.length == this.length + 2) {
-			creator = this.getPlayer(parameters[2]);
+			owner = this.getPlayer(parameters[2]);
 			parameterStartIndex++;
 		}
 		String[] parameters2 = new String[this.parametersText.length];
 		for (int i = 0; i < parameters2.length; i++) {
 			parameters2[i] = parameters[i + parameterStartIndex];
 		}
-		return this.executeEdit(sender, parameters[1], creator, parameters2);
+		return this.executeEdit(sender, parameters[1], owner, parameters2);
 	}
 	
-	protected abstract boolean executeEdit(CommandSender sender, String warpName, String creator, String[] parameters);
+	protected abstract boolean executeEdit(CommandSender sender, String warpName, String owner, String[] parameters);
 	
 	protected String getParameterText(boolean colorBeginning, boolean colorEnding, int index) {
 		return (colorBeginning ? ChatColor.GREEN : "") + this.parametersText[index] + (colorEnding ? ChatColor.WHITE : "");

@@ -22,6 +22,7 @@ import de.xzise.xwarp.commands.ImportCommand;
 import de.xzise.xwarp.commands.InfoCommand;
 import de.xzise.xwarp.commands.InviteCommand;
 import de.xzise.xwarp.commands.ListCommand;
+import de.xzise.xwarp.commands.MessageCommand;
 import de.xzise.xwarp.commands.PermissionsCommand;
 import de.xzise.xwarp.commands.PrivatizeCommand;
 import de.xzise.xwarp.commands.PublicizeCommand;
@@ -61,6 +62,7 @@ public class CommandMap {
         subCommands.add(new UninviteCommand(list, server));
         subCommands.add(new InviteCommand(list, server));
         subCommands.add(new GiveCommand(list, server));
+        subCommands.add(new MessageCommand(list, server));
         subCommands.add(new AddEditorCommand(list, server));
         subCommands.add(new RemoveEditorCommand(list, server));
         subCommands.add(new PrivatizeCommand(list, server));
