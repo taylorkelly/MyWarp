@@ -39,6 +39,7 @@ public class InfoCommand extends WarpCommand {
             }
 
             sender.sendMessage("Creator: " + ChatColor.GREEN + warp.creator + groupText);
+            sender.sendMessage("Owner: " + ChatColor.GREEN + warp.getOwner() + groupText);
             String visibility = "";
             switch (warp.visibility) {
             case GLOBAL:

@@ -305,7 +305,8 @@ public class SQLiteConnection implements DataConnection {
                 Location loc = new Location(world, x, y, z, yaw, pitch);
                 Visibility visibility = Visibility.parseLevel(set.getInt("publicLevel"));
                 String welcomeMessage = set.getString("welcomeMessage");
-                Warp warp = new Warp(index, name, creator, loc, visibility, m.get(index), welcomeMessage);
+                String owner = set.getString("owner");
+                Warp warp = new Warp(index, name, creator, owner, loc, visibility, m.get(index), welcomeMessage);
                 result.add(warp);
                 if (!warp.isValid()) {
                     invalidSize++;

@@ -134,7 +134,7 @@ public class GenericLister {
 	}
 	
 	public static ChatColor getColor(Warp warp, Player player) {
-		if(player != null && warp.playerIsCreator(player.getName())) {
+		if(player != null && warp.isOwn(player.getName())) {
 			switch (warp.visibility) {
 			case PRIVATE :
 				return GenericLister.PRIVATE_OWN;
