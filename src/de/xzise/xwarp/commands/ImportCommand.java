@@ -32,7 +32,6 @@ public class ImportCommand extends DefaultSubCommand {
     protected boolean internalExecute(CommandSender sender, String[] parameters) {
         if (parameters.length >= 2) {
             DataConnection connection = DataConnectionFactory.getConnection(this.server, parameters[1]);
-            ;
             if (connection == null) {
                 sender.sendMessage(ChatColor.RED + "Unrecognized import type.");
                 return true;
@@ -73,6 +72,10 @@ public class ImportCommand extends DefaultSubCommand {
                 } else {
                     notAllowedWarps.add(warp);
                 }
+            }
+
+            for (Warp warp : allowedWarps) {
+                warp.assignNewId();
             }
 
             if (allowedWarps.size() > 0) {

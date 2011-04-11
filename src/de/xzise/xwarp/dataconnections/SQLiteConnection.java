@@ -126,7 +126,15 @@ public class SQLiteConnection implements DataConnection {
                         convertedWarp.setString(2, set.getString("name"));
                         convertedWarp.setString(3, set.getString("creator"));
                         if (version < 1) {
-                            convertedWarp.setString(4, world);
+                            String worldName = set.getString("world");
+                            if (worldName.equals("0")) {
+                                convertedWarp.setString(4, world);
+                            } else {
+                                if (this.server.getWorld(set.getString("world")) == null) {
+                                    MyWarp.logger.info("Found warp with unknown world. (Name: " + set.getString("name") + ")");
+                                }
+                                convertedWarp.setString(4, set.getString("world"));
+                            }
                         } else {
                             convertedWarp.setString(4, set.getString("world"));
                         }

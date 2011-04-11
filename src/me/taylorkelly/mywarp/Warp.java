@@ -88,6 +88,10 @@ public class Warp {
 		}
 	}
 
+    public void assignNewId() {
+        this.index = nextIndex++;
+    }
+
 	public boolean playerCanWarp(CommandSender sender, boolean viaSign) {
 	    String name = null;
 	    if (sender instanceof WarpablePlayer) {
