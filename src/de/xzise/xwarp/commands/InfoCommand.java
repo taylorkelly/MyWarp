@@ -25,21 +25,16 @@ public class InfoCommand extends WarpCommand {
         Warp warp = this.list.getWarp(warpName, owner, MinecraftUtil.getPlayerName(sender));
         if (warp != null) {
             sender.sendMessage("Warp info: " + ChatColor.GREEN + warp.name);
-            String group = null;
+            String world;
             if (warp.isValid()) {
-                group = MyWarp.permissions.getGroup(warp.getLocation().getWorld().getName(), warp.getOwner());
+                world = warp.getLocation().getWorld().getName();
             } else {
                 sender.sendMessage(ChatColor.RED + "The location is invalid!");
-                group = MyWarp.permissions.getGroup(server.getWorlds().get(0).getName(), warp.getOwner());
+                world = this.server.getWorlds().get(0).getName();
             }
 
-            String groupText = "";
-            if (group != null) {
-                groupText = ChatColor.WHITE + " (Group: " + ChatColor.GREEN + group + ChatColor.WHITE + ")";
-            }
-
-            sender.sendMessage("Creator: " + ChatColor.GREEN + warp.getCreator() + groupText);
-            sender.sendMessage("Owner: " + ChatColor.GREEN + warp.getOwner() + groupText);
+            sender.sendMessage("Creator: " + getPlayerLine(warp.getCreator(), world));
+            sender.sendMessage("Owner: " + getPlayerLine(warp.getOwner(), world));
             String visibility = "";
             switch (warp.visibility) {
             case GLOBAL:
@@ -99,6 +94,21 @@ public class InfoCommand extends WarpCommand {
         return true;
     }
 
+    private static String getPlayerLine(String player, String world) {
+        if (MinecraftUtil.isSet(player)) {
+            String group = MyWarp.permissions.getGroup(world, player);
+    
+            String groupText = "";
+            if (group != null) {
+                groupText = ChatColor.WHITE + " (Group: " + ChatColor.GREEN + group + ChatColor.WHITE + ")";
+            }
+    
+            return ChatColor.GREEN + player + groupText;
+        } else {
+            return "Nobody";
+        }
+    }
+    
     @Override
     protected String[] getFullHelpText() {
         return new String[] { "Show the information about the warp." };
