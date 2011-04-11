@@ -10,6 +10,7 @@ import org.bukkit.command.CommandSender;
 
 import de.xzise.MinecraftUtil;
 
+import me.taylorkelly.mywarp.MyWarp;
 import me.taylorkelly.mywarp.Warp;
 import me.taylorkelly.mywarp.Warp.Visibility;
 
@@ -84,6 +85,9 @@ public class WarpList {
         for (Map<String, Warp> personalWarps : this.personal.values()) {
             personalWarps.clear();
         }
+        for (Map<String, Warp> creatorWarps : this.creatorMap.values()) {
+            creatorWarps.clear();
+        }
         for (GlobalMap globalWarps : this.global.values()) {
             globalWarps.clear();
         }
@@ -95,13 +99,19 @@ public class WarpList {
     }
 
     public void addWarp(Warp warp) {
+
+        if (warp.getOwner() == null) {
+            MyWarp.logger.severe("own null: " + warp.name + " by " + warp.getCreator());
+            return;
+        }
+        
         GlobalMap namedWarps = this.global.get(warp.name.toLowerCase());
         if (namedWarps == null) {
             namedWarps = new GlobalMap();
             this.global.put(warp.name.toLowerCase(), namedWarps);
         }
         namedWarps.put(warp);
-
+        
         Map<String, Warp> personalWarps = this.personal.get(warp.getOwner().toLowerCase());
         if (personalWarps == null) {
             personalWarps = new HashMap<String, Warp>();

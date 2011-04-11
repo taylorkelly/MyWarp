@@ -55,6 +55,7 @@ public class Warp {
 		this.index = index;
 		this.name = name;
 		this.creator = creator;
+		this.owner = owner;
 		this.location = location.clone();
 		this.visibility = visibility;
 		if (permissions == null) {
@@ -128,6 +129,10 @@ public class Warp {
 	public boolean isOwn(String name) {
 	    return this.owner.equals(name);
 	}
+	
+	public boolean isCreator(String name) {
+	    return this.creator.equals(name);
+	}
 
 	public void invite(String player) {
 		this.getPermissions(player).put(Permissions.WARP, true);
@@ -169,9 +174,9 @@ public class Warp {
         return false;
     }
 
-	public void setCreator(String giveeName) {
-		this.creator = giveeName;
-	}
+    public void setCreator(String creator) {
+        this.creator = creator;
+    }
 	
 	public void setMessage(String message) {
 		this.welcomeMessage = message;

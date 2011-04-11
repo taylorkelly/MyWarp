@@ -46,8 +46,6 @@ public class PermissionWrapper {
         ADMIN_INVITE("warp.admin.invite"),
         // Uninvite to all warps
         ADMIN_UNINVITE("warp.admin.uninvite"),
-        // Give away all warps
-        ADMIN_GIVE("warp.admin.give"),
         // Edit the welcome message of all warps
         ADMIN_MESSAGE("warp.admin.message"),
         // Update all warps
@@ -72,8 +70,12 @@ public class PermissionWrapper {
         ADMIN_EDITORS_REMOVE("warp.admin.editors.remove"),
         // Converts from hmod file
         ADMIN_EDITORS_ADD("warp.admin.editors.add"),
+        // Give away all warps
+        ADMIN_CHANGE_OWNER("warp.admin.give.owner"),
+        // Change the creator
+        ADMIN_CHANGE_CREATOR("warp.admin.changecreator"),
         // Warp other players
-        ADMIN_WARP_OTHERS("warp.admin.warp.others"),
+        ADMIN_WARP_OTHERS("warp.admin.warp.others"), 
 
         ;
 
@@ -130,7 +132,7 @@ public class PermissionWrapper {
         }
     }
 
-    private static PermissionTypes[] ADMIN_PERMISSIONS = new PermissionTypes[] { PermissionTypes.ADMIN_DELETE, PermissionTypes.ADMIN_INVITE, PermissionTypes.ADMIN_UNINVITE, PermissionTypes.ADMIN_GIVE, PermissionTypes.ADMIN_MESSAGE, PermissionTypes.ADMIN_UPDATE, PermissionTypes.ADMIN_TO_ALL, PermissionTypes.ADMIN_GLOBAL, PermissionTypes.ADMIN_PUBLIC, PermissionTypes.ADMIN_PRIVATE, PermissionTypes.ADMIN_RELOAD, PermissionTypes.ADMIN_RENAME, PermissionTypes.ADMIN_CONVERT, PermissionTypes.ADMIN_EXPORT, PermissionTypes.ADMIN_EDITORS_ADD, PermissionTypes.ADMIN_EDITORS_REMOVE, PermissionTypes.ADMIN_WARP_OTHERS, };
+    private static PermissionTypes[] ADMIN_PERMISSIONS = new PermissionTypes[] { PermissionTypes.ADMIN_DELETE, PermissionTypes.ADMIN_INVITE, PermissionTypes.ADMIN_UNINVITE, PermissionTypes.ADMIN_CHANGE_OWNER, PermissionTypes.ADMIN_MESSAGE, PermissionTypes.ADMIN_UPDATE, PermissionTypes.ADMIN_TO_ALL, PermissionTypes.ADMIN_GLOBAL, PermissionTypes.ADMIN_PUBLIC, PermissionTypes.ADMIN_PRIVATE, PermissionTypes.ADMIN_RELOAD, PermissionTypes.ADMIN_RENAME, PermissionTypes.ADMIN_CONVERT, PermissionTypes.ADMIN_EXPORT, PermissionTypes.ADMIN_EDITORS_ADD, PermissionTypes.ADMIN_EDITORS_REMOVE, PermissionTypes.ADMIN_WARP_OTHERS, PermissionTypes.ADMIN_CHANGE_CREATOR, };
 
     private static PermissionTypes[] DEFAULT_PERMISSIONS = new PermissionTypes[] { PermissionTypes.TO_GLOBAL, PermissionTypes.TO_OWN, PermissionTypes.TO_OTHER, PermissionTypes.TO_INVITED, PermissionTypes.SIGN_WARP_GLOBAL, PermissionTypes.SIGN_WARP_OWN, PermissionTypes.SIGN_WARP_OTHER, PermissionTypes.SIGN_WARP_INVITED, PermissionTypes.CREATE_PRIVATE, PermissionTypes.CREATE_PUBLIC, PermissionTypes.CREATE_GLOBAL, };
 

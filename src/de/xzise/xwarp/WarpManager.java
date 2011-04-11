@@ -168,6 +168,29 @@ public class WarpManager {
         }
     }
 
+    public void changeCreator(String name, String owner, CommandSender sender, String newCreator) {
+        Warp warp = this.getWarp(name, owner, MinecraftUtil.getPlayerName(sender));
+        if (warp != null) {
+            if (MyWarp.permissions.permission(sender, PermissionTypes.ADMIN_CHANGE_CREATOR)) {
+                if (warp.isCreator(newCreator)) {
+                    sender.sendMessage(ChatColor.RED + newCreator + " is already the creator.");
+                } else {
+                    warp.setCreator(newCreator);
+                    this.data.updateCreator(warp);
+                    sender.sendMessage("You have changed the creator of '" + ChatColor.GREEN + warp.name + ChatColor.WHITE + "' to " + ChatColor.GREEN + newCreator + ChatColor.WHITE + ".");
+                    Player match = server.getPlayer(newCreator);
+                    if (match != null) {
+                        match.sendMessage("You're now creator of '" + ChatColor.GREEN + warp.name + ChatColor.WHITE + "' by " + MinecraftUtil.getName(sender));
+                    }
+                }
+            } else {
+                sender.sendMessage(ChatColor.RED + "You do not have permission to give '" + warp.name + "'");
+            }
+        } else {
+            WarpManager.sendMissingWarp(name, owner, sender);
+        }
+    }
+    
     public void give(String name, String owner, CommandSender sender, String giveeName) {
         Warp warp = this.getWarp(name, owner, MinecraftUtil.getPlayerName(sender));
         if (warp != null) {
@@ -178,7 +201,7 @@ public class WarpManager {
                     Warp giveeWarp = this.getWarp(name, giveeName, null);
                     if (giveeWarp == null) {
                         IdentificationInterface ii = this.data.createIdentification(warp);
-                        warp.setCreator(giveeName);
+                        warp.setOwner(giveeName);
                         this.data.updateOwner(warp, ii);
                         sender.sendMessage("You have given '" + ChatColor.GREEN + warp.name + ChatColor.WHITE + "' to " + ChatColor.GREEN + giveeName + ChatColor.WHITE + ".");
                         Player match = server.getPlayer(giveeName);

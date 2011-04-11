@@ -8,7 +8,7 @@ import de.xzise.xwarp.WarpManager;
 public class GiveCommand extends WarpCommand {
 
 	public GiveCommand(WarpManager list, Server server) {
-		super(list, server, "player", "give");
+		super(list, server, "player", "give", "chown");
 	}
 
 	@Override

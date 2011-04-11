@@ -11,6 +11,7 @@ import org.bukkit.command.CommandSender;
 
 import de.xzise.MinecraftUtil;
 import de.xzise.xwarp.commands.AddEditorCommand;
+import de.xzise.xwarp.commands.ChangeCreatorCommand;
 import de.xzise.xwarp.commands.CreateCommand;
 import de.xzise.xwarp.commands.DeleteCommand;
 import de.xzise.xwarp.commands.ExportCommand;
@@ -71,6 +72,7 @@ public class CommandMap {
         subCommands.add(new ListCommand(list, server));
         subCommands.add(new InfoCommand(list, server));
         subCommands.add(new ReloadCommand(list, server));
+        subCommands.add(new ChangeCreatorCommand(list, server));
         subCommands.add(new PermissionsCommand(list, server));
         subCommands.add(new ExportCommand(list, server, pluginPath));
         subCommands.add(new ImportCommand(list, pluginPath, data, server));
