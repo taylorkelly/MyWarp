@@ -41,7 +41,7 @@ public class Warp {
 	
 	public int index;
 	public String name;
-	public String creator;
+	private String creator;
 	private Location location;
 	private String owner;
 	public Visibility visibility;
@@ -88,6 +88,10 @@ public class Warp {
 			return false;
 		}
 	}
+
+    public void assignNewId() {
+        this.index = nextIndex++;
+    }
 
 	public boolean playerCanWarp(CommandSender sender, boolean viaSign) {
 	    String name = null;
@@ -180,15 +184,19 @@ public class Warp {
 	public boolean isValid() {
 		return this.location.getWorld() != null;
 	}
-	
-	public String getOwner() {
-	    return this.owner;
-	}
-	
-	public void setOwner(String owner) {
-	    this.owner = owner;
-	}
-	
+
+    public String getOwner() {
+        return this.owner;
+    }
+
+    public void setOwner(String owner) {
+        this.owner = owner;
+    }
+
+    public String getCreator() {
+        return this.creator;
+    }
+
 	public void setLocation(Location location) {
 		this.location = location.clone();
 	}

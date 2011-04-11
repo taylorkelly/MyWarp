@@ -8,6 +8,8 @@ import java.util.Map;
 
 import org.bukkit.command.CommandSender;
 
+import de.xzise.MinecraftUtil;
+
 import me.taylorkelly.mywarp.Warp;
 import me.taylorkelly.mywarp.Warp.Visibility;
 
@@ -27,14 +29,14 @@ public class WarpList {
             if (warp.visibility == Visibility.GLOBAL) {
                 this.global = warp;
             }
-            this.all.put(warp.creator.toLowerCase(), warp);
+            this.all.put(warp.getCreator().toLowerCase(), warp);
         }
 
         public void delete(Warp warp) {
             if (warp.equals(this.global)) {
                 this.global = null;
             }
-            this.all.remove(warp.creator.toLowerCase());
+            this.all.remove(warp.getCreator().toLowerCase());
         }
 
         public Warp getWarp(String playerName) {
@@ -107,17 +109,21 @@ public class WarpList {
         }
         personalWarps.put(warp.name.toLowerCase(), warp);
         
-        Map<String, Warp> creatorWarps = this.creatorMap.get(warp.creator.toLowerCase());
-        if (creatorWarps == null) {
-            creatorWarps = new HashMap<String, Warp>();
-            this.creatorMap.put(warp.creator.toLowerCase(), creatorWarps);
+        if (MinecraftUtil.isSet(warp.getCreator())) {
+            Map<String, Warp> creatorWarps = this.creatorMap.get(warp.getCreator().toLowerCase());
+            if (creatorWarps == null) {
+                creatorWarps = new HashMap<String, Warp>();
+                this.creatorMap.put(warp.getCreator().toLowerCase(), creatorWarps);
+            }
+            creatorWarps.put(warp.name.toLowerCase(), warp);
         }
-        creatorWarps.put(warp.name.toLowerCase(), warp);
     }
 
     public void deleteWarp(Warp warp) {
         this.global.get(warp.name.toLowerCase()).delete(warp);
-        this.creatorMap.get(warp.creator.toLowerCase()).remove(warp.name.toLowerCase());
+        if (MinecraftUtil.isSet(warp.getCreator())) {
+            this.creatorMap.get(warp.getCreator().toLowerCase()).remove(warp.name.toLowerCase());
+        }
         this.personal.get(warp.getOwner().toLowerCase()).remove(warp.name.toLowerCase());
     }
 

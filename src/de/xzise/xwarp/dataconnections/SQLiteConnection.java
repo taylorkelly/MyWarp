@@ -34,7 +34,7 @@ public class SQLiteConnection implements DataConnection {
 
     private final static String VERSION_TABLE = "CREATE TABLE `meta` (`name` varchar(32) NOT NULL, `value` int NOT NULL);";
 
-    private final static int TARGET_VERSION = 2;
+    private final static int TARGET_VERSION = 3;
 
     private Server server;
     private Connection connection;
@@ -91,7 +91,7 @@ public class SQLiteConnection implements DataConnection {
 
     private void update() {
         int version = getVersion();
-
+        
         if (version < TARGET_VERSION) {
             MyWarp.logger.info("Database layout is outdated (" + version + ")! Updating to " + TARGET_VERSION + ".");
             Statement statement = null;
@@ -119,14 +119,22 @@ public class SQLiteConnection implements DataConnection {
                     String world = server.getWorlds().get(0).getName();
                     set = statement.executeQuery("SELECT * FROM warpTable_backup");
                     List<WarpPermission> list = new ArrayList<WarpPermission>();
-                    convertedWarp = this.connection.prepareStatement("INSERT INTO warpTable (id, name, creator, world, x, y, z, yaw, pitch, publicLevel, welcomeMessage) VALUES (?,?,?,?,?,?,?,?,?,?,?)");
+                    convertedWarp = this.connection.prepareStatement("INSERT INTO warpTable (id, name, creator, world, x, y, z, yaw, pitch, publicLevel, welcomeMessage, owner) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)");
                     while (set.next()) {
                         int id = set.getInt("id");
                         convertedWarp.setInt(1, id);
                         convertedWarp.setString(2, set.getString("name"));
                         convertedWarp.setString(3, set.getString("creator"));
                         if (version < 1) {
-                            convertedWarp.setString(4, world);
+                            String worldName = set.getString("world");
+                            if (worldName.equals("0")) {
+                                convertedWarp.setString(4, world);
+                            } else {
+                                if (this.server.getWorld(set.getString("world")) == null) {
+                                    MyWarp.logger.info("Found warp with unknown world. (Name: " + set.getString("name") + ")");
+                                }
+                                convertedWarp.setString(4, set.getString("world"));
+                            }
                         } else {
                             convertedWarp.setString(4, set.getString("world"));
                         }
@@ -151,7 +159,16 @@ public class SQLiteConnection implements DataConnection {
                             }
                         }
                         convertedWarp.setString(11, set.getString("welcomeMessage"));
+                        if (version < 3) {
+                            convertedWarp.setString(12, set.getString("creator"));
+                        } else {
+                            convertedWarp.setString(12, set.getString("owner"));
+                        }
                         convertedWarp.executeUpdate();
+                    }
+                    
+                    if (version < 3) {
+                        
                     }
 
                     if (version < 2) {
@@ -344,16 +361,17 @@ public class SQLiteConnection implements DataConnection {
             PreparedStatement ps = null;
             PreparedStatement insertPermissions = null;
             try {
-                ps = this.connection.prepareStatement("INSERT INTO warpTable (id, name, creator, world, x, y, z, yaw, pitch, publicLevel, welcomeMessage) VALUES (?,?,?,?,?,?,?,?,?,?,?)");
+                ps = this.connection.prepareStatement("INSERT INTO warpTable (id, name, creator, world, x, y, z, yaw, pitch, publicLevel, welcomeMessage, owner) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)");
                 insertPermissions = this.connection.prepareStatement("INSERT INTO permissions (id, editor, value) VALUES (?,?,?)");
                 for (Warp warp : warps) {
                     if (warp.isValid()) {
                         ps.setInt(1, warp.index);
                         ps.setString(2, warp.name);
-                        ps.setString(3, warp.creator);
+                        ps.setString(3, warp.getCreator());
                         setLocation(warp.getLocation(), 4, ps);
                         ps.setInt(10, warp.visibility.level);
                         ps.setString(11, warp.welcomeMessage);
+                        ps.setString(12, warp.getOwner());
                         ps.addBatch();
 
                         for (String editor : warp.getEditors()) {
@@ -438,17 +456,29 @@ public class SQLiteConnection implements DataConnection {
     }
 
     @Override
-    public void updateCreator(Warp warp, IdentificationInterface identification) {
-        this.updateWarp(warp, "Creator", "UPDATE warpTable SET creator = ? WHERE id = ?", new UpdateFiller() {
+    public void updateOwner(Warp warp, IdentificationInterface identification) {
+        this.updateWarp(warp, "Owner", "UPDATE warpTable SET owner = ? WHERE id = ?", new UpdateFiller() {
 
             @Override
             public void fillStatement(Warp warp, PreparedStatement statement) throws SQLException {
-                statement.setString(1, warp.creator);
+                statement.setString(1, warp.getOwner());
                 statement.setInt(2, warp.index);
             }
         });
     }
 
+    @Override
+    public void updateCreator(Warp warp) {
+        this.updateWarp(warp, "Creator", "UPDATE warpTable SET creator = ? WHERE id = ?", new UpdateFiller() {
+
+            @Override
+            public void fillStatement(Warp warp, PreparedStatement statement) throws SQLException {
+                statement.setString(1, warp.getCreator());
+                statement.setInt(2, warp.index);
+            }
+        });
+    }
+    
     @Override
     public void updateMessage(Warp warp) {
         this.updateWarp(warp, "Welcome Message", "UPDATE warpTable SET welcomeMessage = ? WHERE id = ?", new UpdateFiller() {

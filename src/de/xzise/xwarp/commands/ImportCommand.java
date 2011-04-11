@@ -32,7 +32,6 @@ public class ImportCommand extends DefaultSubCommand {
     protected boolean internalExecute(CommandSender sender, String[] parameters) {
         if (parameters.length >= 2) {
             DataConnection connection = DataConnectionFactory.getConnection(this.server, parameters[1]);
-            ;
             if (connection == null) {
                 sender.sendMessage(ChatColor.RED + "Unrecognized import type.");
                 return true;
@@ -75,6 +74,10 @@ public class ImportCommand extends DefaultSubCommand {
                 }
             }
 
+            for (Warp warp : allowedWarps) {
+                warp.assignNewId();
+            }
+
             if (allowedWarps.size() > 0) {
                 this.list.blindAdd(allowedWarps);
                 this.data.addWarp(allowedWarps.toArray(new Warp[0]));
@@ -86,7 +89,7 @@ public class ImportCommand extends DefaultSubCommand {
                 // Max lines - 1 (for the header) - 1 (for the succeed message)
                 if (notAllowedWarps.size() < MinecraftUtil.getMaximumLines(sender) - 1) {
                     for (Warp warp : notAllowedWarps) {
-                        sender.sendMessage(ChatColor.GREEN + warp.name + ChatColor.WHITE + " by " + ChatColor.GREEN + warp.creator);
+                        sender.sendMessage(ChatColor.GREEN + warp.name + ChatColor.WHITE + " by " + ChatColor.GREEN + warp.getOwner());
                     }
                 }
             }

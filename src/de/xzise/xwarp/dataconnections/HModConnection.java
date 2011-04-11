@@ -187,7 +187,7 @@ public class HModConnection implements DataConnection {
                     if (v != null) {
                         warp.visibility = v;
                     } else {
-                        MyWarp.logger.warning("Illegal visibilty found (" + warp.name + " by " + warp.creator + ")");
+                        MyWarp.logger.warning("Illegal visibilty found (" + warp.name + " by " + warp.getOwner() + ")");
                         valid = false;
                     }
                 } catch (NumberFormatException nfe) {
@@ -238,7 +238,7 @@ public class HModConnection implements DataConnection {
                     if (v != null) {
                         warp.visibility = v;
                     } else {
-                        MyWarp.logger.warning("Illegal visibilty found (" + warp.name + " by " + warp.creator + ")");
+                        MyWarp.logger.warning("Illegal visibilty found (" + warp.name + " by " + warp.getOwner() + ")");
                         valid = false;
                     }
                 } catch (NumberFormatException nfe) {
@@ -286,7 +286,7 @@ public class HModConnection implements DataConnection {
             warpLine.append(makeParsable(l.getPitch()) + SEPARATOR);
             if (version >= 1) {
                 warpLine.append(makeParsable(l.getWorld().getName()) + SEPARATOR);
-                warpLine.append(makeParsable(warp.creator) + SEPARATOR);
+                warpLine.append(makeParsable(warp.getCreator()) + SEPARATOR);
                 warpLine.append(makeParsable(warp.visibility.level) + SEPARATOR);
                 warpLine.append(makeParsable(warp.welcomeMessage) + SEPARATOR);
                 for (String editor : warp.getEditors()) {
@@ -304,7 +304,7 @@ public class HModConnection implements DataConnection {
         } catch (IOException ioe) {
             throw ioe;
         } catch (Exception e) {
-            MyWarp.logger.severe("Unable to write warp: '" + warp.name + "' by " + warp.creator, e);
+            MyWarp.logger.severe("Unable to write warp: '" + warp.name + "' by " + warp.getOwner(), e);
         }
     }
     
@@ -376,10 +376,18 @@ public class HModConnection implements DataConnection {
     }
     
     @Override
-    public void updateCreator(Warp warp, IdentificationInterface identification) {
+    public void updateCreator(Warp warp) {
+        List<Warp> warps = this.getWarps();
+        Warp updated = warps.get(warps.indexOf(warp));
+        updated.setCreator(warp.getCreator());
+        this.writeWarps(warps);
+    }
+    
+    @Override
+    public void updateOwner(Warp warp, IdentificationInterface identification) {
         List<Warp> warps = this.getWarps();
         Warp updated = getWarp(warps, identification);
-        updated.creator = warp.creator;
+        updated.setOwner(warp.getCreator());
         this.writeWarps(warps);
     }
 
@@ -450,7 +458,7 @@ public class HModConnection implements DataConnection {
         private final String owner;
         
         public NameIdentification(Warp warp) {
-            this(warp.name, warp.creator);
+            this(warp.name, warp.getOwner());
         }
         
         public NameIdentification(String name, String owner) {
@@ -460,7 +468,7 @@ public class HModConnection implements DataConnection {
 
         @Override
         public boolean isIdentificated(Warp warp) {
-            return warp.name.equalsIgnoreCase(this.name) && warp.creator.equals(this.owner);
+            return warp.name.equalsIgnoreCase(this.name) && warp.getOwner().equals(this.owner);
         }
         
     }
