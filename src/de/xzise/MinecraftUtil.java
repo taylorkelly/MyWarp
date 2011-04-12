@@ -299,6 +299,38 @@ public final class MinecraftUtil {
     }
 
     /**
+     * Tries to convert a string into a short. If the string is invalid it
+     * returns <code>null</code>.
+     * 
+     * @param string
+     *            The string to be parsed.
+     * @return The value if the string is valid, otherwise <code>null</code>.
+     */
+    public static Short tryAndGetShort(String string) {
+        try {
+            return Short.parseShort(string);
+        } catch (NumberFormatException e) {
+            return null;
+        }
+    }
+
+    /**
+     * Tries to convert a string into a byte. If the string is invalid it
+     * returns <code>null</code>.
+     * 
+     * @param string
+     *            The string to be parsed.
+     * @return The value if the string is valid, otherwise <code>null</code>.
+     */
+    public static Byte tryAndGetByte(String string) {
+        try {
+            return Byte.parseByte(string);
+        } catch (NumberFormatException e) {
+            return null;
+        }
+    }
+
+    /**
      * Tests where the first object is inside the array.
      * 
      * @param o

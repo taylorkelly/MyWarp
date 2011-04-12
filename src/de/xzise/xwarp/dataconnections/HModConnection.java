@@ -177,7 +177,7 @@ public class HModConnection implements DataConnection {
                     World world = server.getWorld(segments[6]);
                     String warpOwner = segments[7];
                     Location location = new Location(world, x, y, z, (float) yaw, (float) pitch);
-                    warp = new Warp(name, "", warpOwner, location);
+                    warp = new Warp(name, warpOwner, warpOwner, location);
                     warp.setMessage(segments[9]);
                     for (int i = GEN_2_LENGTH; i < segments.length; i += 2) {
                         warp.addEditor(segments[i], segments[i+1]);

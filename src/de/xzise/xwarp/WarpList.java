@@ -70,22 +70,22 @@ public class WarpList {
 
     // Warps sorted by owner, name
     private final Map<String, Map<String, Warp>> personal;
-    // Warps sorted by creator, warp name
-    private final Map<String, Map<String, Warp>> creatorMap;
+    // Warps sorted by creator
+    private final Map<String, List<Warp>> creatorMap;
     // Warps sorted by name
     private final Map<String, GlobalMap> global;
 
     public WarpList() {
         this.personal = new HashMap<String, Map<String, Warp>>();
         this.global = new HashMap<String, GlobalMap>();
-        this.creatorMap = new HashMap<String, Map<String, Warp>>();
+        this.creatorMap = new HashMap<String, List<Warp>>();
     }
 
     public void loadList(Collection<Warp> warps) {
         for (Map<String, Warp> personalWarps : this.personal.values()) {
             personalWarps.clear();
         }
-        for (Map<String, Warp> creatorWarps : this.creatorMap.values()) {
+        for (List<Warp> creatorWarps : this.creatorMap.values()) {
             creatorWarps.clear();
         }
         for (GlobalMap globalWarps : this.global.values()) {
@@ -120,19 +120,19 @@ public class WarpList {
         personalWarps.put(warp.name.toLowerCase(), warp);
         
         if (MinecraftUtil.isSet(warp.getCreator())) {
-            Map<String, Warp> creatorWarps = this.creatorMap.get(warp.getCreator().toLowerCase());
+            List<Warp> creatorWarps = this.creatorMap.get(warp.getCreator().toLowerCase());
             if (creatorWarps == null) {
-                creatorWarps = new HashMap<String, Warp>();
+                creatorWarps = new ArrayList<Warp>();
                 this.creatorMap.put(warp.getCreator().toLowerCase(), creatorWarps);
             }
-            creatorWarps.put(warp.name.toLowerCase(), warp);
+            creatorWarps.add(warp);
         }
     }
 
     public void deleteWarp(Warp warp) {
         this.global.get(warp.name.toLowerCase()).delete(warp);
         if (MinecraftUtil.isSet(warp.getCreator())) {
-            this.creatorMap.get(warp.getCreator().toLowerCase()).remove(warp.name.toLowerCase());
+            this.creatorMap.get(warp.getCreator().toLowerCase()).remove(warp);
         }
         this.personal.get(warp.getOwner().toLowerCase()).remove(warp.name.toLowerCase());
     }
