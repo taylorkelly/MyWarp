@@ -81,9 +81,15 @@ public class WarpManager {
             return;
         }
         if (MyWarp.permissions.permission(player, type)) {
+            String creator = MinecraftUtil.getPlayerName(player);
+            if (creator == null && player instanceof Nameable) {
+                creator = ((Nameable) player).getName();
+            }
+            if (creator == null) {
+                creator = "";
+            }
             
-            //TODO: Get number of warps by this creator
-            int warpsByCreator = 0;
+            int warpsByCreator = this.list.getNumberOfWarps(creator, visibility);
             int allowedMaximum = MyWarp.permissions.getInteger(player, limit, -1);
             if (allowedMaximum < 0 || warpsByCreator < allowedMaximum) {
                 Warp warp = this.list.getWarp(name, newOwner, null);
@@ -93,18 +99,6 @@ public class WarpManager {
                 } else if (visibility == Visibility.GLOBAL && globalWarp != null) {
                     player.sendMessage(ChatColor.RED + "Global warp called '" + name + "' already exists (" + globalWarp.name + ").");
                 } else {
-                    String creator = MinecraftUtil.getPlayerName(player);
-                    if (creator == null) {
-                        if (player instanceof Nameable) {
-                            creator = ((Nameable) player).getName();
-                        }
-                    }
-                    if (creator == null) {
-                        creator = "";
-                    }
-                    
-                    
-                    
                     warp = new Warp(name, creator, newOwner, player.getLocation());
                     warp.visibility = visibility;
                     this.list.addWarp(warp);

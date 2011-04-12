@@ -140,6 +140,21 @@ public class WarpList {
     public void updateVisibility(Warp warp) {
         this.global.get(warp.name.toLowerCase()).updateGlobal(warp);
     }
+    
+    public int getNumberOfWarps(String creator, Visibility v) {
+        int number = 0;
+        if (MinecraftUtil.isSet(creator)) {
+            List<Warp> warps = this.creatorMap.get(creator.toLowerCase());
+            if (warps != null) {
+                for (Warp warp : warps) {
+                    if (warp.visibility == v) {
+                        number++;
+                    }
+                }
+            }
+        }
+        return number;
+    }
 
     public Warp getWarp(String name, String owner, String playerName) {
         if (owner == null || owner.isEmpty()) {
