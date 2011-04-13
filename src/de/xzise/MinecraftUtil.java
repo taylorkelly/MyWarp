@@ -45,6 +45,16 @@ public final class MinecraftUtil {
             return PLAYER_LINES_COUNT;
         }
     }
+    
+    public static Player getPlayer(CommandSender sender) {
+        if (sender instanceof Player) {
+            return (Player) sender;
+        } else if (sender instanceof CommandSenderWrapper<?>) {
+            return MinecraftUtil.getPlayer(((CommandSenderWrapper<?>) sender).getSender());
+        } else {
+            return null;
+        }
+    }
 
     /**
      * Returns the name to a sender. If the sender has no player it returns null.
@@ -54,10 +64,9 @@ public final class MinecraftUtil {
      * @return Returns the name of the sender and null if the sender is no player.
      */
     public static String getPlayerName(CommandSender sender) {
-        if (sender instanceof Player) {
-            return ((Player) sender).getName();
-        } else if (sender instanceof CommandSenderWrapper<?>) {
-            return MinecraftUtil.getPlayerName(((CommandSenderWrapper<?>) sender).getSender());
+        Player p = MinecraftUtil.getPlayer(sender);
+        if (p != null) {
+            return p.getName();
         } else {
             return null;
         }

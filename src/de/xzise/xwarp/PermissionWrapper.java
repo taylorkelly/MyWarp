@@ -10,7 +10,6 @@ import com.nijiko.permissions.PermissionHandler;
 import com.nijikokun.bukkit.Permissions.Permissions;
 
 import de.xzise.MinecraftUtil;
-import de.xzise.xwarp.warpable.CommandSenderWrapper;
 
 public class PermissionWrapper {
 
@@ -157,10 +156,9 @@ public class PermissionWrapper {
     }
 
     public boolean permission(CommandSender sender, PermissionTypes permission) {
-        if (sender instanceof CommandSenderWrapper) {
-            return this.permission(((CommandSenderWrapper<?>) sender).getSender(), permission);
-        } else if (sender instanceof Player && this.handler != null) {
-            return this.handler.has((Player) sender, permission.name);
+        Player player = MinecraftUtil.getPlayer(sender);
+        if (player != null && this.handler != null) {
+            return this.handler.has(player, permission.name);
         } else {
             return this.permissionInternal(sender, permission);
         }
@@ -190,8 +188,9 @@ public class PermissionWrapper {
 
     public int getInteger(CommandSender sender, PermissionValues value, int def) {
         if (this.handler != null) {
-            if (sender instanceof Player) {
-                int result = this.handler.getPermissionInteger(((Player) sender).getWorld().getName(), ((Player) sender).getName(), value.name);
+            Player player = MinecraftUtil.getPlayer(sender);
+            if (player != null) {
+                int result = this.handler.getPermissionInteger(player.getWorld().getName(), player.getName(), value.name);
                 return result < 0 ? def : result;
             } else {
                 return def;

@@ -60,6 +60,10 @@ public class WarpManager {
             sender.sendMessage(ChatColor.RED + "You have no permission to reload.");
         }
     }
+    
+    public int getAmountOfWarps(String creator, Visibility visibility) {
+        return this.list.getNumberOfWarps(creator, visibility);
+    }
 
     public void addWarp(String name, Positionable player, String newOwner, Visibility visibility) {
         PermissionTypes type;
