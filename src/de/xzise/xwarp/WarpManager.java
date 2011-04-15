@@ -81,6 +81,16 @@ public class WarpManager {
         return this.list.getNumberOfWarps(creator, visibility);
     }
 
+    private void printPayMessage(CommandSender payee, int amount) {
+        if (amount > 0) {
+            payee.sendMessage(ChatColor.WHITE + "You have paid " + ChatColor.GREEN + this.economy.format(amount) + ChatColor.WHITE + ".");
+        } else if (amount == 0) {
+            payee.sendMessage("Yeah. This warp was " + ChatColor.GREEN + "free" + ChatColor.WHITE + " (as beer)!");
+        } else {
+            payee.sendMessage("Woooo! You got " + ChatColor.GREEN + this.economy.format(amount) + ChatColor.WHITE + "!");
+        }
+    }
+    
     public void addWarp(String name, Positionable player, String newOwner, Visibility visibility) {
         PermissionTypes type;
         PermissionValues limit;
@@ -125,15 +135,18 @@ public class WarpManager {
                     switch (visibility) {
                     case GLOBAL:
                         price = MyWarp.permissions.getInteger(player, PermissionValues.WARP_PRICES_CREATE_GLOBAL, 0);
+                        break;
                     case PRIVATE:
                         price = MyWarp.permissions.getInteger(player, PermissionValues.WARP_PRICES_CREATE_PRIVATE, 0);
+                        break;
                     case PUBLIC:
                         price = MyWarp.permissions.getInteger(player, PermissionValues.WARP_PRICES_CREATE_PUBLIC, 0);
+                        break;
                     }
 
                     switch (this.economy.pay(player, price)) {
                     case PAID:
-                        player.sendMessage(ChatColor.GREEN + "You have paid " + ChatColor.GREEN + this.economy.format(price) + ChatColor.WHITE + ".");
+                        this.printPayMessage(player, price);
                     case UNABLE:
                         warp = new Warp(name, creator, newOwner, player.getLocation());
                         warp.visibility = visibility;
@@ -235,8 +248,10 @@ public class WarpManager {
                 } else {
                     Warp giveeWarp = this.getWarp(name, giveeName, null);
                     if (giveeWarp == null) {
+                        String preOwner = warp.getOwner();
                         IdentificationInterface ii = this.data.createIdentification(warp);
                         warp.setOwner(giveeName);
+                        this.list.updateOwner(warp, preOwner);
                         this.data.updateOwner(warp, ii);
                         sender.sendMessage("You have given '" + ChatColor.GREEN + warp.name + ChatColor.WHITE + "' to " + ChatColor.GREEN + giveeName + ChatColor.WHITE + ".");
                         Player match = server.getPlayer(giveeName);
@@ -574,13 +589,7 @@ public class WarpManager {
                             switch (this.economy.pay(warper, warp.getOwner(), warp.getPrice(), price)) {
                             case PAID:
                                 int totalPrice = warp.getPrice() + price;
-                                if (totalPrice > 0) {
-                                    warper.sendMessage(ChatColor.WHITE + "You have paid " + ChatColor.GREEN + this.economy.format(totalPrice) + ChatColor.WHITE + ".");
-                                } else if (totalPrice == 0) {
-                                    warper.sendMessage("Yeah. This warp was " + ChatColor.GREEN + "free" + ChatColor.WHITE + " (as beer)!");
-                                } else {
-                                    warper.sendMessage("Woooo! You got " + ChatColor.GREEN + this.economy.format(totalPrice) + ChatColor.WHITE + "!");
-                                }
+                                this.printPayMessage(warper, totalPrice);
                             case UNABLE:
                                 this.warmUp.addPlayer(warper, warped, warp);
                                 break;

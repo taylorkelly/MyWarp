@@ -448,7 +448,7 @@ public class HModConnection implements DataConnection {
     public void updateOwner(Warp warp, IdentificationInterface identification) {
         List<Warp> warps = this.getWarps();
         Warp updated = getWarp(warps, identification);
-        updated.setOwner(warp.getCreator());
+        updated.setOwner(warp.getOwner());
         this.writeWarps(warps);
     }
 
