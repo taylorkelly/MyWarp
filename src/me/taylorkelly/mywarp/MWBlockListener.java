@@ -34,7 +34,7 @@ public class MWBlockListener extends BlockListener {
 	    			event.getPlayer().sendMessage(ChatColor.GREEN + destination.name + ChatColor.WHITE + creator);
     				event.getPlayer().sendMessage(ChatColor.RED + "This warp doesn't exists!");
     			} else {
-    				event.getPlayer().sendMessage(ChatColor.GREEN + warp.name + ChatColor.WHITE + " by " + ChatColor.GREEN + warp.creator);
+    				event.getPlayer().sendMessage(ChatColor.GREEN + warp.name + ChatColor.WHITE + " by " + ChatColor.GREEN + warp.getOwner());
     			}
     		}
     	}

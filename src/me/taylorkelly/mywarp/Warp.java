@@ -41,21 +41,23 @@ public class Warp {
 	
 	public int index;
 	public String name;
-	public String creator;
+	private String creator;
 	private Location location;
-	/** This price will be transfered to the creator. */
+	/** This price value will be transfered to the owner. */
         private int price;
+	private String owner;
 	public Visibility visibility;
 	public String welcomeMessage;
 	public Map<String, EditorPermissions> editors;
 
 	public static int nextIndex = 1;
 
-	public Warp(int index, String name, String creator, Location location, Visibility visibility,
+	public Warp(int index, String name, String creator, String owner, Location location, Visibility visibility,
 			Map<String, EditorPermissions> permissions, String welcomeMessage) {
 		this.index = index;
 		this.name = name;
 		this.creator = creator;
+		this.owner = owner;
 		this.location = location.clone();
 		this.visibility = visibility;
 		if (permissions == null) {
@@ -69,16 +71,16 @@ public class Warp {
 		nextIndex++;
 	}
 	
-	public Warp(String name, String creator, Location location) {
-		this(nextIndex, name, creator, location, Visibility.PUBLIC, null, "Welcome to '" + name + "'");
+	public Warp(String name, String creator, String owner, Location location) {
+		this(nextIndex, name, creator, owner, location, Visibility.PUBLIC, null, "Welcome to '" + name + "'");
 	}
 
 	public Warp(String name, Player creator) {
-		this(name, creator.getName(), creator.getLocation());
+		this(name, creator.getName(), creator.getName(), creator.getLocation());
 	}
 
 	public Warp(String name, Location location) {
-		this(name, "No Player", location);
+		this(name, "", "No Player", location);
 	}
 	
 	public boolean playerIsInvited(String name) {
@@ -90,6 +92,10 @@ public class Warp {
 		}
 	}
 
+    public void assignNewId() {
+        this.index = nextIndex++;
+    }
+
 	public boolean playerCanWarp(CommandSender sender, boolean viaSign) {
 	    String name = null;
 	    if (sender instanceof WarpablePlayer) {
@@ -98,7 +104,7 @@ public class Warp {
 	        name = ((Player) sender).getName();
 	    }
 	    
-		if (name != null && this.creator.equals(name) && MyWarp.permissions.permission(sender, viaSign ? PermissionTypes.SIGN_WARP_OWN : PermissionTypes.TO_OWN))
+		if (name != null && this.owner.equals(name) && MyWarp.permissions.permission(sender, viaSign ? PermissionTypes.SIGN_WARP_OWN : PermissionTypes.TO_OWN))
 			return true;
 		if (name != null && this.playerIsInvited(name) && MyWarp.permissions.permission(sender, viaSign ? PermissionTypes.SIGN_WARP_INVITED : PermissionTypes.TO_INVITED))
 			return true;
@@ -122,10 +128,12 @@ public class Warp {
 		this.name = newName;
 	}
 	
-	public boolean playerIsCreator(String name) {
-		if (creator.equals(name))
-			return true;
-		return false;
+	public boolean isOwn(String name) {
+	    return this.owner.equals(name);
+	}
+	
+	public boolean isCreator(String name) {
+	    return this.creator.equals(name);
 	}
 
 	public void invite(String player) {
@@ -137,7 +145,7 @@ public class Warp {
 	}
 
 	public boolean playerCanModify(Player player, Permissions permission) {
-		if (this.creator.equals(player.getName()))
+		if (this.isOwn(player.getName()))
 			return true;
 		EditorPermissions ep = this.editors.get(player.getName().toLowerCase());
 		if (ep != null) {
@@ -160,7 +168,7 @@ public class Warp {
                 return true;
             if (sender instanceof WarpablePlayer) {
                 // Creator permissions
-                if (this.playerIsCreator(((WarpablePlayer) sender).getName()))
+                if (this.isOwn(((WarpablePlayer) sender).getName()))
                     return true;
             }
         }
@@ -168,9 +176,9 @@ public class Warp {
         return false;
     }
 
-	public void setCreator(String giveeName) {
-		this.creator = giveeName;
-	}
+    public void setCreator(String creator) {
+        this.creator = creator;
+    }
 	
 	public void setMessage(String message) {
 		this.welcomeMessage = message;
@@ -183,7 +191,19 @@ public class Warp {
 	public boolean isValid() {
 		return this.location.getWorld() != null;
 	}
-	
+
+    public String getOwner() {
+        return this.owner;
+    }
+
+    public void setOwner(String owner) {
+        this.owner = owner;
+    }
+
+    public String getCreator() {
+        return this.creator;
+    }
+
 	public void setLocation(Location location) {
 		this.location = location.clone();
 	}
@@ -238,7 +258,7 @@ public class Warp {
 	public boolean equals(Object o) {
 		if (o instanceof Warp) {
 			Warp w = (Warp) o;
-			return w.name.equals(this.name) && w.creator.equals(this.creator);
+			return w.name.equals(this.name) && w.owner.equals(this.owner);
 		} else {
 			return false;
 		}

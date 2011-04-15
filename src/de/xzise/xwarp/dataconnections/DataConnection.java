@@ -32,7 +32,9 @@ public interface DataConnection {
 
     void deleteWarp(Warp warp);
 
-    void updateCreator(Warp warp, IdentificationInterface identification);
+    void updateCreator(Warp warp);
+
+    void updateOwner(Warp warp, IdentificationInterface identification);
 
     void updateName(Warp warp, IdentificationInterface identification);
 

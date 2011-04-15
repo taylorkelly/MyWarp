@@ -16,6 +16,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 
 import de.xzise.MinecraftUtil;
+import de.xzise.metainterfaces.Nameable;
 import de.xzise.xwarp.PermissionWrapper.PermissionTypes;
 import de.xzise.xwarp.PermissionWrapper.PermissionValues;
 import de.xzise.xwarp.dataconnections.DataConnection;
@@ -61,69 +62,90 @@ public class WarpManager {
             sender.sendMessage(ChatColor.RED + "You have no permission to reload.");
         }
     }
+    
+    public int getAmountOfWarps(String creator, Visibility visibility) {
+        return this.list.getNumberOfWarps(creator, visibility);
+    }
 
     public void addWarp(String name, Positionable player, String newOwner, Visibility visibility) {
         PermissionTypes type;
+        PermissionValues limit;
         switch (visibility) {
         case PRIVATE:
             type = PermissionTypes.CREATE_PRIVATE;
+            limit = PermissionValues.WARP_LIMIT_PRIVATE;
             break;
         case PUBLIC:
             type = PermissionTypes.CREATE_PUBLIC;
+            limit = PermissionValues.WARP_LIMIT_PUBLIC;
             break;
         case GLOBAL:
             type = PermissionTypes.CREATE_GLOBAL;
+            limit = PermissionValues.WARP_LIMIT_GLOBAL;
             break;
         default:
             return;
         }
         if (MyWarp.permissions.permission(player, type)) {
-            Warp warp = this.list.getWarp(name, newOwner, null);
-            Warp globalWarp = (visibility == Visibility.GLOBAL ? this.list.getWarp(name) : null);
-            if (warp != null) {
-                player.sendMessage(ChatColor.RED + "Warp called '" + name + "' already exists (" + warp.name + ").");
-            } else if (visibility == Visibility.GLOBAL && globalWarp != null) {
-                player.sendMessage(ChatColor.RED + "Global warp called '" + name + "' already exists (" + globalWarp.name + ").");
-            } else {
-                
-                int price = 0;
-                switch (visibility) {
-                case GLOBAL :
-                    price = MyWarp.permissions.getInteger(player, PermissionValues.WARP_PRICES_CREATE_GLOBAL, 0);
-                case PRIVATE :
-                    price = MyWarp.permissions.getInteger(player, PermissionValues.WARP_PRICES_CREATE_PRIVATE, 0);
-                case PUBLIC :
-                    price = MyWarp.permissions.getInteger(player, PermissionValues.WARP_PRICES_CREATE_PUBLIC, 0);
-                }
-                
-                switch (this.economy.pay(player, price)) {
-                case PAID:
-                    player.sendMessage(ChatColor.GREEN + "You have paid " + ChatColor.GREEN + this.economy.format(price) + ChatColor.WHITE + ".");
-                case UNABLE:
-                    warp = new Warp(name, newOwner, player.getLocation());
-                    warp.visibility = visibility;
-                    this.list.addWarp(warp);
-                    this.data.addWarp(warp);
-                    player.sendMessage("Successfully created '" + ChatColor.GREEN + warp.name + ChatColor.WHITE + "'.");
+            String creator = MinecraftUtil.getPlayerName(player);
+            if (creator == null && player instanceof Nameable) {
+                creator = ((Nameable) player).getName();
+            }
+            if (creator == null) {
+                creator = "";
+            }
+            
+            int warpsByCreator = this.list.getNumberOfWarps(creator, visibility);
+            int allowedMaximum = MyWarp.permissions.getInteger(player, limit, -1);
+            if (allowedMaximum < 0 || warpsByCreator < allowedMaximum) {
+                Warp warp = this.list.getWarp(name, newOwner, null);
+                Warp globalWarp = (visibility == Visibility.GLOBAL ? this.list.getWarp(name) : null);
+                if (warp != null) {
+                    player.sendMessage(ChatColor.RED + "Warp called '" + name + "' already exists (" + warp.name + ").");
+                } else if (visibility == Visibility.GLOBAL && globalWarp != null) {
+                    player.sendMessage(ChatColor.RED + "Global warp called '" + name + "' already exists (" + globalWarp.name + ").");
+                } else {
+                    int price = 0;
                     switch (visibility) {
-                    case PRIVATE:
-                        WarpManager.printPrivatizeMessage(player, warp);
-                        break;
-                    case PUBLIC:
-                        if (MyWarp.permissions.permissionOr(player, PermissionTypes.CREATE_PRIVATE, PermissionTypes.ADMIN_PRIVATE)) {
-                            player.sendMessage("If you'd like to privatize it, use:");
-                            player.sendMessage(ChatColor.GREEN + "/warp private \"" + warp.name + "\" " + warp.creator);
+                    case GLOBAL :
+                        price = MyWarp.permissions.getInteger(player, PermissionValues.WARP_PRICES_CREATE_GLOBAL, 0);
+                    case PRIVATE :
+                        price = MyWarp.permissions.getInteger(player, PermissionValues.WARP_PRICES_CREATE_PRIVATE, 0);
+                    case PUBLIC :
+                        price = MyWarp.permissions.getInteger(player, PermissionValues.WARP_PRICES_CREATE_PUBLIC, 0);
+                    }
+                    
+                    switch (this.economy.pay(player, price)) {
+                    case PAID:
+                        player.sendMessage(ChatColor.GREEN + "You have paid " + ChatColor.GREEN + this.economy.format(price) + ChatColor.WHITE + ".");
+                    case UNABLE:
+                        warp = new Warp(name, creator, newOwner, player.getLocation());
+                        warp.visibility = visibility;
+                        this.list.addWarp(warp);
+                        this.data.addWarp(warp);
+                        player.sendMessage("Successfully created '" + ChatColor.GREEN + warp.name + ChatColor.WHITE + "'.");
+                        switch (visibility) {
+                        case PRIVATE:
+                            WarpManager.printPrivatizeMessage(player, warp);
+                            break;
+                        case PUBLIC:
+                            if (MyWarp.permissions.permissionOr(player, PermissionTypes.CREATE_PRIVATE, PermissionTypes.ADMIN_PRIVATE)) {
+                                player.sendMessage("If you'd like to privatize it, use:");
+                                player.sendMessage(ChatColor.GREEN + "/warp private \"" + warp.name + "\" " + warp.getOwner());
+                            }
+                            break;
+                        case GLOBAL:
+                            player.sendMessage("This warp is now global available.");
+                            break;
                         }
                         break;
-                    case GLOBAL:
-                        player.sendMessage("This warp is now global available.");
+                    case NOT_ENOUGH:
+                        player.sendMessage(ChatColor.RED + "You have not enough money to pay this creation.");
                         break;
                     }
-                    break;
-                case NOT_ENOUGH:
-                    player.sendMessage(ChatColor.RED + "You have not enough money to pay this creation.");
-                    break;
                 }
+            } else {
+                player.sendMessage(ChatColor.RED + "You are allowed to create only " + allowedMaximum + " warps.");
             }
         } else {
             player.sendMessage(ChatColor.RED + "You have no permission to add a warp.");
@@ -150,8 +172,8 @@ public class WarpManager {
         // }
     }
 
-    public void deleteWarp(String name, String creator, CommandSender sender) {
-        Warp warp = this.getWarp(name, creator, MinecraftUtil.getPlayerName(sender));
+    public void deleteWarp(String name, String owner, CommandSender sender) {
+        Warp warp = this.getWarp(name, owner, MinecraftUtil.getPlayerName(sender));
         if (warp != null) {
             if (playerCanModifyWarp(sender, warp, Permissions.DELETE)) {
                 this.list.deleteWarp(warp);
@@ -161,22 +183,45 @@ public class WarpManager {
                 sender.sendMessage(ChatColor.RED + "You do not have permission to delete '" + warp.name + "'");
             }
         } else {
-            WarpManager.sendMissingWarp(name, creator, sender);
+            WarpManager.sendMissingWarp(name, owner, sender);
         }
     }
 
-    public void give(String name, String creator, CommandSender sender, String giveeName) {
-        Warp warp = this.getWarp(name, creator, MinecraftUtil.getPlayerName(sender));
+    public void changeCreator(String name, String owner, CommandSender sender, String newCreator) {
+        Warp warp = this.getWarp(name, owner, MinecraftUtil.getPlayerName(sender));
+        if (warp != null) {
+            if (MyWarp.permissions.permission(sender, PermissionTypes.ADMIN_CHANGE_CREATOR)) {
+                if (warp.isCreator(newCreator)) {
+                    sender.sendMessage(ChatColor.RED + newCreator + " is already the creator.");
+                } else {
+                    warp.setCreator(newCreator);
+                    this.data.updateCreator(warp);
+                    sender.sendMessage("You have changed the creator of '" + ChatColor.GREEN + warp.name + ChatColor.WHITE + "' to " + ChatColor.GREEN + newCreator + ChatColor.WHITE + ".");
+                    Player match = server.getPlayer(newCreator);
+                    if (match != null) {
+                        match.sendMessage("You're now creator of '" + ChatColor.GREEN + warp.name + ChatColor.WHITE + "' by " + MinecraftUtil.getName(sender));
+                    }
+                }
+            } else {
+                sender.sendMessage(ChatColor.RED + "You do not have permission to give '" + warp.name + "'");
+            }
+        } else {
+            WarpManager.sendMissingWarp(name, owner, sender);
+        }
+    }
+    
+    public void give(String name, String owner, CommandSender sender, String giveeName) {
+        Warp warp = this.getWarp(name, owner, MinecraftUtil.getPlayerName(sender));
         if (warp != null) {
             if (playerCanModifyWarp(sender, warp, Permissions.GIVE)) {
-                if (warp.playerIsCreator(giveeName)) {
+                if (warp.isOwn(giveeName)) {
                     sender.sendMessage(ChatColor.RED + giveeName + " is already the owner.");
                 } else {
                     Warp giveeWarp = this.getWarp(name, giveeName, null);
                     if (giveeWarp == null) {
                         IdentificationInterface ii = this.data.createIdentification(warp);
-                        warp.setCreator(giveeName);
-                        this.data.updateCreator(warp, ii);
+                        warp.setOwner(giveeName);
+                        this.data.updateOwner(warp, ii);
                         sender.sendMessage("You have given '" + ChatColor.GREEN + warp.name + ChatColor.WHITE + "' to " + ChatColor.GREEN + giveeName + ChatColor.WHITE + ".");
                         Player match = server.getPlayer(giveeName);
                         if (match != null) {
@@ -190,12 +235,27 @@ public class WarpManager {
                 sender.sendMessage(ChatColor.RED + "You do not have permission to give '" + warp.name + "'");
             }
         } else {
-            sender.sendMessage(ChatColor.RED + "No such warp '" + name + "'");
+            WarpManager.sendMissingWarp(name, owner, sender);
+        }
+    }
+    
+    public void setMessage(String name, String owner, CommandSender sender, String message) {
+        Warp warp = this.getWarp(name, owner, MinecraftUtil.getPlayerName(sender));
+        if (warp != null) {
+            if (playerCanModifyWarp(sender, warp, Permissions.MESSAGE)) {
+                warp.welcomeMessage = message;
+                this.data.updateMessage(warp);
+                sender.sendMessage("You have successfully changed the welcome message.");
+            } else {
+                sender.sendMessage(ChatColor.RED + "You do not have permission to set the message of '" + warp.name + "'");
+            }
+        } else {
+            WarpManager.sendMissingWarp(name, owner, sender);
         }
     }
 
-    public void privatize(String name, String creator, CommandSender sender) {
-        Warp warp = this.list.getWarp(name, creator, MinecraftUtil.getPlayerName(sender));
+    public void privatize(String name, String owner, CommandSender sender) {
+        Warp warp = this.list.getWarp(name, owner, MinecraftUtil.getPlayerName(sender));
         if (warp != null) {
             if (WarpManager.playerCanModifyWarp(sender, warp, Permissions.PRIVATE)) {
                 warp.visibility = Visibility.PRIVATE;
@@ -206,12 +266,12 @@ public class WarpManager {
                 sender.sendMessage(ChatColor.RED + "You do not have permission to privatize '" + name + "'");
             }
         } else {
-            WarpManager.sendMissingWarp(name, creator, sender);
+            WarpManager.sendMissingWarp(name, owner, sender);
         }
     }
 
-    public void publicize(String name, String creator, CommandSender sender) {
-        Warp warp = this.list.getWarp(name, creator, MinecraftUtil.getPlayerName(sender));
+    public void publicize(String name, String owner, CommandSender sender) {
+        Warp warp = this.list.getWarp(name, owner, MinecraftUtil.getPlayerName(sender));
         if (warp != null) {
             if (WarpManager.playerCanModifyWarp(sender, warp, Permissions.PUBLIC)) {
                 warp.visibility = Visibility.PUBLIC;
@@ -222,12 +282,12 @@ public class WarpManager {
                 sender.sendMessage(ChatColor.RED + "You do not have permission to publicize '" + warp.name + "'");
             }
         } else {
-            WarpManager.sendMissingWarp(name, creator, sender);
+            WarpManager.sendMissingWarp(name, owner, sender);
         }
     }
 
-    public void globalize(String name, String creator, CommandSender sender) {
-        Warp warp = this.list.getWarp(name, creator, MinecraftUtil.getPlayerName(sender));
+    public void globalize(String name, String owner, CommandSender sender) {
+        Warp warp = this.list.getWarp(name, owner, MinecraftUtil.getPlayerName(sender));
         if (warp != null) {
             if (playerCanModifyWarp(sender, warp, Permissions.GLOBAL)) {
                 Warp existing = this.list.getWarp(name);
@@ -245,17 +305,17 @@ public class WarpManager {
                 sender.sendMessage(ChatColor.RED + "You do not have permission to globalize '" + warp.name + "'");
             }
         } else {
-            WarpManager.sendMissingWarp(name, creator, sender);
+            WarpManager.sendMissingWarp(name, owner, sender);
         }
     }
 
-    public void invite(String name, String creator, CommandSender sender, String inviteeName) {
-        Warp warp = this.list.getWarp(name, creator, MinecraftUtil.getPlayerName(sender));
+    public void invite(String name, String owner, CommandSender sender, String inviteeName) {
+        Warp warp = this.list.getWarp(name, owner, MinecraftUtil.getPlayerName(sender));
         if (warp != null) {
             if (playerCanModifyWarp(sender, warp, Permissions.INVITE)) {
                 if (warp.playerIsInvited(inviteeName)) {
                     sender.sendMessage(ChatColor.RED + inviteeName + " is already invited to this warp.");
-                } else if (warp.playerIsCreator(inviteeName)) {
+                } else if (warp.isOwn(inviteeName)) {
                     sender.sendMessage(ChatColor.RED + inviteeName + " is the creator, of course he's the invited!");
                 } else {
                     warp.invite(inviteeName);
@@ -267,24 +327,24 @@ public class WarpManager {
                     Player match = this.server.getPlayer(inviteeName);
                     if (match != null) {
                         match.sendMessage("You've been invited to warp '" + ChatColor.GREEN + warp.name + ChatColor.WHITE + "' by " + ChatColor.GREEN + MinecraftUtil.getName(sender) + ChatColor.WHITE + ".");
-                        match.sendMessage("Use: " + ChatColor.GREEN + "/warp [to] \"" + warp.name + "\" " + warp.creator + ChatColor.WHITE + " to warp to it.");
+                        match.sendMessage("Use: " + ChatColor.GREEN + "/warp [to] \"" + warp.name + "\" " + warp.getOwner() + ChatColor.WHITE + " to warp to it.");
                     }
                 }
             } else {
                 sender.sendMessage(ChatColor.RED + "You do not have permission to invite players to '" + name + "'.");
             }
         } else {
-            WarpManager.sendMissingWarp(name, creator, sender);
+            WarpManager.sendMissingWarp(name, owner, sender);
         }
     }
 
-    public void uninvite(String name, String creator, CommandSender sender, String inviteeName) {
-        Warp warp = this.list.getWarp(name, creator, MinecraftUtil.getPlayerName(sender));
+    public void uninvite(String name, String owner, CommandSender sender, String inviteeName) {
+        Warp warp = this.list.getWarp(name, owner, MinecraftUtil.getPlayerName(sender));
         if (warp != null) {
             if (WarpManager.playerCanModifyWarp(sender, warp, Permissions.UNINVITE)) {
                 if (!warp.playerIsInvited(inviteeName)) {
                     sender.sendMessage(ChatColor.RED + inviteeName + " is not invited to this warp.");
-                } else if (warp.playerIsCreator(inviteeName)) {
+                } else if (warp.isOwn(inviteeName)) {
                     sender.sendMessage(ChatColor.RED + "You can't uninvite yourself. You're the creator!");
                 } else {
                     warp.addEditor(inviteeName, "w");
@@ -302,21 +362,21 @@ public class WarpManager {
                 sender.sendMessage(ChatColor.RED + "You do not have permission to uninvite players from '" + warp.name + "'.");
             }
         } else {
-            WarpManager.sendMissingWarp(name, creator, sender);
+            WarpManager.sendMissingWarp(name, owner, sender);
         }
     }
 
-    public void rename(String name, String creator, CommandSender sender, String newName) {
-        Warp warp = this.getWarp(name, creator, MinecraftUtil.getPlayerName(sender));
+    public void rename(String name, String owner, CommandSender sender, String newName) {
+        Warp warp = this.getWarp(name, owner, MinecraftUtil.getPlayerName(sender));
         if (warp != null) {
             if (playerCanModifyWarp(sender, warp, Permissions.RENAME)) {
                 // Creator has to exists!
-                if (creator == null || creator.isEmpty()) {
-                    creator = warp.creator;
+                if (owner == null || owner.isEmpty()) {
+                    owner = warp.getOwner();
                 }
                 if (warp.visibility == Visibility.GLOBAL && (this.getWarp(newName, null, null) != null)) {
                     sender.sendMessage(ChatColor.RED + "A global warp with this name already exists!");
-                } else if (this.getWarp(newName, creator, null) != null) {
+                } else if (this.getWarp(newName, owner, null) != null) {
                     sender.sendMessage(ChatColor.RED + "You already have a warp with this name.");
                 } else {
                     IdentificationInterface ii = this.data.createIdentification(warp);
@@ -330,7 +390,7 @@ public class WarpManager {
                 sender.sendMessage(ChatColor.RED + "You do not have permission to change the position from '" + warp.name + "'");
             }
         } else {
-            sender.sendMessage(ChatColor.RED + "No such warp '" + name + "'");
+            WarpManager.sendMissingWarp(name, owner, sender);
         }
     }
 
@@ -437,8 +497,8 @@ public class WarpManager {
         // }
     }
 
-    public void updateLocation(String name, String creator, Positionable player) {
-        Warp warp = this.getWarp(name, creator, MinecraftUtil.getPlayerName(player));
+    public void updateLocation(String name, String owner, Positionable player) {
+        Warp warp = this.getWarp(name, owner, MinecraftUtil.getPlayerName(player));
         if (warp != null) {
             if (WarpManager.playerCanModifyWarp(player, warp, Permissions.UPDATE)) {
                 warp.setLocation(player);
@@ -448,7 +508,7 @@ public class WarpManager {
                 player.sendMessage(ChatColor.RED + "You do not have permission to change the position from '" + warp.name + "'");
             }
         } else {
-            WarpManager.sendMissingWarp(name, creator, player);
+            WarpManager.sendMissingWarp(name, owner, player);
         }
     }
 
@@ -456,8 +516,8 @@ public class WarpManager {
         this.warpTo(name, creator, warper, warped, viaSign, false);
     }
 
-    public void warpTo(String name, String creator, CommandSender warper, Warpable warped, boolean viaSign, boolean worldForce) {
-        Warp warp = this.getWarp(name, creator, MinecraftUtil.getPlayerName(warper));
+    public void warpTo(String name, String owner, CommandSender warper, Warpable warped, boolean viaSign, boolean worldForce) {
+        Warp warp = this.getWarp(name, owner, MinecraftUtil.getPlayerName(warper));
         if (warp != null) {
             if (warped.equals(warper) || MyWarp.permissions.permission(warper, PermissionTypes.ADMIN_WARP_OTHERS)) {
                 if (warp.playerCanWarp(warper, viaSign)) {
@@ -480,7 +540,7 @@ public class WarpManager {
                         }
                         
                         if (this.coolDown.playerHasCooled(warper)) {
-                            switch (this.economy.pay(warper, warp.creator, warp.getPrice(), price)) {
+                            switch (this.economy.pay(warper, warp.getOwner(), warp.getPrice(), price)) {
                             case PAID:
                                 warper.sendMessage(ChatColor.GREEN + "You have paid " + ChatColor.GREEN + this.economy.format(price + warp.getPrice()) + ChatColor.WHITE + ".");
                             case UNABLE:
@@ -501,7 +561,7 @@ public class WarpManager {
                 warper.sendMessage(ChatColor.RED + "You do not have permission to warp others.");
             }
         } else {
-            WarpManager.sendMissingWarp(name, creator, warped);
+            WarpManager.sendMissingWarp(name, owner, warped);
         }
     }
 
@@ -510,25 +570,25 @@ public class WarpManager {
     }
 
     public boolean isNameAvailable(Warp warp) {
-        return this.isNameAvailable(warp.name, warp.creator);
+        return this.isNameAvailable(warp.name, warp.getOwner());
     }
 
     public boolean isNameAvailable(String name, String owner) {
         return this.list.getWarp(name, owner, null) == null;
     }
 
-    public static void sendMissingWarp(String name, String creator, CommandSender sender) {
-        if (creator == null || creator.isEmpty()) {
+    public static void sendMissingWarp(String name, String owner, CommandSender sender) {
+        if (owner == null || owner.isEmpty()) {
             sender.sendMessage(ChatColor.RED + "Global warp '" + name + "' doesn't exist.");
         } else {
-            sender.sendMessage(ChatColor.RED + "Player '" + creator + "' don't owns a warp named '" + name + "'.");
+            sender.sendMessage(ChatColor.RED + "Player '" + owner + "' don't owns a warp named '" + name + "'.");
         }
     }
 
     private static void printPrivatizeMessage(CommandSender sender, Warp warp) {
         sender.sendMessage(ChatColor.WHITE + "You have privatized '" + ChatColor.GREEN + warp.name + ChatColor.WHITE + "'");
         sender.sendMessage("If you'd like to invite others to it, use:");
-        sender.sendMessage(ChatColor.GREEN + "/warp invite \"" + warp.name + "\" " + warp.creator + " <player>");
+        sender.sendMessage(ChatColor.GREEN + "/warp invite \"" + warp.name + "\" " + warp.getOwner() + " <player>");
     }
 
     private static boolean playerCanModifyWarp(CommandSender sender, Warp warp, Permissions permission) {

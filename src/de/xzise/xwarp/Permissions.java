@@ -16,11 +16,12 @@ public enum Permissions {
 	PRIVATE('0', 4, PermissionTypes.ADMIN_PRIVATE, PermissionTypes.CREATE_PRIVATE),
 	PUBLIC('1', 5, PermissionTypes.ADMIN_PUBLIC, PermissionTypes.CREATE_PUBLIC),
 	GLOBAL('2', 6, PermissionTypes.ADMIN_GLOBAL, PermissionTypes.CREATE_GLOBAL),
-	GIVE('g', 7, PermissionTypes.ADMIN_GIVE, null),
+	GIVE('g', 7, PermissionTypes.ADMIN_CHANGE_OWNER, null),
 	DELETE('d', 8, PermissionTypes.ADMIN_DELETE, null),
 	WARP('w', 9, PermissionTypes.ADMIN_TO_ALL, null),
 	ADD_EDITOR('a', 10, PermissionTypes.ADMIN_UNINVITE, null),
-	REMOVE_EDITOR('f', 11, PermissionTypes.ADMIN_INVITE, null);
+	REMOVE_EDITOR('f', 11, PermissionTypes.ADMIN_INVITE, null),
+	MESSAGE('m', 12, PermissionTypes.ADMIN_MESSAGE, null);
 	
 	public final char value;
 	public final int id;

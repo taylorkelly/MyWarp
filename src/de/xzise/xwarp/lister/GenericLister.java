@@ -57,11 +57,11 @@ public class GenericLister {
 			for (Warp warp : listSection) {
 				String name = warp.name;
 				
-				String creator = warp.creator;
+				String owner = warp.getOwner();
 				ChatColor color;
 				if (sender instanceof Player) {
-					if (warp.creator.equalsIgnoreCase(((Player) sender).getName())) {
-						creator = "you";
+					if (owner.equalsIgnoreCase(((Player) sender).getName())) {
+						owner = "you";
 					}
 					color = GenericLister.getColor(warp, (Player) sender);
 				} else {
@@ -69,7 +69,7 @@ public class GenericLister {
 				}
 			
 				String location = GenericLister.getLocationString(warp);
-				String creatorString = " by " + creator;
+				String creatorString = " by " + owner;
 				
 				//Find remaining length left
 				int left = width - widther.getWidth("''" + creatorString + location);
@@ -134,7 +134,7 @@ public class GenericLister {
 	}
 	
 	public static ChatColor getColor(Warp warp, Player player) {
-		if(player != null && warp.playerIsCreator(player.getName())) {
+		if(player != null && warp.isOwn(player.getName())) {
 			switch (warp.visibility) {
 			case PRIVATE :
 				return GenericLister.PRIVATE_OWN;

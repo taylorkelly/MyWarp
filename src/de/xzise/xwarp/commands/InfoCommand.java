@@ -21,24 +21,20 @@ public class InfoCommand extends WarpCommand {
     }
 
     @Override
-    protected boolean executeEdit(CommandSender sender, String warpName, String creator, String[] parameters) {
-        Warp warp = this.list.getWarp(warpName, creator, MinecraftUtil.getPlayerName(sender));
+    protected boolean executeEdit(CommandSender sender, String warpName, String owner, String[] parameters) {
+        Warp warp = this.list.getWarp(warpName, owner, MinecraftUtil.getPlayerName(sender));
         if (warp != null) {
             sender.sendMessage("Warp info: " + ChatColor.GREEN + warp.name);
-            String group = null;
+            String world;
             if (warp.isValid()) {
-                group = MyWarp.permissions.getGroup(warp.getLocation().getWorld().getName(), warp.creator);
+                world = warp.getLocation().getWorld().getName();
             } else {
                 sender.sendMessage(ChatColor.RED + "The location is invalid!");
-                group = MyWarp.permissions.getGroup(server.getWorlds().get(0).getName(), warp.creator);
+                world = this.server.getWorlds().get(0).getName();
             }
 
-            String groupText = "";
-            if (group != null) {
-                groupText = ChatColor.WHITE + " (Group: " + ChatColor.GREEN + group + ChatColor.WHITE + ")";
-            }
-
-            sender.sendMessage("Creator: " + ChatColor.GREEN + warp.creator + groupText);
+            sender.sendMessage("Creator: " + getPlayerLine(warp.getCreator(), world));
+            sender.sendMessage("Owner: " + getPlayerLine(warp.getOwner(), world));
             String visibility = "";
             switch (warp.visibility) {
             case GLOBAL:
@@ -55,22 +51,6 @@ public class InfoCommand extends WarpCommand {
                 visibility = GenericLister.getColor(warp, (Player) sender) + visibility;
             }
             sender.sendMessage("Visibility: " + visibility);
-            // TODO: Add invitees?
-            // List<String> permissions = warp.permissions;
-            // String invitees = "";
-            // if (permissions.size() == 0) {
-            // invitees = "None";
-            // } else {
-            // Iterator<String> i = permissions.iterator();
-            // while (i.hasNext()) {
-            // String name = i.next();
-            // invitees = invitees + ChatColor.GREEN + name;
-            // if (i.hasNext()) {
-            // invitees += ChatColor.WHITE + ", ";
-            // }
-            // }
-            // }
-            // sender.sendMessage("Invitees: " + invitees);
 
             String[] editors = warp.getEditors();
             String editor = "";
@@ -108,12 +88,27 @@ public class InfoCommand extends WarpCommand {
                 sender.sendMessage("Location: World = " + ChatColor.GREEN + location.getWorld().getName() + ChatColor.WHITE + ", x = " + ChatColor.GREEN + location.getBlockX() + ChatColor.WHITE + ", y = " + ChatColor.GREEN + location.getBlockY() + ChatColor.WHITE + ", z = " + ChatColor.GREEN + location.getBlockZ());
             }
         } else {
-            WarpManager.sendMissingWarp(warpName, creator, sender);
+            WarpManager.sendMissingWarp(warpName, owner, sender);
         }
 
         return true;
     }
 
+    private static String getPlayerLine(String player, String world) {
+        if (MinecraftUtil.isSet(player)) {
+            String group = MyWarp.permissions.getGroup(world, player);
+    
+            String groupText = "";
+            if (group != null) {
+                groupText = ChatColor.WHITE + " (Group: " + ChatColor.GREEN + group + ChatColor.WHITE + ")";
+            }
+    
+            return ChatColor.GREEN + player + groupText;
+        } else {
+            return "Nobody";
+        }
+    }
+    
     @Override
     protected String[] getFullHelpText() {
         return new String[] { "Show the information about the warp." };

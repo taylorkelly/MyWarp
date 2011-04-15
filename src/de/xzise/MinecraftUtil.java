@@ -18,6 +18,7 @@ import org.bukkit.entity.Player;
 import de.xzise.metainterfaces.ConsoleCommandWrapper;
 import de.xzise.metainterfaces.LinesCountable;
 import de.xzise.metainterfaces.Nameable;
+import de.xzise.xwarp.warpable.CommandSenderWrapper;
 
 public final class MinecraftUtil {
 
@@ -44,6 +45,16 @@ public final class MinecraftUtil {
             return PLAYER_LINES_COUNT;
         }
     }
+    
+    public static Player getPlayer(CommandSender sender) {
+        if (sender instanceof Player) {
+            return (Player) sender;
+        } else if (sender instanceof CommandSenderWrapper<?>) {
+            return MinecraftUtil.getPlayer(((CommandSenderWrapper<?>) sender).getSender());
+        } else {
+            return null;
+        }
+    }
 
     /**
      * Returns the name to a sender. If the sender has no player it returns null.
@@ -53,8 +64,9 @@ public final class MinecraftUtil {
      * @return Returns the name of the sender and null if the sender is no player.
      */
     public static String getPlayerName(CommandSender sender) {
-        if (sender instanceof Player) {
-            return ((Player) sender).getName();
+        Player p = MinecraftUtil.getPlayer(sender);
+        if (p != null) {
+            return p.getName();
         } else {
             return null;
         }
@@ -290,6 +302,38 @@ public final class MinecraftUtil {
     public static Integer tryAndGetInteger(String string) {
         try {
             return Integer.parseInt(string);
+        } catch (NumberFormatException e) {
+            return null;
+        }
+    }
+
+    /**
+     * Tries to convert a string into a short. If the string is invalid it
+     * returns <code>null</code>.
+     * 
+     * @param string
+     *            The string to be parsed.
+     * @return The value if the string is valid, otherwise <code>null</code>.
+     */
+    public static Short tryAndGetShort(String string) {
+        try {
+            return Short.parseShort(string);
+        } catch (NumberFormatException e) {
+            return null;
+        }
+    }
+
+    /**
+     * Tries to convert a string into a byte. If the string is invalid it
+     * returns <code>null</code>.
+     * 
+     * @param string
+     *            The string to be parsed.
+     * @return The value if the string is valid, otherwise <code>null</code>.
+     */
+    public static Byte tryAndGetByte(String string) {
+        try {
+            return Byte.parseByte(string);
         } catch (NumberFormatException e) {
             return null;
         }

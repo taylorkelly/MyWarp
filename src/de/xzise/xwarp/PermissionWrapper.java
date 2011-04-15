@@ -10,7 +10,6 @@ import com.nijiko.permissions.PermissionHandler;
 import com.nijikokun.bukkit.Permissions.Permissions;
 
 import de.xzise.MinecraftUtil;
-import de.xzise.xwarp.warpable.CommandSenderWrapper;
 
 public class PermissionWrapper {
 
@@ -46,8 +45,6 @@ public class PermissionWrapper {
         ADMIN_INVITE("warp.admin.invite"),
         // Uninvite to all warps
         ADMIN_UNINVITE("warp.admin.uninvite"),
-        // Give away all warps
-        ADMIN_GIVE("warp.admin.give"),
         // Edit the welcome message of all warps
         ADMIN_MESSAGE("warp.admin.message"),
         // Update all warps
@@ -72,8 +69,12 @@ public class PermissionWrapper {
         ADMIN_EDITORS_REMOVE("warp.admin.editors.remove"),
         // Converts from hmod file
         ADMIN_EDITORS_ADD("warp.admin.editors.add"),
+        // Give away all warps
+        ADMIN_CHANGE_OWNER("warp.admin.give.owner"),
+        // Change the creator
+        ADMIN_CHANGE_CREATOR("warp.admin.changecreator"),
         // Warp other players
-        ADMIN_WARP_OTHERS("warp.admin.warp.others"),
+        ADMIN_WARP_OTHERS("warp.admin.warp.others"), 
 
         ;
 
@@ -102,15 +103,30 @@ public class PermissionWrapper {
          * VALUES
          */
         // Cooldown
-        WARP_COOLDOWN_PRIVATE("warp.timers.cooldown.private"), WARP_COOLDOWN_PUBLIC("warp.timers.cooldown.public"), WARP_COOLDOWN_GLOBAL("warp.timers.cooldown.global"),
+        WARP_COOLDOWN_PRIVATE("warp.timers.cooldown.private"),
+        WARP_COOLDOWN_PUBLIC("warp.timers.cooldown.public"),
+        WARP_COOLDOWN_GLOBAL("warp.timers.cooldown.global"),
 
-        // Warm up
-        WARP_WARMUP_PRIVATE("warp.timers.warmup.private"), WARP_WARMUP_PUBLIC("warp.timers.warmup.public"), WARP_WARMUP_GLOBAL("warp.timers.warmup.global"), 
+        // Warmup
+        WARP_WARMUP_PRIVATE("warp.timers.warmup.private"),
+        WARP_WARMUP_PUBLIC("warp.timers.warmup.public"),
+        WARP_WARMUP_GLOBAL("warp.timers.warmup.global"), 
         
-        // Prices
-        WARP_PRICES_TO_PRIVATE("warp.prices.to.private"), WARP_PRICES_TO_PUBLIC("warp.prices.to.public"), WARP_PRICES_TO_GLOBAL("warp.prices.to.global"),
-        WARP_PRICES_CREATE_PRIVATE("warp.prices.create.private"), WARP_PRICES_CREATE_PUBLIC("warp.prices.create.public"), WARP_PRICES_CREATE_GLOBAL("warp.prices.create.global"),
+        // Limits
+        WARP_LIMIT_PRIVATE("warp.limit.private"),
+        WARP_LIMIT_PUBLIC("warp.limit.public"),
+        WARP_LIMIT_GLOBAL("warp.limit.global"),
+
+        // Prices (warp)
+        WARP_PRICES_TO_PRIVATE("warp.prices.to.private"),
+        WARP_PRICES_TO_PUBLIC("warp.prices.to.public"),
+        WARP_PRICES_TO_GLOBAL("warp.prices.to.global"),
         
+        // Prices (create)
+        WARP_PRICES_CREATE_PRIVATE("warp.prices.create.private"),
+        WARP_PRICES_CREATE_PUBLIC("warp.prices.create.public"),
+        WARP_PRICES_CREATE_GLOBAL("warp.prices.create.global"),
+
         ;
 
         public final String name;
@@ -129,7 +145,7 @@ public class PermissionWrapper {
         }
     }
 
-    private static PermissionTypes[] ADMIN_PERMISSIONS = new PermissionTypes[] { PermissionTypes.ADMIN_DELETE, PermissionTypes.ADMIN_INVITE, PermissionTypes.ADMIN_UNINVITE, PermissionTypes.ADMIN_GIVE, PermissionTypes.ADMIN_MESSAGE, PermissionTypes.ADMIN_UPDATE, PermissionTypes.ADMIN_TO_ALL, PermissionTypes.ADMIN_GLOBAL, PermissionTypes.ADMIN_PUBLIC, PermissionTypes.ADMIN_PRIVATE, PermissionTypes.ADMIN_RELOAD, PermissionTypes.ADMIN_RENAME, PermissionTypes.ADMIN_CONVERT, PermissionTypes.ADMIN_EXPORT, PermissionTypes.ADMIN_EDITORS_ADD, PermissionTypes.ADMIN_EDITORS_REMOVE, PermissionTypes.ADMIN_WARP_OTHERS, };
+    private static PermissionTypes[] ADMIN_PERMISSIONS = new PermissionTypes[] { PermissionTypes.ADMIN_DELETE, PermissionTypes.ADMIN_INVITE, PermissionTypes.ADMIN_UNINVITE, PermissionTypes.ADMIN_CHANGE_OWNER, PermissionTypes.ADMIN_MESSAGE, PermissionTypes.ADMIN_UPDATE, PermissionTypes.ADMIN_TO_ALL, PermissionTypes.ADMIN_GLOBAL, PermissionTypes.ADMIN_PUBLIC, PermissionTypes.ADMIN_PRIVATE, PermissionTypes.ADMIN_RELOAD, PermissionTypes.ADMIN_RENAME, PermissionTypes.ADMIN_CONVERT, PermissionTypes.ADMIN_EXPORT, PermissionTypes.ADMIN_EDITORS_ADD, PermissionTypes.ADMIN_EDITORS_REMOVE, PermissionTypes.ADMIN_WARP_OTHERS, PermissionTypes.ADMIN_CHANGE_CREATOR, };
 
     private static PermissionTypes[] DEFAULT_PERMISSIONS = new PermissionTypes[] { PermissionTypes.TO_GLOBAL, PermissionTypes.TO_OWN, PermissionTypes.TO_OTHER, PermissionTypes.TO_INVITED, PermissionTypes.SIGN_WARP_GLOBAL, PermissionTypes.SIGN_WARP_OWN, PermissionTypes.SIGN_WARP_OTHER, PermissionTypes.SIGN_WARP_INVITED, PermissionTypes.CREATE_PRIVATE, PermissionTypes.CREATE_PUBLIC, PermissionTypes.CREATE_GLOBAL, };
 
@@ -154,10 +170,9 @@ public class PermissionWrapper {
     }
 
     public boolean permission(CommandSender sender, PermissionTypes permission) {
-        if (sender instanceof CommandSenderWrapper) {
-            return this.permission(((CommandSenderWrapper<?>) sender).getSender(), permission);
-        } else if (sender instanceof Player && this.handler != null) {
-            return this.handler.has((Player) sender, permission.name);
+        Player player = MinecraftUtil.getPlayer(sender);
+        if (player != null && this.handler != null) {
+            return this.handler.has(player, permission.name);
         } else {
             return this.permissionInternal(sender, permission);
         }
@@ -187,8 +202,9 @@ public class PermissionWrapper {
 
     public int getInteger(CommandSender sender, PermissionValues value, int def) {
         if (this.handler != null) {
-            if (sender instanceof Player) {
-                int result = this.handler.getPermissionInteger(((Player) sender).getWorld().getName(), ((Player) sender).getName(), value.name);
+            Player player = MinecraftUtil.getPlayer(sender);
+            if (player != null) {
+                int result = this.handler.getPermissionInteger(player.getWorld().getName(), player.getName(), value.name);
                 return result < 0 ? def : result;
             } else {
                 return def;

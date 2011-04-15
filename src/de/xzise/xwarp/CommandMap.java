@@ -11,7 +11,7 @@ import org.bukkit.command.CommandSender;
 
 import de.xzise.MinecraftUtil;
 import de.xzise.xwarp.commands.AddEditorCommand;
-import de.xzise.xwarp.commands.ConvertCommand;
+import de.xzise.xwarp.commands.ChangeCreatorCommand;
 import de.xzise.xwarp.commands.CreateCommand;
 import de.xzise.xwarp.commands.DeleteCommand;
 import de.xzise.xwarp.commands.ExportCommand;
@@ -22,6 +22,7 @@ import de.xzise.xwarp.commands.ImportCommand;
 import de.xzise.xwarp.commands.InfoCommand;
 import de.xzise.xwarp.commands.InviteCommand;
 import de.xzise.xwarp.commands.ListCommand;
+import de.xzise.xwarp.commands.MessageCommand;
 import de.xzise.xwarp.commands.PermissionsCommand;
 import de.xzise.xwarp.commands.PrivatizeCommand;
 import de.xzise.xwarp.commands.PublicizeCommand;
@@ -61,6 +62,7 @@ public class CommandMap {
         subCommands.add(new UninviteCommand(list, server));
         subCommands.add(new InviteCommand(list, server));
         subCommands.add(new GiveCommand(list, server));
+        subCommands.add(new MessageCommand(list, server));
         subCommands.add(new AddEditorCommand(list, server));
         subCommands.add(new RemoveEditorCommand(list, server));
         subCommands.add(new PrivatizeCommand(list, server));
@@ -70,10 +72,10 @@ public class CommandMap {
         subCommands.add(new ListCommand(list, server));
         subCommands.add(new InfoCommand(list, server));
         subCommands.add(new ReloadCommand(list, server));
+        subCommands.add(new ChangeCreatorCommand(list, server));
         subCommands.add(new PermissionsCommand(list, server));
         subCommands.add(new ExportCommand(list, server, pluginPath));
         subCommands.add(new ImportCommand(list, pluginPath, data, server));
-        subCommands.add(new ConvertCommand(list, server, data));
         subCommands.add(new WarpForceToCommand(list, server));
 
         for (SubCommand subCommand : subCommands) {
