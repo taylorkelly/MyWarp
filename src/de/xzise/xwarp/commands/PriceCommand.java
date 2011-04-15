@@ -21,13 +21,13 @@ public class PriceCommand extends WarpCommand {
                 sender.sendMessage(ChatColor.RED + "Invalid price given. The price has to be a integer.");
             } else {
                 this.list.setPrice(warpName, owner, sender, price);
-            }            
+            }
             return true;
         } else {
             return false;
         }
     }
-    
+
     @Override
     protected String[] getFullHelpText() {
         return new String[] { "Sets the price for the warp." };

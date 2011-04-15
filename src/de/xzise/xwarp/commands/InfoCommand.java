@@ -18,7 +18,7 @@ import de.xzise.xwarp.lister.GenericLister;
 public class InfoCommand extends WarpCommand {
 
     private final EconomyWrapper wrapper;
-    
+
     public InfoCommand(WarpManager list, Server server, EconomyWrapper wrapper) {
         super(list, server, "", "info");
         this.wrapper = wrapper;
@@ -106,18 +106,18 @@ public class InfoCommand extends WarpCommand {
     private static String getPlayerLine(String player, String world) {
         if (MinecraftUtil.isSet(player)) {
             String group = MyWarp.permissions.getGroup(world, player);
-    
+
             String groupText = "";
             if (group != null) {
                 groupText = ChatColor.WHITE + " (Group: " + ChatColor.GREEN + group + ChatColor.WHITE + ")";
             }
-    
+
             return ChatColor.GREEN + player + groupText;
         } else {
             return "Nobody";
         }
     }
-    
+
     @Override
     protected String[] getFullHelpText() {
         return new String[] { "Show the information about the warp." };

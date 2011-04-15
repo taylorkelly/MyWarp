@@ -104,21 +104,21 @@ public class WarpList {
             MyWarp.logger.severe("own null: " + warp.name + " by " + warp.getCreator());
             return;
         }
-        
+
         GlobalMap namedWarps = this.global.get(warp.name.toLowerCase());
         if (namedWarps == null) {
             namedWarps = new GlobalMap();
             this.global.put(warp.name.toLowerCase(), namedWarps);
         }
         namedWarps.put(warp);
-        
+
         Map<String, Warp> personalWarps = this.personal.get(warp.getOwner().toLowerCase());
         if (personalWarps == null) {
             personalWarps = new HashMap<String, Warp>();
             this.personal.put(warp.getOwner().toLowerCase(), personalWarps);
         }
         personalWarps.put(warp.name.toLowerCase(), warp);
-        
+
         if (MinecraftUtil.isSet(warp.getCreator())) {
             List<Warp> creatorWarps = this.creatorMap.get(warp.getCreator().toLowerCase());
             if (creatorWarps == null) {
@@ -140,12 +140,17 @@ public class WarpList {
     public void updateVisibility(Warp warp) {
         this.global.get(warp.name.toLowerCase()).updateGlobal(warp);
     }
-    
+
     /**
      * Returns the number of warps a player has created.
-     * @param creator The creator of the warps. Has to be not null.
-     * @param visibility The visibility of the warps. Set to null if want to show all visibilites.
-     * @return The numer of warps the player has created (with the desired visibility).
+     * 
+     * @param creator
+     *            The creator of the warps. Has to be not null.
+     * @param visibility
+     *            The visibility of the warps. Set to null if want to show all
+     *            visibilites.
+     * @return The numer of warps the player has created (with the desired
+     *         visibility).
      */
     public int getNumberOfWarps(String creator, Visibility v) {
         int number = 0;

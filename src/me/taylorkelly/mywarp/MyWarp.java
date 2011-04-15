@@ -22,13 +22,13 @@ import de.xzise.xwarp.WarpManager;
 import de.xzise.xwarp.dataconnections.DataConnection;
 
 public class MyWarp extends JavaPlugin {
-    
+
     public static PermissionWrapper permissions = new PermissionWrapper();
     public static XLogger logger;
-    
+
     private EconomyWrapper economyWrapper = new EconomyWrapper();
     private PermissionWrapper permissionsWrapper = permissions;
-    
+
     private CommandMap commands;
     private DataConnection dataConnection;
 
@@ -70,7 +70,7 @@ public class MyWarp extends JavaPlugin {
         }
 
         PluginProperties properties = new PluginProperties(this.getDataFolder(), this.getServer());
-
+        
         this.dataConnection = properties.getDataConnection();
         try {
             if (!this.dataConnection.load(new File(this.getDataFolder(), this.dataConnection.getFilename()))) {
@@ -95,7 +95,7 @@ public class MyWarp extends JavaPlugin {
             this.getServer().getPluginManager().disablePlugin(this);
             return;
         }
-        
+
         this.getCommand("go").setExecutor(this.commands.getCommand(""));
 
         MWBlockListener blockListener = new MWBlockListener(warpList);

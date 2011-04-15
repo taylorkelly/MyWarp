@@ -6,5 +6,5 @@ import org.bukkit.command.CommandSender;
 public interface Positionable extends CommandSender {
 
     Location getLocation();
-    
+
 }

@@ -76,8 +76,7 @@ public class PermissionWrapper {
         // Warp other players
         ADMIN_WARP_OTHERS("warp.admin.warp.others"),
         // Change the price
-        ADMIN_PRICE("warp.admin.price")
-        ;
+        ADMIN_PRICE("warp.admin.price");
 
         // Maybe upcoming permissions:
         // Different admin permissions for each warp (only edit public warps
@@ -111,8 +110,8 @@ public class PermissionWrapper {
         // Warmup
         WARP_WARMUP_PRIVATE("warp.timers.warmup.private"),
         WARP_WARMUP_PUBLIC("warp.timers.warmup.public"),
-        WARP_WARMUP_GLOBAL("warp.timers.warmup.global"), 
-        
+        WARP_WARMUP_GLOBAL("warp.timers.warmup.global"),
+
         // Limits
         WARP_LIMIT_PRIVATE("warp.limit.private"),
         WARP_LIMIT_PUBLIC("warp.limit.public"),
@@ -123,7 +122,7 @@ public class PermissionWrapper {
         WARP_PRICES_TO_PRIVATE("warp.prices.to.private"),
         WARP_PRICES_TO_PUBLIC("warp.prices.to.public"),
         WARP_PRICES_TO_GLOBAL("warp.prices.to.global"),
-        
+
         // Prices (create)
         WARP_PRICES_CREATE_PRIVATE("warp.prices.create.private"),
         WARP_PRICES_CREATE_PUBLIC("warp.prices.create.public"),

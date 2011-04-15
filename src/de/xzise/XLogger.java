@@ -6,7 +6,7 @@ import java.util.logging.Logger;
 import org.bukkit.plugin.Plugin;
 
 public class XLogger {
-    
+
     private final Logger logger;
     private final String pluginName;
 
@@ -17,7 +17,7 @@ public class XLogger {
     public XLogger(String pluginName) {
         this("Minecraft", pluginName);
     }
-    
+
     private XLogger(Logger logger, String pluginName) {
         this.logger = logger;
         this.pluginName = pluginName;

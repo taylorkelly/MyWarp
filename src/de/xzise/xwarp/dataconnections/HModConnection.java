@@ -99,29 +99,29 @@ public class HModConnection implements DataConnection {
             } finally {
                 scanner.close();
             }
-            
+
             switch (version) {
-            case 0 :
+            case 0:
                 return getWarpsVersion0(lines, this.server.getWorlds().get(0));
-            case 1 :
+            case 1:
                 return getWarpsVersion1(lines, this.server);
-            case 2 :
+            case 2:
                 return getWarpsVersion2(lines, this.server);
-            case 3 :
+            case 3:
                 return getWarpsVersion3(lines, this.server);
-            default :
+            default:
                 if (version == null) {
                     return getWarpsVersion0(lines, this.server.getWorlds().get(0));
                 }
                 MyWarp.logger.severe("Unknown version tag: " + version);
                 break;
-            }            
+            }
         } catch (FileNotFoundException e) {
             MyWarp.logger.info("hmod file not found!");
         }
         return result;
     }
-    
+
     private static List<Warp> getWarpsVersion0(List<String> lines, World def) {
         List<Warp> warps = new ArrayList<Warp>();
         for (String line : lines) {
@@ -159,7 +159,7 @@ public class HModConnection implements DataConnection {
         }
         return warps;
     }
-    
+
     private static List<Warp> getWarpsVersion1(List<String> lines, Server server) {
         List<Warp> warps = new ArrayList<Warp>();
         for (String line : lines) {
@@ -169,24 +169,24 @@ public class HModConnection implements DataConnection {
                 boolean valid = true;
                 try {
                     String name = segments[0];
-        
+
                     double x = Double.parseDouble(segments[1]);
                     double y = Double.parseDouble(segments[2]);
                     double z = Double.parseDouble(segments[3]);
                     double yaw = Double.parseDouble(segments[4]);
                     double pitch = Double.parseDouble(segments[5]);
-        
+
                     yaw = (yaw < 0) ? (360 + (yaw % 360)) : (yaw % 360);
-        
+
                     World world = server.getWorld(segments[6]);
                     String warpOwner = segments[7];
                     Location location = new Location(world, x, y, z, (float) yaw, (float) pitch);
                     warp = new Warp(name, warpOwner, warpOwner, location);
                     warp.setMessage(segments[9]);
                     for (int i = GEN_2_LENGTH; i < segments.length; i += 2) {
-                        warp.addEditor(segments[i], segments[i+1]);
+                        warp.addEditor(segments[i], segments[i + 1]);
                     }
-                    
+
                     Visibility v = Visibility.parseLevel(Integer.parseInt(segments[8]));
                     if (v != null) {
                         warp.visibility = v;
@@ -220,24 +220,24 @@ public class HModConnection implements DataConnection {
                 boolean valid = true;
                 try {
                     String name = segments[0];
-        
+
                     double x = Double.parseDouble(segments[1]);
                     double y = Double.parseDouble(segments[2]);
                     double z = Double.parseDouble(segments[3]);
                     double yaw = Double.parseDouble(segments[4]);
                     double pitch = Double.parseDouble(segments[5]);
-        
+
                     yaw = (yaw < 0) ? (360 + (yaw % 360)) : (yaw % 360);
-                    
+
                     World world = server.getWorld(segments[6]);
                     String warpOwner = segments[7];
                     Location location = new Location(world, x, y, z, (float) yaw, (float) pitch);
                     warp = new Warp(name, segments[segments.length - 1], warpOwner, location);
                     warp.setMessage(segments[9]);
                     for (int i = GEN_2_LENGTH; i < segments.length - 1; i += 2) {
-                        warp.addEditor(segments[i], segments[i+1]);
+                        warp.addEditor(segments[i], segments[i + 1]);
                     }
-                    
+
                     Visibility v = Visibility.parseLevel(Integer.parseInt(segments[8]));
                     if (v != null) {
                         warp.visibility = v;
@@ -261,7 +261,7 @@ public class HModConnection implements DataConnection {
         }
         return warps;
     }
-    
+
     private static List<Warp> getWarpsVersion3(List<String> lines, Server server) {
         List<Warp> warps = new ArrayList<Warp>();
         for (String line : lines) {
@@ -271,15 +271,15 @@ public class HModConnection implements DataConnection {
                 boolean valid = true;
                 try {
                     String name = segments[0];
-        
+
                     double x = Double.parseDouble(segments[1]);
                     double y = Double.parseDouble(segments[2]);
                     double z = Double.parseDouble(segments[3]);
                     double yaw = Double.parseDouble(segments[4]);
                     double pitch = Double.parseDouble(segments[5]);
-        
+
                     yaw = (yaw < 0) ? (360 + (yaw % 360)) : (yaw % 360);
-                    
+
                     World world = server.getWorld(segments[6]);
                     String warpOwner = segments[7];
                     String creator = segments[10];
@@ -287,10 +287,10 @@ public class HModConnection implements DataConnection {
                     warp = new Warp(name, creator, warpOwner, location);
                     warp.setMessage(segments[9]);
                     warp.setPrice(Integer.parseInt(segments[11]));
-                    for (int i = GEN_2_LENGTH; i < segments.length - 1; i += 2) {
-                        warp.addEditor(segments[i], segments[i+1]);
+                    for (int i = GEN_3_LENGTH; i < segments.length - 1; i += 2) {
+                        warp.addEditor(segments[i], segments[i + 1]);
                     }
-                    
+
                     Visibility v = Visibility.parseLevel(Integer.parseInt(segments[8]));
                     if (v != null) {
                         warp.visibility = v;
@@ -314,14 +314,14 @@ public class HModConnection implements DataConnection {
         }
         return warps;
     }
-    
+
     private void writeWarps(List<Warp> warps) {
         try {
             FileWriter writer = new FileWriter(this.file);
             try {
-                writer.write("!version 2\n");
+                writer.write("!version 3\n");
                 for (Warp warp : warps) {
-                    writeWarp(warp, writer, 2);
+                    writeWarp(warp, writer, 3);
                 }
             } finally {
                 writer.close();
@@ -368,7 +368,7 @@ public class HModConnection implements DataConnection {
             MyWarp.logger.severe("Unable to write warp: '" + warp.name + "' by " + warp.getOwner(), e);
         }
     }
-    
+
     private static String makeParsable(int input) {
         return Integer.toString(input);
     }
@@ -405,7 +405,7 @@ public class HModConnection implements DataConnection {
             try {
                 FileWriter writer = new FileWriter(this.file, true);
                 try {
-                    //TODO: Determine version
+                    // TODO: Determine version
                     int version = 3;
                     for (Warp warp : warps) {
                         writeWarp(warp, writer, version);
@@ -435,7 +435,7 @@ public class HModConnection implements DataConnection {
         }
         return null;
     }
-    
+
     @Override
     public void updateCreator(Warp warp) {
         List<Warp> warps = this.getWarps();
@@ -443,7 +443,7 @@ public class HModConnection implements DataConnection {
         updated.setCreator(warp.getCreator());
         this.writeWarps(warps);
     }
-    
+
     @Override
     public void updateOwner(Warp warp, IdentificationInterface identification) {
         List<Warp> warps = this.getWarps();
@@ -520,14 +520,14 @@ public class HModConnection implements DataConnection {
     }
 
     private final class NameIdentification implements IdentificationInterface {
-        
+
         private final String name;
         private final String owner;
-        
+
         public NameIdentification(Warp warp) {
             this(warp.name, warp.getOwner());
         }
-        
+
         public NameIdentification(String name, String owner) {
             this.name = name;
             this.owner = owner;
@@ -537,9 +537,9 @@ public class HModConnection implements DataConnection {
         public boolean isIdentificated(Warp warp) {
             return warp.name.equalsIgnoreCase(this.name) && warp.getOwner().equals(this.owner);
         }
-        
+
     }
-    
+
     @Override
     public IdentificationInterface createIdentification(Warp warp) {
         return new NameIdentification(warp);

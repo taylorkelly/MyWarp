@@ -12,7 +12,6 @@ import com.nijiko.coelho.iConomy.system.Account;
 import com.nijiko.coelho.iConomy.system.Bank;
 
 import de.xzise.MinecraftUtil;
-import de.xzise.xwarp.warpable.CommandSenderWrapper;
 
 public class EconomyWrapper {
 
@@ -61,18 +60,16 @@ public class EconomyWrapper {
      */
     public PayResult pay(CommandSender sender, String reciever, int price, int basic) {
         if (this.bank != null) {
-           if (sender instanceof CommandSenderWrapper<?>) {
-               return this.pay(((CommandSenderWrapper<?>) sender).getSender(), reciever, price, basic);
-           }           
-           if (sender instanceof Player) {
-               Account executor = this.bank.getAccount(((Player) sender).getName());
+           Player player = MinecraftUtil.getPlayer(sender);
+           if (player != null) {
+               Account executor = this.getAccount(player.getName());
                // Not negative
                //TODO: Add option if allow
                if (executor.hasEnough(-price -basic)) {
                    executor.add(-price -basic);
                    this.tax.add(basic);
                    if (MinecraftUtil.isSet(reciever)) {
-                       Account owner = this.bank.getAccount(reciever);
+                       Account owner = this.getAccount(reciever);
                        owner.add(price);
                    }
                    return PayResult.PAID;
@@ -86,6 +83,13 @@ public class EconomyWrapper {
             sender.sendMessage(ChatColor.RED + "You should pay for this warp. But no iConomy found.");
         }
         return PayResult.UNABLE;
+    }
+    
+    private final Account getAccount(String name) {
+        if (!this.bank.hasAccount(name)) {
+            this.bank.addAccount(name);
+        }
+        return this.bank.getAccount(name);
     }
     
     public PayResult pay(CommandSender sender, int basic) {

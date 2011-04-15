@@ -91,7 +91,7 @@ public class SQLiteConnection implements DataConnection {
 
     private void update() {
         int version = getVersion();
-        
+
         if (version < TARGET_VERSION) {
             MyWarp.logger.info("Database layout is outdated (" + version + ")! Updating to " + TARGET_VERSION + ".");
             Statement statement = null;
@@ -100,7 +100,7 @@ public class SQLiteConnection implements DataConnection {
             ResultSet set = null;
             try {
                 statement = this.connection.createStatement();
-                
+
                 if (!tableExists("permissions")) {
                     MyWarp.logger.info("Creating permission table.");
                     statement.execute(PERMISSIONS_TABLE);
@@ -171,9 +171,9 @@ public class SQLiteConnection implements DataConnection {
                         }
                         convertedWarp.executeUpdate();
                     }
-                    
+
                     if (version < 3) {
-                        
+
                     }
 
                     if (version < 2) {
@@ -484,7 +484,7 @@ public class SQLiteConnection implements DataConnection {
             }
         });
     }
-    
+
     @Override
     public void updateMessage(Warp warp) {
         this.updateWarp(warp, "Welcome Message", "UPDATE warpTable SET welcomeMessage = ? WHERE id = ?", new UpdateFiller() {
@@ -533,7 +533,7 @@ public class SQLiteConnection implements DataConnection {
             }
         });
     }
-    
+
     @Override
     public void updatePrice(Warp warp) {
         this.updateWarp(warp, "Location", "UPDATE warpTable SET price = ? WHERE id = ?", new UpdateFiller() {
@@ -677,18 +677,18 @@ public class SQLiteConnection implements DataConnection {
     private final class IdIdentification implements IdentificationInterface {
 
         private final int id;
-        
+
         public IdIdentification(Warp warp) {
             this.id = warp.index;
         }
-        
+
         @Override
         public boolean isIdentificated(Warp warp) {
             return this.id == warp.index;
         }
-        
+
     }
-    
+
     @Override
     public IdentificationInterface createIdentification(Warp warp) {
         return new IdIdentification(warp);

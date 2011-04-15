@@ -10,12 +10,12 @@ public class WarpablePlayer extends CommandSenderWrapper<Player> implements Warp
     public WarpablePlayer(Player player) {
         super(player);
     }
-    
+
     @Override
     public String getName() {
         return this.sender.getName();
     }
-    
+
     @Override
     public boolean teleport(Location location) {
         return this.sender.teleport(location);

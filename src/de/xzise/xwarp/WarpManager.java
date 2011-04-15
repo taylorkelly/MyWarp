@@ -39,6 +39,7 @@ public class WarpManager {
     private DataConnection data;
     private CoolDown coolDown;
     private WarmUp warmUp;
+    private boolean useForceTo;
     private EconomyWrapper economy;
 
     public WarpManager(Plugin plugin, EconomyWrapper economy, PluginProperties properties, DataConnection data) {
@@ -47,6 +48,7 @@ public class WarpManager {
         this.data = data;
         this.coolDown = new CoolDown(plugin, properties);
         this.warmUp = new WarmUp(plugin, properties, this.coolDown);
+        this.useForceTo = properties.isForceToUsed();
         this.economy = economy;
         this.loadFromDatabase();
     }
@@ -62,12 +64,17 @@ public class WarpManager {
             sender.sendMessage(ChatColor.RED + "You have no permission to reload.");
         }
     }
-    
+
     /**
      * Returns the number of warps a player has created.
-     * @param creator The creator of the warps. Has to be not null.
-     * @param visibility The visibility of the warps. Set to null if want to show all visibilites.
-     * @return The numer of warps the player has created (with the desired visibility).
+     * 
+     * @param creator
+     *            The creator of the warps. Has to be not null.
+     * @param visibility
+     *            The visibility of the warps. Set to null if want to show all
+     *            visibilites.
+     * @return The numer of warps the player has created (with the desired
+     *         visibility).
      * @see {@link WarpList#getNumberOfWarps(String, Visibility)}
      */
     public int getAmountOfWarps(String creator, Visibility visibility) {
@@ -101,7 +108,7 @@ public class WarpManager {
             if (creator == null) {
                 creator = "";
             }
-            
+
             int warpsByCreator = this.list.getNumberOfWarps(creator, visibility);
             int totalWarpsByCreator = this.list.getNumberOfWarps(creator, null);
             int allowedMaximum = MyWarp.permissions.getInteger(player, limit, -1);
@@ -116,14 +123,14 @@ public class WarpManager {
                 } else {
                     int price = 0;
                     switch (visibility) {
-                    case GLOBAL :
+                    case GLOBAL:
                         price = MyWarp.permissions.getInteger(player, PermissionValues.WARP_PRICES_CREATE_GLOBAL, 0);
-                    case PRIVATE :
+                    case PRIVATE:
                         price = MyWarp.permissions.getInteger(player, PermissionValues.WARP_PRICES_CREATE_PRIVATE, 0);
-                    case PUBLIC :
+                    case PUBLIC:
                         price = MyWarp.permissions.getInteger(player, PermissionValues.WARP_PRICES_CREATE_PUBLIC, 0);
                     }
-                    
+
                     switch (this.economy.pay(player, price)) {
                     case PAID:
                         player.sendMessage(ChatColor.GREEN + "You have paid " + ChatColor.GREEN + this.economy.format(price) + ChatColor.WHITE + ".");
@@ -218,7 +225,7 @@ public class WarpManager {
             WarpManager.sendMissingWarp(name, owner, sender);
         }
     }
-    
+
     public void give(String name, String owner, CommandSender sender, String giveeName) {
         Warp warp = this.getWarp(name, owner, MinecraftUtil.getPlayerName(sender));
         if (warp != null) {
@@ -247,7 +254,7 @@ public class WarpManager {
             WarpManager.sendMissingWarp(name, owner, sender);
         }
     }
-    
+
     public void setMessage(String name, String owner, CommandSender sender, String message) {
         Warp warp = this.getWarp(name, owner, MinecraftUtil.getPlayerName(sender));
         if (warp != null) {
@@ -294,7 +301,7 @@ public class WarpManager {
             WarpManager.sendMissingWarp(name, owner, sender);
         }
     }
-    
+
     public void setPrice(String name, String owner, CommandSender sender, int price) {
         Warp warp = this.list.getWarp(name, owner, MinecraftUtil.getPlayerName(sender));
         if (warp != null) {
@@ -536,8 +543,8 @@ public class WarpManager {
         }
     }
 
-    public void warpTo(String name, String creator, CommandSender warper, Warpable warped, boolean viaSign) {
-        this.warpTo(name, creator, warper, warped, viaSign, false);
+    public void warpTo(String name, String owner, CommandSender warper, Warpable warped, boolean viaSign) {
+        this.warpTo(name, owner, warper, warped, viaSign, this.useForceTo);
     }
 
     public void warpTo(String name, String owner, CommandSender warper, Warpable warped, boolean viaSign, boolean worldForce) {
@@ -552,17 +559,17 @@ public class WarpManager {
                     } else {
                         int price = 0;
                         switch (warp.visibility) {
-                        case PRIVATE :
+                        case PRIVATE:
                             price += MyWarp.permissions.getInteger(warper, PermissionValues.WARP_PRICES_TO_PRIVATE, 0);
                             break;
-                        case PUBLIC :
+                        case PUBLIC:
                             price += MyWarp.permissions.getInteger(warper, PermissionValues.WARP_PRICES_TO_PUBLIC, 0);
                             break;
-                        case GLOBAL :
+                        case GLOBAL:
                             price += MyWarp.permissions.getInteger(warper, PermissionValues.WARP_PRICES_TO_GLOBAL, 0);
                             break;
                         }
-                        
+
                         if (this.coolDown.playerHasCooled(warper)) {
                             switch (this.economy.pay(warper, warp.getOwner(), warp.getPrice(), price)) {
                             case PAID:
@@ -628,7 +635,7 @@ public class WarpManager {
         if (player != null) {
             canModify = warp.playerCanModify(player, permission);
         }
-        
+
         if (permission.defaultPermission != null) {
             return ((canModify && MyWarp.permissions.permission(sender, permission.defaultPermission)) || MyWarp.permissions.permission(sender, permission.adminPermission));
         } else {

@@ -40,7 +40,7 @@ public class CreateCommand extends DefaultSubCommand {
     private static String[] getCreateCommands(String suffix) {
         return new String[] { "create" + suffix, "+" + suffix, "add" + suffix };
     }
-    
+
     private String getAmount(Player player, PermissionValues value) {
         int amount = MyWarp.permissions.getInteger(player, value, -1);
         if (amount < 0) {

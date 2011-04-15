@@ -48,7 +48,7 @@ public class CommandMap {
         this.commands = new HashMap<String, SubCommand>();
 
         this.helper = new HelpCommand();
-        this.warper = new WarpToCommand(list, server, properties);
+        this.warper = new WarpToCommand(list, server);
 
         Collection<SubCommand> subCommands = new ArrayList<SubCommand>();
 
@@ -94,7 +94,7 @@ public class CommandMap {
             }
         }
     }
-    
+
     public SubCommand getCommand(String name) {
         if (MinecraftUtil.isSet(name)) {
             return this.commands.get(name);

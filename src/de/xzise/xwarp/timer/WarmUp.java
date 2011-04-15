@@ -22,29 +22,29 @@ public class WarmUp {
     private final Plugin plugin;
     private final PluginProperties properties;
     private final CoolDown down;
-    
+
     public WarmUp(Plugin plugin, PluginProperties properties, CoolDown down) {
         this.plugin = plugin;
         this.properties = properties;
         this.down = down;
     }
-    
+
     public void addPlayer(CommandSender warper, Warpable warped, Warp warp) {
-       int warmup = this.warmupTime(warp.visibility, warper);
-       if (warmup > 0) {
-           if (this.players.containsKey(warper)) {
-               plugin.getServer().getScheduler().cancelTask(this.players.get(warper));
-           }
-           if (this.properties.isWarmupNotify()) {
-               warper.sendMessage(ChatColor.AQUA + "You will have to warm up for " + warmup + " secs");
-           }
-           int taskIndex = this.plugin.getServer().getScheduler().scheduleSyncDelayedTask(plugin, new WarmTask(warper, warped, warp, this), warmup * 20);
-           this.players.put(warper, taskIndex);
-       } else {
-           this.sendPlayer(warper, warped, warp);
-       }
+        int warmup = this.warmupTime(warp.visibility, warper);
+        if (warmup > 0) {
+            if (this.players.containsKey(warper)) {
+                plugin.getServer().getScheduler().cancelTask(this.players.get(warper));
+            }
+            if (this.properties.isWarmupNotify()) {
+                warper.sendMessage(ChatColor.AQUA + "You will have to warm up for " + warmup + " secs");
+            }
+            int taskIndex = this.plugin.getServer().getScheduler().scheduleSyncDelayedTask(plugin, new WarmTask(warper, warped, warp, this), warmup * 20);
+            this.players.put(warper, taskIndex);
+        } else {
+            this.sendPlayer(warper, warped, warp);
+        }
     }
-    
+
     public int warmupTime(Visibility visibility, CommandSender warper) {
         PermissionValues value = PermissionValues.WARP_WARMUP_PRIVATE;
         switch (visibility) {
@@ -57,19 +57,20 @@ public class WarmUp {
         }
         return MyWarp.permissions.getInteger(warper, value, 0);
     }
-    
-//    public static boolean warmupNeeded(Warp warp, Player player) {
-//        if (!WarpSettings.adminsObeyWarmsCools && player.isOp())
-//                return false;
-//        
-//        if (warp.visibility == Visibility.GLOBAL && WarpSettings.WarmUpForGlobal)
-//                return true;
-//        if (warp.visibility == Visibility.PRIVATE && WarpSettings.WarmUpForPrivate)
-//                return true;
-//        if (warp.visibility == Visibility.PUBLIC && WarpSettings.WarmUpForPublic)
-//                return true;
-//        return false;
-//    }
+
+    // public static boolean warmupNeeded(Warp warp, Player player) {
+    // if (!WarpSettings.adminsObeyWarmsCools && player.isOp())
+    // return false;
+    //
+    // if (warp.visibility == Visibility.GLOBAL && WarpSettings.WarmUpForGlobal)
+    // return true;
+    // if (warp.visibility == Visibility.PRIVATE &&
+    // WarpSettings.WarmUpForPrivate)
+    // return true;
+    // if (warp.visibility == Visibility.PUBLIC && WarpSettings.WarmUpForPublic)
+    // return true;
+    // return false;
+    // }
 
     public boolean playerHasWarmed(CommandSender warper) {
         return this.players.containsKey(warper);
@@ -104,5 +105,5 @@ public class WarmUp {
             this.warmUp.sendPlayer(player, warped, warp);
         }
     }
-    
+
 }

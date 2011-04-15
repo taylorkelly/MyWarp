@@ -16,12 +16,13 @@ public interface DataConnection {
     String getFilename();
 
     void clear();
-    
+
     /**
      * This method should be called to create an identification for a warp,
      * before any changes to this warp will be performed.
      * 
-     * @param warp The identification for the warp will be created.
+     * @param warp
+     *            The identification for the warp will be created.
      * @return An identification.
      */
     IdentificationInterface createIdentification(Warp warp);
