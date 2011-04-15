@@ -43,11 +43,11 @@ public class CommandMap {
     private HelpCommand helper;
     private WarpToCommand warper;
 
-    public CommandMap(WarpManager list, Server server, DataConnection data, File pluginPath) {
+    public CommandMap(WarpManager list, Server server, DataConnection data, File pluginPath, PluginProperties properties) {
         this.commands = new HashMap<String, SubCommand>();
 
         this.helper = new HelpCommand();
-        this.warper = new WarpToCommand(list, server);
+        this.warper = new WarpToCommand(list, server, properties);
 
         Collection<SubCommand> subCommands = new ArrayList<SubCommand>();
 

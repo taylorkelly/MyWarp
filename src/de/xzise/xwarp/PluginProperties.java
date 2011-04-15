@@ -19,6 +19,7 @@ public class PluginProperties {
     private DataConnection dataConnection;
     private boolean cooldownNotify;
     private boolean warmupNotify;
+    private boolean useForceTo;
 
     private File dataDirectory;
     private File configFile;
@@ -43,6 +44,10 @@ public class PluginProperties {
         return this.warmupNotify;
     }
 
+    public boolean isForceToUsed() {
+        return this.useForceTo;
+    }
+
     public void read() {
         java.util.Properties properties = new java.util.Properties();
         if (this.configFile.exists()) {
@@ -58,6 +63,7 @@ public class PluginProperties {
                 properties.setProperty("data-connection", "sqlite");
                 properties.setProperty("cooldown-notify", "true");
                 properties.setProperty("warmup-notify", "true");
+                properties.setProperty("use-force-to", "true");
                 properties.store(new FileWriter(this.configFile), null);
             } catch (IOException e) {
                 MyWarp.logger.warning("Unable to create properties file.", e);
@@ -77,6 +83,7 @@ public class PluginProperties {
 
         this.cooldownNotify = parseString(properties.getProperty("cooldown-notify", "true"));
         this.warmupNotify = parseString(properties.getProperty("warmup-notify", "true"));
+        this.useForceTo = parseString(properties.getProperty("use-force-to", "true"));
     }
 
     public static boolean parseString(String string) {
