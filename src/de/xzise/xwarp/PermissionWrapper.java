@@ -116,6 +116,7 @@ public class PermissionWrapper {
         WARP_LIMIT_PRIVATE("warp.limit.private"),
         WARP_LIMIT_PUBLIC("warp.limit.public"),
         WARP_LIMIT_GLOBAL("warp.limit.global"),
+        WARP_LIMIT_TOTAL("warp.limit.total"),
 
         // Prices (warp)
         WARP_PRICES_TO_PRIVATE("warp.prices.to.private"),

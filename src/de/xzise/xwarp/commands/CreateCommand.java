@@ -45,6 +45,8 @@ public class CreateCommand extends DefaultSubCommand {
         int amount = MyWarp.permissions.getInteger(player, value, -1);
         if (amount < 0) {
             return "Infinite";
+        } else if (amount == 0) {
+            return "None";
         } else {
             return Integer.toString(amount);
         }
@@ -58,6 +60,7 @@ public class CreateCommand extends DefaultSubCommand {
             player.sendMessage(GenericLister.GLOBAL_OWN + "Global: " + ChatColor.GREEN + getAmount(player, PermissionValues.WARP_LIMIT_GLOBAL) + ChatColor.WHITE + " (created: " + ChatColor.GREEN + this.list.getAmountOfWarps(player.getName(), Visibility.GLOBAL) + ChatColor.WHITE + ")");
             player.sendMessage(GenericLister.PUBLIC_OWN + "Public: " + ChatColor.GREEN + getAmount(player, PermissionValues.WARP_LIMIT_PUBLIC) + ChatColor.WHITE + " (created: " + ChatColor.GREEN + this.list.getAmountOfWarps(player.getName(), Visibility.PUBLIC) + ChatColor.WHITE + ")");
             player.sendMessage(GenericLister.PRIVATE_OWN + "Private: " + ChatColor.GREEN + getAmount(player, PermissionValues.WARP_LIMIT_PRIVATE) + ChatColor.WHITE + " (created: " + ChatColor.GREEN + this.list.getAmountOfWarps(player.getName(), Visibility.PRIVATE) + ChatColor.WHITE + ")");
+            player.sendMessage(ChatColor.GREEN + "Total: " + getAmount(player, PermissionValues.WARP_LIMIT_TOTAL) + ChatColor.WHITE + " (created: " + ChatColor.GREEN + this.list.getAmountOfWarps(player.getName(), null) + ChatColor.WHITE + ")");
             return true;
         } else {
             Positionable position = WarperFactory.getPositionable(sender);

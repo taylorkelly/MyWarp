@@ -63,6 +63,13 @@ public class WarpManager {
         }
     }
     
+    /**
+     * Returns the number of warps a player has created.
+     * @param creator The creator of the warps. Has to be not null.
+     * @param visibility The visibility of the warps. Set to null if want to show all visibilites.
+     * @return The numer of warps the player has created (with the desired visibility).
+     * @see {@link WarpList#getNumberOfWarps(String, Visibility)}
+     */
     public int getAmountOfWarps(String creator, Visibility visibility) {
         return this.list.getNumberOfWarps(creator, visibility);
     }
@@ -96,8 +103,10 @@ public class WarpManager {
             }
             
             int warpsByCreator = this.list.getNumberOfWarps(creator, visibility);
+            int totalWarpsByCreator = this.list.getNumberOfWarps(creator, null);
             int allowedMaximum = MyWarp.permissions.getInteger(player, limit, -1);
-            if (allowedMaximum < 0 || warpsByCreator < allowedMaximum) {
+            int allowedTotalMaximum = MyWarp.permissions.getInteger(player, PermissionValues.WARP_LIMIT_TOTAL, -1);
+            if ((allowedMaximum < 0 || warpsByCreator < allowedMaximum) && (allowedTotalMaximum < 0 || totalWarpsByCreator < allowedTotalMaximum)) {
                 Warp warp = this.list.getWarp(name, newOwner, null);
                 Warp globalWarp = (visibility == Visibility.GLOBAL ? this.list.getWarp(name) : null);
                 if (warp != null) {

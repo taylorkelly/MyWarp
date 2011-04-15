@@ -141,13 +141,19 @@ public class WarpList {
         this.global.get(warp.name.toLowerCase()).updateGlobal(warp);
     }
     
+    /**
+     * Returns the number of warps a player has created.
+     * @param creator The creator of the warps. Has to be not null.
+     * @param visibility The visibility of the warps. Set to null if want to show all visibilites.
+     * @return The numer of warps the player has created (with the desired visibility).
+     */
     public int getNumberOfWarps(String creator, Visibility v) {
         int number = 0;
         if (MinecraftUtil.isSet(creator)) {
             List<Warp> warps = this.creatorMap.get(creator.toLowerCase());
             if (warps != null) {
                 for (Warp warp : warps) {
-                    if (warp.visibility == v) {
+                    if (v == null || warp.visibility == v) {
                         number++;
                     }
                 }
