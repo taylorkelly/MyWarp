@@ -26,7 +26,8 @@ public class EconomyWrapper {
     }
     
     private Bank bank;
-    private Account tax = new Account("");
+    //FIXME: Results in errors! Add better option.
+    //private Account tax = new Account("");
 
     /**
      * Pays for an action if the sender has enough money. If the sender is not a player no money will be transfered.
@@ -47,7 +48,8 @@ public class EconomyWrapper {
                //TODO: Add option if allow
                if (executor.hasEnough(-price -basic)) {
                    executor.add(-price -basic);
-                   tax.add(basic);
+                   //FIXME: If tax is implemented uncomment this.
+                   //tax.add(basic);
                    if (MinecraftUtil.isSet(reciever) && this.bank.hasAccount(reciever)) {
                        Account owner = this.bank.getAccount(reciever);
                        owner.add(price);
