@@ -566,7 +566,14 @@ public class WarpManager {
                         if (this.coolDown.playerHasCooled(warper)) {
                             switch (this.economy.pay(warper, warp.getOwner(), warp.getPrice(), price)) {
                             case PAID:
-                                warper.sendMessage(ChatColor.GREEN + "You have paid " + ChatColor.GREEN + this.economy.format(price + warp.getPrice()) + ChatColor.WHITE + ".");
+                                int totalPrice = warp.getPrice() + price;
+                                if (totalPrice > 0) {
+                                    warper.sendMessage(ChatColor.WHITE + "You have paid " + ChatColor.GREEN + this.economy.format(totalPrice) + ChatColor.WHITE + ".");
+                                } else if (totalPrice == 0) {
+                                    warper.sendMessage("Yeah. This warp was " + ChatColor.GREEN + "free" + ChatColor.WHITE + " (as beer)!");
+                                } else {
+                                    warper.sendMessage("Woooo! You got " + ChatColor.GREEN + this.economy.format(totalPrice) + ChatColor.WHITE + "!");
+                                }
                             case UNABLE:
                                 this.warmUp.addPlayer(warper, warped, warp);
                                 break;

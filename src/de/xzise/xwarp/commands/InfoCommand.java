@@ -56,9 +56,9 @@ public class InfoCommand extends WarpCommand {
             }
             sender.sendMessage("Visibility: " + visibility);
             if (this.wrapper.isActive()) {
-                sender.sendMessage("Price: " + this.wrapper.format(warp.getPrice()));
+                sender.sendMessage("Price: " + ChatColor.GREEN + this.wrapper.format(warp.getPrice()));
             } else {
-                sender.sendMessage("Price: " + warp.getPrice() + ChatColor.RED + " (INACTIVE)");
+                sender.sendMessage("Price: " + ChatColor.GREEN + warp.getPrice() + ChatColor.RED + " (INACTIVE)");
             }
 
             String[] editors = warp.getEditors();

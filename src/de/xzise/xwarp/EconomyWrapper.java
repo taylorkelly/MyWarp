@@ -16,6 +16,28 @@ import de.xzise.xwarp.warpable.CommandSenderWrapper;
 
 public class EconomyWrapper {
 
+    /**
+     * Wrap the Account class of iConomy. If no account is set, it will add nothing.
+     * @author Fabian Neundorf
+     */
+    private class AccountWrapper {
+        private final Account account;
+        
+        public AccountWrapper(Account account) {
+            this.account = account;
+        }
+        
+        public AccountWrapper() {
+            this(null);
+        }
+        
+        public void add(int amount) {
+            if (this.account != null) {
+                this.account.add(amount);
+            }
+        }
+    }
+    
     public enum PayResult {
         /** The price was paid. */
         PAID,
@@ -26,8 +48,8 @@ public class EconomyWrapper {
     }
     
     private Bank bank;
-    //FIXME: Results in errors! Add better option.
-    //private Account tax = new Account("");
+    //TODO: Add option
+    private AccountWrapper tax = new AccountWrapper();
 
     /**
      * Pays for an action if the sender has enough money. If the sender is not a player no money will be transfered.
@@ -48,9 +70,8 @@ public class EconomyWrapper {
                //TODO: Add option if allow
                if (executor.hasEnough(-price -basic)) {
                    executor.add(-price -basic);
-                   //FIXME: If tax is implemented uncomment this.
-                   //tax.add(basic);
-                   if (MinecraftUtil.isSet(reciever) && this.bank.hasAccount(reciever)) {
+                   this.tax.add(basic);
+                   if (MinecraftUtil.isSet(reciever)) {
                        Account owner = this.bank.getAccount(reciever);
                        owner.add(price);
                    }
