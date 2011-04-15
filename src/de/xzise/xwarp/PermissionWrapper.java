@@ -74,8 +74,9 @@ public class PermissionWrapper {
         // Change the creator
         ADMIN_CHANGE_CREATOR("warp.admin.changecreator"),
         // Warp other players
-        ADMIN_WARP_OTHERS("warp.admin.warp.others"), 
-
+        ADMIN_WARP_OTHERS("warp.admin.warp.others"),
+        // Change the price
+        ADMIN_PRICE("warp.admin.price")
         ;
 
         // Maybe upcoming permissions:

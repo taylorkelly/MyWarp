@@ -294,6 +294,21 @@ public class WarpManager {
             WarpManager.sendMissingWarp(name, owner, sender);
         }
     }
+    
+    public void setPrice(String name, String owner, CommandSender sender, int price) {
+        Warp warp = this.list.getWarp(name, owner, MinecraftUtil.getPlayerName(sender));
+        if (warp != null) {
+            if (WarpManager.playerCanModifyWarp(sender, warp, Permissions.PRICE)) {
+                warp.setPrice(price);
+                this.data.updatePrice(warp);
+                sender.sendMessage(ChatColor.AQUA + "You have set the price for '" + warp.name + "'");
+            } else {
+                sender.sendMessage(ChatColor.RED + "You do not have permission to change the price of '" + warp.name + "'");
+            }
+        } else {
+            WarpManager.sendMissingWarp(name, owner, sender);
+        }
+    }
 
     public void globalize(String name, String owner, CommandSender sender) {
         Warp warp = this.list.getWarp(name, owner, MinecraftUtil.getPlayerName(sender));

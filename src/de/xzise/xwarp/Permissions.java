@@ -21,7 +21,10 @@ public enum Permissions {
 	WARP('w', 9, PermissionTypes.ADMIN_TO_ALL, null),
 	ADD_EDITOR('a', 10, PermissionTypes.ADMIN_UNINVITE, null),
 	REMOVE_EDITOR('f', 11, PermissionTypes.ADMIN_INVITE, null),
-	MESSAGE('m', 12, PermissionTypes.ADMIN_MESSAGE, null);
+	MESSAGE('m', 12, PermissionTypes.ADMIN_MESSAGE, null),
+	PRICE('p', 13, PermissionTypes.ADMIN_PRICE, null),
+	
+	;
 	
 	public final char value;
 	public final int id;

@@ -33,6 +33,8 @@ public class HModConnection implements DataConnection {
     private static final int GEN_2_LENGTH = GEN_1_LENGTH + 4;
     // Gen2 + Creator
     private static final int GEN_3_LENGTH = GEN_2_LENGTH + 1;
+    // Gen3 + Price
+    private static final int GEN_4_LENGTH = GEN_3_LENGTH + 1;
 
     public HModConnection(Server server) {
         this.server = server;
@@ -105,6 +107,8 @@ public class HModConnection implements DataConnection {
                 return getWarpsVersion1(lines, this.server);
             case 2 :
                 return getWarpsVersion2(lines, this.server);
+            case 3 :
+                return getWarpsVersion3(lines, this.server);
             default :
                 if (version == null) {
                     return getWarpsVersion0(lines, this.server.getWorlds().get(0));
@@ -258,6 +262,59 @@ public class HModConnection implements DataConnection {
         return warps;
     }
     
+    private static List<Warp> getWarpsVersion3(List<String> lines, Server server) {
+        List<Warp> warps = new ArrayList<Warp>();
+        for (String line : lines) {
+            String[] segments = MinecraftUtil.parseLine(line, SEPARATOR);
+            if (segments.length >= GEN_4_LENGTH && segments.length % 2 == 0) {
+                Warp warp = null;
+                boolean valid = true;
+                try {
+                    String name = segments[0];
+        
+                    double x = Double.parseDouble(segments[1]);
+                    double y = Double.parseDouble(segments[2]);
+                    double z = Double.parseDouble(segments[3]);
+                    double yaw = Double.parseDouble(segments[4]);
+                    double pitch = Double.parseDouble(segments[5]);
+        
+                    yaw = (yaw < 0) ? (360 + (yaw % 360)) : (yaw % 360);
+                    
+                    World world = server.getWorld(segments[6]);
+                    String warpOwner = segments[7];
+                    String creator = segments[10];
+                    Location location = new Location(world, x, y, z, (float) yaw, (float) pitch);
+                    warp = new Warp(name, creator, warpOwner, location);
+                    warp.setMessage(segments[9]);
+                    warp.setPrice(Integer.parseInt(segments[11]));
+                    for (int i = GEN_2_LENGTH; i < segments.length - 1; i += 2) {
+                        warp.addEditor(segments[i], segments[i+1]);
+                    }
+                    
+                    Visibility v = Visibility.parseLevel(Integer.parseInt(segments[8]));
+                    if (v != null) {
+                        warp.visibility = v;
+                    } else {
+                        MyWarp.logger.warning("Illegal visibility found (" + warp.name + " by " + warp.getOwner() + ")");
+                        valid = false;
+                    }
+                } catch (NumberFormatException nfe) {
+                    valid = false;
+                    MyWarp.logger.warning("Unable to parse a value (" + nfe.getMessage() + ")");
+                } catch (Exception e) {
+                    MyWarp.logger.severe("Catched an unhandled exception", e);
+                    valid = false;
+                }
+                if (valid && warp != null) {
+                    warps.add(warp);
+                }
+            } else {
+                MyWarp.logger.warning("Invalid warp line found");
+            }
+        }
+        return warps;
+    }
+    
     private void writeWarps(List<Warp> warps) {
         try {
             FileWriter writer = new FileWriter(this.file);
@@ -286,9 +343,13 @@ public class HModConnection implements DataConnection {
             warpLine.append(makeParsable(l.getPitch()) + SEPARATOR);
             if (version >= 1) {
                 warpLine.append(makeParsable(l.getWorld().getName()) + SEPARATOR);
-                warpLine.append(makeParsable(warp.getCreator()) + SEPARATOR);
+                warpLine.append(makeParsable(warp.getOwner()) + SEPARATOR);
                 warpLine.append(makeParsable(warp.visibility.level) + SEPARATOR);
                 warpLine.append(makeParsable(warp.welcomeMessage) + SEPARATOR);
+                if (version >= 3) {
+                    warpLine.append(makeParsable(warp.getCreator()) + SEPARATOR);
+                    warpLine.append(makeParsable(warp.getPrice()) + SEPARATOR);
+                }
                 for (String editor : warp.getEditors()) {
                     EditorPermissions ep = warp.getEditorPermissions(editor);
                     if (ep != null) {
@@ -296,8 +357,8 @@ public class HModConnection implements DataConnection {
                         warpLine.append(makeParsable(ep.getPermissionString()) + SEPARATOR);
                     }
                 }
-                if (version >= 2) {
-                    warpLine.append(makeParsable(warp.getOwner()) + SEPARATOR);
+                if (version == 2) {
+                    warpLine.append(makeParsable(warp.getCreator()) + SEPARATOR);
                 }
             }
             writer.append(warpLine + "\n");
@@ -345,7 +406,7 @@ public class HModConnection implements DataConnection {
                 FileWriter writer = new FileWriter(this.file, true);
                 try {
                     //TODO: Determine version
-                    int version = 2;
+                    int version = 3;
                     for (Warp warp : warps) {
                         writeWarp(warp, writer, version);
                     }
@@ -424,11 +485,17 @@ public class HModConnection implements DataConnection {
     }
 
     @Override
-    // Not supported in hmod
     public void updateEditor(Warp warp, String name) {
         List<Warp> warps = this.getWarps();
-        // Warp updated = warps.get(warps.indexOf(warp));
         warps.set(warps.indexOf(warp), warp);
+        this.writeWarps(warps);
+    }
+
+    @Override
+    public void updatePrice(Warp warp) {
+        List<Warp> warps = this.getWarps();
+        Warp updated = warps.get(warps.indexOf(warp));
+        updated.setPrice(warp.getPrice());
         this.writeWarps(warps);
     }
 

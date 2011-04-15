@@ -10,14 +10,18 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import de.xzise.MinecraftUtil;
+import de.xzise.xwarp.EconomyWrapper;
 import de.xzise.xwarp.Permissions;
 import de.xzise.xwarp.WarpManager;
 import de.xzise.xwarp.lister.GenericLister;
 
 public class InfoCommand extends WarpCommand {
 
-    public InfoCommand(WarpManager list, Server server) {
+    private final EconomyWrapper wrapper;
+    
+    public InfoCommand(WarpManager list, Server server, EconomyWrapper wrapper) {
         super(list, server, "", "info");
+        this.wrapper = wrapper;
     }
 
     @Override
@@ -51,6 +55,11 @@ public class InfoCommand extends WarpCommand {
                 visibility = GenericLister.getColor(warp, (Player) sender) + visibility;
             }
             sender.sendMessage("Visibility: " + visibility);
+            if (this.wrapper.isActive()) {
+                sender.sendMessage("Price: " + this.wrapper.format(warp.getPrice()));
+            } else {
+                sender.sendMessage("Price: " + warp.getPrice() + ChatColor.RED + " (INACTIVE)");
+            }
 
             String[] editors = warp.getEditors();
             String editor = "";

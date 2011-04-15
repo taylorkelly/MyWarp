@@ -89,7 +89,7 @@ public class MyWarp extends JavaPlugin {
         // Create commands
         this.commands = null;
         try {
-            this.commands = new CommandMap(warpList, this.getServer(), this.dataConnection, this.getDataFolder(), properties);
+            this.commands = new CommandMap(warpList, this.economyWrapper, this.getServer(), this.dataConnection, this.getDataFolder(), properties);
         } catch (IllegalArgumentException iae) {
             MyWarp.logger.severe("Couldn't initalize commands. Disabling " + this.name + "!", iae);
             this.getServer().getPluginManager().disablePlugin(this);

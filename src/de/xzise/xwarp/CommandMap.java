@@ -24,6 +24,7 @@ import de.xzise.xwarp.commands.InviteCommand;
 import de.xzise.xwarp.commands.ListCommand;
 import de.xzise.xwarp.commands.MessageCommand;
 import de.xzise.xwarp.commands.PermissionsCommand;
+import de.xzise.xwarp.commands.PriceCommand;
 import de.xzise.xwarp.commands.PrivatizeCommand;
 import de.xzise.xwarp.commands.PublicizeCommand;
 import de.xzise.xwarp.commands.ReloadCommand;
@@ -43,7 +44,7 @@ public class CommandMap {
     private HelpCommand helper;
     private WarpToCommand warper;
 
-    public CommandMap(WarpManager list, Server server, DataConnection data, File pluginPath, PluginProperties properties) {
+    public CommandMap(WarpManager list, EconomyWrapper economyWrapper, Server server, DataConnection data, File pluginPath, PluginProperties properties) {
         this.commands = new HashMap<String, SubCommand>();
 
         this.helper = new HelpCommand();
@@ -68,9 +69,10 @@ public class CommandMap {
         subCommands.add(new PrivatizeCommand(list, server));
         subCommands.add(new PublicizeCommand(list, server));
         subCommands.add(new GlobalizeCommand(list, server));
+        subCommands.add(new PriceCommand(list, server));
         subCommands.add(new SearchCommand(list, server));
         subCommands.add(new ListCommand(list, server));
-        subCommands.add(new InfoCommand(list, server));
+        subCommands.add(new InfoCommand(list, server, economyWrapper));
         subCommands.add(new ReloadCommand(list, server));
         subCommands.add(new ChangeCreatorCommand(list, server));
         subCommands.add(new PermissionsCommand(list, server));

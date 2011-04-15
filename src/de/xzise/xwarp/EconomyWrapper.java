@@ -71,6 +71,10 @@ public class EconomyWrapper {
         return this.pay(sender, null, 0, basic);
     }
     
+    public boolean isActive() {
+        return this.bank != null;
+    }
+    
     public String format(int price) {
         if (this.bank != null) {
             return this.bank.format(price);

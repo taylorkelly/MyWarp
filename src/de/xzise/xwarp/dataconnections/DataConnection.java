@@ -45,4 +45,6 @@ public interface DataConnection {
     void updateLocation(Warp warp);
 
     void updateEditor(Warp warp, String name);
+
+    void updatePrice(Warp warp);
 }
