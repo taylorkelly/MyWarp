@@ -15,6 +15,7 @@ import org.bukkit.Server;
 import org.bukkit.World;
 
 import de.xzise.MinecraftUtil;
+import de.xzise.metainterfaces.LocationWrapper;
 import de.xzise.xwarp.EditorPermissions;
 
 import me.taylorkelly.mywarp.MyWarp;
@@ -140,7 +141,7 @@ public class HModConnection implements DataConnection {
 
                     yaw = (yaw < 0) ? (360 + (yaw % 360)) : (yaw % 360);
 
-                    Location location = new Location(def, x, y, z, (float) yaw, (float) pitch);
+                    LocationWrapper location = new LocationWrapper(new Location(def, x, y, z, (float) yaw, (float) pitch));
                     warp = new Warp(name, "", "", location);
                     warp.visibility = Visibility.GLOBAL;
                 } catch (NumberFormatException nfe) {
@@ -181,7 +182,8 @@ public class HModConnection implements DataConnection {
                     World world = server.getWorld(segments[6]);
                     String warpOwner = segments[7];
                     Location location = new Location(world, x, y, z, (float) yaw, (float) pitch);
-                    warp = new Warp(name, warpOwner, warpOwner, location);
+                    LocationWrapper wrapper = LocationWrapper.create(location, segments[6]);
+                    warp = new Warp(name, warpOwner, warpOwner, wrapper);
                     warp.setMessage(segments[9]);
                     for (int i = GEN_2_LENGTH; i < segments.length; i += 2) {
                         warp.addEditor(segments[i], segments[i + 1]);
@@ -232,7 +234,8 @@ public class HModConnection implements DataConnection {
                     World world = server.getWorld(segments[6]);
                     String warpOwner = segments[7];
                     Location location = new Location(world, x, y, z, (float) yaw, (float) pitch);
-                    warp = new Warp(name, segments[segments.length - 1], warpOwner, location);
+                    LocationWrapper wrapper = LocationWrapper.create(location, segments[6]);
+                    warp = new Warp(name, segments[segments.length - 1], warpOwner, wrapper);
                     warp.setMessage(segments[9]);
                     for (int i = GEN_2_LENGTH; i < segments.length - 1; i += 2) {
                         warp.addEditor(segments[i], segments[i + 1]);
@@ -284,10 +287,11 @@ public class HModConnection implements DataConnection {
                     String warpOwner = segments[7];
                     String creator = segments[10];
                     Location location = new Location(world, x, y, z, (float) yaw, (float) pitch);
-                    warp = new Warp(name, creator, warpOwner, location);
+                    LocationWrapper wrapper = LocationWrapper.create(location, segments[6]);
+                    warp = new Warp(name, creator, warpOwner, wrapper);
                     warp.setMessage(segments[9]);
                     warp.setPrice(Integer.parseInt(segments[11]));
-                    for (int i = GEN_3_LENGTH; i < segments.length - 1; i += 2) {
+                    for (int i = GEN_4_LENGTH; i < segments.length - 1; i += 2) {
                         warp.addEditor(segments[i], segments[i + 1]);
                     }
 
@@ -309,7 +313,8 @@ public class HModConnection implements DataConnection {
                     warps.add(warp);
                 }
             } else {
-                MyWarp.logger.warning("Invalid warp line found");
+                MyWarp.logger.warning("Invalid warp line found:");
+                MyWarp.logger.warning(line);
             }
         }
         return warps;

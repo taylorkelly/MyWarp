@@ -16,6 +16,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 
 import de.xzise.MinecraftUtil;
+import de.xzise.metainterfaces.LocationWrapper;
 import de.xzise.metainterfaces.Nameable;
 import de.xzise.xwarp.PermissionWrapper.PermissionTypes;
 import de.xzise.xwarp.PermissionWrapper.PermissionValues;
@@ -148,7 +149,7 @@ public class WarpManager {
                     case PAID:
                         this.printPayMessage(player, price);
                     case UNABLE:
-                        warp = new Warp(name, creator, newOwner, player.getLocation());
+                        warp = new Warp(name, creator, newOwner, new LocationWrapper(player.getLocation()));
                         warp.visibility = visibility;
                         this.list.addWarp(warp);
                         this.data.addWarp(warp);
@@ -565,47 +566,51 @@ public class WarpManager {
     public void warpTo(String name, String owner, CommandSender warper, Warpable warped, boolean viaSign, boolean worldForce) {
         Warp warp = this.getWarp(name, owner, MinecraftUtil.getPlayerName(warper));
         if (warp != null) {
-            if (warped.equals(warper) || MyWarp.permissions.permission(warper, PermissionTypes.ADMIN_WARP_OTHERS)) {
-                if (warp.playerCanWarp(warper, viaSign)) {
-                    Positionable warpedPos = WarperFactory.getPositionable(warped);
-                    if (!worldForce && warpedPos != null && warp.getLocation().getWorld() != warpedPos.getLocation().getWorld()) {
-                        warper.sendMessage(ChatColor.RED + "The selected warp is in another world.");
-                        warper.sendMessage(ChatColor.RED + "To force warping use /warp force-to <warp> [owner].");
-                    } else {
-                        int price = 0;
-                        switch (warp.visibility) {
-                        case PRIVATE:
-                            price += MyWarp.permissions.getInteger(warper, PermissionValues.WARP_PRICES_TO_PRIVATE, 0);
-                            break;
-                        case PUBLIC:
-                            price += MyWarp.permissions.getInteger(warper, PermissionValues.WARP_PRICES_TO_PUBLIC, 0);
-                            break;
-                        case GLOBAL:
-                            price += MyWarp.permissions.getInteger(warper, PermissionValues.WARP_PRICES_TO_GLOBAL, 0);
-                            break;
-                        }
-
-                        if (this.coolDown.playerHasCooled(warper)) {
-                            switch (this.economy.pay(warper, warp.getOwner(), warp.getPrice(), price)) {
-                            case PAID:
-                                int totalPrice = warp.getPrice() + price;
-                                this.printPayMessage(warper, totalPrice);
-                            case UNABLE:
-                                this.warmUp.addPlayer(warper, warped, warp);
+            if (warp.getLocationWrapper().isValid()) {
+                if (warped.equals(warper) || MyWarp.permissions.permission(warper, PermissionTypes.ADMIN_WARP_OTHERS)) {
+                    if (warp.playerCanWarp(warper, viaSign)) {
+                        Positionable warpedPos = WarperFactory.getPositionable(warped);
+                        if (!worldForce && warpedPos != null && warp.getLocation().getWorld() != warpedPos.getLocation().getWorld()) {
+                            warper.sendMessage(ChatColor.RED + "The selected warp is in another world.");
+                            warper.sendMessage(ChatColor.RED + "To force warping use /warp force-to <warp> [owner].");
+                        } else {
+                            int price = 0;
+                            switch (warp.visibility) {
+                            case PRIVATE:
+                                price += MyWarp.permissions.getInteger(warper, PermissionValues.WARP_PRICES_TO_PRIVATE, 0);
                                 break;
-                            case NOT_ENOUGH:
-                                warper.sendMessage(ChatColor.RED + "You have not enough money to pay this warp.");
+                            case PUBLIC:
+                                price += MyWarp.permissions.getInteger(warper, PermissionValues.WARP_PRICES_TO_PUBLIC, 0);
+                                break;
+                            case GLOBAL:
+                                price += MyWarp.permissions.getInteger(warper, PermissionValues.WARP_PRICES_TO_GLOBAL, 0);
                                 break;
                             }
-                        } else {
-                            warper.sendMessage(ChatColor.RED + "You need to wait for the cooldown of " + this.coolDown.cooldownTime(warp.visibility, warper) + " s");
+
+                            if (this.coolDown.playerHasCooled(warper)) {
+                                switch (this.economy.pay(warper, warp.getOwner(), warp.getPrice(), price)) {
+                                case PAID:
+                                    int totalPrice = warp.getPrice() + price;
+                                    this.printPayMessage(warper, totalPrice);
+                                case UNABLE:
+                                    this.warmUp.addPlayer(warper, warped, warp);
+                                    break;
+                                case NOT_ENOUGH:
+                                    warper.sendMessage(ChatColor.RED + "You have not enough money to pay this warp.");
+                                    break;
+                                }
+                            } else {
+                                warper.sendMessage(ChatColor.RED + "You need to wait for the cooldown of " + this.coolDown.cooldownTime(warp.visibility, warper) + " s");
+                            }
                         }
+                    } else {
+                        warped.sendMessage(ChatColor.RED + "You do not have permission to warp to '" + warp.name + "'.");
                     }
                 } else {
-                    warped.sendMessage(ChatColor.RED + "You do not have permission to warp to '" + warp.name + "'.");
+                    warper.sendMessage(ChatColor.RED + "You do not have permission to warp others.");
                 }
             } else {
-                warper.sendMessage(ChatColor.RED + "You do not have permission to warp others.");
+                warper.sendMessage(ChatColor.RED + "The location of the warp is invalid.");
             }
         } else {
             WarpManager.sendMissingWarp(name, owner, warped);

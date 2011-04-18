@@ -19,6 +19,7 @@ import org.bukkit.Location;
 import org.bukkit.Server;
 import org.bukkit.World;
 
+import de.xzise.metainterfaces.LocationWrapper;
 import de.xzise.xwarp.EditorPermissions;
 import de.xzise.xwarp.Permissions;
 
@@ -318,19 +319,20 @@ public class SQLiteConnection implements DataConnection {
                 int index = set.getInt("id");
                 String name = set.getString("name");
                 String creator = set.getString("creator");
-                World world = server.getWorld(set.getString("world"));
+                String worldName = set.getString("world");
+                World world = server.getWorld(worldName);
                 double x = set.getDouble("x");
                 double y = set.getInt("y");
                 double z = set.getDouble("z");
                 int yaw = set.getInt("yaw");
                 int pitch = set.getInt("pitch");
-                Location loc = new Location(world, x, y, z, yaw, pitch);
+                LocationWrapper loc = LocationWrapper.create(new Location(world, x, y, z, yaw, pitch), worldName);
                 Visibility visibility = Visibility.parseLevel(set.getInt("publicLevel"));
                 String welcomeMessage = set.getString("welcomeMessage");
                 String owner = set.getString("owner");
                 Warp warp = new Warp(index, name, creator, owner, loc, visibility, m.get(index), welcomeMessage);
                 result.add(warp);
-                if (!warp.isValid()) {
+                if (!warp.getLocationWrapper().isValid()) {
                     invalidSize++;
                 }
             }
@@ -355,41 +357,32 @@ public class SQLiteConnection implements DataConnection {
 
     @Override
     public void addWarp(Warp... warps) {
-        int validWarpCount = warps.length;
-        for (Warp warp : warps) {
-            if (!warp.isValid()) {
-                validWarpCount--;
-            }
-        }
-
-        if (validWarpCount > 0) {
+        if (warps.length > 0) {
             PreparedStatement ps = null;
             PreparedStatement insertPermissions = null;
             try {
                 ps = this.connection.prepareStatement("INSERT INTO warpTable (id, name, creator, world, x, y, z, yaw, pitch, publicLevel, welcomeMessage, owner, price) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)");
                 insertPermissions = this.connection.prepareStatement("INSERT INTO permissions (id, editor, value) VALUES (?,?,?)");
                 for (Warp warp : warps) {
-                    if (warp.isValid()) {
-                        ps.setInt(1, warp.index);
-                        ps.setString(2, warp.name);
-                        ps.setString(3, warp.getCreator());
-                        setLocation(warp.getLocation(), 4, ps);
-                        ps.setInt(10, warp.visibility.level);
-                        ps.setString(11, warp.welcomeMessage);
-                        ps.setString(12, warp.getOwner());
-                        ps.setInt(13, warp.getPrice());
-                        ps.addBatch();
+                    ps.setInt(1, warp.index);
+                    ps.setString(2, warp.name);
+                    ps.setString(3, warp.getCreator());
+                    setLocation(warp.getLocationWrapper(), 4, ps);
+                    ps.setInt(10, warp.visibility.level);
+                    ps.setString(11, warp.welcomeMessage);
+                    ps.setString(12, warp.getOwner());
+                    ps.setInt(13, warp.getPrice());
+                    ps.addBatch();
 
-                        for (String editor : warp.getEditors()) {
-                            EditorPermissions ep = warp.getEditorPermissions(editor);
-                            if (ep != null) {
-                                for (Entry<Permissions, Boolean> p : ep.entrySet()) {
-                                    if (p.getValue() != null && p.getValue() == true) {
-                                        insertPermissions.setInt(1, warp.index);
-                                        insertPermissions.setString(2, editor);
-                                        insertPermissions.setInt(3, p.getKey().id);
-                                        insertPermissions.addBatch();
-                                    }
+                    for (String editor : warp.getEditors()) {
+                        EditorPermissions ep = warp.getEditorPermissions(editor);
+                        if (ep != null) {
+                            for (Entry<Permissions, Boolean> p : ep.entrySet()) {
+                                if (p.getValue() != null && p.getValue() == true) {
+                                    insertPermissions.setInt(1, warp.index);
+                                    insertPermissions.setString(2, editor);
+                                    insertPermissions.setInt(3, p.getKey().id);
+                                    insertPermissions.addBatch();
                                 }
                             }
                         }
@@ -412,9 +405,10 @@ public class SQLiteConnection implements DataConnection {
             }
         }
     }
-
-    private static void setLocation(Location location, int offset, PreparedStatement ps) throws SQLException {
-        ps.setString(offset++, location.getWorld().getName());
+    
+    private static void setLocation(LocationWrapper wrapper, int offset, PreparedStatement ps) throws SQLException {
+        ps.setString(offset++, wrapper.getWorld());
+        Location location = wrapper.getLocation();
         ps.setDouble(offset++, location.getX());
         ps.setDouble(offset++, location.getY());
         ps.setDouble(offset++, location.getZ());
@@ -527,8 +521,7 @@ public class SQLiteConnection implements DataConnection {
 
             @Override
             public void fillStatement(Warp warp, PreparedStatement statement) throws SQLException {
-                Location loc = warp.getLocation();
-                SQLiteConnection.setLocation(loc, 1, statement);
+                SQLiteConnection.setLocation(warp.getLocationWrapper(), 1, statement);
                 statement.setInt(7, warp.index);
             }
         });

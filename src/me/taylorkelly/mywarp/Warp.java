@@ -8,6 +8,7 @@ import org.bukkit.Location;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import de.xzise.metainterfaces.LocationWrapper;
 import de.xzise.xwarp.EditorPermissions;
 import de.xzise.xwarp.Permissions;
 import de.xzise.xwarp.PermissionWrapper.PermissionTypes;
@@ -40,7 +41,7 @@ public class Warp {
     public int index;
     public String name;
     private String creator;
-    private Location location;
+    private LocationWrapper location;
     /** This price value will be transfered to the owner. */
     private int price;
     private String owner;
@@ -50,12 +51,12 @@ public class Warp {
 
     public static int nextIndex = 1;
 
-    public Warp(int index, String name, String creator, String owner, Location location, Visibility visibility, Map<String, EditorPermissions> permissions, String welcomeMessage) {
+    public Warp(int index, String name, String creator, String owner, LocationWrapper wrapper, Visibility visibility, Map<String, EditorPermissions> permissions, String welcomeMessage) {
         this.index = index;
         this.name = name;
         this.creator = creator;
         this.owner = owner;
-        this.location = location.clone();
+        this.location = wrapper;
         this.visibility = visibility;
         if (permissions == null) {
             this.editors = new HashMap<String, EditorPermissions>();
@@ -68,16 +69,16 @@ public class Warp {
         nextIndex++;
     }
 
-    public Warp(String name, String creator, String owner, Location location) {
-        this(nextIndex, name, creator, owner, location, Visibility.PUBLIC, null, "Welcome to '" + name + "'");
+    public Warp(String name, String creator, String owner, LocationWrapper wrapper) {
+        this(nextIndex, name, creator, owner, wrapper, Visibility.PUBLIC, null, "Welcome to '" + name + "'");
     }
 
     public Warp(String name, Player creator) {
-        this(name, creator.getName(), creator.getName(), creator.getLocation());
+        this(name, creator.getName(), creator.getName(), new LocationWrapper(creator.getLocation()));
     }
 
     public Warp(String name, Location location) {
-        this(name, "", "No Player", location);
+        this(name, "", "No Player", new LocationWrapper(location));
     }
 
     public boolean playerIsInvited(String name) {
@@ -118,7 +119,7 @@ public class Warp {
     }
 
     public void setLocation(Positionable positionable) {
-        this.location = positionable.getLocation().clone();
+        this.setLocation(positionable.getLocation());
     }
 
     public void rename(String newName) {
@@ -182,11 +183,11 @@ public class Warp {
     }
 
     public Location getLocation() {
-        return this.location.clone();
+        return this.location.getLocation().clone();
     }
-
-    public boolean isValid() {
-        return this.location.getWorld() != null;
+    
+    public LocationWrapper getLocationWrapper() {
+        return this.location;
     }
 
     public String getOwner() {
@@ -202,7 +203,7 @@ public class Warp {
     }
 
     public void setLocation(Location location) {
-        this.location = location.clone();
+        this.location = new LocationWrapper(location);
     }
 
     public EditorPermissions getEditorPermissions(String name) {

@@ -63,9 +63,13 @@ public class EconomyWrapper {
            Player player = MinecraftUtil.getPlayer(sender);
            if (player != null) {
                Account executor = this.getAccount(player.getName());
+               if (price + basic == 0) {
+                   return PayResult.PAID;
+               } else
                // Not negative
                //TODO: Add option if allow
-               if (executor.hasEnough(-price -basic)) {
+//               if (executor.getBalance() >= price + basic) {
+               if (executor.hasEnough(price + basic)) {    
                    executor.add(-price -basic);
                    this.tax.add(basic);
                    if (MinecraftUtil.isSet(reciever)) {

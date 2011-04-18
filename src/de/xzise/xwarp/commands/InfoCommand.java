@@ -29,12 +29,9 @@ public class InfoCommand extends WarpCommand {
         Warp warp = this.list.getWarp(warpName, owner, MinecraftUtil.getPlayerName(sender));
         if (warp != null) {
             sender.sendMessage("Warp info: " + ChatColor.GREEN + warp.name);
-            String world;
-            if (warp.isValid()) {
-                world = warp.getLocation().getWorld().getName();
-            } else {
+            String world = warp.getLocationWrapper().getWorld();
+            if (!warp.getLocationWrapper().isValid()) {
                 sender.sendMessage(ChatColor.RED + "The location is invalid!");
-                world = this.server.getWorlds().get(0).getName();
             }
 
             sender.sendMessage("Creator: " + getPlayerLine(warp.getCreator(), world));
@@ -92,10 +89,8 @@ public class InfoCommand extends WarpCommand {
             sender.sendMessage("Invitees: " + (invitees.isEmpty() ? "None" : invitees));
             sender.sendMessage("Editors: " + editor);
 
-            if (warp.isValid()) {
-                Location location = warp.getLocation();
-                sender.sendMessage("Location: World = " + ChatColor.GREEN + location.getWorld().getName() + ChatColor.WHITE + ", x = " + ChatColor.GREEN + location.getBlockX() + ChatColor.WHITE + ", y = " + ChatColor.GREEN + location.getBlockY() + ChatColor.WHITE + ", z = " + ChatColor.GREEN + location.getBlockZ());
-            }
+            Location location = warp.getLocation();
+            sender.sendMessage("Location: World = " + ChatColor.GREEN + world + ChatColor.WHITE + ", x = " + ChatColor.GREEN + location.getBlockX() + ChatColor.WHITE + ", y = " + ChatColor.GREEN + location.getBlockY() + ChatColor.WHITE + ", z = " + ChatColor.GREEN + location.getBlockZ());
         } else {
             WarpManager.sendMissingWarp(warpName, owner, sender);
         }
