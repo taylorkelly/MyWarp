@@ -75,7 +75,7 @@ public class Searcher {
                 sections.add(section);
             }
 
-            GenericLister.listPage(page, maxPages, sections.toArray(new ListSection[0]), this.sender);
+            GenericLister.listPage(page, maxPages, this.sender, sections.toArray(new ListSection[0]));
         }
     }
 }

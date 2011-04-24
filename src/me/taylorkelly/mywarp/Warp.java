@@ -239,7 +239,7 @@ public class Warp {
 
         @Override
         public int compare(Warp warp1, Warp warp2) {
-            return warp1.name.compareTo(warp2.name);
+            return warp1.name.compareToIgnoreCase(warp2.name);
         }
 
     };

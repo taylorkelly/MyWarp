@@ -40,16 +40,16 @@ public class WarpManager {
     private DataConnection data;
     private CoolDown coolDown;
     private WarmUp warmUp;
-    private boolean useForceTo;
     private EconomyWrapper economy;
+    private PluginProperties properties;
 
     public WarpManager(Plugin plugin, EconomyWrapper economy, PluginProperties properties, DataConnection data) {
         this.list = new WarpList();
         this.server = plugin.getServer();
+        this.properties = properties;
         this.data = data;
         this.coolDown = new CoolDown(plugin, properties);
         this.warmUp = new WarmUp(plugin, properties, this.coolDown);
-        this.useForceTo = properties.isForceToUsed();
         this.economy = economy;
         this.loadFromDatabase();
     }
@@ -86,7 +86,9 @@ public class WarpManager {
         if (amount > 0) {
             payee.sendMessage(ChatColor.WHITE + "You have paid " + ChatColor.GREEN + this.economy.format(amount) + ChatColor.WHITE + ".");
         } else if (amount == 0) {
-            payee.sendMessage("Yeah. This warp was " + ChatColor.GREEN + "free" + ChatColor.WHITE + " (as beer)!");
+            if (properties.showFreePriceMessage()) {
+                payee.sendMessage("Yeah. This warp was " + ChatColor.GREEN + "free" + ChatColor.WHITE + " (as beer)!");
+            }
         } else {
             payee.sendMessage("Woooo! You got " + ChatColor.GREEN + this.economy.format(amount) + ChatColor.WHITE + "!");
         }
@@ -504,10 +506,10 @@ public class WarpManager {
     public List<Warp> getSortedWarps(CommandSender sender, String creator, int start, int size) {
         List<Warp> ret = new ArrayList<Warp>(size);
         List<Warp> names;
-        if (creator == null || creator.isEmpty()) {
-            names = this.getWarps();
-        } else {
+        if (MinecraftUtil.isSet(creator)) {
             names = this.list.getWarps(creator);
+        } else {
+            names = this.getWarps();
         }
 
         final Collator collator = Collator.getInstance();
@@ -560,7 +562,7 @@ public class WarpManager {
     }
 
     public void warpTo(String name, String owner, CommandSender warper, Warpable warped, boolean viaSign) {
-        this.warpTo(name, owner, warper, warped, viaSign, this.useForceTo);
+        this.warpTo(name, owner, warper, warped, viaSign, this.properties.isForceToUsed());
     }
 
     public void warpTo(String name, String owner, CommandSender warper, Warpable warped, boolean viaSign, boolean worldForce) {

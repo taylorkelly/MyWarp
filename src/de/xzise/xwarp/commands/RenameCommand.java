@@ -8,7 +8,7 @@ import de.xzise.xwarp.WarpManager;
 public class RenameCommand extends WarpCommand {
 
 	public RenameCommand(WarpManager list, Server server) {
-		super(list, server, "new name", "rename");
+		super(list, server, "new name", "rename", "mv");
 	}
 
 	@Override

@@ -29,8 +29,8 @@ public class GenericLister {
 
     private GenericLister() {
     }
-
-    public static void listPage(int page, int maxPages, ListSection[] sections, CommandSender sender) {
+    
+    public static void listPage(int page, int maxPages, CommandSender sender, ListSection... sections) {
 
         int charsPerLine = 40;
         WidthCalculator widther = null;

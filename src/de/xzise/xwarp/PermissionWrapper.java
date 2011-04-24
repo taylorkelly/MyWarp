@@ -38,6 +38,20 @@ public class PermissionWrapper {
         CREATE_PUBLIC("warp.create.public"),
         // Create/Edit global warps
         CREATE_GLOBAL("warp.create.global"),
+        
+        // Edit own warps
+        EDIT_DELETE("warp.edit.delete"),
+        EDIT_INVITE("warp.edit.invite.add"),
+        EDIT_UNINVITE("warp.edit.invite.delete"),
+        EDIT_MESSAGE("warp.edit.message"),
+        EDIT_LOCATION("warp.edit.update"),
+        EDIT_RENAME("warp.edit.rename"),
+        // EDIT_(PRIVATE|PUBLIC|GLOBAL) == CREATE_*
+        EDIT_EDITORS_ADD("warp.edit.editors.add"),
+        EDIT_EDITORS_REMOVE("warp.edit.editors.remove"),
+        EDIT_CHANGE_OWNER("warp.edit.owner"),
+        EDIT_CHANGE_CREATOR("warp.edit.creator"),
+        EDIT_PRICE("warp.edit.price"),
 
         // Delete all warps
         ADMIN_DELETE("warp.admin.delete"),

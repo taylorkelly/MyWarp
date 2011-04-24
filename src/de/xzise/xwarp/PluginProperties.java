@@ -10,6 +10,7 @@ import org.bukkit.Server;
 
 import me.taylorkelly.mywarp.MyWarp;
 
+import de.xzise.MinecraftUtil;
 import de.xzise.xwarp.dataconnections.DataConnection;
 import de.xzise.xwarp.dataconnections.HModConnection;
 import de.xzise.xwarp.dataconnections.SQLiteConnection;
@@ -20,6 +21,7 @@ public class PluginProperties {
     private boolean cooldownNotify;
     private boolean warmupNotify;
     private boolean useForceTo;
+    private boolean showFreePriceMessage;
 
     private File dataDirectory;
     private File configFile;
@@ -48,6 +50,10 @@ public class PluginProperties {
         return this.useForceTo;
     }
 
+    public boolean showFreePriceMessage() {
+        return this.showFreePriceMessage;
+    }
+    
     public void read() {
         java.util.Properties properties = new java.util.Properties();
         if (this.configFile.exists()) {
@@ -64,6 +70,7 @@ public class PluginProperties {
                 properties.setProperty("cooldown-notify", "true");
                 properties.setProperty("warmup-notify", "true");
                 properties.setProperty("use-force-to", "true");
+                properties.setProperty("show-free-price-message", "true");
                 properties.store(new FileWriter(this.configFile), null);
             } catch (IOException e) {
                 MyWarp.logger.warning("Unable to create properties file.", e);
@@ -81,17 +88,17 @@ public class PluginProperties {
             this.dataConnection = new SQLiteConnection(server);
         }
 
-        this.cooldownNotify = parseString(properties.getProperty("cooldown-notify", "true"));
-        this.warmupNotify = parseString(properties.getProperty("warmup-notify", "true"));
-        this.useForceTo = parseString(properties.getProperty("use-force-to", "true"));
+        this.cooldownNotify = parseString(properties.getProperty("cooldown-notify"), true);
+        this.warmupNotify = parseString(properties.getProperty("warmup-notify"), true);
+        this.useForceTo = parseString(properties.getProperty("use-force-to"), true);
+        this.showFreePriceMessage = parseString(properties.getProperty("show-free-price-message"), true);
     }
 
-    public static boolean parseString(String string) {
-        if (string.equalsIgnoreCase("true")) {
-            return true;
+    public static boolean parseString(String string, boolean def) {
+        if (MinecraftUtil.isSet(string)) {
+            return string.equalsIgnoreCase("true");
         } else {
-            return false;
+            return def;
         }
     }
-
 }
