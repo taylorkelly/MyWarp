@@ -86,8 +86,13 @@ public class WarpManager {
         if (amount > 0) {
             payee.sendMessage(ChatColor.WHITE + "You have paid " + ChatColor.GREEN + this.economy.format(amount) + ChatColor.WHITE + ".");
         } else if (amount == 0) {
-            if (properties.showFreePriceMessage()) {
-                payee.sendMessage("Yeah. This warp was " + ChatColor.GREEN + "free" + ChatColor.WHITE + " (as beer)!");
+            if (this.properties.showFreePriceMessage()) {
+                String freePriceMessage = "Yeah. This warp was " + ChatColor.GREEN + "free";
+                // Little easteregg: Print with a 1 % change the (as beer) text
+                if (Math.random() < 0.01) {
+                    freePriceMessage += " (as beer)";
+                }
+                payee.sendMessage(freePriceMessage + "!");
             }
         } else {
             payee.sendMessage("Woooo! You got " + ChatColor.GREEN + this.economy.format(amount) + ChatColor.WHITE + "!");
