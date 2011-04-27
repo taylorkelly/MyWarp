@@ -25,6 +25,21 @@ public class LocationWrapper {
         }
     }
     
+    public static Location moveX(Location location, double delta) {
+        location.setX(location.getX() + delta);
+        return location;
+    }
+    
+    public static Location moveY(Location location, double delta) {
+        location.setY(location.getY() + delta);
+        return location;
+    }
+    
+    public static Location moveZ(Location location, double delta) {
+        location.setZ(location.getZ() + delta);
+        return location;
+    }
+    
     public void setWorld(World world) {
         if (this.location.getWorld() == null && world.getName().equals(this.world)) {
             this.location.setWorld(world);

@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
@@ -116,6 +117,25 @@ public class Warp {
     public boolean playerCanWarp(Warpable player) {
         // TODO: More elegant version?
         return playerCanWarp(player, true) || playerCanWarp(player, false);
+    }
+    
+    /**
+     * Returns if the location is save.
+     * @return if the location is save. Is false if invalid.
+     */
+    public boolean isSave()
+    {
+        if (this.location.isValid()) {
+            Location location = this.getLocation();
+            Material lower = location.getBlock().getType();
+            LocationWrapper.moveY(location, 1.0D);
+            Material higher = location.getBlock().getType();
+            
+            //return (plugin.sm.throughBlocks.contains(mat1.getId())) && (plugin.sm.throughBlocks.contains(mat2.getId()));
+            return lower == Material.AIR && higher == Material.AIR;
+        } else {
+            return false;
+        }
     }
 
     public void setLocation(Positionable positionable) {

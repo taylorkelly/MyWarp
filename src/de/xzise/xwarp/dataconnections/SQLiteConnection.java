@@ -289,22 +289,22 @@ public class SQLiteConnection implements DataConnection {
         try {
             statement = this.connection.createStatement();
             set = statement.executeQuery("SELECT * FROM permissions");
-            Map<Integer, Map<String, EditorPermissions>> m = new HashMap<Integer, Map<String, EditorPermissions>>();
+            Map<Integer, Map<String, EditorPermissions>> allPermissions = new HashMap<Integer, Map<String, EditorPermissions>>();
             while (set.next()) {
                 int index = set.getInt("id");
-                Map<String, EditorPermissions> n = m.get(index);
-                if (n == null) {
-                    n = new HashMap<String, EditorPermissions>();
-                    m.put(index, n);
+                Map<String, EditorPermissions> warpPermissions = allPermissions.get(index);
+                if (warpPermissions == null) {
+                    warpPermissions = new HashMap<String, EditorPermissions>();
+                    allPermissions.put(index, warpPermissions);
                 }
                 String editor = set.getString("editor");
-                EditorPermissions o = n.get(editor.toLowerCase());
-                if (o == null) {
-                    o = new EditorPermissions();
-                    n.put(editor.toLowerCase(), o);
+                EditorPermissions editorPermissions = warpPermissions.get(editor.toLowerCase());
+                if (editorPermissions == null) {
+                    editorPermissions = new EditorPermissions();
+                    warpPermissions.put(editor.toLowerCase(), editorPermissions);
                 }
                 int value = set.getInt("value");
-                o.put(Permissions.getById(value), true);
+                editorPermissions.put(Permissions.getById(value), true);
             }
 
             if (set != null) {
@@ -330,7 +330,7 @@ public class SQLiteConnection implements DataConnection {
                 Visibility visibility = Visibility.parseLevel(set.getInt("publicLevel"));
                 String welcomeMessage = set.getString("welcomeMessage");
                 String owner = set.getString("owner");
-                Warp warp = new Warp(index, name, creator, owner, loc, visibility, m.get(index), welcomeMessage);
+                Warp warp = new Warp(index, name, creator, owner, loc, visibility, allPermissions.get(index), welcomeMessage);
                 result.add(warp);
                 if (!warp.getLocationWrapper().isValid()) {
                     invalidSize++;
@@ -534,7 +534,7 @@ public class SQLiteConnection implements DataConnection {
             @Override
             public void fillStatement(Warp warp, PreparedStatement statement) throws SQLException {
                 statement.setInt(1, warp.getPrice());
-                statement.setInt(7, warp.index);
+                statement.setInt(2, warp.index);
             }
         });
     }
@@ -545,19 +545,31 @@ public class SQLiteConnection implements DataConnection {
         ResultSet set = null;
         try {
             ps = this.connection.prepareStatement("DELETE FROM permissions WHERE id = ? AND editor = ?");
+            ps.setInt(1, warp.index);
+            ps.setString(2, name.toLowerCase());
             ps.executeUpdate();
 
             EditorPermissions p = warp.getEditorPermissions(name);
             if (p != null) {
                 ps = this.connection.prepareStatement("INSERT OR IGNORE INTO permissions (id, editor, value) VALUES (?,?,?)");
 
+                boolean permissionAdded = false;
+                
                 for (Entry<Permissions, Boolean> entry : p.entrySet()) {
-                    ps.setInt(1, warp.index);
-                    ps.setString(2, name);
-                    ps.setInt(3, entry.getKey().id);
+                    if (entry.getValue() != null && entry.getValue()) {
+                        ps.setInt(1, warp.index);
+                        ps.setString(2, name.toLowerCase());
+                        ps.setInt(3, entry.getKey().id);
+                        ps.addBatch();
+                        permissionAdded = true;
+                    }
                 }
 
-                ps.executeUpdate();
+                if (permissionAdded) {
+                    ps.executeBatch();
+                } else {
+                    ps.clearBatch();
+                }
             }
 
             this.connection.commit();

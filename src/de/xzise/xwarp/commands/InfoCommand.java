@@ -32,6 +32,8 @@ public class InfoCommand extends WarpCommand {
             String world = warp.getLocationWrapper().getWorld();
             if (!warp.getLocationWrapper().isValid()) {
                 sender.sendMessage(ChatColor.RED + "The location is invalid!");
+            } else if (!warp.isSave()) {
+                sender.sendMessage(ChatColor.RED + "The location is not save!");
             }
 
             sender.sendMessage("Creator: " + getPlayerLine(warp.getCreator(), world));
@@ -54,7 +56,7 @@ public class InfoCommand extends WarpCommand {
             sender.sendMessage("Visibility: " + visibility);
             if (this.wrapper.isActive()) {
                 sender.sendMessage("Price: " + ChatColor.GREEN + this.wrapper.format(warp.getPrice()));
-            } else {
+            } else if (warp.getPrice() != 0) {
                 sender.sendMessage("Price: " + ChatColor.GREEN + warp.getPrice() + ChatColor.RED + " (INACTIVE)");
             }
 
