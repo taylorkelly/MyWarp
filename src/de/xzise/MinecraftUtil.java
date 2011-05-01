@@ -376,12 +376,30 @@ public final class MinecraftUtil {
         return MinecraftUtil.indexOf(o, a) >= 0;
     }
 
+    /**
+     * Returns a random value of the list. If the list is not set ({@link #isSet(Object)}) it will return null.
+     * @param list The given list.
+     * @return a random element of the list.
+     */
     public static <T> T getRandom(List<T> list) {
-        return list.get(new Random().nextInt(list.size()));
+        if (MinecraftUtil.isSet(list)) {
+            return list.get(new Random().nextInt(list.size()));
+        } else {
+            return null;
+        }
     }
-
+    
+    /**
+     * Returns a random value of the array. If the array is not set ({@link #isSet(Object)}) it will return null.
+     * @param list The given list.
+     * @return a random element of the list.
+     */
     public static <T> T getRandom(T[] array) {
-        return array[new Random().nextInt(array.length)];
+        if (MinecraftUtil.isSet(array)) {
+            return array[new Random().nextInt(array.length)];
+        } else {
+            return null;
+        }
     }
 
     public static void copyFile(File source, File destination) throws IOException {
