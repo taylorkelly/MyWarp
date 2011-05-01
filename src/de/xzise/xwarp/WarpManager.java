@@ -53,6 +53,10 @@ public class WarpManager {
         this.economy = economy;
         this.loadFromDatabase();
     }
+    
+    public WarmUp getWarmUp() {
+        return this.warmUp;
+    }
 
     private void loadFromDatabase() {
         this.list.loadList(this.data.getWarps());

@@ -1,9 +1,11 @@
-package de.xzise.xwarp;
+package de.xzise.xwarp.listeners;
 
 import me.taylorkelly.mywarp.Warp;
 
 import org.bukkit.event.world.WorldListener;
 import org.bukkit.event.world.WorldLoadEvent;
+
+import de.xzise.xwarp.WarpManager;
 
 public class XWWorldListener extends WorldListener {
 

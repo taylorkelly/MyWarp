@@ -6,16 +6,20 @@ import org.bukkit.event.Event.Result;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerListener;
+import org.bukkit.event.player.PlayerMoveEvent;
 
+import de.xzise.xwarp.PluginProperties;
 import de.xzise.xwarp.WarpManager;
 import de.xzise.xwarp.PermissionWrapper.PermissionTypes;
 
 public class WMPlayerListener extends PlayerListener {
 
     private final WarpManager manager;
+    private final PluginProperties properties;
 
-    public WMPlayerListener(WarpManager manager) {
+    public WMPlayerListener(WarpManager manager, PluginProperties properties) {
         this.manager = manager;
+        this.properties = properties;
     }
 
     @Override
@@ -27,6 +31,12 @@ public class WMPlayerListener extends PlayerListener {
                 event.setUseInteractedBlock(Result.DENY);
                 event.setCancelled(true);
             }
+        }
+    }
+    
+    public void onPlayerMove(PlayerMoveEvent event) {
+        if (this.properties.isCancelWarmUpOnMovement()) {
+            this.manager.getWarmUp().cancelWarmUp(event.getPlayer());
         }
     }
 }

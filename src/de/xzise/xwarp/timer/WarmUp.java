@@ -44,6 +44,11 @@ public class WarmUp {
             this.sendPlayer(warper, warped, warp);
         }
     }
+    
+    public void cancelWarmUp(CommandSender warper) {
+        //TODO: Only remove, if warp itself?
+        this.players.remove(warper);
+    }
 
     public int warmupTime(Visibility visibility, CommandSender warper) {
         PermissionValues value = PermissionValues.WARP_WARMUP_PRIVATE;

@@ -19,8 +19,9 @@ import de.xzise.xwarp.EconomyWrapper;
 import de.xzise.xwarp.PermissionWrapper;
 import de.xzise.xwarp.PluginProperties;
 import de.xzise.xwarp.WarpManager;
-import de.xzise.xwarp.XWWorldListener;
 import de.xzise.xwarp.dataconnections.DataConnection;
+import de.xzise.xwarp.listeners.XWEntityListener;
+import de.xzise.xwarp.listeners.XWWorldListener;
 
 public class MyWarp extends JavaPlugin {
 
@@ -127,7 +128,8 @@ public class MyWarp extends JavaPlugin {
         this.economyWrapper.init(this.getServer().getPluginManager().getPlugin("iConomy"));
         
         this.getServer().getPluginManager().registerEvent(Event.Type.WORLD_LOAD, new XWWorldListener(warpManager), Priority.Low, this);
-        this.getServer().getPluginManager().registerEvent(Event.Type.PLAYER_INTERACT, new WMPlayerListener(warpManager), Priority.Normal, this);
+        this.getServer().getPluginManager().registerEvent(Event.Type.PLAYER_INTERACT, new WMPlayerListener(warpManager, properties), Priority.Normal, this);
+        this.getServer().getPluginManager().registerEvent(Event.Type.ENTITY_DAMAGE, new XWEntityListener(properties, warpManager.getWarmUp()), Priority.Normal, this);
         this.getServer().getPluginManager().registerEvent(Event.Type.SIGN_CHANGE, blockListener, Priority.Low, this);
         this.getServer().getPluginManager().registerEvent(Event.Type.PLUGIN_ENABLE, serverListner, Priority.Low, this);
         this.getServer().getPluginManager().registerEvent(Event.Type.PLUGIN_DISABLE, serverListner, Priority.Low, this);
