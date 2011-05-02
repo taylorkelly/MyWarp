@@ -1,5 +1,5 @@
 name: xWarp
-version: 2.9.4 warm-up-cancelation b1
+version: 2.9.4 warm-up-cancellation b2
 main: me.taylorkelly.mywarp.MyWarp
 description: Implementation to create warp points!
 authors:
