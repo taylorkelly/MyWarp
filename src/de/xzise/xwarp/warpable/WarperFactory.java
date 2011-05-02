@@ -1,5 +1,6 @@
 package de.xzise.xwarp.warpable;
 
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 public final class WarperFactory {
@@ -27,9 +28,10 @@ public final class WarperFactory {
     }
 
     public static Player getPlayer(Object sender) {
-        if (sender instanceof WarpablePlayer) {
-            return ((WarpablePlayer) sender).getSender();
-        } else if (sender instanceof Player) {
+        if (sender instanceof CommandSender) {
+            sender = CommandSenderWrapper.getCommandSender((CommandSender) sender);
+        }
+        if (sender instanceof Player) {
             return (Player) sender;
         } else {
             return null;
