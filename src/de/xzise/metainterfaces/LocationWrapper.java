@@ -3,26 +3,23 @@ package de.xzise.metainterfaces;
 import org.bukkit.Location;
 import org.bukkit.World;
 
-public class LocationWrapper {
+public class LocationWrapper implements Moveable<LocationWrapper> {
 
-    private final Location location;
-    private final String world;
+    private final FixedLocation location;
+    private final String worldName;
+    private World world;
     
     public LocationWrapper(Location location) {
-        this(location, location.getWorld().getName());
+        this(new FixedLocation(location));
     }
     
-    public LocationWrapper(Location location, String world) {
-        this.location = location.clone();
-        this.world = world == null ? location.getWorld().getName() : world;
+    public LocationWrapper(FixedLocation location) {
+        this(location, location.world.getName());
     }
     
-    public static LocationWrapper create(Location location, String world) {
-        if (world != null) {
-            return new LocationWrapper(location, world);
-        } else {
-            return new LocationWrapper(location);
-        }
+    public LocationWrapper(FixedLocation location, String world) {
+        this.location = location;
+        this.worldName = world == null ? location.world.getName() : world;
     }
     
     public static Location moveX(Location location, double delta) {
@@ -41,21 +38,39 @@ public class LocationWrapper {
     }
     
     public void setWorld(World world) {
-        if (this.location.getWorld() == null && world.getName().equals(this.world)) {
-            this.location.setWorld(world);
+        if (this.world == null && this.location.world == null && world.getName().equals(this.worldName)) {
+            this.world = world;
         }
     }
     
-    public Location getLocation() {
-        return this.location.clone();
+    public FixedLocation getLocation() {
+        return this.location;
     }
     
     public String getWorld() {
-        return this.world;
+        return this.worldName;
     }
 
     public boolean isValid() {
-        return this.location.getWorld() != null;
+        return this.world != null;
+    }
+
+    @Override
+    public LocationWrapper moveX(double delta) {
+        this.location.moveX(delta);
+        return this;
+    }
+
+    @Override
+    public LocationWrapper moveY(double delta) {
+        this.location.moveY(delta);
+        return this;
+    }
+
+    @Override
+    public LocationWrapper moveZ(double delta) {
+        this.location.moveZ(delta);
+        return this;
     }
 
 }
