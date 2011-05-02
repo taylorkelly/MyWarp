@@ -131,8 +131,30 @@ public class Warp {
             Material lower = location.getBlock().getType();
             LocationWrapper.moveY(location, 1.0D);
             Material higher = location.getBlock().getType();
+            LocationWrapper.moveY(location, 1.0D);
+            Material top = location.getBlock().getType();
+            
+            Boolean save = null;
+            //TODO: Test comma! Is there already a method?
+            double comma = MinecraftUtil.getComma(location.getY());
+            
+            //TODO: Determine comma for “step height”
+            if (comma > 0.5D) {
+                if (checkMaterials(new Material[] { lower }, Material.STEP) && checkOpaqueMaterials(higher)) {
+                    save = true;
+                }
+            }
+            
+            if (save == null) {
+                //TODO: Determine comma
+                if (comma <= 0.01D) {
+                    save = checkOpaqueMaterials(lower, higher);
+                } else {
+                    save = checkOpaqueMaterials(lower, higher, top);
+                }
+            }
 
-            return checkOpaqueMaterials(lower, higher);
+            return save;
         } else {
             return false;
         }
