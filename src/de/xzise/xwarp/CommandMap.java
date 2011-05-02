@@ -73,7 +73,7 @@ public class CommandMap {
         subCommands.add(new SearchCommand(list, server));
         subCommands.add(new ListCommand(list, server));
         subCommands.add(new InfoCommand(list, server, economyWrapper));
-        subCommands.add(new ReloadCommand(list, server));
+        subCommands.add(new ReloadCommand(list));
         subCommands.add(new ChangeCreatorCommand(list, server));
         subCommands.add(new PermissionsCommand(list, server));
         subCommands.add(new ExportCommand(list, server, pluginPath));

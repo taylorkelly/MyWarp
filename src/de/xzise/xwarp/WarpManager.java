@@ -57,15 +57,16 @@ public class WarpManager {
     private void loadFromDatabase() {
         this.list.loadList(this.data.getWarps());
     }
-
-    public void loadFromDatabase(CommandSender sender) {
+    
+    public void reload(CommandSender sender) {
         if (MyWarp.permissions.permission(sender, PermissionTypes.ADMIN_RELOAD)) {
-            this.loadFromDatabase();
+        this.properties.read();
+        this.loadFromDatabase();
         } else {
             sender.sendMessage(ChatColor.RED + "You have no permission to reload.");
         }
     }
-
+    
     /**
      * Returns the number of warps a player has created.
      * 
