@@ -20,7 +20,9 @@ import de.xzise.xwarp.PermissionWrapper;
 import de.xzise.xwarp.PluginProperties;
 import de.xzise.xwarp.WarpManager;
 import de.xzise.xwarp.dataconnections.DataConnection;
+import de.xzise.xwarp.listeners.XWBlockListener;
 import de.xzise.xwarp.listeners.XWEntityListener;
+import de.xzise.xwarp.listeners.XWPlayerListener;
 import de.xzise.xwarp.listeners.XWWorldListener;
 
 public class MyWarp extends JavaPlugin {
@@ -100,8 +102,8 @@ public class MyWarp extends JavaPlugin {
 
         this.getCommand("go").setExecutor(this.commands.getCommand(""));
 
-        WMPlayerListener playerListener = new WMPlayerListener(warpManager, properties);
-        MWBlockListener blockListener = new MWBlockListener(warpManager);
+        XWPlayerListener playerListener = new XWPlayerListener(warpManager, properties);
+        XWBlockListener blockListener = new XWBlockListener(warpManager);
         ServerListener serverListner = new ServerListener() {
             @Override
             public void onPluginEnable(PluginEnableEvent event) {

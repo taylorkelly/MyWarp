@@ -1,4 +1,9 @@
-package me.taylorkelly.mywarp;
+package de.xzise.xwarp.listeners;
+
+import me.taylorkelly.mywarp.MyWarp;
+import me.taylorkelly.mywarp.SignWarp;
+import me.taylorkelly.mywarp.Warp;
+import me.taylorkelly.mywarp.WarpDestination;
 
 import org.bukkit.ChatColor;
 import org.bukkit.block.Block;
@@ -9,11 +14,11 @@ import org.bukkit.event.block.SignChangeEvent;
 import de.xzise.xwarp.WarpManager;
 import de.xzise.xwarp.PermissionWrapper.PermissionTypes;
 
-public class MWBlockListener extends BlockListener {
+public class XWBlockListener extends BlockListener {
 
     private WarpManager list;
 
-    public MWBlockListener(WarpManager list) {
+    public XWBlockListener(WarpManager list) {
         this.list = list;
     }
 

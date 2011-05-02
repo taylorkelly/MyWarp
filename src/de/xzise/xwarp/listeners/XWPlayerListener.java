@@ -1,4 +1,7 @@
-package me.taylorkelly.mywarp;
+package de.xzise.xwarp.listeners;
+
+import me.taylorkelly.mywarp.MyWarp;
+import me.taylorkelly.mywarp.SignWarp;
 
 import org.bukkit.ChatColor;
 import org.bukkit.block.Block;
@@ -13,12 +16,12 @@ import de.xzise.xwarp.PluginProperties;
 import de.xzise.xwarp.WarpManager;
 import de.xzise.xwarp.PermissionWrapper.PermissionTypes;
 
-public class WMPlayerListener extends PlayerListener {
+public class XWPlayerListener extends PlayerListener {
 
     private final WarpManager manager;
     private final PluginProperties properties;
 
-    public WMPlayerListener(WarpManager manager, PluginProperties properties) {
+    public XWPlayerListener(WarpManager manager, PluginProperties properties) {
         this.manager = manager;
         this.properties = properties;
     }
