@@ -3,7 +3,7 @@ package de.xzise.metainterfaces;
 import org.bukkit.Location;
 import org.bukkit.World;
 
-public class LocationWrapper {
+public class LocationWrapper implements Moveable {
 
     private final Location location;
     private final String world;
@@ -56,6 +56,24 @@ public class LocationWrapper {
 
     public boolean isValid() {
         return this.location.getWorld() != null;
+    }
+
+    @Override
+    public Moveable moveX(double delta) {
+        moveX(this.location, delta);
+        return this;
+    }
+
+    @Override
+    public Moveable moveY(double delta) {
+        moveY(this.location, delta);
+        return this;
+    }
+
+    @Override
+    public Moveable moveZ(double delta) {
+        moveZ(this.location, delta);
+        return this;
     }
 
 }
