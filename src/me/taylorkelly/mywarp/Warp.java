@@ -9,6 +9,7 @@ import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import de.xzise.MinecraftUtil;
 import de.xzise.metainterfaces.FixedLocation;
 import de.xzise.metainterfaces.LocationWrapper;
 import de.xzise.xwarp.EditorPermissions;
@@ -127,16 +128,51 @@ public class Warp {
     public boolean isSave()
     {
         if (this.location.isValid()) {
-            FixedLocation location = this.getLocation();
+            Location location = this.getLocation().toLocation();
             Material lower = location.getBlock().getType();
-            location = location.moveY(1.0D);
+            LocationWrapper.moveX(location, 1.0D);
             Material higher = location.getBlock().getType();
+            LocationWrapper.moveX(location, 1.0D);
+            Material top = location.getBlock().getType();
             
-            //return (plugin.sm.throughBlocks.contains(mat1.getId())) && (plugin.sm.throughBlocks.contains(mat2.getId()));
-            return lower == Material.AIR && higher == Material.AIR;
+            Boolean save = null;
+            //TODO: Test comma! Is there already a method?
+            double comma = MinecraftUtil.getComma(location.getY());
+            
+            //TODO: Determine comma for “step height”
+            if (comma > 0.5D) {
+                if (checkMaterials(new Material[] { lower }, Material.STEP) && checkOpaqueMaterials(higher)) {
+                    save = true;
+                }
+            }
+            
+            if (save == null) {
+                //TODO: Determine comma
+                if (comma <= 0.01D) {
+                    save = checkOpaqueMaterials(lower, higher);
+                } else {
+                    save = checkOpaqueMaterials(lower, higher, top);
+                }
+            }
+
+            return save;
         } else {
             return false;
         }
+    }
+    
+    private static boolean checkOpaqueMaterials(Material... materials) {
+        //TODO: Reorganize
+        return checkMaterials(materials, Material.AIR, Material.WATER, Material.STATIONARY_WATER, Material.SAPLING, Material.YELLOW_FLOWER, Material.RED_ROSE, Material.BROWN_MUSHROOM, Material.RED_MUSHROOM, Material.TORCH, Material.REDSTONE_TORCH_ON, Material.REDSTONE_TORCH_OFF, Material.REDSTONE_WIRE, Material.CROPS, Material.SIGN_POST, Material.LADDER, Material.RAILS, Material.WALL_SIGN, Material.LEVER, Material.STONE_PLATE, Material.WOOD_PLATE, Material.STONE_BUTTON, Material.SNOW, Material.WOODEN_DOOR, Material.PORTAL, Material.SUGAR_CANE_BLOCK, Material.IRON_DOOR, Material.POWERED_RAIL, Material.DETECTOR_RAIL, Material.CAKE_BLOCK);
+    }
+    
+    private static boolean checkMaterials(Material[] materials, Material... allowed) {
+        for (Material material : materials) {
+            if (!MinecraftUtil.contains(material, allowed)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     public void setLocation(Positionable positionable) {
