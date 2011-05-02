@@ -9,6 +9,7 @@ import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import de.xzise.metainterfaces.FixedLocation;
 import de.xzise.metainterfaces.LocationWrapper;
 import de.xzise.xwarp.EditorPermissions;
 import de.xzise.xwarp.Permissions;
@@ -126,9 +127,9 @@ public class Warp {
     public boolean isSave()
     {
         if (this.location.isValid()) {
-            Location location = this.getLocation();
+            FixedLocation location = this.getLocation();
             Material lower = location.getBlock().getType();
-            LocationWrapper.moveY(location, 1.0D);
+            location = location.moveY(1.0D);
             Material higher = location.getBlock().getType();
             
             //return (plugin.sm.throughBlocks.contains(mat1.getId())) && (plugin.sm.throughBlocks.contains(mat2.getId()));
@@ -202,8 +203,8 @@ public class Warp {
         this.welcomeMessage = message;
     }
 
-    public Location getLocation() {
-        return this.location.getLocation().clone();
+    public FixedLocation getLocation() {
+        return this.location.getLocation();
     }
     
     public LocationWrapper getLocationWrapper() {
@@ -223,6 +224,10 @@ public class Warp {
     }
 
     public void setLocation(Location location) {
+        this.setLocation(new FixedLocation(location));
+    }
+    
+    public void setLocation(FixedLocation location) {
         this.location = new LocationWrapper(location);
     }
 

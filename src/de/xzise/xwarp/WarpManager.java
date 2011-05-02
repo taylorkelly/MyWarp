@@ -583,7 +583,7 @@ public class WarpManager {
                 if (warped.equals(warper) || MyWarp.permissions.permission(warper, PermissionTypes.ADMIN_WARP_OTHERS)) {
                     if (warp.playerCanWarp(warper, viaSign)) {
                         Positionable warpedPos = WarperFactory.getPositionable(warped);
-                        if (!worldForce && warpedPos != null && warp.getLocation().getWorld() != warpedPos.getLocation().getWorld()) {
+                        if (!worldForce && warpedPos != null && warp.getLocation().world != warpedPos.getLocation().getWorld()) {
                             warper.sendMessage(ChatColor.RED + "The selected warp is in another world.");
                             warper.sendMessage(ChatColor.RED + "To force warping use /warp force-to <warp> [owner].");
                         } else {

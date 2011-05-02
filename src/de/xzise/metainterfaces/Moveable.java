@@ -1,9 +1,9 @@
 package de.xzise.metainterfaces;
 
-public interface Moveable {
+public interface Moveable<T extends Moveable<?>> {
 
-    Moveable moveX(double delta);
-    Moveable moveY(double delta);
-    Moveable moveZ(double delta);
+    T moveX(double delta);
+    T moveY(double delta);
+    T moveZ(double delta);
     
 }

@@ -9,7 +9,7 @@ import org.bukkit.util.Vector;
  * A class which acts like a normal location, but is immutable.
  * @author Fabian Neundorf
  */
-public class FixedLocation implements Moveable {
+public class FixedLocation implements Moveable<FixedLocation> {
     
     public final World world;
     public final double x;
@@ -35,8 +35,8 @@ public class FixedLocation implements Moveable {
         this(location.world, location.x + xDelta, location.y + yDelta, location.z + zDelta, location.yaw, location.pitch);
     }
     
-    public Moveable move(double xDelta, double yDelta, double zDelta) {
-        return new FixedLocation(this, xDelta, yDelta, zDelta);
+    public Location toLocation() {
+        return new Location(this.world, this.x, this.y, this.z, this.yaw, this.pitch);
     }
     
     /**
@@ -119,18 +119,22 @@ public class FixedLocation implements Moveable {
         return vector;
     }
     
+    public FixedLocation move(double xDelta, double yDelta, double zDelta) {
+        return new FixedLocation(this, xDelta, yDelta, zDelta);
+    }
+    
     @Override
-    public Moveable moveX(double delta) {
+    public FixedLocation moveX(double delta) {
         return this.move(delta, 0, 0);
     }
 
     @Override
-    public Moveable moveY(double delta) {
+    public FixedLocation moveY(double delta) {
         return this.move(0, delta, 0);
     }
 
     @Override
-    public Moveable moveZ(double delta) {
+    public FixedLocation moveZ(double delta) {
         return this.move(0, 0, delta);
     }
     
