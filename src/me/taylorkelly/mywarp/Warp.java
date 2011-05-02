@@ -13,6 +13,7 @@ import de.xzise.metainterfaces.LocationWrapper;
 import de.xzise.xwarp.EditorPermissions;
 import de.xzise.xwarp.Permissions;
 import de.xzise.xwarp.PermissionWrapper.PermissionTypes;
+import de.xzise.xwarp.PermissionWrapper.WorldPermission;
 import de.xzise.xwarp.warpable.Positionable;
 import de.xzise.xwarp.warpable.Warpable;
 import de.xzise.xwarp.warpable.WarpablePlayer;
@@ -96,11 +97,19 @@ public class Warp {
     }
 
     public boolean playerCanWarp(CommandSender sender, boolean viaSign) {
+        Player player = WarperFactory.getPlayer(sender);
         String name = null;
-        if (sender instanceof WarpablePlayer) {
-            name = ((WarpablePlayer) sender).getName();
-        } else if (sender instanceof Player) {
-            name = ((Player) sender).getName();
+        WorldPermission worldPermission = WorldPermission.TO_WORLD;
+        if (player != null) {
+            name = player.getName();
+            if (player.getWorld().equals(this.getLocation().getWorld())) {
+                worldPermission = WorldPermission.WITHIN_WORLD;
+            }
+        }
+        
+        // If the player isn't allowed to warp to/within the world cancel here!
+        if (!MyWarp.permissions.hasWorldPermission(sender, worldPermission, this.getLocationWrapper().getWorld(), true)) {
+            return false;
         }
 
         if (name != null && this.owner.equals(name) && MyWarp.permissions.permission(sender, viaSign ? PermissionTypes.SIGN_WARP_OWN : PermissionTypes.TO_OWN))

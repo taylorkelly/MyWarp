@@ -112,6 +112,28 @@ public class PermissionWrapper {
         }
     }
 
+    public enum WorldPermission {
+        // Warp to worlds
+        TO_WORLD("warp.to.world.to"),
+        WITHIN_WORLD("warp.to.world.within");
+        
+        
+        public final String name;
+
+        WorldPermission(String name) {
+            this.name = name;
+        }
+
+        public static WorldPermission getType(String name) {
+            for (WorldPermission type : WorldPermission.values()) {
+                if (type.name.equals(name)) {
+                    return type;
+                }
+            }
+            return null;
+        }
+    }
+    
     public enum PermissionValues {
         /*
          * VALUES
@@ -183,13 +205,22 @@ public class PermissionWrapper {
             return false;
         }
     }
-
-    public boolean permission(CommandSender sender, PermissionTypes permission) {
+    
+    private Boolean has(CommandSender sender, String name) {
         Player player = MinecraftUtil.getPlayer(sender);
         if (player != null && this.handler != null) {
-            return this.handler.has(player, permission.name);
+            return this.handler.has(player, name);
         } else {
+            return null;
+        }
+    }
+
+    public boolean permission(CommandSender sender, PermissionTypes permission) {
+        Boolean hasPermission = this.has(sender, permission.name);
+        if (hasPermission == null) {
             return this.permissionInternal(sender, permission);
+        } else {
+            return hasPermission;
         }
     }
 
@@ -224,6 +255,15 @@ public class PermissionWrapper {
             } else {
                 return def;
             }
+        } else {
+            return def;
+        }
+    }
+    
+    public boolean hasWorldPermission(CommandSender sender, WorldPermission permission, String world, boolean def) {
+        Boolean hasPermission = this.has(sender, permission.name + "." + world);
+        if (hasPermission != null) {
+            return hasPermission;
         } else {
             return def;
         }
