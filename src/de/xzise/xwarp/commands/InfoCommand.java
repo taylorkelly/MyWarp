@@ -4,12 +4,12 @@ import me.taylorkelly.mywarp.MyWarp;
 import me.taylorkelly.mywarp.Warp;
 
 import org.bukkit.ChatColor;
-import org.bukkit.Location;
 import org.bukkit.Server;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import de.xzise.MinecraftUtil;
+import de.xzise.metainterfaces.FixedLocation;
 import de.xzise.xwarp.EconomyWrapper;
 import de.xzise.xwarp.Permissions;
 import de.xzise.xwarp.WarpManager;
@@ -91,7 +91,7 @@ public class InfoCommand extends WarpCommand {
             sender.sendMessage("Invitees: " + (invitees.isEmpty() ? "None" : invitees));
             sender.sendMessage("Editors: " + editor);
 
-            Location location = warp.getLocation();
+            FixedLocation location = warp.getLocation();
             sender.sendMessage("Location: World = " + ChatColor.GREEN + world + ChatColor.WHITE + ", x = " + ChatColor.GREEN + location.getBlockX() + ChatColor.WHITE + ", y = " + ChatColor.GREEN + location.getBlockY() + ChatColor.WHITE + ", z = " + ChatColor.GREEN + location.getBlockZ());
         } else {
             WarpManager.sendMissingWarp(warpName, owner, sender);

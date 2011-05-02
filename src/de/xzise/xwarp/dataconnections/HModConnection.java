@@ -15,6 +15,7 @@ import org.bukkit.Server;
 import org.bukkit.World;
 
 import de.xzise.MinecraftUtil;
+import de.xzise.metainterfaces.FixedLocation;
 import de.xzise.metainterfaces.LocationWrapper;
 import de.xzise.xwarp.EditorPermissions;
 
@@ -174,15 +175,15 @@ public class HModConnection implements DataConnection {
                     double x = Double.parseDouble(segments[1]);
                     double y = Double.parseDouble(segments[2]);
                     double z = Double.parseDouble(segments[3]);
-                    double yaw = Double.parseDouble(segments[4]);
-                    double pitch = Double.parseDouble(segments[5]);
+                    float yaw = Float.parseFloat(segments[4]);
+                    float pitch = Float.parseFloat(segments[5]);
 
                     yaw = (yaw < 0) ? (360 + (yaw % 360)) : (yaw % 360);
 
                     World world = server.getWorld(segments[6]);
                     String warpOwner = segments[7];
-                    Location location = new Location(world, x, y, z, (float) yaw, (float) pitch);
-                    LocationWrapper wrapper = LocationWrapper.create(location, segments[6]);
+                    FixedLocation location = new FixedLocation(world, x, y, z, yaw, pitch);
+                    LocationWrapper wrapper = new LocationWrapper(location, segments[6]);
                     warp = new Warp(name, warpOwner, warpOwner, wrapper);
                     warp.setMessage(segments[9]);
                     for (int i = GEN_2_LENGTH; i < segments.length; i += 2) {
@@ -226,15 +227,15 @@ public class HModConnection implements DataConnection {
                     double x = Double.parseDouble(segments[1]);
                     double y = Double.parseDouble(segments[2]);
                     double z = Double.parseDouble(segments[3]);
-                    double yaw = Double.parseDouble(segments[4]);
-                    double pitch = Double.parseDouble(segments[5]);
+                    float yaw = Float.parseFloat(segments[4]);
+                    float pitch = Float.parseFloat(segments[5]);
 
                     yaw = (yaw < 0) ? (360 + (yaw % 360)) : (yaw % 360);
 
                     World world = server.getWorld(segments[6]);
                     String warpOwner = segments[7];
-                    Location location = new Location(world, x, y, z, (float) yaw, (float) pitch);
-                    LocationWrapper wrapper = LocationWrapper.create(location, segments[6]);
+                    FixedLocation location = new FixedLocation(world, x, y, z, yaw, pitch);
+                    LocationWrapper wrapper = new LocationWrapper(location, segments[6]);
                     warp = new Warp(name, segments[segments.length - 1], warpOwner, wrapper);
                     warp.setMessage(segments[9]);
                     for (int i = GEN_2_LENGTH; i < segments.length - 1; i += 2) {
@@ -278,16 +279,16 @@ public class HModConnection implements DataConnection {
                     double x = Double.parseDouble(segments[1]);
                     double y = Double.parseDouble(segments[2]);
                     double z = Double.parseDouble(segments[3]);
-                    double yaw = Double.parseDouble(segments[4]);
-                    double pitch = Double.parseDouble(segments[5]);
+                    float yaw = Float.parseFloat(segments[4]);
+                    float pitch = Float.parseFloat(segments[5]);
 
                     yaw = (yaw < 0) ? (360 + (yaw % 360)) : (yaw % 360);
 
                     World world = server.getWorld(segments[6]);
                     String warpOwner = segments[7];
                     String creator = segments[10];
-                    Location location = new Location(world, x, y, z, (float) yaw, (float) pitch);
-                    LocationWrapper wrapper = LocationWrapper.create(location, segments[6]);
+                    FixedLocation location = new FixedLocation(world, x, y, z, yaw, pitch);
+                    LocationWrapper wrapper = new LocationWrapper(location, segments[6]);
                     warp = new Warp(name, creator, warpOwner, wrapper);
                     warp.setMessage(segments[9]);
                     warp.setPrice(Integer.parseInt(segments[11]));
@@ -339,15 +340,16 @@ public class HModConnection implements DataConnection {
     private static void writeWarp(Warp warp, Writer writer, int version) throws IOException {
         try {
             StringBuilder warpLine = new StringBuilder();
-            Location l = warp.getLocation();
+            LocationWrapper l = warp.getLocationWrapper();
+            FixedLocation location = l.getLocation();
             warpLine.append(makeParsable(warp.name) + SEPARATOR);
-            warpLine.append(makeParsable(l.getX()) + SEPARATOR);
-            warpLine.append(makeParsable(l.getY()) + SEPARATOR);
-            warpLine.append(makeParsable(l.getZ()) + SEPARATOR);
-            warpLine.append(makeParsable(l.getYaw()) + SEPARATOR);
-            warpLine.append(makeParsable(l.getPitch()) + SEPARATOR);
+            warpLine.append(makeParsable(location.x) + SEPARATOR);
+            warpLine.append(makeParsable(location.y) + SEPARATOR);
+            warpLine.append(makeParsable(location.z) + SEPARATOR);
+            warpLine.append(makeParsable(location.yaw) + SEPARATOR);
+            warpLine.append(makeParsable(location.pitch) + SEPARATOR);
             if (version >= 1) {
-                warpLine.append(makeParsable(l.getWorld().getName()) + SEPARATOR);
+                warpLine.append(makeParsable(l.getWorld()) + SEPARATOR);
                 warpLine.append(makeParsable(warp.getOwner()) + SEPARATOR);
                 warpLine.append(makeParsable(warp.visibility.level) + SEPARATOR);
                 warpLine.append(makeParsable(warp.welcomeMessage) + SEPARATOR);

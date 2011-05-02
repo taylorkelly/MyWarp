@@ -85,7 +85,7 @@ public class WarmUp {
     }
 
     private void sendPlayer(CommandSender warper, Warpable warped, Warp warp) {
-        if (warped.teleport(warp.getLocation())) {
+        if (warped.teleport(warp.getLocation().toLocation())) {
             warped.sendMessage(ChatColor.AQUA + warp.welcomeMessage);
             this.down.addPlayer(warp.visibility, warper);
             if (!warped.equals(warper)) {
