@@ -57,20 +57,17 @@ public class LocationWrapper implements Moveable<LocationWrapper> {
 
     @Override
     public LocationWrapper moveX(double delta) {
-        this.location.moveX(delta);
-        return this;
+        return new LocationWrapper(this.location.moveX(delta));
     }
 
     @Override
     public LocationWrapper moveY(double delta) {
-        this.location.moveY(delta);
-        return this;
+        return new LocationWrapper(this.location.moveY(delta));
     }
 
     @Override
     public LocationWrapper moveZ(double delta) {
-        this.location.moveZ(delta);
-        return this;
+        return new LocationWrapper(this.location.moveZ(delta));
     }
 
 }
