@@ -1,5 +1,6 @@
 package me.taylorkelly.mywarp;
 
+import org.bukkit.ChatColor;
 import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
 import org.bukkit.event.Event.Result;
@@ -36,7 +37,9 @@ public class WMPlayerListener extends PlayerListener {
     
     public void onPlayerMove(PlayerMoveEvent event) {
         if (this.properties.isCancelWarmUpOnMovement()) {
-            this.manager.getWarmUp().cancelWarmUp(event.getPlayer());
+            if (this.manager.getWarmUp().cancelWarmUp(event.getPlayer())) {
+                event.getPlayer().sendMessage(ChatColor.RED + "WarmUp was canceled due to movement!");
+            }
         }
     }
 }

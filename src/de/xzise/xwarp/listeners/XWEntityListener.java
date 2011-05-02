@@ -1,5 +1,6 @@
 package de.xzise.xwarp.listeners;
 
+import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityListener;
@@ -20,7 +21,9 @@ public class XWEntityListener extends EntityListener {
     public void onEntityDamage(EntityDamageEvent event) {
         if (this.properties.isCancelWarmUpOnDamage()) {
             if (event.getEntity() instanceof Player) {
-                this.warmUp.cancelWarmUp((Player) event.getEntity());
+                if (this.warmUp.cancelWarmUp((Player) event.getEntity())) {
+                    ((Player) event.getEntity()).sendMessage(ChatColor.RED + "WarmUp was canceled due to damage!");
+                }
             }
         }
     }

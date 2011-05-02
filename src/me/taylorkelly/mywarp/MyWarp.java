@@ -100,6 +100,7 @@ public class MyWarp extends JavaPlugin {
 
         this.getCommand("go").setExecutor(this.commands.getCommand(""));
 
+        WMPlayerListener playerListener = new WMPlayerListener(warpManager, properties);
         MWBlockListener blockListener = new MWBlockListener(warpManager);
         ServerListener serverListner = new ServerListener() {
             @Override
@@ -128,7 +129,8 @@ public class MyWarp extends JavaPlugin {
         this.economyWrapper.init(this.getServer().getPluginManager().getPlugin("iConomy"));
         
         this.getServer().getPluginManager().registerEvent(Event.Type.WORLD_LOAD, new XWWorldListener(warpManager), Priority.Low, this);
-        this.getServer().getPluginManager().registerEvent(Event.Type.PLAYER_INTERACT, new WMPlayerListener(warpManager, properties), Priority.Normal, this);
+        this.getServer().getPluginManager().registerEvent(Event.Type.PLAYER_INTERACT, playerListener, Priority.Normal, this);
+        this.getServer().getPluginManager().registerEvent(Event.Type.PLAYER_MOVE, playerListener, Priority.Normal, this);
         this.getServer().getPluginManager().registerEvent(Event.Type.ENTITY_DAMAGE, new XWEntityListener(properties, warpManager.getWarmUp()), Priority.Normal, this);
         this.getServer().getPluginManager().registerEvent(Event.Type.SIGN_CHANGE, blockListener, Priority.Low, this);
         this.getServer().getPluginManager().registerEvent(Event.Type.PLUGIN_ENABLE, serverListner, Priority.Low, this);
