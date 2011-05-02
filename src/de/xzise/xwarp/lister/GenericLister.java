@@ -7,11 +7,11 @@ import me.taylorkelly.mywarp.Warp;
 
 import org.angelsl.minecraft.randomshit.fontwidth.MinecraftFontWidthCalculator;
 import org.bukkit.ChatColor;
-import org.bukkit.Location;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
 
+import de.xzise.metainterfaces.FixedLocation;
 import de.xzise.metainterfaces.LocationWrapper;
 import de.xzise.xwarp.warpable.WarperFactory;
 
@@ -162,12 +162,12 @@ public class GenericLister {
     }
 
     public static String getLocationString(LocationWrapper wrapper) {
-        Location location = wrapper.getLocation();
+        FixedLocation location = wrapper.getLocation();
         String invalidString = "";
         if (!wrapper.isValid()) {
             invalidString = " " + ChatColor.RED + "(invalid)";
         }
-        return " @(" + wrapper.getWorld() + invalidString + ", " + (int) location.getX() + ", " + (int) location.getY() + ", " + (int) location.getZ() + ")";
+        return " @(" + wrapper.getWorld() + invalidString + ", " + location.getBlockX() + ", " + location.getBlockY() + ", " + location.getBlockZ() + ")";
     }
 
 }
