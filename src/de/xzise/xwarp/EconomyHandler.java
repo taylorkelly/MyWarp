@@ -1,5 +1,8 @@
 package de.xzise.xwarp;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import me.taylorkelly.mywarp.MyWarp;
 
 import org.bukkit.ChatColor;
@@ -10,9 +13,10 @@ import org.bukkit.plugin.PluginDescriptionFile;
 
 import de.xzise.MinecraftUtil;
 import de.xzise.xwarp.wrappers.economy.AccountWrapper;
+import de.xzise.xwarp.wrappers.economy.BOSEcon0;
 import de.xzise.xwarp.wrappers.economy.EconomyWrapper;
-import de.xzise.xwarp.wrappers.economy.iConomy4;
-import de.xzise.xwarp.wrappers.economy.iConomy5;
+import de.xzise.xwarp.wrappers.economy.EconomyWrapperFactory;
+import de.xzise.xwarp.wrappers.economy.iConomyFactory;
 
 public class EconomyHandler {
     
@@ -25,15 +29,22 @@ public class EconomyHandler {
         NOT_ENOUGH;
     }
     
+    public static final Map<String, EconomyWrapperFactory> FACTORIES = new HashMap<String, EconomyWrapperFactory>();
+    
+    static {
+        FACTORIES.put("BOSEconomy", new BOSEcon0.Factory());
+        FACTORIES.put("iConomy", new iConomyFactory());
+    }
+    
     public static final AccountWrapper NULLARY_ACCOUNT = new AccountWrapper() {
         
         @Override
-        public boolean hasEnough(double price) {
+        public boolean hasEnough(int price) {
             return false;
         }
         
         @Override
-        public void add(double price) {}
+        public void add(int price) {}
     };
     
     private EconomyWrapper economy;
@@ -103,15 +114,11 @@ public class EconomyHandler {
         this.economy = null;
         if (plugin != null) {
             PluginDescriptionFile pdf = plugin.getDescription();
-            if (pdf.getName().equals("iConomy")) {
-                // Try newer
-                try {
-                    this.economy = new iConomy5();
-                } catch (NoClassDefFoundError ncdfe) {
-                    // Try v4
-                    this.economy = new iConomy4();
-                }
-            } else {
+            EconomyWrapperFactory factory = FACTORIES.get(pdf.getName());
+            if (factory != null) {
+                this.economy = factory.create(plugin);
+            }
+            if (this.economy == null) {
                 MyWarp.logger.warning("Economy system not found. Use defaults.");
             }
         } else {

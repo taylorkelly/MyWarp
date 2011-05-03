@@ -17,12 +17,12 @@ public class iConomy4 implements EconomyWrapper {
         }
         
         @Override
-        public boolean hasEnough(double price) {
+        public boolean hasEnough(int price) {
             return this.account.hasEnough(price);
         }
 
         @Override
-        public void add(double price) {
+        public void add(int price) {
             this.account.add(price);
         }
         
@@ -38,7 +38,7 @@ public class iConomy4 implements EconomyWrapper {
     }
 
     @Override
-    public String format(double price) {
+    public String format(int price) {
         return this.bank.format(price);
     }
 
