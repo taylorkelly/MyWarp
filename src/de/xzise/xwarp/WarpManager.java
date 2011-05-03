@@ -40,10 +40,10 @@ public class WarpManager {
     private DataConnection data;
     private CoolDown coolDown;
     private WarmUp warmUp;
-    private EconomyWrapper economy;
+    private EconomyHandler economy;
     private PluginProperties properties;
 
-    public WarpManager(Plugin plugin, EconomyWrapper economy, PluginProperties properties, DataConnection data) {
+    public WarpManager(Plugin plugin, EconomyHandler economy, PluginProperties properties, DataConnection data) {
         this.list = new WarpList();
         this.server = plugin.getServer();
         this.properties = properties;

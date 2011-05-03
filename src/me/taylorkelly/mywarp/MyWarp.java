@@ -15,7 +15,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import de.xzise.MinecraftUtil;
 import de.xzise.XLogger;
 import de.xzise.xwarp.CommandMap;
-import de.xzise.xwarp.EconomyWrapper;
+import de.xzise.xwarp.EconomyHandler;
 import de.xzise.xwarp.PermissionWrapper;
 import de.xzise.xwarp.PluginProperties;
 import de.xzise.xwarp.WarpManager;
@@ -30,7 +30,7 @@ public class MyWarp extends JavaPlugin {
     public static PermissionWrapper permissions = new PermissionWrapper();
     public static XLogger logger;
 
-    private EconomyWrapper economyWrapper = new EconomyWrapper();
+    private EconomyHandler economyWrapper = new EconomyHandler();
     private PermissionWrapper permissionsWrapper = permissions;
 
     private CommandMap commands;

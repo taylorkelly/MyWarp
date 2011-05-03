@@ -6,36 +6,15 @@ import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
-
-import com.nijiko.coelho.iConomy.iConomy;
-import com.nijiko.coelho.iConomy.system.Account;
-import com.nijiko.coelho.iConomy.system.Bank;
+import org.bukkit.plugin.PluginDescriptionFile;
 
 import de.xzise.MinecraftUtil;
+import de.xzise.xwarp.wrappers.economy.AccountWrapper;
+import de.xzise.xwarp.wrappers.economy.EconomyWrapper;
+import de.xzise.xwarp.wrappers.economy.iConomy4;
+import de.xzise.xwarp.wrappers.economy.iConomy5;
 
-public class EconomyWrapper {
-
-    /**
-     * Wrap the Account class of iConomy. If no account is set, it will add nothing.
-     * @author Fabian Neundorf
-     */
-    private class AccountWrapper {
-        private final Account account;
-        
-        public AccountWrapper(Account account) {
-            this.account = account;
-        }
-        
-        public AccountWrapper() {
-            this(null);
-        }
-        
-        public void add(int amount) {
-            if (this.account != null) {
-                this.account.add(amount);
-            }
-        }
-    }
+public class EconomyHandler {
     
     public enum PayResult {
         /** The price was paid. */
@@ -46,9 +25,20 @@ public class EconomyWrapper {
         NOT_ENOUGH;
     }
     
-    private Bank bank;
+    public static final AccountWrapper NULLARY_ACCOUNT = new AccountWrapper() {
+        
+        @Override
+        public boolean hasEnough(double price) {
+            return false;
+        }
+        
+        @Override
+        public void add(double price) {}
+    };
+    
+    private EconomyWrapper economy;
     //TODO: Add option
-    private AccountWrapper tax = new AccountWrapper();
+    private AccountWrapper tax = NULLARY_ACCOUNT;
 
     /**
      * Pays for an action if the sender has enough money. If the sender is not a player no money will be transfered.
@@ -59,10 +49,10 @@ public class EconomyWrapper {
      * @return If the price could be paid or if there was nothing to pay.
      */
     public PayResult pay(CommandSender sender, String reciever, int price, int basic) {
-        if (this.bank != null) {
+        if (this.economy != null) {
            Player player = MinecraftUtil.getPlayer(sender);
            if (player != null) {
-               Account executor = this.getAccount(player.getName());
+               AccountWrapper executor = this.getAccount(player.getName());
                if (price + basic == 0) {
                    return PayResult.PAID;
                } else
@@ -73,7 +63,7 @@ public class EconomyWrapper {
                    executor.add(-price -basic);
                    this.tax.add(basic);
                    if (MinecraftUtil.isSet(reciever)) {
-                       Account owner = this.getAccount(reciever);
+                       AccountWrapper owner = this.getAccount(reciever);
                        owner.add(price);
                    }
                    return PayResult.PAID;
@@ -89,11 +79,8 @@ public class EconomyWrapper {
         return PayResult.UNABLE;
     }
     
-    private final Account getAccount(String name) {
-        if (!this.bank.hasAccount(name)) {
-            this.bank.addAccount(name);
-        }
-        return this.bank.getAccount(name);
+    private final AccountWrapper getAccount(String name) {
+        return this.economy.getAccount(name);
     }
     
     public PayResult pay(CommandSender sender, int basic) {
@@ -101,25 +88,31 @@ public class EconomyWrapper {
     }
     
     public boolean isActive() {
-        return this.bank != null;
+        return this.economy != null;
     }
     
     public String format(int price) {
-        if (this.bank != null) {
-            return this.bank.format(price);
+        if (this.economy != null) {
+            return this.economy.format(price);
         } else {
             return "";
         }
     }
 
     public void init(Plugin plugin) {
-        this.bank = null;
-        if (plugin != null && plugin instanceof iConomy) {
-            if (plugin.isEnabled()) {
-                this.bank = iConomy.getBank();
-                MyWarp.logger.info("iConomy enabled.");
+        this.economy = null;
+        if (plugin != null) {
+            PluginDescriptionFile pdf = plugin.getDescription();
+            if (pdf.getName().equals("iConomy")) {
+                // Try newer
+                try {
+                    this.economy = new iConomy5();
+                } catch (NoClassDefFoundError ncdfe) {
+                    // Try v4
+                    this.economy = new iConomy4();
+                }
             } else {
-                MyWarp.logger.info("Economy system found, but not enabled. Use defaults.");
+                MyWarp.logger.warning("Economy system not found. Use defaults.");
             }
         } else {
             MyWarp.logger.warning("Economy system not found. Use defaults.");

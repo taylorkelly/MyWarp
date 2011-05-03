@@ -10,16 +10,16 @@ import org.bukkit.entity.Player;
 
 import de.xzise.MinecraftUtil;
 import de.xzise.metainterfaces.FixedLocation;
-import de.xzise.xwarp.EconomyWrapper;
+import de.xzise.xwarp.EconomyHandler;
 import de.xzise.xwarp.Permissions;
 import de.xzise.xwarp.WarpManager;
 import de.xzise.xwarp.lister.GenericLister;
 
 public class InfoCommand extends WarpCommand {
 
-    private final EconomyWrapper wrapper;
+    private final EconomyHandler wrapper;
 
-    public InfoCommand(WarpManager list, Server server, EconomyWrapper wrapper) {
+    public InfoCommand(WarpManager list, Server server, EconomyHandler wrapper) {
         super(list, server, "", "info");
         this.wrapper = wrapper;
     }
