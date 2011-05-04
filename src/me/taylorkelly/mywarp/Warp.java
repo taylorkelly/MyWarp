@@ -137,12 +137,34 @@ public class Warp {
     public boolean isSave()
     {
         if (this.location.isValid()) {
-            FixedLocation location = this.getLocation();
+            Location location = this.getLocation().toLocation();
             Material lower = location.getBlock().getType();
-            location = location.moveY(1.0D);
+            LocationWrapper.moveX(location, 1.0D);
             Material higher = location.getBlock().getType();
+            LocationWrapper.moveX(location, 1.0D);
+            Material top = location.getBlock().getType();
+            
+            Boolean save = null;
+            //TODO: Test comma! Is there already a method?
+            double comma = MinecraftUtil.getComma(location.getY());
+            
+            //TODO: Determine comma for “step height”
+            if (comma > 0.5D) {
+                if (checkMaterials(new Material[] { lower }, Material.STEP) && checkOpaqueMaterials(higher)) {
+                    save = true;
+                }
+            }
+            
+            if (save == null) {
+                //TODO: Determine comma
+                if (comma <= 0.01D) {
+                    save = checkOpaqueMaterials(lower, higher);
+                } else {
+                    save = checkOpaqueMaterials(lower, higher, top);
+                }
+            }
 
-            return checkOpaqueMaterials(lower, higher);
+            return save;
         } else {
             return false;
         }
