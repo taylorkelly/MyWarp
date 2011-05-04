@@ -1,5 +1,7 @@
 package de.xzise.xwarp.wrappers.economy;
 
+import org.bukkit.plugin.Plugin;
+
 import com.nijiko.coelho.iConomy.iConomy;
 import com.nijiko.coelho.iConomy.system.Account;
 import com.nijiko.coelho.iConomy.system.Bank;
@@ -7,6 +9,7 @@ import com.nijiko.coelho.iConomy.system.Bank;
 public class iConomy4 implements EconomyWrapper {
 
     private final Bank bank;
+    private final Plugin plugin;
     
     public final class Account4 implements AccountWrapper {
 
@@ -28,8 +31,9 @@ public class iConomy4 implements EconomyWrapper {
         
     }
     
-    public iConomy4() {
+    public iConomy4(Plugin plugin) {
         this.bank = iConomy.getBank();
+        this.plugin = plugin;
     }
     
     @Override
@@ -40,6 +44,11 @@ public class iConomy4 implements EconomyWrapper {
     @Override
     public String format(int price) {
         return this.bank.format(price);
+    }
+
+    @Override
+    public Plugin getPlugin() {
+        return this.plugin;
     }
 
 }

@@ -30,7 +30,7 @@ public class MyWarp extends JavaPlugin {
     public static PermissionWrapper permissions = new PermissionWrapper();
     public static XLogger logger;
 
-    private EconomyHandler economyWrapper = new EconomyHandler();
+    private EconomyHandler economyWrapper;
     private PermissionWrapper permissionsWrapper = permissions;
 
     private CommandMap commands;
@@ -104,13 +104,14 @@ public class MyWarp extends JavaPlugin {
 
         XWPlayerListener playerListener = new XWPlayerListener(warpManager, properties);
         XWBlockListener blockListener = new XWBlockListener(warpManager);
+        this.economyWrapper = new EconomyHandler(properties);
         ServerListener serverListner = new ServerListener() {
             @Override
             public void onPluginEnable(PluginEnableEvent event) {
                 String name = event.getPlugin().getDescription().getName();
                 if (name.equals("Permissions")) {
                     MyWarp.this.permissionsWrapper.init(event.getPlugin());
-                } else if (name.equals("iConomy")) {
+                } else {
                     MyWarp.this.economyWrapper.init(event.getPlugin());
                 }
             }
@@ -120,15 +121,17 @@ public class MyWarp extends JavaPlugin {
                 String name = event.getPlugin().getDescription().getName();
                 if (name.equals("Permissions")) {
                     MyWarp.this.permissionsWrapper.init(null);
-                } else if (name.equals("iConomy")) {
-                    MyWarp.this.economyWrapper.init(null);
+                } else {
+                    if (MyWarp.this.economyWrapper.unload(event.getPlugin())) {
+                        MyWarp.this.economyWrapper.init(MyWarp.this.getServer().getPluginManager());
+                    }
                 }
             }
         };
 
         // Unless an event is called, to tell all enabled plugins
         this.permissionsWrapper.init(this.getServer().getPluginManager().getPlugin("Permissions"));
-        this.economyWrapper.init(this.getServer().getPluginManager().getPlugin("iConomy"));
+        this.economyWrapper.init(this.getServer().getPluginManager());
         
         this.getServer().getPluginManager().registerEvent(Event.Type.WORLD_LOAD, new XWWorldListener(warpManager), Priority.Low, this);
         this.getServer().getPluginManager().registerEvent(Event.Type.PLAYER_INTERACT, playerListener, Priority.Normal, this);

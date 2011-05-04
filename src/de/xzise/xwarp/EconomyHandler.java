@@ -10,6 +10,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginDescriptionFile;
+import org.bukkit.plugin.PluginManager;
 
 import de.xzise.MinecraftUtil;
 import de.xzise.xwarp.wrappers.economy.AccountWrapper;
@@ -50,6 +51,11 @@ public class EconomyHandler {
     private EconomyWrapper economy;
     //TODO: Add option
     private AccountWrapper tax = NULLARY_ACCOUNT;
+    private PluginProperties properties;
+
+    public EconomyHandler(PluginProperties properties) {
+        this.properties = properties;
+    }
 
     /**
      * Pays for an action if the sender has enough money. If the sender is not a player no money will be transfered.
@@ -109,20 +115,56 @@ public class EconomyHandler {
             return "";
         }
     }
+    
+    public void init(PluginManager pluginManager) {
+        for (String string : FACTORIES.keySet()) {
+            this.init(pluginManager.getPlugin(string));
+            if (this.economy != null) {
+                return;
+            }
+        }
+    }
 
     public void init(Plugin plugin) {
-        this.economy = null;
-        if (plugin != null) {
+        if (plugin != null && this.economy == null) {
             PluginDescriptionFile pdf = plugin.getDescription();
-            EconomyWrapperFactory factory = FACTORIES.get(pdf.getName());
-            if (factory != null) {
-                this.economy = factory.create(plugin);
+            String economyPlugin = this.properties.getEconomyPlugin();
+            if (!MinecraftUtil.isSet(economyPlugin) || (pdf.getName().equalsIgnoreCase(economyPlugin))) {
+                EconomyWrapperFactory factory = FACTORIES.get(pdf.getName());
+                if (factory != null) {
+                    if (plugin.isEnabled()) {
+                    try {
+                        this.economy = factory.create(plugin);
+                    } catch (Exception e) {
+                        //TODO: Better exception handling
+                        this.economy = null;
+                    }
+                    if (this.economy == null) {
+                        MyWarp.logger.warning("Invalid economy system found: " + pdf.getFullName());
+                    } else {
+                        String baseAccount = this.properties.getEconomyBaseAccount();
+                        if (MinecraftUtil.isSet(baseAccount)) {
+                            this.tax = this.economy.getAccount(baseAccount);
+                        } else {
+                            this.tax = NULLARY_ACCOUNT;
+                        }
+                        MyWarp.logger.info("Linked with economy system: " + pdf.getFullName());
+                    }
+                    } else {
+                        MyWarp.logger.warning("Doesn't link to disabled economy system: " + pdf.getFullName());
+                    }
+                }
             }
-            if (this.economy == null) {
-                MyWarp.logger.warning("Economy system not found. Use defaults.");
-            }
+        }
+    }
+    
+    public boolean unload(Plugin plugin) {
+        if (this.economy != null && plugin == this.economy.getPlugin()) {
+            this.economy = null;
+            MyWarp.logger.info("Deactivated economy system.");
+            return true;
         } else {
-            MyWarp.logger.warning("Economy system not found. Use defaults.");
+            return false;
         }
     }
 }

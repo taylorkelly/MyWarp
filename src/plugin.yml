@@ -1,5 +1,5 @@
 name: xWarp
-version: 2.10.0 economy-wrappers b0
+version: 2.10.0 economy-wrappers b1
 main: me.taylorkelly.mywarp.MyWarp
 description: Implementation to create warp points!
 authors:

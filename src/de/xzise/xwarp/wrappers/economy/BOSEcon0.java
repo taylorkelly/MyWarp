@@ -62,4 +62,9 @@ public class BOSEcon0 implements EconomyWrapper {
         
     }
 
+    @Override
+    public Plugin getPlugin() {
+        return this.economy;
+    }
+
 }

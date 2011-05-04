@@ -24,6 +24,8 @@ public class PluginProperties {
     private boolean showFreePriceMessage;
     private boolean cancelWarmUpOnDamage;
     private boolean cancelWarmUpOnMovement;
+    private String economyPlugin;
+    private String economyBaseAccount;
 
     private File dataDirectory;
     private File configFile;
@@ -38,6 +40,14 @@ public class PluginProperties {
 
     public DataConnection getDataConnection() {
         return this.dataConnection;
+    }
+    
+    public String getEconomyPlugin() {
+        return this.economyPlugin;
+    }
+    
+    public String getEconomyBaseAccount() {
+        return this.economyBaseAccount;
     }
 
     public boolean isCooldownNotify() {
@@ -83,6 +93,8 @@ public class PluginProperties {
                 properties.setProperty("show-free-price-message", "true");
                 properties.setProperty("cancel-warm-up-on-damage", "true");
                 properties.setProperty("cancel-warm-up-on-movement", "false");
+                properties.setProperty("economy", "");
+                properties.setProperty("economy-base-account", "");
                 properties.store(new FileWriter(this.configFile), null);
             } catch (IOException e) {
                 MyWarp.logger.warning("Unable to create properties file.", e);
@@ -100,6 +112,9 @@ public class PluginProperties {
             this.dataConnection = new SQLiteConnection(server);
         }
 
+        this.economyPlugin = properties.getProperty("economy", "");
+        this.economyBaseAccount = properties.getProperty("economy-base-account", "");
+        
         this.cooldownNotify = parseString(properties.getProperty("cooldown-notify"), true);
         this.warmupNotify = parseString(properties.getProperty("warmup-notify"), true);
         this.useForceTo = parseString(properties.getProperty("use-force-to"), true);

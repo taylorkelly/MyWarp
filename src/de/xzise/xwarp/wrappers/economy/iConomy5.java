@@ -1,5 +1,7 @@
 package de.xzise.xwarp.wrappers.economy;
 
+import org.bukkit.plugin.Plugin;
+
 import com.iConomy.iConomy;
 import com.iConomy.system.Account;
 
@@ -22,7 +24,13 @@ public class iConomy5 implements EconomyWrapper {
         public void add(int price) {
             this.account.getHoldings().add(price);
         }
-        
+
+    }
+
+    private final Plugin plugin;
+    
+    public iConomy5(Plugin plugin) {
+        this.plugin = plugin;
     }
     
     @Override
@@ -33,6 +41,11 @@ public class iConomy5 implements EconomyWrapper {
     @Override
     public String format(int price) {
         return iConomy.format(price);
+    }
+
+    @Override
+    public Plugin getPlugin() {
+        return this.plugin;
     }
 
 }
