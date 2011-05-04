@@ -20,6 +20,7 @@ public class LocationWrapper implements Moveable<LocationWrapper> {
     public LocationWrapper(FixedLocation location, String world) {
         this.location = location;
         this.worldName = world == null ? location.world.getName() : world;
+        this.world = this.location.world;
     }
     
     public static Location moveX(Location location, double delta) {

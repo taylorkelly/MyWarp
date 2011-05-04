@@ -40,4 +40,12 @@ public class CommandSenderWrapper<T extends CommandSender> implements CommandSen
             return false;
         }
     }
+
+    public static CommandSender getCommandSender(CommandSender sender) {
+        if (sender instanceof CommandSenderWrapper<?>) {
+            return CommandSenderWrapper.getCommandSender(((CommandSenderWrapper<?>) sender).getSender());
+        } else {
+            return sender;
+        }
+    }
 }

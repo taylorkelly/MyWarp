@@ -6,6 +6,7 @@ import java.util.List;
 import org.bukkit.block.Sign;
 import org.bukkit.entity.Player;
 
+import de.xzise.xwarp.WarpDestination;
 import de.xzise.xwarp.WarpManager;
 import de.xzise.xwarp.signwarps.MyWarpSign;
 import de.xzise.xwarp.signwarps.SignWarpDefinition;

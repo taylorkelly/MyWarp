@@ -36,6 +36,7 @@ import de.xzise.xwarp.warpable.WarperFactory;
 public class WarpManager {
 
     private WarpList list;
+    private List<WarpProtectionArea> protectionAreas;
     private Server server;
     private DataConnection data;
     private CoolDown coolDown;
@@ -45,6 +46,7 @@ public class WarpManager {
 
     public WarpManager(Plugin plugin, EconomyWrapper economy, PluginProperties properties, DataConnection data) {
         this.list = new WarpList();
+        this.protectionAreas = new ArrayList<WarpProtectionArea>();
         this.server = plugin.getServer();
         this.properties = properties;
         this.data = data;
@@ -145,46 +147,57 @@ public class WarpManager {
                 } else if (visibility == Visibility.GLOBAL && globalWarp != null) {
                     player.sendMessage(ChatColor.RED + "Global warp called '" + name + "' already exists (" + globalWarp.name + ").");
                 } else {
-                    int price = 0;
-                    switch (visibility) {
-                    case GLOBAL:
-                        price = MyWarp.permissions.getInteger(player, PermissionValues.WARP_PRICES_CREATE_GLOBAL, 0);
-                        break;
-                    case PRIVATE:
-                        price = MyWarp.permissions.getInteger(player, PermissionValues.WARP_PRICES_CREATE_PRIVATE, 0);
-                        break;
-                    case PUBLIC:
-                        price = MyWarp.permissions.getInteger(player, PermissionValues.WARP_PRICES_CREATE_PUBLIC, 0);
-                        break;
+                    boolean inProtectionArea = false;
+                    for (WarpProtectionArea area : this.protectionAreas) {
+                        if (area.isWithIn(player) && !MyWarp.permissions.permission(player, PermissionTypes.ADMIN_IGNORE_PROTECTION_AREA) && creator != null && area.isAllowed(creator)) {
+                            inProtectionArea = true;
+                        }
                     }
-
-                    switch (this.economy.pay(player, price)) {
-                    case PAID:
-                        this.printPayMessage(player, price);
-                    case UNABLE:
-                        warp = new Warp(name, creator, newOwner, new LocationWrapper(player.getLocation()));
-                        warp.visibility = visibility;
-                        this.list.addWarp(warp);
-                        this.data.addWarp(warp);
-                        player.sendMessage("Successfully created '" + ChatColor.GREEN + warp.name + ChatColor.WHITE + "'.");
+                
+                    if (inProtectionArea) {
+                        player.sendMessage(ChatColor.RED + "Here is a warp creation protectionarea.");
+                    } else {
+                        int price = 0;
                         switch (visibility) {
+                        case GLOBAL:
+                            price = MyWarp.permissions.getInteger(player, PermissionValues.WARP_PRICES_CREATE_GLOBAL, 0);
+                            break;
                         case PRIVATE:
-                            WarpManager.printPrivatizeMessage(player, warp);
+                            price = MyWarp.permissions.getInteger(player, PermissionValues.WARP_PRICES_CREATE_PRIVATE, 0);
                             break;
                         case PUBLIC:
-                            if (MyWarp.permissions.permissionOr(player, PermissionTypes.CREATE_PRIVATE, PermissionTypes.ADMIN_PRIVATE)) {
-                                player.sendMessage("If you'd like to privatize it, use:");
-                                player.sendMessage(ChatColor.GREEN + "/warp private \"" + warp.name + "\" " + warp.getOwner());
-                            }
-                            break;
-                        case GLOBAL:
-                            player.sendMessage("This warp is now global available.");
+                            price = MyWarp.permissions.getInteger(player, PermissionValues.WARP_PRICES_CREATE_PUBLIC, 0);
                             break;
                         }
-                        break;
-                    case NOT_ENOUGH:
-                        player.sendMessage(ChatColor.RED + "You have not enough money to pay this creation.");
-                        break;
+    
+                        switch (this.economy.pay(player, price)) {
+                        case PAID:
+                            this.printPayMessage(player, price);
+                        case UNABLE:
+                            warp = new Warp(name, creator, newOwner, new LocationWrapper(player.getLocation()));
+                            warp.visibility = visibility;
+                            this.list.addWarp(warp);
+                            this.data.addWarp(warp);
+                            player.sendMessage("Successfully created '" + ChatColor.GREEN + warp.name + ChatColor.WHITE + "'.");
+                            switch (visibility) {
+                            case PRIVATE:
+                                WarpManager.printPrivatizeMessage(player, warp);
+                                break;
+                            case PUBLIC:
+                                if (MyWarp.permissions.permissionOr(player, PermissionTypes.CREATE_PRIVATE, PermissionTypes.ADMIN_PRIVATE)) {
+                                    player.sendMessage("If you'd like to privatize it, use:");
+                                    player.sendMessage(ChatColor.GREEN + "/warp private \"" + warp.name + "\" " + warp.getOwner());
+                                }
+                                break;
+                            case GLOBAL:
+                                player.sendMessage("This warp is now global available.");
+                                break;
+                            }
+                            break;
+                        case NOT_ENOUGH:
+                            player.sendMessage(ChatColor.RED + "You have not enough money to pay this creation.");
+                            break;
+                        }
                     }
                 }
             } else {

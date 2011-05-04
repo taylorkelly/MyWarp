@@ -2,13 +2,8 @@ package de.xzise.xwarp;
 
 import java.util.List;
 
-import org.bukkit.Location;
-import org.bukkit.entity.Player;
-
-import de.xzise.MinecraftUtil;
 import de.xzise.metainterfaces.FixedLocation;
 import de.xzise.xwarp.warpable.Positionable;
-import de.xzise.xwarp.warpable.WarperFactory;
 
 public class WarpProtectionArea {
 
@@ -28,29 +23,32 @@ public class WarpProtectionArea {
     }
     
     public boolean isWithIn(Positionable positionable) {
-        Location location = positionable.getLocation();
-        if (location.getWorld().equals(firstEdge.world)) {
+        return this.isWithIn(new FixedLocation(positionable.getLocation()));
+    }
+    
+    public boolean isWithIn(FixedLocation location) {
+        if (location.world.equals(firstEdge.world)) {
             double lowerX = Math.min(firstEdge.x, secondEdge.x);
             double upperX = Math.max(firstEdge.x, secondEdge.x);
             double lowerY = Math.min(firstEdge.y, secondEdge.y);
             double upperY = Math.max(firstEdge.y, secondEdge.y);
             double lowerZ = Math.min(firstEdge.z, secondEdge.z);
             double upperZ = Math.max(firstEdge.z, secondEdge.z);
-            double x = location.getX();
-            double y = location.getY();
-            double z = location.getZ();
+            double x = location.x;
+            double y = location.y;
+            double z = location.z;
             return lowerX <= x && x <= upperX && lowerY <= y && y <= upperY && lowerZ <= z && z <= upperZ;
         } else {
             return false;
         }
     }
     
-    public boolean isAllowed(Player player) {
+    public boolean isAllowed(String name) {
     //TODO: Allow positionable & differ between the visibility?
-        if (player.getName().equals(this.owner)) {
+        if (name.equals(this.owner)) {
             return true;
         } else {
-            return this.allowed.contains(player.getName());
+            return this.allowed.contains(name);
         }
     }
     
