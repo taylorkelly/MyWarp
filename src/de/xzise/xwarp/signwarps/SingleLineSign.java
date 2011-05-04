@@ -1,6 +1,6 @@
 package de.xzise.xwarp.signwarps;
 
-import me.taylorkelly.mywarp.WarpDestination;
+import de.xzise.xwarp.WarpDestination;
 
 public class SingleLineSign implements SignWarpDefinition {
 
