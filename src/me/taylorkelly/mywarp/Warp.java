@@ -51,7 +51,8 @@ public class Warp {
     private String owner;
     public Visibility visibility;
     public String welcomeMessage;
-    public Map<String, EditorPermissions> editors;
+    public Map<String, EditorPermissions> playerEditors;
+    public Map<String, EditorPermissions> groupEditors;
 
     public static int nextIndex = 1;
 
@@ -63,10 +64,11 @@ public class Warp {
         this.location = wrapper;
         this.visibility = visibility;
         if (permissions == null) {
-            this.editors = new HashMap<String, EditorPermissions>();
+            this.playerEditors = new HashMap<String, EditorPermissions>();
         } else {
-            this.editors = new HashMap<String, EditorPermissions>(permissions);
+            this.playerEditors = new HashMap<String, EditorPermissions>(permissions);
         }
+        this.groupEditors = new HashMap<String, EditorPermissions>();
         this.welcomeMessage = welcomeMessage;
         if (index > nextIndex)
             nextIndex = index;
@@ -86,7 +88,7 @@ public class Warp {
     }
 
     public boolean playerIsInvited(String name) {
-        EditorPermissions ep = this.editors.get(name.toLowerCase());
+        EditorPermissions ep = this.playerEditors.get(name.toLowerCase());
         if (ep != null) {
             return ep.get(Permissions.WARP);
         } else {
@@ -211,7 +213,7 @@ public class Warp {
     public boolean playerCanModify(Player player, Permissions permission) {
         if (this.isOwn(player.getName()))
             return true;
-        EditorPermissions ep = this.editors.get(player.getName().toLowerCase());
+        EditorPermissions ep = this.playerEditors.get(player.getName().toLowerCase());
         if (ep != null) {
             return ep.get(permission);
         }
@@ -277,7 +279,7 @@ public class Warp {
     }
 
     public EditorPermissions getEditorPermissions(String name) {
-        EditorPermissions player = this.editors.get(name.toLowerCase());
+        EditorPermissions player = this.playerEditors.get(name.toLowerCase());
         if (player == null) {
             return null;
         }
@@ -285,14 +287,14 @@ public class Warp {
     }
 
     public String[] getEditors() {
-        return this.editors.keySet().toArray(new String[0]);
+        return this.playerEditors.keySet().toArray(new String[0]);
     }
 
     private EditorPermissions getPermissions(String name) {
-        EditorPermissions player = this.editors.get(name.toLowerCase());
+        EditorPermissions player = this.playerEditors.get(name.toLowerCase());
         if (player == null) {
             player = new EditorPermissions();
-            this.editors.put(name.toLowerCase(), player);
+            this.playerEditors.put(name.toLowerCase(), player);
         }
         return player;
     }
@@ -302,7 +304,7 @@ public class Warp {
     }
 
     public void removeEditor(String name) {
-        this.editors.remove(name.toLowerCase());
+        this.playerEditors.remove(name.toLowerCase());
     }
 
     public static final WarpComparator WARP_NAME_COMPARATOR = new WarpComparator() {
