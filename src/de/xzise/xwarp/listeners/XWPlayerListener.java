@@ -1,7 +1,6 @@
 package de.xzise.xwarp.listeners;
 
 import me.taylorkelly.mywarp.MyWarp;
-import me.taylorkelly.mywarp.SignWarp;
 
 import org.bukkit.ChatColor;
 import org.bukkit.block.Block;
@@ -15,6 +14,7 @@ import org.bukkit.event.player.PlayerMoveEvent;
 import de.xzise.xwarp.PluginProperties;
 import de.xzise.xwarp.WarpManager;
 import de.xzise.xwarp.PermissionWrapper.PermissionTypes;
+import de.xzise.xwarp.signwarps.SignWarp;
 
 public class XWPlayerListener extends PlayerListener {
 

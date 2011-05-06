@@ -1,7 +1,6 @@
 package de.xzise.xwarp.listeners;
 
 import me.taylorkelly.mywarp.MyWarp;
-import me.taylorkelly.mywarp.SignWarp;
 import me.taylorkelly.mywarp.Warp;
 
 import org.bukkit.ChatColor;
@@ -10,9 +9,11 @@ import org.bukkit.block.Sign;
 import org.bukkit.event.block.BlockListener;
 import org.bukkit.event.block.SignChangeEvent;
 
+import de.xzise.MinecraftUtil;
 import de.xzise.xwarp.WarpDestination;
 import de.xzise.xwarp.WarpManager;
 import de.xzise.xwarp.PermissionWrapper.PermissionTypes;
+import de.xzise.xwarp.signwarps.SignWarp;
 
 public class XWBlockListener extends BlockListener {
 
@@ -27,19 +28,23 @@ public class XWBlockListener extends BlockListener {
         if (block.getState() instanceof Sign && MyWarp.permissions.permissionOr(event.getPlayer(), PermissionTypes.SIGN_WARP_GLOBAL, PermissionTypes.SIGN_WARP_INVITED, PermissionTypes.SIGN_WARP_OTHER, PermissionTypes.SIGN_WARP_OWN)) {
             WarpDestination destination = SignWarp.getDestination(SignWarp.getFilledLines(event.getLines()));
             if (destination != null) {
-                event.getPlayer().sendMessage("Warp sign found.");
+                String line = "Warp sign found: ";
                 Warp warp = this.list.getWarp(destination.name, destination.creator, null);
                 if (warp == null) {
                     String creator = "";
-                    if (!destination.creator.isEmpty()) {
+                    if (MinecraftUtil.isSet(destination.creator)) {
                         creator = " by " + ChatColor.GREEN + destination.creator;
                     } else {
                         creator = " (global)";
                     }
-                    event.getPlayer().sendMessage(ChatColor.GREEN + destination.name + ChatColor.WHITE + creator);
-                    event.getPlayer().sendMessage(ChatColor.RED + "This warp doesn't exists!");
+                    line += ChatColor.GREEN + destination.name + ChatColor.WHITE + creator;
                 } else {
-                    event.getPlayer().sendMessage(ChatColor.GREEN + warp.name + ChatColor.WHITE + " by " + ChatColor.GREEN + warp.getOwner());
+                    line += ChatColor.GREEN + warp.name + ChatColor.WHITE + " by " + ChatColor.GREEN + warp.getOwner();
+                }
+                
+                event.getPlayer().sendMessage(line);
+                if (warp == null) {
+                    event.getPlayer().sendMessage(ChatColor.RED + "This warp doesn't exists!");
                 }
             }
         }
