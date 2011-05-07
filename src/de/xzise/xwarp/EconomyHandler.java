@@ -17,6 +17,7 @@ import de.xzise.xwarp.wrappers.economy.AccountWrapper;
 import de.xzise.xwarp.wrappers.economy.BOSEcon0;
 import de.xzise.xwarp.wrappers.economy.EconomyWrapper;
 import de.xzise.xwarp.wrappers.economy.EconomyWrapperFactory;
+import de.xzise.xwarp.wrappers.economy.Essentials;
 import de.xzise.xwarp.wrappers.economy.iConomyFactory;
 
 public class EconomyHandler {
@@ -35,6 +36,7 @@ public class EconomyHandler {
     static {
         FACTORIES.put("BOSEconomy", new BOSEcon0.Factory());
         FACTORIES.put("iConomy", new iConomyFactory());
+        FACTORIES.put("Essentials", new Essentials.Factory());
     }
     
     public static final AccountWrapper NULLARY_ACCOUNT = new AccountWrapper() {

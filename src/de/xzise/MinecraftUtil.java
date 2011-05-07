@@ -351,6 +351,10 @@ public final class MinecraftUtil {
             return null;
         }
     }
+    
+    public static double getComma(double value) {
+        return Math.abs(value - Math.floor(value));
+    }
 
     /**
      * Tests where the first object is inside the array.

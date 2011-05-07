@@ -646,7 +646,7 @@ public class WarpManager {
         if (owner == null || owner.isEmpty()) {
             sender.sendMessage(ChatColor.RED + "Global warp '" + name + "' doesn't exist.");
         } else {
-            sender.sendMessage(ChatColor.RED + "Player '" + owner + "' don't owns a warp named '" + name + "'.");
+            sender.sendMessage(ChatColor.RED + "Player '" + owner + "' doesn't own a warp named '" + name + "'.");
         }
     }
 
