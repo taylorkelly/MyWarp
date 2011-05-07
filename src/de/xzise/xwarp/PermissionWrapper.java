@@ -281,12 +281,12 @@ public class PermissionWrapper {
         if (plugin != null) {
             if (plugin.isEnabled()) {
                 this.handler = ((Permissions) plugin).getHandler();
-                MyWarp.logger.info("Permissions enabled.");
+                MyWarp.logger.info("Linked with permissions: " + plugin.getDescription().getFullName());
             } else {
-                MyWarp.logger.info("Permissions system found, but not enabled. Use defaults.");
+                MyWarp.logger.info("Doesn't link to disabled permissions: " + plugin.getDescription().getFullName());
             }
         } else {
-            MyWarp.logger.warning("Permission system not found. Use defaults.");
+            MyWarp.logger.warning("No permissions found until here. Permissions will be maybe activated later. Use defaults.");
         }
     }
 

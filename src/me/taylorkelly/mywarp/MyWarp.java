@@ -88,9 +88,9 @@ public class MyWarp extends JavaPlugin {
             return;
         }
 
-        WarpManager warpManager = new WarpManager(this, this.economyWrapper, properties, this.dataConnection);
-
         this.economyWrapper = new EconomyHandler(properties, this.getServer().getPluginManager());
+        
+        WarpManager warpManager = new WarpManager(this, this.economyWrapper, properties, this.dataConnection);
         
         // Create commands
         this.commands = null;
