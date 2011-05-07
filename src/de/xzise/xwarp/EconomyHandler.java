@@ -51,12 +51,14 @@ public class EconomyHandler {
     };
     
     private EconomyWrapper economy;
-    //TODO: Add option
     private AccountWrapper tax = NULLARY_ACCOUNT;
-    private PluginProperties properties;
+    private final PluginProperties properties;
+    private final PluginManager pluginManager;
 
-    public EconomyHandler(PluginProperties properties) {
+    public EconomyHandler(PluginProperties properties, PluginManager pluginManager) {
         this.properties = properties;
+        this.setBaseAccount();
+        this.pluginManager = pluginManager;
     }
 
     /**
@@ -118,12 +120,30 @@ public class EconomyHandler {
         }
     }
     
-    public void init(PluginManager pluginManager) {
+    public void reloadConfig() {
+        this.init();
+        this.setBaseAccount();
+    }
+    
+    private void setBaseAccount() {
+        String baseAccount = this.properties.getEconomyBaseAccount();
+        if (MinecraftUtil.isSet(baseAccount) && this.isActive()) {
+            this.tax = this.economy.getAccount(baseAccount);
+        } else {
+            this.tax = NULLARY_ACCOUNT;
+        }
+    }
+    
+    public void init() {
+        this.economy = null;
         for (String string : FACTORIES.keySet()) {
-            this.init(pluginManager.getPlugin(string));
+            this.init(this.pluginManager.getPlugin(string));
             if (this.economy != null) {
                 return;
             }
+        }
+        if (this.economy == null) {
+            MyWarp.logger.info("No economy system found until here. Economy plugin will be maybe activated later.");
         }
     }
 
@@ -135,23 +155,18 @@ public class EconomyHandler {
                 EconomyWrapperFactory factory = FACTORIES.get(pdf.getName());
                 if (factory != null) {
                     if (plugin.isEnabled()) {
-                    try {
-                        this.economy = factory.create(plugin);
-                    } catch (Exception e) {
-                        //TODO: Better exception handling
-                        this.economy = null;
-                    }
-                    if (this.economy == null) {
-                        MyWarp.logger.warning("Invalid economy system found: " + pdf.getFullName());
-                    } else {
-                        String baseAccount = this.properties.getEconomyBaseAccount();
-                        if (MinecraftUtil.isSet(baseAccount)) {
-                            this.tax = this.economy.getAccount(baseAccount);
-                        } else {
-                            this.tax = NULLARY_ACCOUNT;
+                        try {
+                            this.economy = factory.create(plugin);
+                        } catch (Exception e) {
+                            //TODO: Better exception handling
+                            this.economy = null;
                         }
-                        MyWarp.logger.info("Linked with economy system: " + pdf.getFullName());
-                    }
+                        if (this.economy == null) {
+                            MyWarp.logger.warning("Invalid economy system found: " + pdf.getFullName());
+                        } else {
+                            this.setBaseAccount();
+                            MyWarp.logger.info("Linked with economy system: " + pdf.getFullName());
+                        }
                     } else {
                         MyWarp.logger.warning("Doesn't link to disabled economy system: " + pdf.getFullName());
                     }

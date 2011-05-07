@@ -90,6 +90,8 @@ public class MyWarp extends JavaPlugin {
 
         WarpManager warpManager = new WarpManager(this, this.economyWrapper, properties, this.dataConnection);
 
+        this.economyWrapper = new EconomyHandler(properties, this.getServer().getPluginManager());
+        
         // Create commands
         this.commands = null;
         try {
@@ -104,7 +106,6 @@ public class MyWarp extends JavaPlugin {
 
         XWPlayerListener playerListener = new XWPlayerListener(warpManager, properties);
         XWBlockListener blockListener = new XWBlockListener(warpManager);
-        this.economyWrapper = new EconomyHandler(properties);
         ServerListener serverListner = new ServerListener() {
             @Override
             public void onPluginEnable(PluginEnableEvent event) {
@@ -123,7 +124,7 @@ public class MyWarp extends JavaPlugin {
                     MyWarp.this.permissionsWrapper.init(null);
                 } else {
                     if (MyWarp.this.economyWrapper.unload(event.getPlugin())) {
-                        MyWarp.this.economyWrapper.init(MyWarp.this.getServer().getPluginManager());
+                        MyWarp.this.economyWrapper.init();
                     }
                 }
             }
@@ -131,7 +132,7 @@ public class MyWarp extends JavaPlugin {
 
         // Unless an event is called, to tell all enabled plugins
         this.permissionsWrapper.init(this.getServer().getPluginManager().getPlugin("Permissions"));
-        this.economyWrapper.init(this.getServer().getPluginManager());
+        this.economyWrapper.init();
         
         this.getServer().getPluginManager().registerEvent(Event.Type.WORLD_LOAD, new XWWorldListener(warpManager), Priority.Low, this);
         this.getServer().getPluginManager().registerEvent(Event.Type.PLAYER_INTERACT, playerListener, Priority.Normal, this);

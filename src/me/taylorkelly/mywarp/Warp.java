@@ -100,11 +100,14 @@ public class Warp {
 
     public boolean playerCanWarp(CommandSender sender, boolean viaSign) {
         Player player = WarperFactory.getPlayer(sender);
+        Positionable pos = WarperFactory.getPositionable(sender);
         String name = null;
         WorldPermission worldPermission = WorldPermission.TO_WORLD;
         if (player != null) {
-            name = player.getName();
-            if (player.getWorld().getName().equals(this.getLocationWrapper().getWorld())) {
+            name = player.getName();   
+        }
+        if (pos != null) {
+            if (pos.getLocation().getWorld().getName().equals(this.getLocationWrapper().getWorld())) {
                 worldPermission = WorldPermission.WITHIN_WORLD;
             }
         }

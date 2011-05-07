@@ -66,6 +66,7 @@ public class WarpManager {
         if (MyWarp.permissions.permission(sender, PermissionTypes.ADMIN_RELOAD)) {
             this.properties.read();
             this.loadFromDatabase();
+            this.economy.reloadConfig();
             sender.sendMessage("Reload successfully!");
         } else {
             sender.sendMessage(ChatColor.RED + "You have no permission to reload.");

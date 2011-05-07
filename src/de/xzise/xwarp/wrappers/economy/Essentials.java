@@ -1,9 +1,10 @@
 package de.xzise.xwarp.wrappers.economy;
 
+import me.taylorkelly.mywarp.MyWarp;
+
 import org.bukkit.plugin.Plugin;
 
 import com.earth2me.essentials.api.Economy;
-
 
 public class Essentials implements EconomyWrapper {
 
@@ -53,7 +54,14 @@ public class Essentials implements EconomyWrapper {
         @Override
         public EconomyWrapper create(Plugin plugin) {
             if (plugin instanceof com.earth2me.essentials.Essentials) {
-                return new Essentials(plugin);
+                Essentials buf = new Essentials(plugin);
+                try {
+                    buf.format(0);
+                    return buf;
+                } catch (NoClassDefFoundError e) {
+                    MyWarp.logger.info("Essentials plugin found, but without Economy API. Should be there since Essentials 2.2.13");
+                    return null;
+                }
             } else {
                 return null;
             }
