@@ -38,6 +38,9 @@ public class iConomy4 implements EconomyWrapper {
     
     @Override
     public AccountWrapper getAccount(String name) {
+        if (!this.bank.hasAccount(name)) {
+            this.bank.addAccount(name);
+        }
         return new Account4(this.bank.getAccount(name));
     }
 
