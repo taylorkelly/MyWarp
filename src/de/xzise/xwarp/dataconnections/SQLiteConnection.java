@@ -331,6 +331,7 @@ public class SQLiteConnection implements DataConnection {
                 String welcomeMessage = set.getString("welcomeMessage");
                 String owner = set.getString("owner");
                 Warp warp = new Warp(index, name, creator, owner, loc, visibility, allPermissions.get(index), welcomeMessage);
+                warp.setPrice(set.getInt("price"));
                 result.add(warp);
                 if (!warp.getLocationWrapper().isValid()) {
                     invalidSize++;

@@ -25,7 +25,7 @@ public class BOSEcon0 implements EconomyWrapper {
         
         @Override
         public boolean hasEnough(int price) {
-            return this.economy.getPlayerMoney(name) >= price;
+            return this.economy.getPlayerMoney(this.name) >= price;
         }
 
         @Override
@@ -42,10 +42,11 @@ public class BOSEcon0 implements EconomyWrapper {
 
     @Override
     public String format(int price) {
+        //TODO: Negatives? Zeros?
         if (price == 1) {
-            return price + this.economy.getMoneyName();
+            return price + " " + this.economy.getMoneyName();
         } else {
-            return price + this.economy.getMoneyNamePlural();
+            return price + " " + this.economy.getMoneyNamePlural();
         }
     }
     
