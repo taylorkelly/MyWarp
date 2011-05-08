@@ -16,6 +16,11 @@ public class Essentials implements EconomyWrapper {
         
         public EssentialsAccount(String name) {
             this.name = name;
+            if (!Economy.accountExist(name)) {
+                if (!Economy.newAccount(name)) {
+                    MyWarp.logger.warning("EssentialsAccount: Couldn't create a new account named \"" + name + "\"!");
+                }
+            }
         }
 
         @Override
