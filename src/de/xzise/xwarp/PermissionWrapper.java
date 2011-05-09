@@ -24,20 +24,13 @@ public class PermissionWrapper {
         TO_OTHER("warp.to.other"),
 
         // Warp with sign to global
-        SIGN_WARP_GLOBAL("warp.sign.global"),
+        SIGN_WARP_GLOBAL("warp.sign.to.global"),
         // Warp to own warps
-        SIGN_WARP_OWN("warp.sign.own"),
+        SIGN_WARP_OWN("warp.sign.to.own"),
         // Warp to invited warps
-        SIGN_WARP_INVITED("warp.sign.invited"),
+        SIGN_WARP_INVITED("warp.sign.to.invited"),
         // Warp to public warps
-        SIGN_WARP_OTHER("warp.sign.other"),
-
-        // Create/Edit private warps
-        CREATE_PRIVATE("warp.create.private"),
-        // Create/Edit public warps
-        CREATE_PUBLIC("warp.create.public"),
-        // Create/Edit global warps
-        CREATE_GLOBAL("warp.create.global"),
+        SIGN_WARP_OTHER("warp.sign.to.other"),
         
         // Create warp sign to private warp
         CREATE_SIGN_PRIVATE("warp.sign.create.private"),
@@ -47,6 +40,13 @@ public class PermissionWrapper {
         CREATE_SIGN_GLOBAL("warp.sign.create.global"),
         // Create warp sign to warp which doesn't exists
         SIGN_CREATE_UNKNOWN("warp.sign.create.unknown"),
+
+        // Create/Edit private warps
+        CREATE_PRIVATE("warp.create.private"),
+        // Create/Edit public warps
+        CREATE_PUBLIC("warp.create.public"),
+        // Create/Edit global warps
+        CREATE_GLOBAL("warp.create.global"),
         
         // Edit own warps
         EDIT_DELETE("warp.edit.delete"),
