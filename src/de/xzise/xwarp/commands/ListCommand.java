@@ -1,11 +1,14 @@
 package de.xzise.xwarp.commands;
 
+import me.taylorkelly.mywarp.MyWarp;
+
 import org.bukkit.ChatColor;
 import org.bukkit.Server;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 
 import de.xzise.MinecraftUtil;
+import de.xzise.xwarp.PermissionWrapper.PermissionTypes;
 import de.xzise.xwarp.WarpManager;
 import de.xzise.xwarp.lister.GenericLister;
 import de.xzise.xwarp.lister.ListSection;
@@ -17,9 +20,12 @@ public class ListCommand extends DefaultSubCommand {
     }
 
     @Override
-    protected boolean internalExecute(CommandSender sender, String[] parameters) {
+    protected boolean internalExecute(CommandSender sender, String[] parameters) {        
         if (parameters.length == 3 && !MinecraftUtil.isInteger(parameters[2])) {
             return false;
+        } else if (!MyWarp.permissions.permission(sender, PermissionTypes.CMD_LIST)) {
+            sender.sendMessage(ChatColor.RED + "You have no permission to list warps.");
+            return true;
         }
 
         if (parameters.length == 2 && parameters[1].equalsIgnoreCase("legend")) {

@@ -13,6 +13,7 @@ import de.xzise.metainterfaces.FixedLocation;
 import de.xzise.xwarp.EconomyHandler;
 import de.xzise.xwarp.Permissions;
 import de.xzise.xwarp.WarpManager;
+import de.xzise.xwarp.PermissionWrapper.PermissionTypes;
 import de.xzise.xwarp.lister.GenericLister;
 
 public class InfoCommand extends WarpCommand {
@@ -26,6 +27,11 @@ public class InfoCommand extends WarpCommand {
 
     @Override
     protected boolean executeEdit(CommandSender sender, String warpName, String owner, String[] parameters) {
+        if (!MyWarp.permissions.permission(sender, PermissionTypes.CMD_INFO)) {
+            sender.sendMessage(ChatColor.RED + "You have no permission to gather information to warps.");
+            return true;
+        }
+        
         Warp warp = this.list.getWarp(warpName, owner, MinecraftUtil.getPlayerName(sender));
         if (warp != null) {
             sender.sendMessage("Warp info: " + ChatColor.GREEN + warp.name);
