@@ -18,7 +18,6 @@ import de.xzise.xwarp.PermissionWrapper.PermissionTypes;
 import de.xzise.xwarp.PermissionWrapper.WorldPermission;
 import de.xzise.xwarp.warpable.Positionable;
 import de.xzise.xwarp.warpable.Warpable;
-import de.xzise.xwarp.warpable.WarpablePlayer;
 import de.xzise.xwarp.warpable.WarperFactory;
 
 public class Warp {
@@ -235,7 +234,7 @@ public class Warp {
     }
 
     public boolean listWarp(CommandSender sender) {
-        if (!this.isListed()) {
+        if (!this.isListed() && !MyWarp.permissions.permission(sender, PermissionTypes.ADMIN_LIST_VIEW)) {
             return false;
         }
         
@@ -249,9 +248,10 @@ public class Warp {
             // Can warp
             if (this.playerCanWarp(warpable))
                 return true;
-            if (sender instanceof WarpablePlayer) {
+            Player player = WarperFactory.getPlayer(warpable);
+            if (player != null) {
                 // Creator permissions
-                if (this.isOwn(((WarpablePlayer) sender).getName()))
+                if (this.isOwn(player.getName()))
                     return true;
             }
         }
