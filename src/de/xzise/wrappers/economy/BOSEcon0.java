@@ -1,8 +1,9 @@
-package de.xzise.xwarp.wrappers.economy;
+package de.xzise.wrappers.economy;
 
 import org.bukkit.plugin.Plugin;
 
 import cosine.boseconomy.BOSEconomy;
+import de.xzise.XLogger;
 
 public class BOSEcon0 implements EconomyWrapper {
 
@@ -53,7 +54,7 @@ public class BOSEcon0 implements EconomyWrapper {
     public static class Factory implements EconomyWrapperFactory {
 
         @Override
-        public EconomyWrapper create(Plugin plugin) {
+        public EconomyWrapper create(Plugin plugin, XLogger logger) {
             if (plugin instanceof BOSEconomy) {
                 return new BOSEcon0((BOSEconomy) plugin);
             } else {

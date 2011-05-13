@@ -15,107 +15,113 @@ public class PermissionWrapper {
 
     public enum PermissionTypes {
         // Warp to global warps
-        TO_GLOBAL("warp.to.global"),
+        TO_GLOBAL("warp.to.global", true),
         // Warp to own warps
-        TO_OWN("warp.to.own"),
+        TO_OWN("warp.to.own", true),
         // Warp to invited warps
-        TO_INVITED("warp.to.invited"),
+        TO_INVITED("warp.to.invited", true),
         // Warp to public warps
-        TO_OTHER("warp.to.other"),
+        TO_OTHER("warp.to.other", true),
 
         // Warp with sign to global
-        SIGN_WARP_GLOBAL("warp.sign.to.global"),
+        SIGN_WARP_GLOBAL("warp.sign.to.global", true),
         // Warp to own warps
-        SIGN_WARP_OWN("warp.sign.to.own"),
+        SIGN_WARP_OWN("warp.sign.to.own", true),
         // Warp to invited warps
-        SIGN_WARP_INVITED("warp.sign.to.invited"),
+        SIGN_WARP_INVITED("warp.sign.to.invited", true),
         // Warp to public warps
-        SIGN_WARP_OTHER("warp.sign.to.other"),
+        SIGN_WARP_OTHER("warp.sign.to.other", true),
         
         // Create warp sign to private warp
-        CREATE_SIGN_PRIVATE("warp.sign.create.private"),
+        CREATE_SIGN_PRIVATE("warp.sign.create.private", true),
         // Create warp sign to public warp
-        CREATE_SIGN_PUBLIC("warp.sign.create.public"),
+        CREATE_SIGN_PUBLIC("warp.sign.create.public", true),
         // Create warp sign to global warp
-        CREATE_SIGN_GLOBAL("warp.sign.create.global"),
+        CREATE_SIGN_GLOBAL("warp.sign.create.global", true),
         // Create warp sign to warp which doesn't exists
-        SIGN_CREATE_UNKNOWN("warp.sign.create.unknown"),
+        SIGN_CREATE_UNKNOWN("warp.sign.create.unknown", true),
 
         // Create/Edit private warps
-        CREATE_PRIVATE("warp.create.private"),
+        CREATE_PRIVATE("warp.create.private", true),
         // Create/Edit public warps
-        CREATE_PUBLIC("warp.create.public"),
+        CREATE_PUBLIC("warp.create.public", true),
         // Create/Edit global warps
-        CREATE_GLOBAL("warp.create.global"),
+        CREATE_GLOBAL("warp.create.global", true),
         
         // Edit own warps
-        EDIT_DELETE("warp.edit.delete"),
-        EDIT_INVITE("warp.edit.invite.add"),
-        EDIT_UNINVITE("warp.edit.invite.delete"),
-        EDIT_MESSAGE("warp.edit.message"),
-        EDIT_LOCATION("warp.edit.update"),
-        EDIT_RENAME("warp.edit.rename"),
+        EDIT_DELETE("warp.edit.delete", true),
+        EDIT_INVITE("warp.edit.invite.add", true),
+        EDIT_UNINVITE("warp.edit.invite.delete", true),
+        EDIT_MESSAGE("warp.edit.message", true),
+        EDIT_LOCATION("warp.edit.update", true),
+        EDIT_RENAME("warp.edit.rename", true),
         // EDIT_(PRIVATE|PUBLIC|GLOBAL) == CREATE_*
-        EDIT_EDITORS_ADD("warp.edit.editors.add"),
-        EDIT_EDITORS_REMOVE("warp.edit.editors.remove"),
-        EDIT_CHANGE_OWNER("warp.edit.owner"),
-        EDIT_CHANGE_CREATOR("warp.edit.creator"),
-        EDIT_PRICE("warp.edit.price"),
+        EDIT_EDITORS_ADD("warp.edit.editors.add", true),
+        EDIT_EDITORS_REMOVE("warp.edit.editors.remove", true),
+        EDIT_CHANGE_OWNER("warp.edit.owner", true),
+        EDIT_CHANGE_CREATOR("warp.edit.creator", false),
+        EDIT_PRICE("warp.edit.price", true),
 
         // Access to list
-        CMD_LIST("warp.command.list"),
-        CMD_SEARCH("warp.command.search"),
-        CMD_INFO("warp.command.info"),
+        CMD_LIST("warp.command.list", true),
+        CMD_SEARCH("warp.command.search", true),
+        CMD_INFO("warp.command.info", true),
 
         // Delete all warps
-        ADMIN_DELETE("warp.admin.delete"),
+        ADMIN_DELETE("warp.admin.delete", false),
         // Invite to all warps
-        ADMIN_INVITE("warp.admin.invite"),
+        ADMIN_INVITE("warp.admin.invite", false),
         // Uninvite to all warps
-        ADMIN_UNINVITE("warp.admin.uninvite"),
+        ADMIN_UNINVITE("warp.admin.uninvite", false),
         // Edit the welcome message of all warps
-        ADMIN_MESSAGE("warp.admin.message"),
+        ADMIN_MESSAGE("warp.admin.message", false),
         // Update all warps
-        ADMIN_UPDATE("warp.admin.update"),
+        ADMIN_UPDATE("warp.admin.update", false),
         // Rename all warps
-        ADMIN_RENAME("warp.admin.rename"),
+        ADMIN_RENAME("warp.admin.rename", false),
         // Make other's warp privates
-        ADMIN_PRIVATE("warp.admin.private"),
+        ADMIN_PRIVATE("warp.admin.private", false),
         // Make other's warp public
-        ADMIN_PUBLIC("warp.admin.public"),
+        ADMIN_PUBLIC("warp.admin.public", false),
         // Make other's warps global
-        ADMIN_GLOBAL("warp.admin.global"),
+        ADMIN_GLOBAL("warp.admin.global", false),
         // Warp to all warps
-        ADMIN_TO_ALL("warp.admin.to.all"),
+        ADMIN_TO_ALL("warp.admin.to.all", false),
         // Reload database
-        ADMIN_RELOAD("warp.admin.reload"),
+        ADMIN_RELOAD("warp.admin.reload", false),
         // Converts from hmod file
-        ADMIN_CONVERT("warp.admin.convert"),
+        ADMIN_CONVERT("warp.admin.convert", false),
         // Export warps
-        ADMIN_EXPORT("warp.admin.export"),
+        ADMIN_EXPORT("warp.admin.export", false),
         // Converts from hmod file
-        ADMIN_EDITORS_REMOVE("warp.admin.editors.remove"),
+        ADMIN_EDITORS_REMOVE("warp.admin.editors.remove", false),
         // Converts from hmod file
-        ADMIN_EDITORS_ADD("warp.admin.editors.add"),
+        ADMIN_EDITORS_ADD("warp.admin.editors.add", false),
         // Give away all warps
-        ADMIN_CHANGE_OWNER("warp.admin.give.owner"),
+        ADMIN_CHANGE_OWNER("warp.admin.give.owner", false),
         // Change the creator
-        ADMIN_CHANGE_CREATOR("warp.admin.changecreator"),
+        ADMIN_CHANGE_CREATOR("warp.admin.changecreator", false),
         // Warp other players
-        ADMIN_WARP_OTHERS("warp.admin.warp.others"),
+        ADMIN_WARP_OTHERS("warp.admin.warp.others", false),
         // Change the price
-        ADMIN_PRICE("warp.admin.price");
+        ADMIN_PRICE("warp.admin.price", false);
 
         // Maybe upcoming permissions:
         // Different admin permissions for each warp (only edit public warps
         // e.g.)
 
         public final String name;
+        private final boolean def;
 
-        PermissionTypes(String name) {
+        private PermissionTypes(String name, boolean def) {
             this.name = name;
+            this.def = def;
         }
-
+        
+        public boolean isDefault() {
+            return this.def;
+        }
+        
         public static PermissionTypes getType(String name) {
             for (PermissionTypes type : PermissionTypes.values()) {
                 if (type.name.equals(name)) {
@@ -196,10 +202,6 @@ public class PermissionWrapper {
         }
     }
 
-    private static PermissionTypes[] ADMIN_PERMISSIONS = new PermissionTypes[] { PermissionTypes.ADMIN_DELETE, PermissionTypes.ADMIN_INVITE, PermissionTypes.ADMIN_UNINVITE, PermissionTypes.ADMIN_CHANGE_OWNER, PermissionTypes.ADMIN_MESSAGE, PermissionTypes.ADMIN_UPDATE, PermissionTypes.ADMIN_TO_ALL, PermissionTypes.ADMIN_GLOBAL, PermissionTypes.ADMIN_PUBLIC, PermissionTypes.ADMIN_PRIVATE, PermissionTypes.ADMIN_RELOAD, PermissionTypes.ADMIN_RENAME, PermissionTypes.ADMIN_CONVERT, PermissionTypes.ADMIN_EXPORT, PermissionTypes.ADMIN_EDITORS_ADD, PermissionTypes.ADMIN_EDITORS_REMOVE, PermissionTypes.ADMIN_WARP_OTHERS, PermissionTypes.ADMIN_CHANGE_CREATOR, PermissionTypes.ADMIN_PRICE};
-
-    private static PermissionTypes[] DEFAULT_PERMISSIONS = new PermissionTypes[] { PermissionTypes.TO_GLOBAL, PermissionTypes.TO_OWN, PermissionTypes.TO_OTHER, PermissionTypes.TO_INVITED, PermissionTypes.SIGN_WARP_GLOBAL, PermissionTypes.SIGN_WARP_OWN, PermissionTypes.SIGN_WARP_OTHER, PermissionTypes.SIGN_WARP_INVITED, PermissionTypes.CREATE_PRIVATE, PermissionTypes.CREATE_PUBLIC, PermissionTypes.CREATE_GLOBAL, PermissionTypes.EDIT_CHANGE_OWNER, PermissionTypes.EDIT_DELETE, PermissionTypes.EDIT_EDITORS_ADD, PermissionTypes.EDIT_EDITORS_REMOVE, PermissionTypes.EDIT_INVITE, PermissionTypes.EDIT_LOCATION, PermissionTypes.EDIT_MESSAGE, PermissionTypes.EDIT_PRICE, PermissionTypes.EDIT_RENAME, PermissionTypes.EDIT_UNINVITE, PermissionTypes.CREATE_SIGN_PRIVATE, PermissionTypes.CREATE_SIGN_PUBLIC, PermissionTypes.CREATE_SIGN_GLOBAL, PermissionTypes.SIGN_CREATE_UNKNOWN, PermissionTypes.CMD_LIST, PermissionTypes.CMD_SEARCH, PermissionTypes.CMD_INFO};
-
     private PermissionHandler handler = null;
 
     public String getGroup(String world, String player) {
@@ -211,12 +213,10 @@ public class PermissionWrapper {
     }
 
     private boolean permissionInternal(CommandSender sender, PermissionTypes permission) {
-        if (MinecraftUtil.contains(permission, DEFAULT_PERMISSIONS)) {
+        if (permission.isDefault()) {
             return true;
-        } else if (MinecraftUtil.contains(permission, ADMIN_PERMISSIONS)) {
-            return sender.isOp();
         } else {
-            return false;
+            return sender.isOp();
         }
     }
     
@@ -239,7 +239,12 @@ public class PermissionWrapper {
     }
 
     public boolean hasAdminPermission(CommandSender sender) {
-        return this.permissionOr(sender, ADMIN_PERMISSIONS);
+        for (PermissionTypes type : PermissionTypes.values()) {
+            if (this.permission(sender, type) && !type.isDefault()) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public boolean permissionOr(CommandSender sender, PermissionTypes... permission) {

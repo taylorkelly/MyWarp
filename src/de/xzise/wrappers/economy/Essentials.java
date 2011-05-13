@@ -1,24 +1,25 @@
-package de.xzise.xwarp.wrappers.economy;
-
-import me.taylorkelly.mywarp.MyWarp;
+package de.xzise.wrappers.economy;
 
 import org.bukkit.plugin.Plugin;
 
 import com.earth2me.essentials.api.Economy;
 
+import de.xzise.XLogger;
+
 public class Essentials implements EconomyWrapper {
 
     private final Plugin economy;
+    private final XLogger logger;
     
     public final class EssentialsAccount implements AccountWrapper {
         
         private final String name;
         
-        public EssentialsAccount(String name) {
+        public EssentialsAccount(String name, XLogger logger) {
             this.name = name;
             if (!Economy.accountExist(name)) {
                 if (!Economy.newAccount(name)) {
-                    MyWarp.logger.warning("EssentialsAccount: Couldn't create a new account named \"" + name + "\"!");
+                    logger.warning("EssentialsAccount: Couldn't create a new account named \"" + name + "\"!");
                 }
             }
         }
@@ -35,13 +36,14 @@ public class Essentials implements EconomyWrapper {
         
     }
     
-    public Essentials(Plugin plugin) {
+    public Essentials(Plugin plugin, XLogger logger) {
         this.economy = plugin;
+        this.logger = logger;
     }
     
     @Override
     public AccountWrapper getAccount(String name) {
-        return new EssentialsAccount(name);
+        return new EssentialsAccount(name, this.logger);
     }
 
     @Override
@@ -57,14 +59,14 @@ public class Essentials implements EconomyWrapper {
     public static class Factory implements EconomyWrapperFactory {
 
         @Override
-        public EconomyWrapper create(Plugin plugin) {
+        public EconomyWrapper create(Plugin plugin, XLogger logger) {
             if (plugin instanceof com.earth2me.essentials.Essentials) {
-                Essentials buf = new Essentials(plugin);
+                Essentials buf = new Essentials(plugin, logger);
                 try {
                     buf.format(0);
                     return buf;
                 } catch (NoClassDefFoundError e) {
-                    MyWarp.logger.info("Essentials plugin found, but without Economy API. Should be there since Essentials 2.2.13");
+                    logger.info("Essentials plugin found, but without Economy API. Should be there since Essentials 2.2.13");
                     return null;
                 }
             } else {

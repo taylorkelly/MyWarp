@@ -1,4 +1,4 @@
-package de.xzise.xwarp.wrappers.economy;
+package de.xzise.wrappers.economy;
 
 import org.bukkit.plugin.Plugin;
 

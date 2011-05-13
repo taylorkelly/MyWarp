@@ -15,10 +15,10 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
 
+import de.xzise.metainterfaces.CommandSenderWrapper;
 import de.xzise.metainterfaces.ConsoleCommandWrapper;
 import de.xzise.metainterfaces.LinesCountable;
 import de.xzise.metainterfaces.Nameable;
-import de.xzise.xwarp.warpable.CommandSenderWrapper;
 
 public final class MinecraftUtil {
 

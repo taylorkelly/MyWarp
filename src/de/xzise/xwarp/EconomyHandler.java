@@ -13,12 +13,12 @@ import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.PluginManager;
 
 import de.xzise.MinecraftUtil;
-import de.xzise.xwarp.wrappers.economy.AccountWrapper;
-import de.xzise.xwarp.wrappers.economy.BOSEcon0;
-import de.xzise.xwarp.wrappers.economy.EconomyWrapper;
-import de.xzise.xwarp.wrappers.economy.EconomyWrapperFactory;
-import de.xzise.xwarp.wrappers.economy.Essentials;
-import de.xzise.xwarp.wrappers.economy.iConomyFactory;
+import de.xzise.wrappers.economy.AccountWrapper;
+import de.xzise.wrappers.economy.BOSEcon0;
+import de.xzise.wrappers.economy.EconomyWrapper;
+import de.xzise.wrappers.economy.EconomyWrapperFactory;
+import de.xzise.wrappers.economy.Essentials;
+import de.xzise.wrappers.economy.iConomyFactory;
 
 public class EconomyHandler {
     
@@ -156,7 +156,7 @@ public class EconomyHandler {
                 if (factory != null) {
                     if (plugin.isEnabled()) {
                         try {
-                            this.economy = factory.create(plugin);
+                            this.economy = factory.create(plugin, MyWarp.logger);
                         } catch (Exception e) {
                             //TODO: Better exception handling
                             this.economy = null;

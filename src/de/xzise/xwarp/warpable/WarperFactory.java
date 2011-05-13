@@ -3,6 +3,8 @@ package de.xzise.xwarp.warpable;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import de.xzise.metainterfaces.CommandSenderWrapper;
+
 public final class WarperFactory {
 
     private WarperFactory() {}

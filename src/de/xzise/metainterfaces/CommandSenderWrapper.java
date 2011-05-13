@@ -1,4 +1,4 @@
-package de.xzise.xwarp.warpable;
+package de.xzise.metainterfaces;
 
 import org.bukkit.Server;
 import org.bukkit.command.CommandSender;

@@ -1,4 +1,4 @@
-package de.xzise.xwarp.wrappers.economy;
+package de.xzise.wrappers.economy;
 
 /**
  * A wrapper for accounts.

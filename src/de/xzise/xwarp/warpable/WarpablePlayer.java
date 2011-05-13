@@ -3,6 +3,7 @@ package de.xzise.xwarp.warpable;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
+import de.xzise.metainterfaces.CommandSenderWrapper;
 import de.xzise.metainterfaces.Nameable;
 
 public class WarpablePlayer extends CommandSenderWrapper<Player> implements Warpable, Positionable, Nameable {

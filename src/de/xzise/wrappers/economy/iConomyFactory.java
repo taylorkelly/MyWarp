@@ -1,13 +1,13 @@
-package de.xzise.xwarp.wrappers.economy;
-
-import me.taylorkelly.mywarp.MyWarp;
+package de.xzise.wrappers.economy;
 
 import org.bukkit.plugin.Plugin;
+
+import de.xzise.XLogger;
 
 public class iConomyFactory implements EconomyWrapperFactory {
 
     @Override
-    public EconomyWrapper create(Plugin plugin) {
+    public EconomyWrapper create(Plugin plugin, XLogger logger) {
         try {
             if (plugin instanceof com.iConomy.iConomy) {
                 return new iConomy5(plugin);
@@ -15,7 +15,7 @@ public class iConomyFactory implements EconomyWrapperFactory {
                 return null;
             }
         } catch (NoClassDefFoundError e) {
-            MyWarp.logger.info("The plugin \"" + plugin.getDescription().getFullName() + "\" is not iConomy 5 compatible.");
+            logger.info("The plugin \"" + plugin.getDescription().getFullName() + "\" is not iConomy 5 compatible.");
         }
         
         try {
@@ -25,7 +25,7 @@ public class iConomyFactory implements EconomyWrapperFactory {
                 return null;
             }
         } catch (NoClassDefFoundError e) {
-            MyWarp.logger.info("The plugin \"" + plugin.getDescription().getFullName() + "\" is not iConomy 4 compatible.");
+            logger.info("The plugin \"" + plugin.getDescription().getFullName() + "\" is not iConomy 4 compatible.");
         }
         return null;
     }
