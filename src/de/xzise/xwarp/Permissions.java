@@ -23,6 +23,8 @@ public enum Permissions {
     REMOVE_EDITOR('f', 11, PermissionTypes.ADMIN_EDITORS_REMOVE, PermissionTypes.EDIT_EDITORS_REMOVE),
     MESSAGE('m', 12, PermissionTypes.ADMIN_MESSAGE, PermissionTypes.EDIT_MESSAGE),
     PRICE('p', 13, PermissionTypes.ADMIN_PRICE, PermissionTypes.EDIT_PRICE),
+    FREE('c', 14, PermissionTypes.ADMIN_FREE, PermissionTypes.EDIT_FREE),
+    LIST('s', 15, PermissionTypes.ADMIN_LIST, PermissionTypes.EDIT_LIST),
 
     ;
 

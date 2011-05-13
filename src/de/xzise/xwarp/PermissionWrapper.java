@@ -60,7 +60,9 @@ public class PermissionWrapper {
         EDIT_EDITORS_REMOVE("warp.edit.editors.remove", true),
         EDIT_CHANGE_OWNER("warp.edit.owner", true),
         EDIT_CHANGE_CREATOR("warp.edit.creator", false),
-        EDIT_PRICE("warp.edit.price", true),
+        EDIT_PRICE("warp.edit.price.set", true),
+        EDIT_FREE("warp.edit.price.free", false),
+        EDIT_LIST("warp.edit.list", false),
 
         // Access to list
         CMD_LIST("warp.command.list", true),
@@ -104,7 +106,12 @@ public class PermissionWrapper {
         // Warp other players
         ADMIN_WARP_OTHERS("warp.admin.warp.others", false),
         // Change the price
-        ADMIN_PRICE("warp.admin.price", false);
+        ADMIN_PRICE("warp.admin.price.set", false),
+        // Change the price to free
+        ADMIN_FREE("warp.admin.price.free", false),
+        // Hide from list/Show on list
+        ADMIN_LIST("warp.admin.list", false),
+        ;
 
         // Maybe upcoming permissions:
         // Different admin permissions for each warp (only edit public warps

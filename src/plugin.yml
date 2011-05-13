@@ -1,5 +1,5 @@
 name: xWarp
-version: 2.10.1
+version: 2.11.0-listable-free b0 
 main: me.taylorkelly.mywarp.MyWarp
 description: Implementation to create warp points!
 authors:

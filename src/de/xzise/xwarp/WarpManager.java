@@ -335,10 +335,20 @@ public class WarpManager {
     public void setPrice(String name, String owner, CommandSender sender, int price) {
         Warp warp = this.list.getWarp(name, owner, MinecraftUtil.getPlayerName(sender));
         if (warp != null) {
-            if (WarpManager.playerCanModifyWarp(sender, warp, Permissions.PRICE)) {
+            Permissions p;
+            if (price < 0) {
+                p = Permissions.FREE;
+            } else {
+                p = Permissions.PRICE;
+            }
+            if (WarpManager.playerCanModifyWarp(sender, warp, p)) {
                 warp.setPrice(price);
                 this.data.updatePrice(warp);
-                sender.sendMessage(ChatColor.AQUA + "You have set the price for '" + warp.name + "'");
+                if (price < 0) {
+                    sender.sendMessage(ChatColor.AQUA + "Everybody could now warp for free to '" + warp.name + "'.");
+                } else {
+                    sender.sendMessage(ChatColor.AQUA + "You have set the price for '" + warp.name + "'");
+                }
             } else {
                 sender.sendMessage(ChatColor.RED + "You do not have permission to change the price of '" + warp.name + "'");
             }
@@ -602,16 +612,21 @@ public class WarpManager {
                             }
 
                             if (this.coolDown.playerHasCooled(warper)) {
-                                switch (this.economy.pay(warper, warp.getOwner(), warp.getPrice(), price)) {
-                                case PAID:
-                                    int totalPrice = warp.getPrice() + price;
-                                    this.printPayMessage(warper, totalPrice);
-                                case UNABLE:
-                                    this.warmUp.addPlayer(warper, warped, warp);
-                                    break;
-                                case NOT_ENOUGH:
-                                    warper.sendMessage(ChatColor.RED + "You have not enough money to pay this warp.");
-                                    break;
+                                if (warp.isFree()) {
+                                    this.printPayMessage(warper, 0);
+                                    this.warmUp.addPlayer(warper, warped, warp);  
+                                } else {
+                                    switch (this.economy.pay(warper, warp.getOwner(), warp.getPrice(), price)) {
+                                    case PAID:
+                                        int totalPrice = warp.getPrice() + price;
+                                        this.printPayMessage(warper, totalPrice);
+                                    case UNABLE:
+                                        this.warmUp.addPlayer(warper, warped, warp);
+                                        break;
+                                    case NOT_ENOUGH:
+                                        warper.sendMessage(ChatColor.RED + "You have not enough money to pay this warp.");
+                                        break;
+                                    }
                                 }
                             } else {
                                 warper.sendMessage(ChatColor.RED + "You need to wait for the cooldown of " + this.coolDown.cooldownTime(warp.visibility, warper) + " s");

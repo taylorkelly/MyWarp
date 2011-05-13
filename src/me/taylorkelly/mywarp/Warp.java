@@ -33,12 +33,23 @@ public class Warp {
         }
 
         public static Visibility parseLevel(int level) {
+            // Bit 31 - 08 = unused
+            // Bit      07 = !listed (→ bit set = not listed)
+            // Bit 06 - 00 = visibility
+            byte cleanedLevel = (byte) (level & 0x7F);
             for (Visibility visibility : Visibility.values()) {
-                if (visibility.level == level) {
+                if (visibility.level == cleanedLevel) {
                     return visibility;
                 }
             }
             return null;
+        }
+        
+        public static boolean isListed(int level) {
+            // Bit 31 - 08 = unused
+            // Bit      07 = !listed (→ bit set = not listed)
+            // Bit 06 - 00 = visibility
+            return (level & 0x80) == 0;
         }
     }
 
@@ -48,6 +59,7 @@ public class Warp {
     private LocationWrapper location;
     /** This price value will be transfered to the owner. */
     private int price;
+    private boolean listed;
     private String owner;
     public Visibility visibility;
     public String welcomeMessage;
@@ -68,6 +80,7 @@ public class Warp {
             this.editors = new HashMap<String, EditorPermissions>(permissions);
         }
         this.welcomeMessage = welcomeMessage;
+        this.listed = true;
         if (index > nextIndex)
             nextIndex = index;
         nextIndex++;
@@ -222,7 +235,10 @@ public class Warp {
     }
 
     public boolean listWarp(CommandSender sender) {
-
+        if (!this.isListed()) {
+            return false;
+        }
+        
         // Admin permissions
         if (MyWarp.permissions.hasAdminPermission(sender))
             return true;
@@ -341,6 +357,18 @@ public class Warp {
 
     public int getPrice() {
         return this.price;
+    }
+
+    public void setListed(boolean listed) {
+        this.listed = listed;
+    }
+
+    public boolean isListed() {
+        return listed;
+    }
+
+    public boolean isFree() {
+        return this.price < 0;
     }
 }
 
