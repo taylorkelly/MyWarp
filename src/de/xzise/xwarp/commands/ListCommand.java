@@ -82,7 +82,14 @@ public class ListCommand extends DefaultSubCommand {
 
     @Override
     protected String[] getFullHelpText() {
-        return new String[] { "Shows the given page of the warp list.", "If creator is set only the warps of the creator are listed." };
+        String[] legend = GenericLister.getLegend();
+        String[] lines = new String[2 + legend.length];
+        lines[0] = "Shows the given page of the warp list.";
+        lines[1] = "If creator is set only the warps of the creator are listed.";
+        for (int i = 0; i < legend.length; i++) {
+            lines[i + 2] = legend[i];
+        }
+        return lines;
     }
 
     @Override
