@@ -6,7 +6,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import de.xzise.xwarp.PermissionWrapper.PermissionTypes;
+import de.xzise.xwarp.wrappers.permission.PermissionTypes;
 
 public enum Permissions {
     UPDATE('l', 0, PermissionTypes.ADMIN_UPDATE, PermissionTypes.EDIT_LOCATION),
@@ -24,7 +24,7 @@ public enum Permissions {
     MESSAGE('m', 12, PermissionTypes.ADMIN_MESSAGE, PermissionTypes.EDIT_MESSAGE),
     PRICE('p', 13, PermissionTypes.ADMIN_PRICE, PermissionTypes.EDIT_PRICE),
     FREE('c', 14, PermissionTypes.ADMIN_FREE, PermissionTypes.EDIT_FREE),
-    LIST('s', 15, PermissionTypes.ADMIN_LIST, PermissionTypes.EDIT_LIST),
+    LIST('s', 15, PermissionTypes.ADMIN_LIST_CHANGE, PermissionTypes.EDIT_LIST),
 
     ;
 

@@ -18,8 +18,6 @@ import org.bukkit.plugin.Plugin;
 import de.xzise.MinecraftUtil;
 import de.xzise.metainterfaces.LocationWrapper;
 import de.xzise.metainterfaces.Nameable;
-import de.xzise.xwarp.PermissionWrapper.PermissionTypes;
-import de.xzise.xwarp.PermissionWrapper.PermissionValues;
 import de.xzise.xwarp.dataconnections.DataConnection;
 import de.xzise.xwarp.dataconnections.IdentificationInterface;
 import de.xzise.xwarp.timer.CoolDown;
@@ -27,6 +25,8 @@ import de.xzise.xwarp.timer.WarmUp;
 import de.xzise.xwarp.warpable.Positionable;
 import de.xzise.xwarp.warpable.Warpable;
 import de.xzise.xwarp.warpable.WarperFactory;
+import de.xzise.xwarp.wrappers.permission.PermissionTypes;
+import de.xzise.xwarp.wrappers.permission.PermissionValues;
 
 /**
  * Wraps around {@link WarpList} to provide permissions support.
@@ -106,6 +106,7 @@ public class WarpManager {
         }
     }
     
+    @SuppressWarnings("unchecked")
     public void addWarp(String name, Positionable player, String newOwner, Visibility visibility) {
         PermissionTypes type;
         PermissionValues limit;
@@ -136,8 +137,8 @@ public class WarpManager {
 
             int warpsByCreator = this.list.getNumberOfWarps(creator, visibility);
             int totalWarpsByCreator = this.list.getNumberOfWarps(creator, null);
-            int allowedMaximum = MyWarp.permissions.getInteger(player, limit, -1);
-            int allowedTotalMaximum = MyWarp.permissions.getInteger(player, PermissionValues.WARP_LIMIT_TOTAL, -1);
+            int allowedMaximum = MyWarp.permissions.getInteger(player, limit);
+            int allowedTotalMaximum = MyWarp.permissions.getInteger(player, PermissionValues.WARP_LIMIT_TOTAL);
             if ((allowedMaximum < 0 || warpsByCreator < allowedMaximum) && (allowedTotalMaximum < 0 || totalWarpsByCreator < allowedTotalMaximum)) {
                 Warp warp = this.list.getWarp(name, newOwner, null);
                 Warp globalWarp = (visibility == Visibility.GLOBAL ? this.list.getWarp(name) : null);
@@ -149,13 +150,13 @@ public class WarpManager {
                     int price = 0;
                     switch (visibility) {
                     case GLOBAL:
-                        price = MyWarp.permissions.getInteger(player, PermissionValues.WARP_PRICES_CREATE_GLOBAL, 0);
+                        price = MyWarp.permissions.getInteger(player, PermissionValues.WARP_PRICES_CREATE_GLOBAL);
                         break;
                     case PRIVATE:
-                        price = MyWarp.permissions.getInteger(player, PermissionValues.WARP_PRICES_CREATE_PRIVATE, 0);
+                        price = MyWarp.permissions.getInteger(player, PermissionValues.WARP_PRICES_CREATE_PRIVATE);
                         break;
                     case PUBLIC:
-                        price = MyWarp.permissions.getInteger(player, PermissionValues.WARP_PRICES_CREATE_PUBLIC, 0);
+                        price = MyWarp.permissions.getInteger(player, PermissionValues.WARP_PRICES_CREATE_PUBLIC);
                         break;
                     }
 
@@ -601,13 +602,13 @@ public class WarpManager {
                             int price = 0;
                             switch (warp.visibility) {
                             case PRIVATE:
-                                price += MyWarp.permissions.getInteger(warper, PermissionValues.WARP_PRICES_TO_PRIVATE, 0);
+                                price += MyWarp.permissions.getInteger(warper, PermissionValues.WARP_PRICES_TO_PRIVATE);
                                 break;
                             case PUBLIC:
-                                price += MyWarp.permissions.getInteger(warper, PermissionValues.WARP_PRICES_TO_PUBLIC, 0);
+                                price += MyWarp.permissions.getInteger(warper, PermissionValues.WARP_PRICES_TO_PUBLIC);
                                 break;
                             case GLOBAL:
-                                price += MyWarp.permissions.getInteger(warper, PermissionValues.WARP_PRICES_TO_GLOBAL, 0);
+                                price += MyWarp.permissions.getInteger(warper, PermissionValues.WARP_PRICES_TO_GLOBAL);
                                 break;
                             }
 

@@ -14,11 +14,11 @@ import de.xzise.metainterfaces.FixedLocation;
 import de.xzise.metainterfaces.LocationWrapper;
 import de.xzise.xwarp.EditorPermissions;
 import de.xzise.xwarp.Permissions;
-import de.xzise.xwarp.PermissionWrapper.PermissionTypes;
-import de.xzise.xwarp.PermissionWrapper.WorldPermission;
 import de.xzise.xwarp.warpable.Positionable;
 import de.xzise.xwarp.warpable.Warpable;
 import de.xzise.xwarp.warpable.WarperFactory;
+import de.xzise.xwarp.wrappers.permission.PermissionTypes;
+import de.xzise.xwarp.wrappers.permission.WorldPermission;
 
 public class Warp {
 
@@ -125,7 +125,7 @@ public class Warp {
         }
         
         // If the player isn't allowed to warp to/within the world cancel here!
-        if (!MyWarp.permissions.hasWorldPermission(sender, worldPermission, this.getLocationWrapper().getWorld(), true)) {
+        if (!MyWarp.permissions.permission(sender, worldPermission.getPermission(this.getLocationWrapper().getWorld(), true))) {
             return false;
         }
 
@@ -239,7 +239,7 @@ public class Warp {
         }
         
         // Admin permissions
-        if (MyWarp.permissions.hasAdminPermission(sender))
+        if (MyWarp.permissions.permissionOr(sender, PermissionTypes.getDefaultPermissions(false)))
             return true;
 
         Warpable warpable = WarperFactory.getWarpable(sender);
