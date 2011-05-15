@@ -14,9 +14,9 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import de.xzise.MinecraftUtil;
 import de.xzise.XLogger;
+import de.xzise.wrappers.permissions.PermissionsHandler;
 import de.xzise.xwarp.CommandMap;
 import de.xzise.xwarp.EconomyHandler;
-import de.xzise.xwarp.PermissionWrapper;
 import de.xzise.xwarp.PluginProperties;
 import de.xzise.xwarp.WarpManager;
 import de.xzise.xwarp.dataconnections.DataConnection;
@@ -27,11 +27,11 @@ import de.xzise.xwarp.listeners.XWWorldListener;
 
 public class MyWarp extends JavaPlugin {
 
-    public static PermissionWrapper permissions = new PermissionWrapper();
+    public static PermissionsHandler permissions;
     public static XLogger logger;
 
     private EconomyHandler economyWrapper;
-    private PermissionWrapper permissionsWrapper = permissions;
+    private PermissionsHandler permissionsWrapper = permissions;
 
     private CommandMap commands;
     private DataConnection dataConnection;
@@ -88,6 +88,8 @@ public class MyWarp extends JavaPlugin {
             return;
         }
 
+        this.permissionsWrapper = new PermissionsHandler(this.getServer().getPluginManager(), "", logger);
+        permissions = this.permissionsWrapper;
         this.economyWrapper = new EconomyHandler(properties, this.getServer().getPluginManager());
         
         WarpManager warpManager = new WarpManager(this, this.economyWrapper, properties, this.dataConnection);
@@ -109,30 +111,24 @@ public class MyWarp extends JavaPlugin {
         ServerListener serverListner = new ServerListener() {
             @Override
             public void onPluginEnable(PluginEnableEvent event) {
-                String name = event.getPlugin().getDescription().getName();
-                if (name.equals("Permissions")) {
-                    MyWarp.this.permissionsWrapper.init(event.getPlugin());
-                } else {
-                    MyWarp.this.economyWrapper.init(event.getPlugin());
-                }
+                MyWarp.this.permissionsWrapper.load(event.getPlugin());
+                MyWarp.this.economyWrapper.load(event.getPlugin());
             }
 
             @Override
             public void onPluginDisable(PluginDisableEvent event) {
-                String name = event.getPlugin().getDescription().getName();
-                if (name.equals("Permissions")) {
-                    MyWarp.this.permissionsWrapper.init(null);
-                } else {
-                    if (MyWarp.this.economyWrapper.unload(event.getPlugin())) {
-                        MyWarp.this.economyWrapper.init();
-                    }
+                if (MyWarp.this.permissionsWrapper.unload(event.getPlugin())) {
+                    MyWarp.this.permissionsWrapper.load();
+                }
+                if (MyWarp.this.economyWrapper.unload(event.getPlugin())) {
+                    MyWarp.this.economyWrapper.load();
                 }
             }
         };
 
         // Unless an event is called, to tell all enabled plugins
-        this.permissionsWrapper.init(this.getServer().getPluginManager().getPlugin("Permissions"));
-        this.economyWrapper.init();
+        this.permissionsWrapper.load();
+        this.economyWrapper.load();
         
         this.getServer().getPluginManager().registerEvent(Event.Type.WORLD_LOAD, new XWWorldListener(warpManager), Priority.Low, this);
         this.getServer().getPluginManager().registerEvent(Event.Type.PLAYER_INTERACT, playerListener, Priority.Normal, this);

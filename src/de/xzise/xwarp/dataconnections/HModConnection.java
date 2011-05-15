@@ -190,9 +190,11 @@ public class HModConnection implements DataConnection {
                         warp.addEditor(segments[i], segments[i + 1]);
                     }
 
-                    Visibility v = Visibility.parseLevel(Integer.parseInt(segments[8]));
+                    int visibilityValue = Integer.parseInt(segments[8]);
+                    Visibility v = Visibility.parseLevel(visibilityValue);
                     if (v != null) {
                         warp.visibility = v;
+                        warp.setListed(Visibility.isListed(visibilityValue));
                     } else {
                         MyWarp.logger.warning("Illegal visibilty found (" + warp.name + " by " + warp.getOwner() + ")");
                         valid = false;
@@ -242,9 +244,11 @@ public class HModConnection implements DataConnection {
                         warp.addEditor(segments[i], segments[i + 1]);
                     }
 
-                    Visibility v = Visibility.parseLevel(Integer.parseInt(segments[8]));
+                    int visibilityValue = Integer.parseInt(segments[8]);
+                    Visibility v = Visibility.parseLevel(visibilityValue);
                     if (v != null) {
                         warp.visibility = v;
+                        warp.setListed(Visibility.isListed(visibilityValue));
                     } else {
                         MyWarp.logger.warning("Illegal visibilty found (" + warp.name + " by " + warp.getOwner() + ")");
                         valid = false;
@@ -296,9 +300,11 @@ public class HModConnection implements DataConnection {
                         warp.addEditor(segments[i], segments[i + 1]);
                     }
 
-                    Visibility v = Visibility.parseLevel(Integer.parseInt(segments[8]));
+                    int visibilityValue = Integer.parseInt(segments[8]);
+                    Visibility v = Visibility.parseLevel(visibilityValue);
                     if (v != null) {
                         warp.visibility = v;
+                        warp.setListed(Visibility.isListed(visibilityValue));
                     } else {
                         MyWarp.logger.warning("Illegal visibility found (" + warp.name + " by " + warp.getOwner() + ")");
                         valid = false;

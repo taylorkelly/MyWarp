@@ -8,10 +8,10 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import de.xzise.xwarp.WarpManager;
-import de.xzise.xwarp.PermissionWrapper.PermissionTypes;
 import de.xzise.xwarp.warpable.Warpable;
 import de.xzise.xwarp.warpable.WarpablePlayer;
 import de.xzise.xwarp.warpable.WarperFactory;
+import de.xzise.xwarp.wrappers.permission.PermissionTypes;
 
 public class WarpToCommand extends DefaultSubCommand {
 
@@ -74,6 +74,7 @@ public class WarpToCommand extends DefaultSubCommand {
         return "warp [to] <name> [creator] [warped]";
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     protected boolean listHelp(CommandSender sender) {
         return MyWarp.permissions.permissionOr(sender, PermissionTypes.TO_GLOBAL, PermissionTypes.TO_INVITED, PermissionTypes.TO_OTHER, PermissionTypes.TO_OWN, PermissionTypes.ADMIN_TO_ALL);

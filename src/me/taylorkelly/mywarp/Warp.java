@@ -14,12 +14,11 @@ import de.xzise.metainterfaces.FixedLocation;
 import de.xzise.metainterfaces.LocationWrapper;
 import de.xzise.xwarp.EditorPermissions;
 import de.xzise.xwarp.Permissions;
-import de.xzise.xwarp.PermissionWrapper.PermissionTypes;
-import de.xzise.xwarp.PermissionWrapper.WorldPermission;
 import de.xzise.xwarp.warpable.Positionable;
 import de.xzise.xwarp.warpable.Warpable;
-import de.xzise.xwarp.warpable.WarpablePlayer;
 import de.xzise.xwarp.warpable.WarperFactory;
+import de.xzise.xwarp.wrappers.permission.PermissionTypes;
+import de.xzise.xwarp.wrappers.permission.WorldPermission;
 
 public class Warp {
 
@@ -33,12 +32,23 @@ public class Warp {
         }
 
         public static Visibility parseLevel(int level) {
+            // Bit 31 - 08 = unused
+            // Bit      07 = !listed (→ bit set = not listed)
+            // Bit 06 - 00 = visibility
+            byte cleanedLevel = (byte) (level & 0x7F);
             for (Visibility visibility : Visibility.values()) {
-                if (visibility.level == level) {
+                if (visibility.level == cleanedLevel) {
                     return visibility;
                 }
             }
             return null;
+        }
+        
+        public static boolean isListed(int level) {
+            // Bit 31 - 08 = unused
+            // Bit      07 = !listed (→ bit set = not listed)
+            // Bit 06 - 00 = visibility
+            return (level & 0x80) == 0;
         }
     }
 
@@ -48,6 +58,7 @@ public class Warp {
     private LocationWrapper location;
     /** This price value will be transfered to the owner. */
     private int price;
+    private boolean listed;
     private String owner;
     public Visibility visibility;
     public String welcomeMessage;
@@ -68,6 +79,7 @@ public class Warp {
             this.editors = new HashMap<String, EditorPermissions>(permissions);
         }
         this.welcomeMessage = welcomeMessage;
+        this.listed = true;
         if (index > nextIndex)
             nextIndex = index;
         nextIndex++;
@@ -113,7 +125,7 @@ public class Warp {
         }
         
         // If the player isn't allowed to warp to/within the world cancel here!
-        if (!MyWarp.permissions.hasWorldPermission(sender, worldPermission, this.getLocationWrapper().getWorld(), true)) {
+        if (!MyWarp.permissions.permission(sender, worldPermission.getPermission(this.getLocationWrapper().getWorld(), true))) {
             return false;
         }
 
@@ -222,9 +234,12 @@ public class Warp {
     }
 
     public boolean listWarp(CommandSender sender) {
-
+        if (!this.isListed() && !MyWarp.permissions.permission(sender, PermissionTypes.ADMIN_LIST_VIEW)) {
+            return false;
+        }
+        
         // Admin permissions
-        if (MyWarp.permissions.hasAdminPermission(sender))
+        if (MyWarp.permissions.permissionOr(sender, PermissionTypes.getDefaultPermissions(false)))
             return true;
 
         Warpable warpable = WarperFactory.getWarpable(sender);
@@ -233,9 +248,10 @@ public class Warp {
             // Can warp
             if (this.playerCanWarp(warpable))
                 return true;
-            if (sender instanceof WarpablePlayer) {
+            Player player = WarperFactory.getPlayer(warpable);
+            if (player != null) {
                 // Creator permissions
-                if (this.isOwn(((WarpablePlayer) sender).getName()))
+                if (this.isOwn(player.getName()))
                     return true;
             }
         }
@@ -341,6 +357,18 @@ public class Warp {
 
     public int getPrice() {
         return this.price;
+    }
+
+    public void setListed(boolean listed) {
+        this.listed = listed;
+    }
+
+    public boolean isListed() {
+        return listed;
+    }
+
+    public boolean isFree() {
+        return this.price < 0;
     }
 }
 

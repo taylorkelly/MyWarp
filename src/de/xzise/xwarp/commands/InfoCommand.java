@@ -13,8 +13,9 @@ import de.xzise.metainterfaces.FixedLocation;
 import de.xzise.xwarp.EconomyHandler;
 import de.xzise.xwarp.Permissions;
 import de.xzise.xwarp.WarpManager;
-import de.xzise.xwarp.PermissionWrapper.PermissionTypes;
 import de.xzise.xwarp.lister.GenericLister;
+import de.xzise.xwarp.wrappers.permission.PermissionTypes;
+import de.xzise.xwarp.wrappers.permission.PermissionValues;
 
 public class InfoCommand extends WarpCommand {
 
@@ -23,6 +24,16 @@ public class InfoCommand extends WarpCommand {
     public InfoCommand(WarpManager list, Server server, EconomyHandler wrapper) {
         super(list, server, "", "info");
         this.wrapper = wrapper;
+    }
+    
+    private String getPrice(int price, int base) {
+        if (price < 0 || (price == 0 && base == 0)) {
+            return "Gratis";
+        } else if (price == 0 && base != 0) {
+            return "Only permissions price (" + this.wrapper.format(base) + ")";
+        } else {
+            return this.wrapper.format(price) + " base price: " + this.wrapper.format(base);
+        }
     }
 
     @Override
@@ -45,15 +56,19 @@ public class InfoCommand extends WarpCommand {
             sender.sendMessage("Creator: " + getPlayerLine(warp.getCreator(), world));
             sender.sendMessage("Owner: " + getPlayerLine(warp.getOwner(), world));
             String visibility = "";
+            int basePrice = 0;
             switch (warp.visibility) {
             case GLOBAL:
                 visibility = "Global";
+                basePrice = MyWarp.permissions.getInteger(sender, PermissionValues.WARP_PRICES_TO_GLOBAL);
                 break;
             case PUBLIC:
                 visibility = "Public";
+                basePrice = MyWarp.permissions.getInteger(sender, PermissionValues.WARP_PRICES_TO_PUBLIC);
                 break;
             case PRIVATE:
                 visibility = "Private";
+                basePrice = MyWarp.permissions.getInteger(sender, PermissionValues.WARP_PRICES_TO_PRIVATE);
                 break;
             }
             if (sender instanceof Player) {
@@ -61,9 +76,9 @@ public class InfoCommand extends WarpCommand {
             }
             sender.sendMessage("Visibility: " + visibility);
             if (this.wrapper.isActive()) {
-                sender.sendMessage("Price: " + ChatColor.GREEN + this.wrapper.format(warp.getPrice()));
+                sender.sendMessage("Price: " + ChatColor.GREEN + this.getPrice(warp.getPrice(), basePrice));
             } else if (warp.getPrice() != 0) {
-                sender.sendMessage("Price: " + ChatColor.GREEN + warp.getPrice() + ChatColor.RED + " (INACTIVE)");
+                sender.sendMessage("Price: " + ChatColor.GREEN + this.getPrice(warp.getPrice(), basePrice) + ChatColor.RED + " (Inactive)");
             }
 
             String[] editors = warp.getEditors();

@@ -11,12 +11,12 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.Plugin;
 
 import de.xzise.xwarp.PluginProperties;
-import de.xzise.xwarp.PermissionWrapper.PermissionValues;
 import de.xzise.xwarp.warpable.Warpable;
+import de.xzise.xwarp.wrappers.permission.Groups;
 
 public class CoolDown {
 
-    private final Map<CommandSender, Integer> players = new HashMap<CommandSender, Integer>();
+    private final Map<CommandSender, CoolTask> players = new HashMap<CommandSender, CoolTask>();
     private final Plugin plugin;
     private final PluginProperties properties;
     
@@ -29,11 +29,13 @@ public class CoolDown {
         int time = this.cooldownTime(visibility, sender);
         if (time > 0) {
             if (this.players.containsKey(sender)) {
-                this.plugin.getServer().getScheduler().cancelTask(this.players.get(sender));
+                this.plugin.getServer().getScheduler().cancelTask(this.players.get(sender).id);
             }
     
-            int taskIndex = this.plugin.getServer().getScheduler().scheduleSyncDelayedTask(this.plugin, new CoolTask(sender, this), time * 20);
-            this.players.put(sender, taskIndex);
+            CoolTask task = new CoolTask(sender, this);
+            int taskIndex = this.plugin.getServer().getScheduler().scheduleSyncDelayedTask(this.plugin, task, time * 20);
+            task.setId(taskIndex);
+            this.players.put(sender, task);
         }
     }
 
@@ -55,16 +57,7 @@ public class CoolDown {
     }
     
     public int cooldownTime(Visibility visibility, CommandSender sender) {
-        PermissionValues value = PermissionValues.WARP_COOLDOWN_PRIVATE;
-        switch (visibility) {
-        case GLOBAL:
-            value = PermissionValues.WARP_COOLDOWN_GLOBAL;
-            break;
-        case PUBLIC:
-            value = PermissionValues.WARP_COOLDOWN_PUBLIC;
-            break;
-        }
-        return MyWarp.permissions.getInteger(sender, value, 0);
+        return MyWarp.permissions.getInteger(sender, Groups.TIMERS_COOLDOWN_GROUP.get(visibility));
     }
     
     public void cooledDown(CommandSender warpable) {
@@ -73,30 +66,20 @@ public class CoolDown {
         }
         this.players.remove(warpable);
     }
-    
-//    public boolean cooldownNeeded(Warp warp, CommandSender warper) {
-//        if (!WarpSettings.adminsObeyWarmsCools && warper.isOp())
-//                return false;
-//        
-//        if (warp.visibility == Visibility.PUBLIC && WarpSettings.CoolDownForPublic)
-//                return true;
-//            if (warp.visibility == Visibility.PRIVATE && WarpSettings.CoolDownForPrivate)
-//                return true;
-//                if (warp.visibility == Visibility.GLOBAL && WarpSettings.CoolDownForGlobal)
-//                    return true;
-//                else
-//                    return false;
-//        
-//    }
 
     private static class CoolTask implements Runnable {
 
         private final CommandSender player;
         private final CoolDown cooldown;
+        private int id;
 
         public CoolTask(CommandSender player, CoolDown cooldown) {
             this.player = player;
             this.cooldown = cooldown;
+        }
+        
+        public void setId(int id) {
+            this.id = id;
         }
 
         public void run() {

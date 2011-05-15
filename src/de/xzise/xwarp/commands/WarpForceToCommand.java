@@ -6,9 +6,9 @@ import org.bukkit.Server;
 import org.bukkit.command.CommandSender;
 
 import de.xzise.xwarp.WarpManager;
-import de.xzise.xwarp.PermissionWrapper.PermissionTypes;
 import de.xzise.xwarp.warpable.Warpable;
 import de.xzise.xwarp.warpable.WarperFactory;
+import de.xzise.xwarp.wrappers.permission.PermissionTypes;
 
 /* 
  * Temporary extra command, to warp in another worlds. Maybe it work maybe not!
@@ -42,6 +42,7 @@ public class WarpForceToCommand extends WarpCommand {
         return "warp force-to <name> [creator]";
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     protected boolean listHelp(CommandSender sender) {
         return MyWarp.permissions.permissionOr(sender, PermissionTypes.TO_GLOBAL, PermissionTypes.TO_INVITED, PermissionTypes.TO_OTHER, PermissionTypes.TO_OWN, PermissionTypes.ADMIN_TO_ALL);

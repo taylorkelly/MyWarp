@@ -6,9 +6,9 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import de.xzise.xwarp.PermissionWrapper.PermissionTypes;
+import de.xzise.xwarp.wrappers.permission.PermissionTypes;
 
-public enum Permissions {
+public enum Permissions implements PermissionDouble {
     UPDATE('l', 0, PermissionTypes.ADMIN_UPDATE, PermissionTypes.EDIT_LOCATION),
     RENAME('r', 1, PermissionTypes.ADMIN_RENAME, PermissionTypes.EDIT_RENAME),
     UNINVITE('u', 2, PermissionTypes.ADMIN_UNINVITE, PermissionTypes.EDIT_UNINVITE),
@@ -23,6 +23,8 @@ public enum Permissions {
     REMOVE_EDITOR('f', 11, PermissionTypes.ADMIN_EDITORS_REMOVE, PermissionTypes.EDIT_EDITORS_REMOVE),
     MESSAGE('m', 12, PermissionTypes.ADMIN_MESSAGE, PermissionTypes.EDIT_MESSAGE),
     PRICE('p', 13, PermissionTypes.ADMIN_PRICE, PermissionTypes.EDIT_PRICE),
+    FREE('c', 14, PermissionTypes.ADMIN_FREE, PermissionTypes.EDIT_FREE),
+    LIST('s', 15, PermissionTypes.ADMIN_LIST_CHANGE, PermissionTypes.EDIT_LIST),
 
     ;
 
@@ -102,5 +104,15 @@ public enum Permissions {
                 }
             }
         }
+    }
+
+    @Override
+    public PermissionTypes getDefault() {
+        return this.defaultPermission;
+    }
+
+    @Override
+    public PermissionTypes getAdmin() {
+        return this.adminPermission;
     }
 }

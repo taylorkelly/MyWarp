@@ -5,7 +5,7 @@ import me.taylorkelly.mywarp.MyWarp;
 import org.bukkit.command.CommandSender;
 
 import de.xzise.xwarp.WarpManager;
-import de.xzise.xwarp.PermissionWrapper.PermissionTypes;
+import de.xzise.xwarp.wrappers.permission.PermissionTypes;
 
 public class ReloadCommand extends SubCommand {
 

@@ -13,8 +13,8 @@ import org.bukkit.plugin.Plugin;
 
 import de.xzise.MinecraftUtil;
 import de.xzise.xwarp.PluginProperties;
-import de.xzise.xwarp.PermissionWrapper.PermissionValues;
 import de.xzise.xwarp.warpable.Warpable;
+import de.xzise.xwarp.wrappers.permission.Groups;
 
 public class WarmUp {
 
@@ -54,16 +54,7 @@ public class WarmUp {
     }
 
     public int warmupTime(Visibility visibility, CommandSender warper) {
-        PermissionValues value = PermissionValues.WARP_WARMUP_PRIVATE;
-        switch (visibility) {
-        case GLOBAL:
-            value = PermissionValues.WARP_WARMUP_GLOBAL;
-            break;
-        case PUBLIC:
-            value = PermissionValues.WARP_WARMUP_PUBLIC;
-            break;
-        }
-        return MyWarp.permissions.getInteger(warper, value, 0);
+        return MyWarp.permissions.getInteger(warper, Groups.TIMERS_WARMUP_GROUP.get(visibility));
     }
 
     // public static boolean warmupNeeded(Warp warp, Player player) {

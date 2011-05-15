@@ -24,6 +24,7 @@ public class PluginProperties {
     private boolean showFreePriceMessage;
     private boolean cancelWarmUpOnDamage;
     private boolean cancelWarmUpOnMovement;
+    private boolean createUpdates;
     private String economyPlugin;
     private String economyBaseAccount;
 
@@ -74,6 +75,10 @@ public class PluginProperties {
         return this.showFreePriceMessage;
     }
     
+    public boolean isCreationUpdating() {
+        return this.createUpdates;
+    }
+    
     public void read() {
         java.util.Properties properties = new java.util.Properties();
         if (this.configFile.exists()) {
@@ -95,6 +100,7 @@ public class PluginProperties {
                 properties.setProperty("cancel-warm-up-on-movement", "false");
                 properties.setProperty("economy", "");
                 properties.setProperty("economy-base-account", "");
+                properties.setProperty("update-if-exists", "false");
                 properties.store(new FileWriter(this.configFile), null);
             } catch (IOException e) {
                 MyWarp.logger.warning("Unable to create properties file.", e);
@@ -121,6 +127,7 @@ public class PluginProperties {
         this.showFreePriceMessage = parseString(properties.getProperty("show-free-price-message"), true);
         this.cancelWarmUpOnDamage = parseString(properties.getProperty("cancel-warm-up-on-damage"), true);
         this.cancelWarmUpOnMovement = parseString(properties.getProperty("cancel-warm-up-on-movement"), false);
+        this.createUpdates = parseString(properties.getProperty("update-if-exists"), false);
     }
 
     public static boolean parseString(String string, boolean def) {

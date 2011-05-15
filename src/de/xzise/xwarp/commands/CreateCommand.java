@@ -9,11 +9,11 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import de.xzise.MinecraftUtil;
-import de.xzise.xwarp.PermissionWrapper.PermissionTypes;
-import de.xzise.xwarp.PermissionWrapper.PermissionValues;
 import de.xzise.xwarp.lister.GenericLister;
 import de.xzise.xwarp.warpable.Positionable;
 import de.xzise.xwarp.warpable.WarperFactory;
+import de.xzise.xwarp.wrappers.permission.PermissionTypes;
+import de.xzise.xwarp.wrappers.permission.PermissionValues;
 import de.xzise.xwarp.WarpManager;
 
 public class CreateCommand extends DefaultSubCommand {
@@ -42,7 +42,7 @@ public class CreateCommand extends DefaultSubCommand {
     }
 
     private String getAmount(Player player, PermissionValues value) {
-        int amount = MyWarp.permissions.getInteger(player, value, -1);
+        int amount = MyWarp.permissions.getInteger(player, value);
         if (amount < 0) {
             return "Infinite";
         } else if (amount == 0) {

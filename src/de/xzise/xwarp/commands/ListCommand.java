@@ -8,10 +8,10 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 
 import de.xzise.MinecraftUtil;
-import de.xzise.xwarp.PermissionWrapper.PermissionTypes;
 import de.xzise.xwarp.WarpManager;
 import de.xzise.xwarp.lister.GenericLister;
 import de.xzise.xwarp.lister.ListSection;
+import de.xzise.xwarp.wrappers.permission.PermissionTypes;
 
 public class ListCommand extends DefaultSubCommand {
 
