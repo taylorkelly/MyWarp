@@ -12,7 +12,7 @@ import org.bukkit.plugin.Plugin;
 
 import de.xzise.xwarp.PluginProperties;
 import de.xzise.xwarp.warpable.Warpable;
-import de.xzise.xwarp.wrappers.permission.PermissionValues;
+import de.xzise.xwarp.wrappers.permission.Groups;
 
 public class CoolDown {
 
@@ -57,15 +57,7 @@ public class CoolDown {
     }
     
     public int cooldownTime(Visibility visibility, CommandSender sender) {
-        switch (visibility) {
-        case PRIVATE :
-            return MyWarp.permissions.getInteger(sender, PermissionValues.WARP_COOLDOWN_PRIVATE);
-        case GLOBAL:
-            return MyWarp.permissions.getInteger(sender, PermissionValues.WARP_COOLDOWN_GLOBAL);
-        case PUBLIC:
-            return MyWarp.permissions.getInteger(sender, PermissionValues.WARP_COOLDOWN_PUBLIC);
-        }
-        return 0;
+        return MyWarp.permissions.getInteger(sender, Groups.TIMERS_COOLDOWN_GROUP.get(visibility));
     }
     
     public void cooledDown(CommandSender warpable) {

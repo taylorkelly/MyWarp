@@ -30,7 +30,12 @@ public class PermissionsPluginWrapper implements PermissionsWrapper {
     public Integer getInteger(CommandSender sender, Permission<Integer> permission) {
         Player player = MinecraftUtil.getPlayer(sender);
         if (player != null) {
-            return this.handler.getPermissionInteger(player.getWorld().getName(), player.getName(), permission.getName());
+            int i = this.handler.getPermissionInteger(player.getWorld().getName(), player.getName(), permission.getName());
+            if (i < 0) {
+                return null;
+            } else {
+                return i;
+            }
         } else {
             return null;
         }
@@ -42,7 +47,7 @@ public class PermissionsPluginWrapper implements PermissionsWrapper {
     }
     
     public PermissionsPluginWrapper(Permissions plugin) {
-        this.handler = Permissions.Security;
+        this.handler = plugin.getHandler();
     }
 
     @Override

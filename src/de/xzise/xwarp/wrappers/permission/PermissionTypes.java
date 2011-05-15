@@ -3,9 +3,13 @@ package de.xzise.xwarp.wrappers.permission;
 import java.util.ArrayList;
 import java.util.List;
 
-import de.xzise.wrappers.permissions.Permission;
+import me.taylorkelly.mywarp.Warp.Visibility;
 
-public enum PermissionTypes implements Permission<Boolean> {
+import de.xzise.wrappers.permissions.Permission;
+import de.xzise.wrappers.permissions.VisibilityPermission;
+
+public enum PermissionTypes implements Permission<Boolean>, VisibilityPermission {
+    
     // Warp to global warps
     TO_GLOBAL("warp.to.global", true),
     // Warp to own warps
@@ -25,20 +29,20 @@ public enum PermissionTypes implements Permission<Boolean> {
     SIGN_WARP_OTHER("warp.sign.to.other", true),
     
     // Create warp sign to private warp
-    CREATE_SIGN_PRIVATE("warp.sign.create.private", true),
+    CREATE_SIGN_PRIVATE("warp.sign.create.private", true, Visibility.PRIVATE),
     // Create warp sign to public warp
-    CREATE_SIGN_PUBLIC("warp.sign.create.public", true),
+    CREATE_SIGN_PUBLIC("warp.sign.create.public", true, Visibility.PUBLIC),
     // Create warp sign to global warp
-    CREATE_SIGN_GLOBAL("warp.sign.create.global", true),
+    CREATE_SIGN_GLOBAL("warp.sign.create.global", true, Visibility.GLOBAL),
     // Create warp sign to warp which doesn't exists
     SIGN_CREATE_UNKNOWN("warp.sign.create.unknown", true),
 
     // Create/Edit private warps
-    CREATE_PRIVATE("warp.create.private", true),
+    CREATE_PRIVATE("warp.create.private", true, Visibility.PRIVATE),
     // Create/Edit public warps
-    CREATE_PUBLIC("warp.create.public", true),
+    CREATE_PUBLIC("warp.create.public", true, Visibility.PUBLIC),
     // Create/Edit global warps
-    CREATE_GLOBAL("warp.create.global", true),
+    CREATE_GLOBAL("warp.create.global", true, Visibility.GLOBAL),
     
     // Edit own warps
     EDIT_DELETE("warp.edit.delete", true),
@@ -112,11 +116,17 @@ public enum PermissionTypes implements Permission<Boolean> {
     // e.g.)
 
     public final String name;
-    private final boolean def;
+    public final boolean def;
+    public final Visibility visibility;
 
     private PermissionTypes(String name, boolean def) {
+        this(name, def, null);
+    }
+    
+    private PermissionTypes(String name, boolean def, Visibility visibility) {
         this.name = name;
         this.def = def;
+        this.visibility = visibility;
     }
     
     public Boolean getDefault() {
@@ -145,5 +155,10 @@ public enum PermissionTypes implements Permission<Boolean> {
     @Override
     public String getName() {
         return this.name;
+    }
+
+    @Override
+    public Visibility getVisibility() {
+        return this.visibility;
     }
 }
