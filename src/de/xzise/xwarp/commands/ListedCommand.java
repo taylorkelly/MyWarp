@@ -8,7 +8,7 @@ import de.xzise.xwarp.WarpManager;
 
 public class ListedCommand extends WarpCommand {
 
-    protected ListedCommand(WarpManager list, Server server) {
+    public ListedCommand(WarpManager list, Server server) {
         super(list, server, "list warp", "listed");
     }
 
@@ -32,13 +32,12 @@ public class ListedCommand extends WarpCommand {
 
     @Override
     protected String[] getFullHelpText() {
-        return new String[] { "Sets a warp to listed or not listed.", "To list the warp the parameter has to be 'yes' or 'true.", "To unlist it has to be 'no' or 'false." };
+        return new String[] { "Sets a warp to listed or not listed.", "To list the warp the parameter has to be 'yes' or 'true.", "To unlist it has to be 'no' or 'false'." };
     }
 
     @Override
     protected String getSmallHelpText() {
-        // TODO Auto-generated method stub
-        return null;
+        return "(Un)lists a warp";
     }
 
 }

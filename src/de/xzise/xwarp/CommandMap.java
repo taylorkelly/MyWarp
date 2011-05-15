@@ -22,6 +22,7 @@ import de.xzise.xwarp.commands.ImportCommand;
 import de.xzise.xwarp.commands.InfoCommand;
 import de.xzise.xwarp.commands.InviteCommand;
 import de.xzise.xwarp.commands.ListCommand;
+import de.xzise.xwarp.commands.ListedCommand;
 import de.xzise.xwarp.commands.MessageCommand;
 import de.xzise.xwarp.commands.PermissionsCommand;
 import de.xzise.xwarp.commands.PriceCommand;
@@ -73,6 +74,7 @@ public class CommandMap {
         subCommands.add(new SearchCommand(list, server));
         subCommands.add(new ListCommand(list, server));
         subCommands.add(new InfoCommand(list, server, economyWrapper));
+        subCommands.add(new ListedCommand(list, server));
         subCommands.add(new ReloadCommand(list));
         subCommands.add(new ChangeCreatorCommand(list, server));
         subCommands.add(new PermissionsCommand(list, server));

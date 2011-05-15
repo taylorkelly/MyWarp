@@ -663,7 +663,7 @@ public class WarpManager {
             if (WarpManager.playerCanModifyWarp(sender, warp, Permissions.LIST)) {
                 warp.setListed(listed);
                 this.data.updateVisibility(warp);
-                sender.sendMessage("You have " + (listed ? "listed" : "unlisted") + "'" + ChatColor.GREEN + warp.name + ChatColor.WHITE + "'.");
+                sender.sendMessage("You have " + (listed ? "listed" : "unlisted") + " '" + ChatColor.GREEN + warp.name + ChatColor.WHITE + "'.");
             } else {
                 sender.sendMessage(ChatColor.RED + "You do not have permission to change the listed status from '" + warp.name + "'");
             }

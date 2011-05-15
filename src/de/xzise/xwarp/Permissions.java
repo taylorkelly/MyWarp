@@ -8,7 +8,7 @@ import java.util.Set;
 
 import de.xzise.xwarp.wrappers.permission.PermissionTypes;
 
-public enum Permissions {
+public enum Permissions implements PermissionDouble {
     UPDATE('l', 0, PermissionTypes.ADMIN_UPDATE, PermissionTypes.EDIT_LOCATION),
     RENAME('r', 1, PermissionTypes.ADMIN_RENAME, PermissionTypes.EDIT_RENAME),
     UNINVITE('u', 2, PermissionTypes.ADMIN_UNINVITE, PermissionTypes.EDIT_UNINVITE),
@@ -104,5 +104,15 @@ public enum Permissions {
                 }
             }
         }
+    }
+
+    @Override
+    public PermissionTypes getDefault() {
+        return this.defaultPermission;
+    }
+
+    @Override
+    public PermissionTypes getAdmin() {
+        return this.adminPermission;
     }
 }
