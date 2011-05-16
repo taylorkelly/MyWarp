@@ -223,6 +223,24 @@ public class Warp {
         this.getPermissions(inviteeName).put(Permissions.WARP, false);
     }
 
+    public boolean canModify(CommandSender sender, boolean defaultModification, PermissionTypes defaultPermission, PermissionTypes adminPermission) {
+        if (defaultPermission != null) {
+            return ((defaultModification && MyWarp.permissions.permission(sender, defaultPermission)) || MyWarp.permissions.permission(sender, adminPermission));
+        } else {
+            return (defaultModification || MyWarp.permissions.permission(sender, adminPermission));
+        }
+    }
+    
+    public boolean canModify(CommandSender sender, Permissions permission) {
+        Player player = WarperFactory.getPlayer(sender);
+        boolean canModify = false;
+        if (player != null) {
+            canModify = this.playerCanModify(player, permission);
+        }
+
+        return this.canModify(sender, canModify, permission.defaultPermission, permission.adminPermission);
+    }
+    
     public boolean playerCanModify(Player player, Permissions permission) {
         if (this.isOwn(player.getName()))
             return true;

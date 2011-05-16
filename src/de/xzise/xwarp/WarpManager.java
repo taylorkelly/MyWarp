@@ -644,17 +644,7 @@ public class WarpManager {
     }
 
     private static boolean playerCanModifyWarp(CommandSender sender, Warp warp, Permissions permission) {
-        Player player = WarperFactory.getPlayer(sender);
-        boolean canModify = false;
-        if (player != null) {
-            canModify = warp.playerCanModify(player, permission);
-        }
-
-        if (permission.defaultPermission != null) {
-            return ((canModify && MyWarp.permissions.permission(sender, permission.defaultPermission)) || MyWarp.permissions.permission(sender, permission.adminPermission));
-        } else {
-            return (canModify || MyWarp.permissions.permission(sender, permission.adminPermission));
-        }
+        return warp.canModify(sender, permission);
     }
 
     public void setListed(String name, String owner, CommandSender sender, Boolean listed) {
