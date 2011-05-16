@@ -322,10 +322,10 @@ public class SQLiteConnection implements DataConnection {
                 String worldName = set.getString("world");
                 World world = server.getWorld(worldName);
                 double x = set.getDouble("x");
-                double y = set.getInt("y");
+                double y = set.getDouble("y");
                 double z = set.getDouble("z");
-                int yaw = set.getInt("yaw");
-                int pitch = set.getInt("pitch");
+                float yaw = set.getFloat("yaw");
+                float pitch = set.getFloat("pitch");
                 LocationWrapper loc = new LocationWrapper(new FixedLocation(world, x, y, z, yaw, pitch), worldName);
                 int publicLevel = set.getInt("publicLevel");
                 Visibility visibility = Visibility.parseLevel(publicLevel);

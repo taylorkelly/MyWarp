@@ -28,6 +28,7 @@ public class Handler<W extends Wrapper> {
         this.logger = logger;
         this.type = type;
         this.nullary = nullaryWrapper;
+        this.pluginName = plugin;
     }
     
     public void setPluginName(String name) {
