@@ -2,13 +2,10 @@ package de.xzise.wrappers;
 
 import java.util.Map;
 
-import me.taylorkelly.mywarp.MyWarp;
-
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.PluginManager;
 
-import de.xzise.MinecraftUtil;
 import de.xzise.XLogger;
 
 public class Handler<W extends Wrapper> {
@@ -54,33 +51,37 @@ public class Handler<W extends Wrapper> {
             }
         }
         if (this.wrapper == null) {
-            this.logger.info("No " + type + " system found until here. Economy plugin will be maybe activated later.");
+            if (this.pluginName == null) {
+                this.logger.info("Loaded no " + this.type + " system, because it is deactivated.");
+            } else {
+                this.logger.info("No " + this.type + " system found until here. A " + this.type + " plugin will be maybe activated later.");
+            }
         }
     }
     
     protected void loaded() {}
     
     public void load(Plugin plugin) {
-        if (plugin != null && this.wrapper == null) {
+        if (plugin != null && this.wrapper == null && this.pluginName != null) {
             PluginDescriptionFile pdf = plugin.getDescription();
-            if (!MinecraftUtil.isSet(this.pluginName) || (pdf.getName().equalsIgnoreCase(this.pluginName))) {
+            if (this.pluginName.isEmpty() || (pdf.getName().equalsIgnoreCase(this.pluginName))) {
                 Factory<W> factory = factories.get(pdf.getName());
                 if (factory != null) {
                     if (plugin.isEnabled()) {
                         try {
-                            this.wrapper = factory.create(plugin, MyWarp.logger);
+                            this.wrapper = factory.create(plugin, this.logger);
                         } catch (Exception e) {
                             //TODO: Better exception handling
                             this.wrapper = null;
                         }
                         if (this.wrapper == null) {
-                            MyWarp.logger.warning("Invalid " + type + " system found: " + pdf.getFullName());
+                            this.logger.warning("Invalid " + this.type + " system found: " + pdf.getFullName());
                         } else {
                             this.loaded();
-                            MyWarp.logger.info("Linked with " + type + " system: " + pdf.getFullName());
+                            this.logger.info("Linked with " + this.type + " system: " + pdf.getFullName());
                         }
                     } else {
-                        MyWarp.logger.warning("Doesn't link to disabled " + type + " system: " + pdf.getFullName());
+                        this.logger.warning("Doesn't link to disabled " + this.type + " system: " + pdf.getFullName());
                     }
                 }
             }
@@ -90,7 +91,7 @@ public class Handler<W extends Wrapper> {
     public boolean unload(Plugin plugin) {
         if (this.wrapper != null && plugin == this.wrapper.getPlugin()) {
             this.wrapper = null;
-            this.logger.info("Deactivated economy system.");
+            this.logger.info("Deactivated " + this.type + " system.");
             return true;
         } else {
             return false;

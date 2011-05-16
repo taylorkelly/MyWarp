@@ -44,7 +44,11 @@ public class PluginProperties {
     }
     
     public String getEconomyPlugin() {
-        return this.economyPlugin;
+        if (this.economyPlugin.equalsIgnoreCase("none") || this.economyPlugin.equalsIgnoreCase("null")) {
+            return null;
+        } else {
+            return this.economyPlugin;
+        }
     }
     
     public String getEconomyBaseAccount() {
