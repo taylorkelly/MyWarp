@@ -5,9 +5,8 @@ import org.bukkit.World;
 
 public class LocationWrapper implements Moveable<LocationWrapper> {
 
-    private final FixedLocation location;
+    private FixedLocation location;
     private final String worldName;
-    private World world;
     
     public LocationWrapper(Location location) {
         this(new FixedLocation(location));
@@ -19,8 +18,10 @@ public class LocationWrapper implements Moveable<LocationWrapper> {
     
     public LocationWrapper(FixedLocation location, String world) {
         this.location = location;
-        this.worldName = world == null ? location.world.getName() : world;
-        this.world = this.location.world;
+        this.worldName = this.location.world != null ? location.world.getName() : world;
+        if (worldName == null) {
+            throw new IllegalArgumentException("Nullary world got.");
+        }
     }
     
     public static Location moveX(Location location, double delta) {
@@ -38,9 +39,12 @@ public class LocationWrapper implements Moveable<LocationWrapper> {
         return location;
     }
     
-    public void setWorld(World world) {
-        if (this.world == null && this.location.world == null && world.getName().equals(this.worldName)) {
-            this.world = world;
+    public boolean setWorld(World world) {
+        if (this.location.world == null && world.getName().equals(this.worldName)) {
+            this.location = new FixedLocation(world, this.location.x, this.location.y, this.location.z, this.location.yaw, this.location.pitch);
+            return true;
+        } else {
+            return false;
         }
     }
     
@@ -53,7 +57,7 @@ public class LocationWrapper implements Moveable<LocationWrapper> {
     }
 
     public boolean isValid() {
-        return this.world != null;
+        return this.location.world != null;
     }
 
     @Override

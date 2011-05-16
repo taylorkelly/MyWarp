@@ -1,5 +1,6 @@
 package de.xzise.xwarp.listeners;
 
+import me.taylorkelly.mywarp.MyWarp;
 import me.taylorkelly.mywarp.Warp;
 
 import org.bukkit.event.world.WorldListener;
@@ -17,8 +18,14 @@ public class XWWorldListener extends WorldListener {
 
     @Override
     public void onWorldLoad(WorldLoadEvent event) {
+        int i = 0;
         for (Warp warp : this.manager.getWarps()) {
-            warp.getLocationWrapper().setWorld(event.getWorld());
+            if (warp.getLocationWrapper().setWorld(event.getWorld())) {
+                i++;
+            }
+        }
+        if (i > 0) {
+            MyWarp.logger.info("Loaded world '" + event.getWorld().getName() + "' and updated " + i + " warp" + (i == 1 ? "." : "s."));
         }
     }
 }
