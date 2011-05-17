@@ -1,5 +1,6 @@
 package de.xzise.xwarp;
 
+import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -41,12 +42,12 @@ public class EconomyHandler extends Handler<EconomyWrapper> {
     public static final AccountWrapper NULLARY_ACCOUNT = new AccountWrapper() {
         
         @Override
-        public boolean hasEnough(int price) {
+        public boolean hasEnough(double price) {
             return false;
         }
         
         @Override
-        public void add(int price) {}
+        public void add(double price) {}
     };
     
     private AccountWrapper tax = NULLARY_ACCOUNT;
@@ -66,7 +67,7 @@ public class EconomyHandler extends Handler<EconomyWrapper> {
      * @param basic The basic price like an tax.
      * @return If the price could be paid or if there was nothing to pay.
      */
-    public PayResult pay(CommandSender sender, String reciever, int price, int basic) {
+    public PayResult pay(CommandSender sender, String reciever, int price, double basic) {
         if (this.isActive()) {
            Player player = MinecraftUtil.getPlayer(sender);
            if (player != null) {
@@ -101,15 +102,21 @@ public class EconomyHandler extends Handler<EconomyWrapper> {
         return this.getWrapper().getAccount(name);
     }
     
-    public PayResult pay(CommandSender sender, int basic) {
+    public PayResult pay(CommandSender sender, double basic) {
         return this.pay(sender, null, 0, basic);
     }
     
-    public String format(int price) {
+    public String format(double price) {
         if (this.isActive()) {
             return this.getWrapper().format(price);
         } else {
-            return Integer.toString(price);
+            DecimalFormat fakeForm = new DecimalFormat("#,##0.##");
+            String fakeFormed = fakeForm.format(price);
+            if (fakeFormed.endsWith(".")) {
+                fakeFormed = fakeFormed.substring(0, fakeFormed.length() - 1);
+            }
+
+            return fakeFormed;
         }
     }
     

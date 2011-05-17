@@ -25,12 +25,12 @@ public class Essentials implements EconomyWrapper {
         }
 
         @Override
-        public boolean hasEnough(int price) {
+        public boolean hasEnough(double price) {
             return Economy.hasEnough(this.name, price);
         }
 
         @Override
-        public void add(int price) {
+        public void add(double price) {
             Economy.add(this.name, price);
         }
         
@@ -47,7 +47,7 @@ public class Essentials implements EconomyWrapper {
     }
 
     @Override
-    public String format(int price) {
+    public String format(double price) {
         return Economy.format(price);
     }
 

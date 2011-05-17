@@ -17,4 +17,8 @@ public class DefaultPermissions {
         return permission.getDefault();
     }
 
+    public double getDouble(CommandSender sender, Permission<Double> permission) {
+        return permission.getDefault();
+    }
+
 }

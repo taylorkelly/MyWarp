@@ -15,7 +15,7 @@ import de.xzise.xwarp.Permissions;
 import de.xzise.xwarp.WarpManager;
 import de.xzise.xwarp.lister.GenericLister;
 import de.xzise.xwarp.wrappers.permission.PermissionTypes;
-import de.xzise.xwarp.wrappers.permission.PermissionValues;
+import de.xzise.xwarp.wrappers.permission.PricePermissions;
 
 public class InfoCommand extends WarpCommand {
 
@@ -26,7 +26,7 @@ public class InfoCommand extends WarpCommand {
         this.wrapper = wrapper;
     }
     
-    private String getPrice(int price, int base) {
+    private String getPrice(int price, double base) {
         if (price < 0 || (price == 0 && base == 0)) {
             return "Gratis";
         } else if (price == 0 && base != 0) {
@@ -56,19 +56,19 @@ public class InfoCommand extends WarpCommand {
             sender.sendMessage("Creator: " + getPlayerLine(warp.getCreator(), world));
             sender.sendMessage("Owner: " + getPlayerLine(warp.getOwner(), world));
             String visibility = "";
-            int basePrice = 0;
+            double basePrice = 0;
             switch (warp.visibility) {
             case GLOBAL:
                 visibility = "Global";
-                basePrice = MyWarp.permissions.getInteger(sender, PermissionValues.WARP_PRICES_TO_GLOBAL);
+                basePrice = MyWarp.permissions.getDouble(sender, PricePermissions.WARP_PRICES_TO_GLOBAL);
                 break;
             case PUBLIC:
                 visibility = "Public";
-                basePrice = MyWarp.permissions.getInteger(sender, PermissionValues.WARP_PRICES_TO_PUBLIC);
+                basePrice = MyWarp.permissions.getDouble(sender, PricePermissions.WARP_PRICES_TO_PUBLIC);
                 break;
             case PRIVATE:
                 visibility = "Private";
-                basePrice = MyWarp.permissions.getInteger(sender, PermissionValues.WARP_PRICES_TO_PRIVATE);
+                basePrice = MyWarp.permissions.getDouble(sender, PricePermissions.WARP_PRICES_TO_PRIVATE);
                 break;
             }
             if (sender instanceof Player) {

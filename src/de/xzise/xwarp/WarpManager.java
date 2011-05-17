@@ -90,10 +90,8 @@ public class WarpManager {
         return this.list.getNumberOfWarps(creator, visibility);
     }
 
-    private void printPayMessage(CommandSender payee, int amount) {
-        if (amount > 0) {
-            payee.sendMessage(ChatColor.WHITE + "You have paid " + ChatColor.GREEN + this.economy.format(amount) + ChatColor.WHITE + ".");
-        } else if (amount == 0) {
+    private void printPayMessage(CommandSender payee, double amount) {
+        if (amount > 0.0000001 && amount < 0.0000001) {
             if (this.properties.showFreePriceMessage()) {
                 String freePriceMessage = "Yeah. This warp was " + ChatColor.GREEN + "free";
                 // Little easteregg: Print with a 1 % change the (as beer) text
@@ -102,6 +100,8 @@ public class WarpManager {
                 }
                 payee.sendMessage(freePriceMessage + "!");
             }
+        } else if (amount > 0) {
+            payee.sendMessage(ChatColor.WHITE + "You have paid " + ChatColor.GREEN + this.economy.format(amount) + ChatColor.WHITE + ".");
         } else {
             payee.sendMessage("Woooo! You got " + ChatColor.GREEN + this.economy.format(-amount) + ChatColor.WHITE + "!");
         }
@@ -135,7 +135,7 @@ public class WarpManager {
                     } else if (visibility == Visibility.GLOBAL && globalWarp != null) {
                         player.sendMessage(ChatColor.RED + "Global warp called '" + name + "' already exists (" + globalWarp.name + ").");
                     } else {
-                        int price = MyWarp.permissions.getInteger(player, Groups.PRICES_CREATE_GROUP.get(visibility));
+                        double price = MyWarp.permissions.getDouble(player, Groups.PRICES_CREATE_GROUP.get(visibility));
     
                         switch (this.economy.pay(player, price)) {
                         case PAID:
@@ -579,7 +579,7 @@ public class WarpManager {
                             warper.sendMessage(ChatColor.RED + "The selected warp is in another world.");
                             warper.sendMessage(ChatColor.RED + "To force warping use /warp force-to <warp> [owner].");
                         } else {
-                            int price = MyWarp.permissions.getInteger(warper, Groups.PRICES_TO_GROUP.get(warp.visibility));
+                            double price = MyWarp.permissions.getDouble(warper, Groups.PRICES_TO_GROUP.get(warp.visibility));
 
                             if (this.coolDown.playerHasCooled(warper)) {
                                 if (warp.isFree()) {
@@ -588,7 +588,7 @@ public class WarpManager {
                                 } else {
                                     switch (this.economy.pay(warper, warp.getOwner(), warp.getPrice(), price)) {
                                     case PAID:
-                                        int totalPrice = warp.getPrice() + price;
+                                        double totalPrice = warp.getPrice() + price;
                                         this.printPayMessage(warper, totalPrice);
                                     case UNABLE:
                                         this.warmUp.addPlayer(warper, warped, warp);

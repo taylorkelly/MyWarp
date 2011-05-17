@@ -10,7 +10,6 @@ public class BOSEcon0 implements EconomyWrapper {
     private BOSEconomy economy;
     
     public BOSEcon0(BOSEconomy plugin) {
-        //TODO: Test
         this.economy = plugin;
     }
     
@@ -25,13 +24,13 @@ public class BOSEcon0 implements EconomyWrapper {
         }
         
         @Override
-        public boolean hasEnough(int price) {
+        public boolean hasEnough(double price) {
             return this.economy.getPlayerMoney(this.name) >= price;
         }
 
         @Override
-        public void add(int price) {
-            this.economy.addPlayerMoney(this.name, price, false);
+        public void add(double price) {
+            this.economy.addPlayerMoney(this.name, (int) Math.round(price), false);
         }
         
     }
@@ -42,7 +41,7 @@ public class BOSEcon0 implements EconomyWrapper {
     }
 
     @Override
-    public String format(int price) {
+    public String format(double price) {
         //TODO: Negatives? Zeros?
         if (price == 1) {
             return price + " " + this.economy.getMoneyName();

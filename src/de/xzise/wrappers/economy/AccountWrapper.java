@@ -6,7 +6,7 @@ package de.xzise.wrappers.economy;
  */
 public interface AccountWrapper {
 
-    boolean hasEnough(int price);
-    void add(int price);
+    boolean hasEnough(double price);
+    void add(double price);
     
 }

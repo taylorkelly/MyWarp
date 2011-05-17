@@ -10,6 +10,8 @@ public interface PermissionsWrapper extends Wrapper {
     
     public Integer getInteger(CommandSender sender, Permission<Integer> permission);
 
+    public Double getDouble(CommandSender sender, Permission<Double> permission);
+
     public String getGroup(String world, String player);
     
 }
