@@ -107,7 +107,6 @@ public class WarpManager {
         }
     }
     
-    @SuppressWarnings("unchecked")
     public void addWarp(String name, Positionable player, String newOwner, Visibility visibility) {
         Warp warp = this.list.getWarp(name, newOwner, null);
         Warp globalWarp = (visibility == Visibility.GLOBAL ? this.list.getWarp(name) : null);

@@ -1,6 +1,5 @@
 package de.xzise.wrappers.permissions;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -57,8 +56,9 @@ public class PermissionsHandler extends Handler<PermissionsWrapper> {
         }
     }
 
-    public boolean permissionOr(CommandSender sender, Permission<Boolean>... permissions) {
-        return this.permissionOr(sender, Arrays.asList(permissions));
+    // To prevent the unchecked warning
+    public boolean permissionOr(CommandSender sender, Permission<Boolean> p1, Permission<Boolean> p2) {
+        return this.permission(sender, p1) || this.permission(sender, p2);
     }
     
     public boolean permissionOr(CommandSender sender, List<Permission<Boolean>> permissions) {

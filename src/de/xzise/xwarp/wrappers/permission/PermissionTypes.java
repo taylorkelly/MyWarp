@@ -119,6 +119,17 @@ public enum PermissionTypes implements Permission<Boolean>, VisibilityPermission
     public final boolean def;
     public final Visibility visibility;
 
+    public final static List<Permission<Boolean>> WARP_TO_PERMISSIONS;
+
+    static {
+        WARP_TO_PERMISSIONS = new ArrayList<Permission<Boolean>>(5);
+        WARP_TO_PERMISSIONS.add(ADMIN_TO_ALL);
+        WARP_TO_PERMISSIONS.add(TO_INVITED);
+        WARP_TO_PERMISSIONS.add(TO_GLOBAL);
+        WARP_TO_PERMISSIONS.add(TO_OTHER);
+        WARP_TO_PERMISSIONS.add(TO_OWN);
+    }
+
     private PermissionTypes(String name, boolean def) {
         this(name, def, null);
     }

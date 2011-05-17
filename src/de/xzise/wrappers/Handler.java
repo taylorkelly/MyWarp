@@ -12,7 +12,7 @@ public class Handler<W extends Wrapper> {
 
     private final Map<String, ? extends Factory<W>> factories;
     private final PluginManager pluginManager;
-    private final XLogger logger;
+    protected final XLogger logger;
     private final String type;
     private final W nullary;
     private String pluginName;

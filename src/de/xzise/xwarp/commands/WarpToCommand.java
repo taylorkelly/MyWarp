@@ -74,9 +74,8 @@ public class WarpToCommand extends DefaultSubCommand {
         return "warp [to] <name> [creator] [warped]";
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     protected boolean listHelp(CommandSender sender) {
-        return MyWarp.permissions.permissionOr(sender, PermissionTypes.TO_GLOBAL, PermissionTypes.TO_INVITED, PermissionTypes.TO_OTHER, PermissionTypes.TO_OWN, PermissionTypes.ADMIN_TO_ALL);
+        return MyWarp.permissions.permissionOr(sender, PermissionTypes.WARP_TO_PERMISSIONS);
     }
 }
