@@ -42,12 +42,7 @@ public class BOSEcon0 implements EconomyWrapper {
 
     @Override
     public String format(double price) {
-        //TODO: Negatives? Zeros?
-        if (price == 1) {
-            return price + " " + this.economy.getMoneyName();
-        } else {
-            return price + " " + this.economy.getMoneyNamePlural();
-        }
+        return null;
     }
     
     public static class Factory implements EconomyWrapperFactory {

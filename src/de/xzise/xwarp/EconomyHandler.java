@@ -9,7 +9,10 @@ import me.taylorkelly.mywarp.MyWarp;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
+
+import com.nijikokun.register.payment.Methods;
 
 import de.xzise.MinecraftUtil;
 import de.xzise.wrappers.Handler;
@@ -18,6 +21,8 @@ import de.xzise.wrappers.economy.BOSEcon0;
 import de.xzise.wrappers.economy.EconomyWrapper;
 import de.xzise.wrappers.economy.EconomyWrapperFactory;
 import de.xzise.wrappers.economy.Essentials;
+import de.xzise.wrappers.economy.MethodWrapper;
+import de.xzise.wrappers.economy.MineConomy;
 import de.xzise.wrappers.economy.iConomyFactory;
 
 public class EconomyHandler extends Handler<EconomyWrapper> {
@@ -37,6 +42,7 @@ public class EconomyHandler extends Handler<EconomyWrapper> {
         FACTORIES.put("BOSEconomy", new BOSEcon0.Factory());
         FACTORIES.put("iConomy", new iConomyFactory());
         FACTORIES.put("Essentials", new Essentials.Factory());
+        FACTORIES.put("MineConomy", new MineConomy.Factory());
     }
     
     public static final AccountWrapper NULLARY_ACCOUNT = new AccountWrapper() {
@@ -52,6 +58,7 @@ public class EconomyHandler extends Handler<EconomyWrapper> {
     
     private AccountWrapper tax = NULLARY_ACCOUNT;
     private final PluginProperties properties;
+    private final Methods methods = new Methods();
 
     public EconomyHandler(PluginProperties properties, PluginManager pluginManager) {
         super(FACTORIES, pluginManager, "economy", properties.getEconomyPlugin(), MyWarp.logger);
@@ -107,9 +114,12 @@ public class EconomyHandler extends Handler<EconomyWrapper> {
     }
     
     public String format(double price) {
+        String result = null;
         if (this.isActive()) {
-            return this.getWrapper().format(price);
-        } else {
+            result = this.getWrapper().format(price);
+        }
+        
+        if (result == null) {
             DecimalFormat fakeForm = new DecimalFormat("#,##0.##");
             String fakeFormed = fakeForm.format(price);
             if (fakeFormed.endsWith(".")) {
@@ -118,6 +128,7 @@ public class EconomyHandler extends Handler<EconomyWrapper> {
 
             return fakeFormed;
         }
+        return result;
     }
     
     public void reloadConfig() {
@@ -135,7 +146,18 @@ public class EconomyHandler extends Handler<EconomyWrapper> {
         }
     }
     
+    @Override
     protected void loaded() {
         this.setBaseAccount();
+    }
+    
+    @Override
+    protected boolean customLoad(Plugin plugin) {
+        if (!this.methods.hasMethod() && this.methods.setMethod(plugin)) {
+            this.setWrapper(new MethodWrapper(this.methods.getMethod(), plugin));
+            return true;
+        } else {
+            return false;
+        }
     }
 }

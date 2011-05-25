@@ -62,27 +62,44 @@ public class Handler<W extends Wrapper> {
     
     protected void loaded() {}
     
+    protected void setWrapper(W wrapper) {
+        this.wrapper = wrapper;
+    }
+    
+    protected boolean customLoad(Plugin plugin) {
+        return false;
+    }
+    
     public void load(Plugin plugin) {
         if (plugin != null && this.wrapper == null && this.pluginName != null) {
             PluginDescriptionFile pdf = plugin.getDescription();
             if (this.pluginName.isEmpty() || (pdf.getName().equalsIgnoreCase(this.pluginName))) {
-                Factory<W> factory = factories.get(pdf.getName());
-                if (factory != null) {
-                    if (plugin.isEnabled()) {
-                        try {
-                            this.wrapper = factory.create(plugin, this.logger);
-                        } catch (Exception e) {
-                            //TODO: Better exception handling
-                            this.wrapper = null;
-                        }
-                        if (this.wrapper == null) {
-                            this.logger.warning("Invalid " + this.type + " system found: " + pdf.getFullName());
+                boolean loaded = this.customLoad(plugin);
+                
+                if (!loaded) {
+                    Factory<W> factory = factories.get(pdf.getName());
+                    if (factory != null) {
+                        if (plugin.isEnabled()) {
+                            try {
+                                this.wrapper = factory.create(plugin, this.logger);
+                                loaded = true;
+                            } catch (Exception e) {
+                                this.logger.warning("Invalid " + this.type + " system found (" + pdf.getFullName() + "): " + e.getMessage());
+                                this.wrapper = null;
+                                loaded = false;
+                            }
                         } else {
-                            this.loaded();
-                            this.logger.info("Linked with " + this.type + " system: " + pdf.getFullName());
+                            this.logger.warning("Doesn't link to disabled " + this.type + " system: " + pdf.getFullName());
                         }
+                    }
+                }
+                
+                if (loaded) {
+                    if (this.wrapper == null) {
+                        this.logger.warning("Invalid " + this.type + " system found: " + pdf.getFullName());
                     } else {
-                        this.logger.warning("Doesn't link to disabled " + this.type + " system: " + pdf.getFullName());
+                        this.loaded();
+                        this.logger.info("Linked with " + this.type + " system: " + pdf.getFullName());
                     }
                 }
             }
