@@ -69,14 +69,24 @@ public class Handler<W extends Wrapper> {
                 Factory<W> factory = factories.get(pdf.getName());
                 if (factory != null) {
                     if (plugin.isEnabled()) {
+                        boolean handled = false;
                         try {
                             this.wrapper = factory.create(plugin, this.logger);
+                        } catch (InvalidWrapperException e) {
+                            this.logger.warning("Error while loading the plugin " + pdf.getFullName() + " into " + this.type + " system.");
+                            this.logger.warning("Error message: " + e.getMessage());
+                            handled = true;
+                            this.wrapper = null;
                         } catch (Exception e) {
-                            //TODO: Better exception handling
+                            this.logger.warning("Unspecified error while loading the plugin " + pdf.getFullName() + " into " + this.type + " system.");
+                            this.logger.warning("Error message: '" + e.getMessage() + "' of '" + e.getClass().getSimpleName() + "'");
+                            handled = true;
                             this.wrapper = null;
                         }
                         if (this.wrapper == null) {
-                            this.logger.warning("Invalid " + this.type + " system found: " + pdf.getFullName());
+                            if (!handled) {
+                                this.logger.warning("Invalid " + this.type + " system found: " + pdf.getFullName());
+                            }
                         } else {
                             this.loaded();
                             this.logger.info("Linked with " + this.type + " system: " + pdf.getFullName());

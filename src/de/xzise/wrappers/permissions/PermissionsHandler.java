@@ -37,10 +37,15 @@ public class PermissionsHandler extends Handler<PermissionsWrapper> {
         public String getGroup(String world, String player) {
             return null;
         }
+
+        @Override
+        public Double getDouble(CommandSender sender, Permission<Double> permission) {
+            return null;
+        }
     };
     
     static {
-        FACTORIES.put("Permissions", new PermissionsPluginWrapper.PermissionsPluginFactory());
+        FACTORIES.put("Permissions", new PermissionPluginWrapperFactory());
     }
 
     public PermissionsHandler(PluginManager pluginManager, String plugin, XLogger logger) {
@@ -76,6 +81,15 @@ public class PermissionsHandler extends Handler<PermissionsWrapper> {
             return result;
         } else {
             return DEFAULT_PERMISSIONS.getInteger(sender, permission);
+        }
+    }
+    
+    public double getDouble(CommandSender sender, Permission<Double> permission) {
+        Double result = this.getWrapper().getDouble(sender, permission);
+        if (result != null) {
+            return result;
+        } else {
+            return DEFAULT_PERMISSIONS.getDouble(sender, permission);
         }
     }
 

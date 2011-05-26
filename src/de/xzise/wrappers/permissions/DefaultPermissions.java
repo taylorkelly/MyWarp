@@ -2,7 +2,6 @@ package de.xzise.wrappers.permissions;
 
 import org.bukkit.command.CommandSender;
 
-
 public class DefaultPermissions {
 
     public boolean has(CommandSender sender, Permission<Boolean> permission) {
@@ -14,6 +13,10 @@ public class DefaultPermissions {
     }
 
     public int getInteger(CommandSender sender, Permission<Integer> permission) {
+        return permission.getDefault();
+    }
+
+    public double getDouble(CommandSender sender, Permission<Double> permission) {
         return permission.getDefault();
     }
 
