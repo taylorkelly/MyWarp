@@ -82,12 +82,15 @@ public class WarpManager {
      * @param visibility
      *            The visibility of the warps. Set to null if want to show all
      *            visibilites.
+     * @param world
+     *            The world the warps has to be in. If null, it checks all
+     *            worlds.
      * @return The number of warps the player has created (with the desired
      *         visibility).
-     * @see {@link WarpList#getNumberOfWarps(String, Visibility)}
+     * @see {@link WarpList#getNumberOfWarps(String, Visibility, String)}
      */
-    public int getAmountOfWarps(String creator, Visibility visibility) {
-        return this.list.getNumberOfWarps(creator, visibility);
+    public int getAmountOfWarps(String creator, Visibility visibility, String world) {
+        return this.list.getNumberOfWarps(creator, visibility, world);
     }
 
     private void printPayMessage(CommandSender payee, double amount) {
@@ -117,16 +120,16 @@ public class WarpManager {
             PermissionValues limit = Groups.LIMIT_GROUP.get(visibility);
             
             if (MyWarp.permissions.permission(player, type)) {
-                String creator = MinecraftUtil.getPlayerName(player);
-                if (creator == null && player instanceof Nameable) {
+                String creator = "";
+                String world = player.getLocation().getWorld().getName();
+                if (player instanceof Nameable) {
                     creator = ((Nameable) player).getName();
-                }
-                if (creator == null) {
-                    creator = "";
+                } else {
+                    creator = MinecraftUtil.getPlayerName(player);
                 }
     
-                int warpsByCreator = this.list.getNumberOfWarps(creator, visibility);
-                int totalWarpsByCreator = this.list.getNumberOfWarps(creator, null);
+                int warpsByCreator = this.list.getNumberOfWarps(creator, visibility, world);
+                int totalWarpsByCreator = this.list.getNumberOfWarps(creator, null, world);
                 int allowedMaximum = MyWarp.permissions.getInteger(player, limit);
                 int allowedTotalMaximum = MyWarp.permissions.getInteger(player, PermissionValues.WARP_LIMIT_TOTAL);
                 if ((allowedMaximum < 0 || warpsByCreator < allowedMaximum) && (allowedTotalMaximum < 0 || totalWarpsByCreator < allowedTotalMaximum)) {

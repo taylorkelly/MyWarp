@@ -139,7 +139,7 @@ public class WarpList {
         }
         personalWarps.put(warp.name.toLowerCase(), warp);
     }
-    
+
     public void updateVisibility(Warp warp) {
         this.global.get(warp.name.toLowerCase()).updateGlobal(warp);
     }
@@ -151,17 +151,20 @@ public class WarpList {
      *            The creator of the warps. Has to be not null.
      * @param visibility
      *            The visibility of the warps. Set to null if want to show all
-     *            visibilites.
-     * @return The numer of warps the player has created (with the desired
+     *            visibilities.
+     * @param world
+     *            The world the warps has to be in. If null, it checks all
+     *            worlds.
+     * @return The number of warps the player has created (with the desired
      *         visibility).
      */
-    public int getNumberOfWarps(String creator, Visibility v) {
+    public int getNumberOfWarps(String creator, Visibility visibility, String world) {
         int number = 0;
         if (MinecraftUtil.isSet(creator)) {
             List<Warp> warps = this.creatorMap.get(creator.toLowerCase());
             if (warps != null) {
                 for (Warp warp : warps) {
-                    if (v == null || warp.visibility == v) {
+                    if ((visibility == null || warp.visibility == visibility) && (world == null || warp.getLocationWrapper().getWorld().equals(world))) {
                         number++;
                     }
                 }

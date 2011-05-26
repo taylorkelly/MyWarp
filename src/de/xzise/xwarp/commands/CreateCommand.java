@@ -57,10 +57,11 @@ public class CreateCommand extends DefaultSubCommand {
         Player player = MinecraftUtil.getPlayer(sender);
         if (parameters.length == 1 && player != null) {
             player.sendMessage("You could create following amount of warps:");
-            player.sendMessage(GenericLister.GLOBAL_OWN + "Global: " + ChatColor.GREEN + getAmount(player, PermissionValues.WARP_LIMIT_GLOBAL) + ChatColor.WHITE + " (created: " + ChatColor.GREEN + this.list.getAmountOfWarps(player.getName(), Visibility.GLOBAL) + ChatColor.WHITE + ")");
-            player.sendMessage(GenericLister.PUBLIC_OWN + "Public: " + ChatColor.GREEN + getAmount(player, PermissionValues.WARP_LIMIT_PUBLIC) + ChatColor.WHITE + " (created: " + ChatColor.GREEN + this.list.getAmountOfWarps(player.getName(), Visibility.PUBLIC) + ChatColor.WHITE + ")");
-            player.sendMessage(GenericLister.PRIVATE_OWN + "Private: " + ChatColor.GREEN + getAmount(player, PermissionValues.WARP_LIMIT_PRIVATE) + ChatColor.WHITE + " (created: " + ChatColor.GREEN + this.list.getAmountOfWarps(player.getName(), Visibility.PRIVATE) + ChatColor.WHITE + ")");
-            player.sendMessage(ChatColor.GREEN + "Total: " + getAmount(player, PermissionValues.WARP_LIMIT_TOTAL) + ChatColor.WHITE + " (created: " + ChatColor.GREEN + this.list.getAmountOfWarps(player.getName(), null) + ChatColor.WHITE + ")");
+            player.sendMessage(GenericLister.GLOBAL_OWN + "Global: " + ChatColor.GREEN + getAmount(player, PermissionValues.WARP_LIMIT_GLOBAL) + ChatColor.WHITE + " (created: " + ChatColor.GREEN + this.list.getAmountOfWarps(player.getName(), Visibility.GLOBAL, player.getWorld().getName()) + ChatColor.WHITE + ")");
+            player.sendMessage(GenericLister.PUBLIC_OWN + "Public: " + ChatColor.GREEN + getAmount(player, PermissionValues.WARP_LIMIT_PUBLIC) + ChatColor.WHITE + " (created: " + ChatColor.GREEN + this.list.getAmountOfWarps(player.getName(), Visibility.PUBLIC, player.getWorld().getName()) + ChatColor.WHITE + ")");
+            player.sendMessage(GenericLister.PRIVATE_OWN + "Private: " + ChatColor.GREEN + getAmount(player, PermissionValues.WARP_LIMIT_PRIVATE) + ChatColor.WHITE + " (created: " + ChatColor.GREEN + this.list.getAmountOfWarps(player.getName(), Visibility.PRIVATE, player.getWorld().getName()) + ChatColor.WHITE + ")");
+            player.sendMessage(ChatColor.GREEN + "Total: " + getAmount(player, PermissionValues.WARP_LIMIT_TOTAL) + ChatColor.WHITE + " (created: " + ChatColor.GREEN + this.list.getAmountOfWarps(player.getName(), null, player.getWorld().getName()) + ChatColor.WHITE + ")");
+//            player.sendMessage(ChatColor.GREEN + "Global total: " + /* TODO: Get global value */ getAmount(player, PermissionValues.WARP_LIMIT_TOTAL) + ChatColor.WHITE + " (created: " + ChatColor.GREEN + this.list.getAmountOfWarps(player.getName(), null, null) + ChatColor.WHITE + ")");
             return true;
         } else {
             Positionable position = WarperFactory.getPositionable(sender);
