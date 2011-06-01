@@ -18,6 +18,7 @@ import org.bukkit.plugin.Plugin;
 import de.xzise.MinecraftUtil;
 import de.xzise.metainterfaces.LocationWrapper;
 import de.xzise.metainterfaces.Nameable;
+import de.xzise.wrappers.economy.EconomyHandler;
 import de.xzise.xwarp.dataconnections.DataConnection;
 import de.xzise.xwarp.dataconnections.IdentificationInterface;
 import de.xzise.xwarp.timer.CoolDown;
@@ -67,7 +68,7 @@ public class WarpManager {
         if (MyWarp.permissions.permission(sender, PermissionTypes.ADMIN_RELOAD)) {
             this.properties.read();
             this.loadFromDatabase();
-            this.economy.reloadConfig();
+            this.economy.reloadConfig(this.properties.getEconomyPlugin(), this.properties.getEconomyBaseAccount());
             sender.sendMessage("Reload successfully!");
         } else {
             sender.sendMessage(ChatColor.RED + "You have no permission to reload.");
@@ -94,7 +95,7 @@ public class WarpManager {
     }
 
     private void printPayMessage(CommandSender payee, double amount) {
-        if (amount > 0.0000001 && amount < 0.0000001) {
+        if (amount > -0.0000001 && amount < 0.0000001) {
             if (this.properties.showFreePriceMessage()) {
                 String freePriceMessage = "Yeah. This warp was " + ChatColor.GREEN + "free";
                 // Little easteregg: Print with a 1 % change the (as beer) text
@@ -132,7 +133,11 @@ public class WarpManager {
                 int totalWarpsByCreator = this.list.getNumberOfWarps(creator, null, world);
                 int allowedMaximum = MyWarp.permissions.getInteger(player, limit);
                 int allowedTotalMaximum = MyWarp.permissions.getInteger(player, PermissionValues.WARP_LIMIT_TOTAL);
-                if ((allowedMaximum < 0 || warpsByCreator < allowedMaximum) && (allowedTotalMaximum < 0 || totalWarpsByCreator < allowedTotalMaximum)) {
+                if (warpsByCreator >= allowedMaximum && allowedMaximum >= 0) {
+                    player.sendMessage(ChatColor.RED + "You are allowed to create only " + allowedMaximum + " warps.");
+                } else if (totalWarpsByCreator >= allowedTotalMaximum && allowedTotalMaximum >= 0) {
+                    player.sendMessage(ChatColor.RED + "You are allowed to create only " + allowedTotalMaximum + " warps in total.");
+                } else {
                     if (warp != null) {
                         player.sendMessage(ChatColor.RED + "Warp called '" + name + "' already exists (" + warp.name + ").");
                     } else if (visibility == Visibility.GLOBAL && globalWarp != null) {
@@ -169,8 +174,6 @@ public class WarpManager {
                             break;
                         }
                     }
-                } else {
-                    player.sendMessage(ChatColor.RED + "You are allowed to create only " + allowedMaximum + " warps.");
                 }
             } else {
                 player.sendMessage(ChatColor.RED + "You have no permission to add a warp.");

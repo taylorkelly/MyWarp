@@ -10,7 +10,7 @@ import org.bukkit.entity.Player;
 
 import de.xzise.MinecraftUtil;
 import de.xzise.metainterfaces.FixedLocation;
-import de.xzise.xwarp.EconomyHandler;
+import de.xzise.wrappers.economy.EconomyHandler;
 import de.xzise.xwarp.Permissions;
 import de.xzise.xwarp.WarpManager;
 import de.xzise.xwarp.lister.GenericLister;

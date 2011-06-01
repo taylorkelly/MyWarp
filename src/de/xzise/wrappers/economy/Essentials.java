@@ -3,6 +3,8 @@ package de.xzise.wrappers.economy;
 import org.bukkit.plugin.Plugin;
 
 import com.earth2me.essentials.api.Economy;
+import com.earth2me.essentials.api.NoLoanPermittedException;
+import com.earth2me.essentials.api.UserDoesNotExistException;
 
 import de.xzise.XLogger;
 
@@ -10,37 +12,43 @@ public class Essentials implements EconomyWrapper {
 
     private final Plugin economy;
     private final XLogger logger;
-    
+
     public final class EssentialsAccount implements AccountWrapper {
-        
         private final String name;
-        
+        private final XLogger logger;
+
         public EssentialsAccount(String name, XLogger logger) {
             this.name = name;
-            if (!Economy.accountExist(name)) {
-                if (!Economy.newAccount(name)) {
-                    logger.warning("EssentialsAccount: Couldn't create a new account named \"" + name + "\"!");
-                }
-            }
+            this.logger = logger;
         }
 
         @Override
         public boolean hasEnough(double price) {
-            return Economy.hasEnough(this.name, price);
+            try {
+                return Economy.hasEnough(this.name, price);
+            } catch (UserDoesNotExistException e) {
+                this.logger.warning("Unable to check if the user " + this.name + " has enough, because the user doesn't exists.");
+                return false;
+            }
         }
 
         @Override
         public void add(double price) {
-            Economy.add(this.name, price);
+            try {
+                Economy.add(this.name, price);
+            } catch (UserDoesNotExistException e) {
+                this.logger.warning("Unable to change the price of " + this.name + ", because the user doesn't exists.");                
+            } catch (NoLoanPermittedException e) {
+                this.logger.warning("Unable to change the price of " + this.name + ", because the loan was permitted.");
+            }
         }
-        
     }
-    
+
     public Essentials(Plugin plugin, XLogger logger) {
         this.economy = plugin;
         this.logger = logger;
     }
-    
+
     @Override
     public AccountWrapper getAccount(String name) {
         return new EssentialsAccount(name, this.logger);
@@ -55,7 +63,7 @@ public class Essentials implements EconomyWrapper {
     public Plugin getPlugin() {
         return this.economy;
     }
-    
+
     public static class Factory implements EconomyWrapperFactory {
 
         @Override
@@ -73,7 +81,7 @@ public class Essentials implements EconomyWrapper {
                 return null;
             }
         }
-        
+
     }
 
 }

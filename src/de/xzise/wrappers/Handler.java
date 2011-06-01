@@ -93,7 +93,7 @@ public class Handler<W extends Wrapper> {
                         }
                     }
                 }
-                
+
                 if (loaded) {
                     if (this.wrapper == null) {
                         this.logger.warning("Invalid " + this.type + " system found: " + pdf.getFullName());

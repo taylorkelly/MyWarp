@@ -1,10 +1,8 @@
-package de.xzise.xwarp;
+package de.xzise.wrappers.economy;
 
 import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.Map;
-
-import me.taylorkelly.mywarp.MyWarp;
 
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
@@ -15,14 +13,13 @@ import org.bukkit.plugin.PluginManager;
 import com.nijikokun.register.payment.Methods;
 
 import de.xzise.MinecraftUtil;
+import de.xzise.XLogger;
 import de.xzise.wrappers.Handler;
 import de.xzise.wrappers.economy.AccountWrapper;
 import de.xzise.wrappers.economy.BOSEcon0;
 import de.xzise.wrappers.economy.EconomyWrapper;
 import de.xzise.wrappers.economy.EconomyWrapperFactory;
 import de.xzise.wrappers.economy.Essentials;
-import de.xzise.wrappers.economy.MethodWrapper;
-import de.xzise.wrappers.economy.MineConomy;
 import de.xzise.wrappers.economy.iConomyFactory;
 
 public class EconomyHandler extends Handler<EconomyWrapper> {
@@ -57,12 +54,18 @@ public class EconomyHandler extends Handler<EconomyWrapper> {
     };
     
     private AccountWrapper tax = NULLARY_ACCOUNT;
-    private final PluginProperties properties;
-    private final Methods methods = new Methods();
+    private Methods methods = null;
+    private String economyBaseName;
 
-    public EconomyHandler(PluginProperties properties, PluginManager pluginManager) {
-        super(FACTORIES, pluginManager, "economy", properties.getEconomyPlugin(), MyWarp.logger);
-        this.properties = properties;
+    public EconomyHandler(PluginManager pluginManager, String economyPluginName, String economyBaseName, XLogger logger) {
+        super(FACTORIES, pluginManager, "economy", economyPluginName, logger);
+        this.economyBaseName = economyBaseName;
+        try {
+            this.methods = new Methods();
+        } catch (NoClassDefFoundError e) {
+            this.methods = null;
+            this.logger.info("No Register found. Deactivating Register support.");
+        }
         this.setBaseAccount();
     }
 
@@ -75,7 +78,7 @@ public class EconomyHandler extends Handler<EconomyWrapper> {
      * @return If the price could be paid or if there was nothing to pay.
      */
     public PayResult pay(CommandSender sender, String reciever, int price, double basic) {
-        if (this.isActive()) {
+        if (this.getWrapper() != null) {
            Player player = MinecraftUtil.getPlayer(sender);
            if (player != null) {
                AccountWrapper executor = this.getAccount(player.getName());
@@ -97,7 +100,7 @@ public class EconomyHandler extends Handler<EconomyWrapper> {
                    return PayResult.NOT_ENOUGH;
                }
            } else {
-               MyWarp.logger.info("Couldn't pay action, because the executor is not a player.");
+               this.logger.info("Couldn't pay action, because the executor is not a player.");
            }
         } else if (price > 0) {
             sender.sendMessage(ChatColor.RED + "You should pay for this warp. But no iConomy found.");
@@ -131,16 +134,16 @@ public class EconomyHandler extends Handler<EconomyWrapper> {
         return result;
     }
     
-    public void reloadConfig() {
-        this.setPluginName(this.properties.getEconomyPlugin());
+    public void reloadConfig(String economyPluginName, String economyBaseName) {
+        this.economyBaseName = economyBaseName;
+        this.setPluginName(economyPluginName);
         this.load();
         this.setBaseAccount();
     }
     
     private void setBaseAccount() {
-        String baseAccount = this.properties.getEconomyBaseAccount();
-        if (MinecraftUtil.isSet(baseAccount) && this.isActive()) {
-            this.tax = this.getWrapper().getAccount(baseAccount);
+        if (MinecraftUtil.isSet(this.economyBaseName) && this.isActive()) {
+            this.tax = this.getWrapper().getAccount(this.economyBaseName);
         } else {
             this.tax = NULLARY_ACCOUNT;
         }
@@ -153,7 +156,7 @@ public class EconomyHandler extends Handler<EconomyWrapper> {
     
     @Override
     protected boolean customLoad(Plugin plugin) {
-        if (!this.methods.hasMethod() && this.methods.setMethod(plugin)) {
+        if (this.methods != null && !this.methods.hasMethod() && this.methods.setMethod(plugin)) {
             this.setWrapper(new MethodWrapper(this.methods.getMethod(), plugin));
             return true;
         } else {

@@ -79,6 +79,7 @@ public class WarmUp {
         if (warped.teleport(warp.getLocation().toLocation())) {
             warped.sendMessage(ChatColor.AQUA + warp.welcomeMessage);
             this.down.addPlayer(warp.visibility, warper);
+            this.players.remove(warper);
             if (!warped.equals(warper)) {
                 warper.sendMessage("Sucessfully warped '" + ChatColor.GREEN + MinecraftUtil.getName(warped) + ChatColor.WHITE + "'");
             }

@@ -10,6 +10,7 @@ import org.bukkit.Server;
 import org.bukkit.command.CommandSender;
 
 import de.xzise.MinecraftUtil;
+import de.xzise.wrappers.economy.EconomyHandler;
 import de.xzise.xwarp.commands.AddEditorCommand;
 import de.xzise.xwarp.commands.ChangeCreatorCommand;
 import de.xzise.xwarp.commands.CreateCommand;

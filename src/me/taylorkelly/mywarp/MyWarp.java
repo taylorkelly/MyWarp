@@ -16,7 +16,7 @@ import de.xzise.MinecraftUtil;
 import de.xzise.XLogger;
 import de.xzise.wrappers.permissions.PermissionsHandler;
 import de.xzise.xwarp.CommandMap;
-import de.xzise.xwarp.EconomyHandler;
+import de.xzise.wrappers.economy.EconomyHandler;
 import de.xzise.xwarp.PluginProperties;
 import de.xzise.xwarp.WarpManager;
 import de.xzise.xwarp.dataconnections.DataConnection;
@@ -90,7 +90,7 @@ public class MyWarp extends JavaPlugin {
 
         this.permissionsWrapper = new PermissionsHandler(this.getServer().getPluginManager(), "", logger);
         permissions = this.permissionsWrapper;
-        this.economyWrapper = new EconomyHandler(properties, this.getServer().getPluginManager());
+        this.economyWrapper = new EconomyHandler(this.getServer().getPluginManager(), properties.getEconomyPlugin(), properties.getEconomyBaseAccount(), logger);
         
         WarpManager warpManager = new WarpManager(this, this.economyWrapper, properties, this.dataConnection);
         
