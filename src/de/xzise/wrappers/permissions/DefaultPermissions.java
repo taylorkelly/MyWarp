@@ -2,7 +2,6 @@ package de.xzise.wrappers.permissions;
 
 import org.bukkit.command.CommandSender;
 
-
 public class DefaultPermissions {
 
     public boolean has(CommandSender sender, Permission<Boolean> permission) {

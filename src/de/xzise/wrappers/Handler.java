@@ -17,11 +17,11 @@ public class Handler<W extends Wrapper> {
     private final W nullary;
     private String pluginName;
     private W wrapper;
-    
+
     public Handler(Map<String, ? extends Factory<W>> factories, PluginManager pluginManager, String type, String plugin, XLogger logger) {
         this(factories, null, pluginManager, type, plugin, logger);
     }
-    
+
     public Handler(Map<String, ? extends Factory<W>> factories, W nullaryWrapper, PluginManager pluginManager, String type, String plugin, XLogger logger) {
         this.factories = factories;
         this.pluginManager = pluginManager;
@@ -30,19 +30,19 @@ public class Handler<W extends Wrapper> {
         this.nullary = nullaryWrapper;
         this.pluginName = plugin;
     }
-    
+
     public void setPluginName(String name) {
         this.pluginName = name;
     }
-    
+
     public boolean isActive() {
         return this.wrapper != null && this.wrapper != this.nullary;
     }
-    
+
     public W getWrapper() {
         return this.wrapper == null ? this.nullary : this.wrapper;
     }
-    
+
     public void load() {
         this.wrapper = null;
         for (String string : this.factories.keySet()) {
@@ -59,37 +59,49 @@ public class Handler<W extends Wrapper> {
             }
         }
     }
-    
-    protected void loaded() {}
-    
+
+    protected void loaded() {
+    }
+
     protected void setWrapper(W wrapper) {
         this.wrapper = wrapper;
     }
-    
+
     protected boolean customLoad(Plugin plugin) {
         return false;
     }
-    
+
     public void load(Plugin plugin) {
         if (plugin != null && this.wrapper == null && this.pluginName != null) {
             PluginDescriptionFile pdf = plugin.getDescription();
             if (this.pluginName.isEmpty() || (pdf.getName().equalsIgnoreCase(this.pluginName))) {
                 boolean loaded = this.customLoad(plugin);
-                
+
                 if (!loaded) {
                     Factory<W> factory = factories.get(pdf.getName());
                     if (factory != null) {
                         if (plugin.isEnabled()) {
+                            boolean handled = false;
                             try {
                                 this.wrapper = factory.create(plugin, this.logger);
-                                loaded = true;
-                            } catch (Exception e) {
-                                this.logger.warning("Invalid " + this.type + " system found (" + pdf.getFullName() + "): " + e.getMessage());
+                            } catch (InvalidWrapperException e) {
+                                this.logger.warning("Error while loading the plugin " + pdf.getFullName() + " into " + this.type + " system.");
+                                this.logger.warning("Error message: " + e.getMessage());
+                                handled = true;
                                 this.wrapper = null;
-                                loaded = false;
+                            } catch (Exception e) {
+                                this.logger.warning("Unspecified error while loading the plugin " + pdf.getFullName() + " into " + this.type + " system.");
+                                this.logger.warning("Error message: '" + e.getMessage() + "' of '" + e.getClass().getSimpleName() + "'");
+                                handled = true;
+                                this.wrapper = null;
                             }
-                        } else {
-                            this.logger.warning("Doesn't link to disabled " + this.type + " system: " + pdf.getFullName());
+                            if (this.wrapper == null) {
+                                if (!handled) {
+                                    this.logger.warning("Invalid " + this.type + " system found: " + pdf.getFullName());
+                                }
+                            } else {
+                                this.logger.warning("Doesn't link to disabled " + this.type + " system: " + pdf.getFullName());
+                            }
                         }
                     }
                 }
@@ -105,7 +117,7 @@ public class Handler<W extends Wrapper> {
             }
         }
     }
-    
+
     public boolean unload(Plugin plugin) {
         if (this.wrapper != null && plugin == this.wrapper.getPlugin()) {
             this.wrapper = null;
@@ -115,5 +127,5 @@ public class Handler<W extends Wrapper> {
             return false;
         }
     }
-    
+
 }

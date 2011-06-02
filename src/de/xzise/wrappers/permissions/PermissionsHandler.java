@@ -45,7 +45,7 @@ public class PermissionsHandler extends Handler<PermissionsWrapper> {
     };
     
     static {
-        FACTORIES.put("Permissions", new PermissionsPluginWrapper.PermissionsPluginFactory());
+        FACTORIES.put("Permissions", new PermissionPluginWrapperFactory());
     }
 
     public PermissionsHandler(PluginManager pluginManager, String plugin, XLogger logger) {

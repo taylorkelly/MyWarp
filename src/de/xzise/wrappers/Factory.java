@@ -7,6 +7,6 @@ import de.xzise.XLogger;
 
 public interface Factory<T> {
 
-    T create(Plugin plugin, XLogger logger);
+    T create(Plugin plugin, XLogger logger) throws InvalidWrapperException;
     
 }

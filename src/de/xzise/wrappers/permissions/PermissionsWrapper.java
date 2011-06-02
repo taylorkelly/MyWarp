@@ -6,12 +6,12 @@ import de.xzise.wrappers.Wrapper;
 
 public interface PermissionsWrapper extends Wrapper {
 
-    public Boolean has(CommandSender sender, Permission<Boolean> permission);
+    Boolean has(CommandSender sender, Permission<Boolean> permission);
     
-    public Integer getInteger(CommandSender sender, Permission<Integer> permission);
+    Integer getInteger(CommandSender sender, Permission<Integer> permission);
 
-    public Double getDouble(CommandSender sender, Permission<Double> permission);
+    Double getDouble(CommandSender sender, Permission<Double> permission);
 
-    public String getGroup(String world, String player);
+    String getGroup(String world, String player);
     
 }
