@@ -13,16 +13,14 @@ public class PermissionPluginWrapperFactory implements Factory<PermissionsWrappe
     @Override
     public PermissionsWrapper create(Plugin plugin, XLogger logger) throws InvalidWrapperException {
         if (plugin instanceof Permissions) {
-            String[] version = plugin.getDescription().getVersion().split("\\.");
-            if (version.length > 0) {
-                int majorVersion = -1;
+            String compVersion = plugin.getDescription().getVersion();
+            String[] versionElements = compVersion.split("\\.");
+            if (versionElements.length > 0) {
+                int majorVersion;
                 try {
-                    majorVersion = Integer.parseInt(version[0]);
+                    majorVersion = Integer.parseInt(versionElements[0]);
                 } catch (NumberFormatException e) {
                     majorVersion = -1;
-                }
-                if (majorVersion > 3) {
-                    throw new InvalidWrapperException("Unknown Permissions version. (" + majorVersion + ")");
                 }
                 switch (majorVersion) {
                 case 3:
@@ -30,8 +28,10 @@ public class PermissionPluginWrapperFactory implements Factory<PermissionsWrappe
                 case 2:
                     return new PermissionsPluginWrapper((Permissions) plugin);
                 default:
-                    return null;
+                    throw new InvalidWrapperException("Unknown Permissions version. (" + compVersion + ")");
                 }
+            } else {
+                throw new InvalidWrapperException("Unknown Permissions version. (" + compVersion + ")");
             }
         }
         return null;

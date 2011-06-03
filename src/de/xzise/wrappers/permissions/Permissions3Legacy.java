@@ -3,19 +3,42 @@ package de.xzise.wrappers.permissions;
 import java.util.LinkedHashSet;
 
 import com.nijiko.permissions.Entry;
+import com.nijiko.permissions.Entry.IntegerInfoVisitor;
+//import com.nijiko.permissions.Entry.DoubleInfoVisitor;
 import com.nijiko.permissions.Group;
 import com.nijiko.permissions.PermissionHandler;
 import com.nijiko.permissions.User;
 import com.nijiko.permissions.Entry.EntryVisitor;
 
+import de.xzise.XLogger;
+
 public class Permissions3Legacy {
+    
+    public static EntryVisitor<Integer> getIntVisitor(String name, XLogger logger) {
+        try {
+            return new IntegerInfoVisitor(name);
+        } catch (NoClassDefFoundError e) {
+            logger.info("You are maybe using a outdated version of Permissions.");
+            return new IntVisitor(name);
+        }
+    }
+    
+    public static EntryVisitor<Double> getDoubleVisitor(String name, XLogger logger) {
+        try {
+//            return new DoubleInfoVisitor(name);
+            return new DoubleVisitor(name);
+        } catch (NoClassDefFoundError e) {
+            logger.info("You are maybe using a outdated version of Permissions.");
+            return new DoubleVisitor(name);
+        }
+    }
     
     /**
      * A visitor class, to get the raw integer value.
      * 
      * Maybe exposed soon in Permissions 3. Until then use this one.
      */
-    public static final class IntVisitor implements EntryVisitor<Integer> {
+    private static final class IntVisitor implements EntryVisitor<Integer> {
 
         private final String name;
         
@@ -35,7 +58,7 @@ public class Permissions3Legacy {
      * 
      * Maybe exposed soon in Permissions 3. Until then use this one.
      */
-    public static final class DoubleVisitor implements EntryVisitor<Double> {
+    private static final class DoubleVisitor implements EntryVisitor<Double> {
 
         private final String name;
         

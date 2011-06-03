@@ -81,27 +81,20 @@ public class Handler<W extends Wrapper> {
                     Factory<W> factory = factories.get(pdf.getName());
                     if (factory != null) {
                         if (plugin.isEnabled()) {
-                            boolean handled = false;
                             try {
                                 this.wrapper = factory.create(plugin, this.logger);
+                                loaded = true;
                             } catch (InvalidWrapperException e) {
                                 this.logger.warning("Error while loading the plugin " + pdf.getFullName() + " into " + this.type + " system.");
                                 this.logger.warning("Error message: " + e.getMessage());
-                                handled = true;
                                 this.wrapper = null;
                             } catch (Exception e) {
                                 this.logger.warning("Unspecified error while loading the plugin " + pdf.getFullName() + " into " + this.type + " system.");
                                 this.logger.warning("Error message: '" + e.getMessage() + "' of '" + e.getClass().getSimpleName() + "'");
-                                handled = true;
                                 this.wrapper = null;
                             }
-                            if (this.wrapper == null) {
-                                if (!handled) {
-                                    this.logger.warning("Invalid " + this.type + " system found: " + pdf.getFullName());
-                                }
-                            } else {
-                                this.logger.warning("Doesn't link to disabled " + this.type + " system: " + pdf.getFullName());
-                            }
+                        } else {
+                            this.logger.warning("Skiped disabled " + this.type + " system: " + pdf.getFullName());
                         }
                     }
                 }
