@@ -48,6 +48,15 @@ public class LocationWrapper implements Moveable<LocationWrapper> {
         }
     }
     
+    public boolean unsetWorld(World world) {
+        if (this.location.world == world && world != null) {
+            this.location = new FixedLocation(null, this.location.x, this.location.y, this.location.z, this.location.yaw, this.location.pitch);
+            return true;
+        } else {
+            return false;
+        }
+    }
+    
     public FixedLocation getLocation() {
         return this.location;
     }

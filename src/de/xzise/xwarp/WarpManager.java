@@ -16,6 +16,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 
 import de.xzise.MinecraftUtil;
+import de.xzise.metainterfaces.CommandSenderWrapper;
 import de.xzise.metainterfaces.LocationWrapper;
 import de.xzise.metainterfaces.Nameable;
 import de.xzise.wrappers.economy.EconomyHandler;
@@ -128,11 +129,13 @@ public class WarpManager {
                 } else {
                     creator = MinecraftUtil.getPlayerName(player);
                 }
+                
+                CommandSender sender = CommandSenderWrapper.getCommandSender(player);
     
                 int warpsByCreator = this.list.getNumberOfWarps(creator, visibility, world);
                 int totalWarpsByCreator = this.list.getNumberOfWarps(creator, null, world);
-                int allowedMaximum = MyWarp.permissions.getInteger(player, limit);
-                int allowedTotalMaximum = MyWarp.permissions.getInteger(player, PermissionValues.WARP_LIMIT_TOTAL);
+                int allowedMaximum = MyWarp.permissions.getInteger(sender, limit);
+                int allowedTotalMaximum = MyWarp.permissions.getInteger(sender, PermissionValues.WARP_LIMIT_TOTAL);
                 if (warpsByCreator >= allowedMaximum && allowedMaximum >= 0) {
                     player.sendMessage(ChatColor.RED + "You are allowed to create only " + allowedMaximum + " warps.");
                 } else if (totalWarpsByCreator >= allowedTotalMaximum && allowedTotalMaximum >= 0) {

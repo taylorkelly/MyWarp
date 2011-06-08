@@ -131,6 +131,11 @@ public class MyWarp extends JavaPlugin {
         this.economyWrapper.load();
         
         this.getServer().getPluginManager().registerEvent(Event.Type.WORLD_LOAD, new XWWorldListener(warpManager), Priority.Low, this);
+        try {
+            this.getServer().getPluginManager().registerEvent(Event.Type.WORLD_UNLOAD, new XWWorldListener(warpManager), Priority.Low, this);
+        } catch (NoSuchFieldError e) {
+            // No unload on server: No problem at all. Since 834/835 there.
+        }
         this.getServer().getPluginManager().registerEvent(Event.Type.PLAYER_INTERACT, playerListener, Priority.Normal, this);
         this.getServer().getPluginManager().registerEvent(Event.Type.PLAYER_MOVE, playerListener, Priority.Normal, this);
         this.getServer().getPluginManager().registerEvent(Event.Type.ENTITY_DAMAGE, new XWEntityListener(properties, warpManager.getWarmUp()), Priority.Normal, this);

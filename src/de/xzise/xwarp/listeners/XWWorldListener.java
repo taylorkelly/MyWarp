@@ -5,6 +5,7 @@ import me.taylorkelly.mywarp.Warp;
 
 import org.bukkit.event.world.WorldListener;
 import org.bukkit.event.world.WorldLoadEvent;
+import org.bukkit.event.world.WorldUnloadEvent;
 
 import de.xzise.xwarp.WarpManager;
 
@@ -25,7 +26,20 @@ public class XWWorldListener extends WorldListener {
             }
         }
         if (i > 0) {
-            MyWarp.logger.info("Loaded world '" + event.getWorld().getName() + "' and updated " + i + " warp" + (i == 1 ? "." : "s."));
+            MyWarp.logger.info("Because world '" + event.getWorld().getName() + "' was loaded " + i + " warp" + (i == 1 ? "" : "s") + " get valid.");
+        }
+    }
+    
+    @Override
+    public void onWorldUnload(WorldUnloadEvent event) {
+        int i = 0;
+        for (Warp warp : this.manager.getWarps()) {
+            if (warp.getLocationWrapper().unsetWorld(event.getWorld())) {
+                i++;
+            }
+        }
+        if (i > 0) {
+            MyWarp.logger.info("Because world '" + event.getWorld().getName() + "' was unloaded " + i + " warp" + (i == 1 ? "" : "s") + " get invalid.");
         }
     }
 }
