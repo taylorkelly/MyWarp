@@ -160,12 +160,11 @@ public class Warp {
             Material top = location.getBlock().getType();
             
             Boolean save = null;
-            //TODO: Test comma! Is there already a method?
-            double comma = MinecraftUtil.getComma(location.getY());
+            double comma = MinecraftUtil.getDecimalPlaces(location.getY());
             
             //TODO: Determine comma for “step height”
             if (comma > 0.5D) {
-                if (checkMaterials(new Material[] { lower }, Material.STEP) && checkOpaqueMaterials(higher)) {
+                if (checkMaterials(lower, Material.STEP) && checkOpaqueMaterials(higher)) {
                     save = true;
                 }
             }
@@ -186,8 +185,31 @@ public class Warp {
     }
     
     private static boolean checkOpaqueMaterials(Material... materials) {
-        //TODO: Reorganize
-        return checkMaterials(materials, Material.AIR, Material.WATER, Material.STATIONARY_WATER, Material.SAPLING, Material.YELLOW_FLOWER, Material.RED_ROSE, Material.BROWN_MUSHROOM, Material.RED_MUSHROOM, Material.TORCH, Material.REDSTONE_TORCH_ON, Material.REDSTONE_TORCH_OFF, Material.REDSTONE_WIRE, Material.CROPS, Material.SIGN_POST, Material.LADDER, Material.RAILS, Material.WALL_SIGN, Material.LEVER, Material.STONE_PLATE, Material.WOOD_PLATE, Material.STONE_BUTTON, Material.SNOW, Material.WOODEN_DOOR, Material.PORTAL, Material.SUGAR_CANE_BLOCK, Material.IRON_DOOR, Material.POWERED_RAIL, Material.DETECTOR_RAIL, Material.CAKE_BLOCK);
+        // TODO: Reorganize
+        // @formatter:off
+        return checkMaterials(materials,
+                // "Solids" blocks
+                Material.AIR, Material.WATER, Material.STATIONARY_WATER, Material.SNOW,
+                // Plants
+                Material.SAPLING, Material.YELLOW_FLOWER, Material.RED_ROSE, Material.BROWN_MUSHROOM, Material.RED_MUSHROOM, Material.SUGAR_CANE_BLOCK, Material.CROPS,
+                // Torches/Redstone
+                Material.TORCH, Material.REDSTONE_TORCH_ON, Material.REDSTONE_TORCH_OFF, Material.REDSTONE_WIRE,
+                // Signs
+                Material.SIGN_POST, Material.WALL_SIGN,
+                // Rails
+                Material.RAILS, Material.POWERED_RAIL, Material.DETECTOR_RAIL,
+                // Switches
+                Material.LEVER, Material.STONE_PLATE, Material.WOOD_PLATE, Material.STONE_BUTTON,
+                // Doors
+                Material.WOODEN_DOOR, Material.IRON_DOOR,
+                Material.LADDER,
+                Material.PORTAL,
+                Material.CAKE_BLOCK);
+        // @formatter:on
+    }
+    
+    private static boolean checkMaterials(Material material, Material... allowed) {
+        return MinecraftUtil.contains(material, allowed);
     }
     
     private static boolean checkMaterials(Material[] materials, Material... allowed) {

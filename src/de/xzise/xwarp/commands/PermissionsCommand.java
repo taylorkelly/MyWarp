@@ -4,11 +4,15 @@ import me.taylorkelly.mywarp.MyWarp;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Server;
+import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import de.xzise.xwarp.WarpManager;
 import de.xzise.xwarp.wrappers.permission.PermissionTypes;
+import de.xzise.xwarp.wrappers.permission.PermissionValues;
+import de.xzise.xwarp.wrappers.permission.PricePermissions;
+import de.xzise.xwarp.wrappers.permission.WorldPermission;
 
 public class PermissionsCommand extends DefaultSubCommand {
 
@@ -74,9 +78,38 @@ public class PermissionsCommand extends DefaultSubCommand {
                     sender.sendMessage(message);
                 }
             }
+            for (PermissionValues value : PermissionValues.values()) {
+                sender.sendMessage(value.getName() + ": " + MyWarp.permissions.getInteger(sender, value));
+            }
+            for (PricePermissions value : PricePermissions.values()) {
+                sender.sendMessage(value.getName() + ": " + MyWarp.permissions.getDouble(sender, value));
+            }
+            sender.sendMessage("Allowed to warp within: " + this.worldPermission(sender, WorldPermission.WITHIN_WORLD));
+            sender.sendMessage("Allowed to warp into: " + this.worldPermission(sender, WorldPermission.TO_WORLD));
             return true;
         } else {
             return false;
+        }
+    }
+    
+    private String worldPermission(CommandSender sender, WorldPermission permission) {
+        int count = 0;
+        String worlds = "";
+        for (World world : this.server.getWorlds()) {
+            if (MyWarp.permissions.permission(sender, permission.getPermission(world.getName(), false))) {
+                if (count > 0) {
+                    worlds += ", ";
+                }
+                worlds += world.getName();
+                count++;
+            }
+        }
+        if (count == this.server.getWorlds().size()) {
+            return "All worlds";
+        } else if (count == 0) {
+            return "None";
+        } else {
+            return worlds;
         }
     }
 
@@ -97,7 +130,7 @@ public class PermissionsCommand extends DefaultSubCommand {
 
     @Override
     protected boolean listHelp(CommandSender sender) {
-        // TODO: false or true? It is only a debug function so ... false?
+        // It is only a debug function so: false?
         return false;
     }
 

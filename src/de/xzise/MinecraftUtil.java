@@ -352,8 +352,12 @@ public final class MinecraftUtil {
         }
     }
     
-    public static double getComma(double value) {
-        return Math.abs(value - Math.floor(value));
+    public static long trunc(double value) {
+        return (long) value;
+    }
+    
+    public static double getDecimalPlaces(double value) {
+        return Math.abs(value - trunc(value));
     }
 
     /**

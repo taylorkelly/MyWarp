@@ -97,7 +97,7 @@ public class WarpManager {
     private void printPayMessage(CommandSender payee, double amount) {
         if (amount > -0.0000001 && amount < 0.0000001) {
             if (this.properties.showFreePriceMessage()) {
-                String freePriceMessage = "Yeah. This warp was " + ChatColor.GREEN + "free";
+                String freePriceMessage = "Yeah. This warp was " + ChatColor.GREEN + "free" + ChatColor.WHITE;
                 // Little easteregg: Print with a 1 % change the (as beer) text
                 if (Math.random() < 0.01) {
                     freePriceMessage += " (as beer)";
