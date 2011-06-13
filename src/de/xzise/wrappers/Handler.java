@@ -39,6 +39,16 @@ public class Handler<W extends Wrapper> {
         return this.wrapper != null && this.wrapper != this.nullary;
     }
 
+    public String getWrapperName() {
+        if (this.isActive()) {
+            return this.wrapper.getPlugin().getDescription().getFullName();
+        } else if (this.pluginManager == null) {
+            return "Deactivated";
+        } else {
+            return "Not linked (yet)";
+        }
+    }
+    
     public W getWrapper() {
         return this.wrapper == null ? this.nullary : this.wrapper;
     }

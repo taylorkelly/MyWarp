@@ -228,22 +228,26 @@ public class WarpList {
     }
 
     public int getSize(CommandSender sender, String creator) {
-        if (creator == null || creator.isEmpty())
+        if (creator == null || creator.isEmpty()) {
             return this.getSize(sender);
-        else {
+        } else {
             Map<String, Warp> map = this.personal.get(creator.toLowerCase());
             return map == null ? 0 : this.getSize(sender, map);
         }
     }
 
     private int getSize(CommandSender sender, Map<String, Warp> map) {
-        int size = 0;
-        for (Warp warp : map.values()) {
-            if (warp.listWarp(sender)) {
-                size++;
+        if (sender == null) {
+            return map.size();
+        } else {
+            int size = 0;
+            for (Warp warp : map.values()) {
+                if (warp.listWarp(sender)) {
+                    size++;
+                }
             }
+            return size;
         }
-        return size;
     }
 
 }

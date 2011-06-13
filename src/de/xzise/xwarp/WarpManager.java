@@ -121,7 +121,9 @@ public class WarpManager {
             PermissionTypes type = Groups.CREATE_GROUP.get(visibility);
             PermissionValues limit = Groups.LIMIT_GROUP.get(visibility);
             
-            if (MyWarp.permissions.permission(player, type)) {
+            CommandSender sender = CommandSenderWrapper.getCommandSender(player);
+            
+            if (MyWarp.permissions.permission(sender, type)) {
                 String creator = "";
                 String world = player.getLocation().getWorld().getName();
                 if (player instanceof Nameable) {
@@ -129,8 +131,6 @@ public class WarpManager {
                 } else {
                     creator = MinecraftUtil.getPlayerName(player);
                 }
-                
-                CommandSender sender = CommandSenderWrapper.getCommandSender(player);
     
                 int warpsByCreator = this.list.getNumberOfWarps(creator, visibility, world);
                 int totalWarpsByCreator = this.list.getNumberOfWarps(creator, null, world);
@@ -142,38 +142,38 @@ public class WarpManager {
                     player.sendMessage(ChatColor.RED + "You are allowed to create only " + allowedTotalMaximum + " warps in total.");
                 } else {
                     if (warp != null) {
-                        player.sendMessage(ChatColor.RED + "Warp called '" + name + "' already exists (" + warp.name + ").");
+                        sender.sendMessage(ChatColor.RED + "Warp called '" + name + "' already exists (" + warp.name + ").");
                     } else if (visibility == Visibility.GLOBAL && globalWarp != null) {
-                        player.sendMessage(ChatColor.RED + "Global warp called '" + name + "' already exists (" + globalWarp.name + ").");
+                        sender.sendMessage(ChatColor.RED + "Global warp called '" + name + "' already exists (" + globalWarp.name + ").");
                     } else {
-                        double price = MyWarp.permissions.getDouble(player, Groups.PRICES_CREATE_GROUP.get(visibility));
+                        double price = MyWarp.permissions.getDouble(sender, Groups.PRICES_CREATE_GROUP.get(visibility));
     
-                        switch (this.economy.pay(player, price)) {
+                        switch (this.economy.pay(sender, price)) {
                         case PAID:
-                            this.printPayMessage(player, price);
+                            this.printPayMessage(sender, price);
                         case UNABLE:
                             warp = new Warp(name, creator, newOwner, new LocationWrapper(player.getLocation()));
                             warp.visibility = visibility;
                             this.list.addWarp(warp);
                             this.data.addWarp(warp);
-                            player.sendMessage("Successfully created '" + ChatColor.GREEN + warp.name + ChatColor.WHITE + "'.");
+                            sender.sendMessage("Successfully created '" + ChatColor.GREEN + warp.name + ChatColor.WHITE + "'.");
                             switch (visibility) {
                             case PRIVATE:
-                                WarpManager.printPrivatizeMessage(player, warp);
+                                WarpManager.printPrivatizeMessage(sender, warp);
                                 break;
                             case PUBLIC:
-                                if (MyWarp.permissions.permissionOr(player, PermissionTypes.CREATE_PRIVATE, PermissionTypes.ADMIN_PRIVATE)) {
-                                    player.sendMessage("If you'd like to privatize it, use:");
-                                    player.sendMessage(ChatColor.GREEN + "/warp private \"" + warp.name + "\" " + warp.getOwner());
+                                if (MyWarp.permissions.permissionOr(sender, PermissionTypes.CREATE_PRIVATE, PermissionTypes.ADMIN_PRIVATE)) {
+                                    sender.sendMessage("If you'd like to privatize it, use:");
+                                    sender.sendMessage(ChatColor.GREEN + "/warp private \"" + warp.name + "\" " + warp.getOwner());
                                 }
                                 break;
                             case GLOBAL:
-                                player.sendMessage("This warp is now global available.");
+                                sender.sendMessage("This warp is now global available.");
                                 break;
                             }
                             break;
                         case NOT_ENOUGH:
-                            player.sendMessage(ChatColor.RED + "You have not enough money to pay this creation.");
+                            sender.sendMessage(ChatColor.RED + "You have not enough money to pay this creation.");
                             break;
                         }
                     }

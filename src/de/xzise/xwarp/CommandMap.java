@@ -6,6 +6,8 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import me.taylorkelly.mywarp.MyWarp;
+
 import org.bukkit.Server;
 import org.bukkit.command.CommandSender;
 
@@ -33,6 +35,7 @@ import de.xzise.xwarp.commands.ReloadCommand;
 import de.xzise.xwarp.commands.RemoveEditorCommand;
 import de.xzise.xwarp.commands.RenameCommand;
 import de.xzise.xwarp.commands.SearchCommand;
+import de.xzise.xwarp.commands.StatusCommand;
 import de.xzise.xwarp.commands.SubCommand;
 import de.xzise.xwarp.commands.UninviteCommand;
 import de.xzise.xwarp.commands.UpdateCommand;
@@ -74,10 +77,11 @@ public class CommandMap {
         subCommands.add(new PriceCommand(list, server));
         subCommands.add(new SearchCommand(list, server));
         subCommands.add(new ListCommand(list, server));
+        subCommands.add(new ChangeCreatorCommand(list, server));
         subCommands.add(new InfoCommand(list, server, economyWrapper));
         subCommands.add(new ListedCommand(list, server));
         subCommands.add(new ReloadCommand(list));
-        subCommands.add(new ChangeCreatorCommand(list, server));
+        subCommands.add(new StatusCommand(list, economyWrapper, MyWarp.permissions));
         subCommands.add(new PermissionsCommand(list, server));
         subCommands.add(new ExportCommand(list, server, pluginPath));
         subCommands.add(new ImportCommand(list, pluginPath, data, server));
