@@ -2,10 +2,10 @@ package de.xzise.xwarp;
 
 public class WarpDestination {
     public final String name;
-    public final String creator;
+    public final String owner;
 
-    public WarpDestination(String name, String creator) {
+    public WarpDestination(String name, String owner) {
         this.name = name;
-        this.creator = creator;
+        this.owner = owner;
     }
 }

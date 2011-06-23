@@ -25,10 +25,22 @@ public class Warp {
     public enum Visibility {
         PRIVATE(0), PUBLIC(1), GLOBAL(2);
 
+        private static final Map<String, Visibility> names = new HashMap<String, Warp.Visibility>();
+        
+        static {
+            names.put("private", PRIVATE);
+            names.put("public", PUBLIC);
+            names.put("global", GLOBAL);
+        }
+        
         public final int level;
 
         private Visibility(int level) {
             this.level = level;
+        }
+
+        public static Visibility parseString(String string) {
+            return names.get(string);
         }
 
         public static Visibility parseLevel(int level) {

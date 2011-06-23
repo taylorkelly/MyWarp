@@ -165,7 +165,7 @@ public class GenericLister {
         FixedLocation location = wrapper.getLocation();
         String invalidString = "";
         if (!wrapper.isValid()) {
-            invalidString = " " + ChatColor.RED + "(invalid)";
+            invalidString = " " + ChatColor.RED + "(invalid)" + ChatColor.WHITE;
         }
         return " @(" + wrapper.getWorld() + invalidString + ", " + location.getBlockX() + ", " + location.getBlockY() + ", " + location.getBlockZ() + ")";
     }

@@ -3,8 +3,12 @@ package de.xzise.xwarp.signwarps;
 import java.util.ArrayList;
 import java.util.List;
 
+import me.taylorkelly.mywarp.MyWarp;
+
+import org.bukkit.Material;
 import org.bukkit.block.Sign;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 
 import de.xzise.xwarp.WarpDestination;
 import de.xzise.xwarp.WarpManager;
@@ -20,26 +24,40 @@ public class SignWarp {
         this.sign = sign;
     }
 
-    public WarpDestination getDestination() {
-        return SignWarp.getDestination(SignWarp.getFilledLines(this.sign));
+    public WarpDestination getDestination(Player player) {
+        return SignWarp.getDestination(SignWarp.getFilledLines(this.sign), player);
     }
 
     public boolean warp(WarpManager list, Player player) {
-        WarpDestination destination = this.getDestination();
+        WarpDestination destination = this.getDestination(player);
 
         if (destination != null) {
-            list.warpTo(destination.name, destination.creator, player, WarperFactory.getWarpable(player), true);
+            list.warpTo(destination.name, destination.owner, player, WarperFactory.getWarpable(player), true);
             return true;
         } else {
             return false;
         }
     }
+    
+    private static String replaceName(String text, String value, String... placeHolders) {
+        for (String placeHolder : placeHolders) {
+            text = text.replace("{" + placeHolder + "}", value);
+        }
+        return text;
+    }
 
-    public static WarpDestination getDestination(String[] lines) {
+    public static WarpDestination getDestination(String[] lines, Player player) {
         for (SignWarpDefinition destinationElement : SIGN_WARP_DEFINITIONS) {
             WarpDestination destination = destinationElement.getDestination(lines);
             if (destination != null) {
-                return destination;
+                String name = destination.name;
+                name = replaceName(name, player.getName(), "Name", "N");
+                name = replaceName(name, player.getDisplayName(), "DName", "DN");
+                name = replaceName(name, MyWarp.permissions.getGroup(player.getWorld().getName(), player.getName()), "Group", "G");
+                ItemStack stack = player.getItemInHand();
+                name = replaceName(name, String.valueOf(stack == null ? Material.AIR.getId() : stack.getTypeId()), "Hand", "M");
+                
+                return new WarpDestination(name, destination.owner);
             }
         }
 

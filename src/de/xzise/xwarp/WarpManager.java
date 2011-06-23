@@ -4,6 +4,7 @@ import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 import me.taylorkelly.mywarp.MyWarp;
 import me.taylorkelly.mywarp.Warp;
@@ -515,35 +516,6 @@ public class WarpManager {
         return new MatchList(exactMatches, matches);
     }
 
-    public List<Warp> getSortedWarps(CommandSender sender, String creator, int start, int size) {
-        List<Warp> ret = new ArrayList<Warp>(size);
-        List<Warp> names;
-        if (MinecraftUtil.isSet(creator)) {
-            names = this.list.getWarps(creator);
-        } else {
-            names = this.getWarps();
-        }
-
-        final Collator collator = Collator.getInstance();
-        collator.setStrength(Collator.SECONDARY);
-        Collections.sort(names, Warp.WARP_NAME_COMPARATOR);
-
-        int index = 0;
-        int currentCount = 0;
-        while (index < names.size() && ret.size() < size) {
-            Warp warp = names.get(index);
-            if (warp.listWarp(sender)) {
-                if (currentCount >= start) {
-                    ret.add(warp);
-                } else {
-                    currentCount++;
-                }
-            }
-            index++;
-        }
-        return ret;
-    }
-
     public void blindAdd(Warp warp) {
         this.list.addWarp(warp);
         // if (this.getWarp(warp.name) == null) {
@@ -623,6 +595,36 @@ public class WarpManager {
         } else {
             WarpManager.sendMissingWarp(name, owner, warped);
         }
+    }
+    
+    public List<Warp> getWarps(CommandSender sender, Set<String> creators, Set<String> owners, Set<String> worlds, Set<Visibility> visibilites) {
+        List<Warp> warps = new ArrayList<Warp>();
+        
+        if (MinecraftUtil.isSet(owners)) {
+            for (String owner : owners) {
+                warps.addAll(this.list.getWarps(owner));
+            }
+        } else {
+            warps.addAll(this.list.getWarps());
+        }
+        
+        for (int i = warps.size() - 1; i >= 0; i--) {
+            Warp w = warps.get(i);
+            if ((MinecraftUtil.isSet(creators) && !creators.contains(w.getCreator().toLowerCase())) ||
+                (MinecraftUtil.isSet(worlds) && !worlds.contains(w.getLocationWrapper().getWorld().toLowerCase())) ||
+                (MinecraftUtil.isSet(visibilites) && !visibilites.contains(w.visibility)) ||
+                (!w.listWarp(sender))) {
+                warps.remove(i);
+            }
+        }
+
+        if (warps.size() > 0) {
+            final Collator collator = Collator.getInstance();
+            collator.setStrength(Collator.SECONDARY);
+            Collections.sort(warps, Warp.WARP_NAME_COMPARATOR);
+        }
+        
+        return warps;
     }
 
     public int getSize(CommandSender sender, String creator) {

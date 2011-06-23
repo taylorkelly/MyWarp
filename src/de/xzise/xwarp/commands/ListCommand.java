@@ -1,11 +1,18 @@
 package de.xzise.xwarp.commands;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import me.taylorkelly.mywarp.MyWarp;
+import me.taylorkelly.mywarp.Warp;
+import me.taylorkelly.mywarp.Warp.Visibility;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Server;
 import org.bukkit.command.CommandSender;
-import org.bukkit.command.ConsoleCommandSender;
+import org.bukkit.entity.Player;
 
 import de.xzise.MinecraftUtil;
 import de.xzise.xwarp.WarpManager;
@@ -19,44 +26,86 @@ public class ListCommand extends DefaultSubCommand {
         super(list, server, "list", "ls");
     }
 
+    private static <T> void add(CommandSender sender, Set<T> set, T t) {
+        if (!set.add(t)) {
+            sender.sendMessage(ChatColor.RED + "This parameter was already added.");
+        }
+    }
+    
     @Override
-    protected boolean internalExecute(CommandSender sender, String[] parameters) {        
-        if (parameters.length == 3 && !MinecraftUtil.isInteger(parameters[2])) {
-            return false;
-        } else if (!MyWarp.permissions.permission(sender, PermissionTypes.CMD_LIST)) {
+    protected boolean internalExecute(CommandSender sender, String[] parameters) {
+        if (!MyWarp.permissions.permission(sender, PermissionTypes.CMD_LIST)) {
             sender.sendMessage(ChatColor.RED + "You have no permission to list warps.");
             return true;
         }
-
+        
+        // Special case
         if (parameters.length == 2 && parameters[1].equalsIgnoreCase("legend")) {
-            if (sender instanceof ConsoleCommandSender) {
-                sender.sendMessage("No colors in console, so this command is useless here!");
+            if (!(sender instanceof Player)) {
+                sender.sendMessage("Maybe no colors here, so this command could be useless here!");
             }
             for (String line : GenericLister.getLegend()) {
                 sender.sendMessage(line);
             }
         } else {
-            String creator = null;
-            int page;
-            int maxPages = -1;
-            int numLines = MinecraftUtil.getMaximumLines(sender);
-
-            ListSection section = new ListSection("", numLines);
-
-            if (parameters.length == 3 || (parameters.length == 2 && !MinecraftUtil.isInteger(parameters[1]))) {
-                creator = this.getPlayer(parameters[1]);
-                if (parameters.length == 3) {
-                    page = Integer.parseInt(parameters[2]);
+            // Parse values here
+            /*
+             * c:<creator>
+             * oc:<offline creator (won't be expanded)>
+             * w:<world>
+             * o:<owner>
+             * oo:<offline owner (won't be expanded)>
+             * v:<visibility>
+             */
+            
+            Set<String> creators = new HashSet<String>();
+            Set<String> owners = new HashSet<String>();
+            Set<String> worlds = new HashSet<String>();
+            Set<Visibility> visibilites = new HashSet<Visibility>();
+            Integer page = null; // Default page = 1
+            // 0 = list/ls
+            for (int i = 1; i < parameters.length; i++) {
+                if (parameters[i].startsWith("c:")) {
+                    add(sender, creators, MinecraftUtil.expandName(parameters[i].substring(2), this.server).toLowerCase());
+                } else if (parameters[i].startsWith("oc:")) {
+                    add(sender, creators, parameters[i].substring(2).toLowerCase());
+                } else if (parameters[i].startsWith("w:")) {
+                    add(sender, worlds, parameters[i].substring(2).toLowerCase());
+                } else if (parameters[i].startsWith("o:")) {
+                    add(sender, owners, MinecraftUtil.expandName(parameters[i].substring(2), this.server).toLowerCase());
+                } else if (parameters[i].startsWith("oo:")) {
+                    add(sender, owners, parameters[i].substring(2).toLowerCase());
+                } else if (parameters[i].startsWith("v:")) {
+                    Visibility v = Visibility.parseString(parameters[i].substring(2));
+                    if (v != null) {
+                        add(sender, visibilites, v);
+                    } else {
+                        sender.sendMessage(ChatColor.RED + "Inputed an invalid visibility value: " + parameters[i].substring(2));
+                    }
                 } else {
-                    page = 1;
+                    Integer buffer = MinecraftUtil.tryAndGetInteger(parameters[i]);
+                    if (buffer != null) {
+                        if (page == null) {
+                            page = buffer;
+                        } else {
+                            sender.sendMessage(ChatColor.RED + "Found more than one page definition. Selecting first: " + buffer);
+                        }
+                    } else {
+                        sender.sendMessage(ChatColor.RED + "Unknown parameter prefix: " + parameters[i]);
+                    }
                 }
-            } else if (parameters.length == 2) {
-                page = Integer.parseInt(parameters[1]);
-            } else {
+            }
+            
+            if (page == null) {
                 page = 1;
             }
 
-            maxPages = getNumberOfPages(this.list.getSize(sender, creator), sender);
+            final List<Warp> warps = this.list.getWarps(sender, creators, owners, worlds, visibilites);
+            
+            final int maxPages = getNumberOfPages(warps.size(), sender);
+            final int numLines = MinecraftUtil.getMaximumLines(sender);
+
+            final ListSection section = new ListSection("", numLines);
 
             if (maxPages < 1) {
                 sender.sendMessage(ChatColor.RED + "There are no warps to list");
@@ -68,8 +117,16 @@ public class ListCommand extends DefaultSubCommand {
                 sender.sendMessage(ChatColor.RED + "There are only " + maxPages + " pages of warps");
                 return true;
             }
+            
+            // Get only those warps one the page
+            List<Warp> pageWarps = new ArrayList<Warp>(numLines);
+            final int offset = (page - 1) * numLines;
+            final int lines = Math.min(warps.size() - offset, numLines);
+            for (int i = 0; i < lines; i++) {
+                pageWarps.add(warps.get(i + offset));
+            }
 
-            section.addWarps(this.list.getSortedWarps(sender, creator, (page - 1) * (numLines - 1), numLines - 1));
+            section.addWarps(pageWarps);
 
             GenericLister.listPage(page, maxPages, sender, section);
         }

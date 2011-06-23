@@ -26,6 +26,7 @@ public class PermissionPluginWrapperFactory implements Factory<PermissionsWrappe
                 case 3:
                     return new Permissions3Wrapper((Permissions) plugin, logger);
                 case 2:
+                case 1: // Guess, that the Permissions 1 work with the Permissions 2 wrapper (e.g. for PermissionsEx)
                     return new PermissionsPluginWrapper((Permissions) plugin);
                 default:
                     throw new InvalidWrapperException("Unknown Permissions version. (" + compVersion + ")");

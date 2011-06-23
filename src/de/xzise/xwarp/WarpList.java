@@ -203,13 +203,12 @@ public class WarpList {
     }
 
     public List<Warp> getWarps(String owner) {
-        List<Warp> result = null;
         Map<String, Warp> personalWarps = this.personal.get(owner.toLowerCase());
         if (personalWarps != null) {
-            result = new ArrayList<Warp>(personalWarps.size());
-            result.addAll(personalWarps.values());
+            return new ArrayList<Warp>(personalWarps.values());
+        } else {
+            return new ArrayList<Warp>(0);
         }
-        return result;
     }
 
     /**

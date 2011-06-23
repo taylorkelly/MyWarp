@@ -7,6 +7,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Random;
 
@@ -237,8 +238,8 @@ public final class MinecraftUtil {
         }
         if (o instanceof String) {
             return !((String) o).isEmpty();
-        } else if (o instanceof List<?>) {
-            return !((List<?>) o).isEmpty();
+        } else if (o instanceof Collection<?>) {
+            return !((Collection<?>) o).isEmpty();
         } else if (o.getClass().isArray()) {
             return java.lang.reflect.Array.getLength(o) > 0;
         } else {
