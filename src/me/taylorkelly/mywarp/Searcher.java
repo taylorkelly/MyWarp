@@ -51,26 +51,18 @@ public class Searcher {
             if (this.exactMatches.size() > startIndex) {
                 ListSection section = new ListSection("Exact matches for search: " + ChatColor.GREEN + this.query, MinecraftUtil.getMaximumLines(sender));
                 elementsLeft--;
-                for (Warp warp : exactMatches) {
-                    if (elementsLeft > 0) {
-                        section.addWarp(warp);
-                        elementsLeft--;
-                    } else {
-                        break;
-                    }
+                for (int i = startIndex; i < this.exactMatches.size() && elementsLeft > 0; i++) {
+                    section.addWarp(this.exactMatches.get(i));
+                    elementsLeft--;
                 }
                 sections.add(section);
             }
             if (this.matches.size() > startIndex && elementsLeft > 2) {
                 ListSection section = new ListSection("Partial matches for search: " + ChatColor.GREEN + this.query);
                 elementsLeft--;
-                for (Warp warp : matches) {
-                    if (elementsLeft > 0) {
-                        section.addWarp(warp);
-                        elementsLeft--;
-                    } else {
-                        break;
-                    }
+                for (int i = startIndex; i < this.matches.size() && elementsLeft > 0; i++) {
+                    section.addWarp(this.matches.get(i));
+                    elementsLeft--;
                 }
                 sections.add(section);
             }

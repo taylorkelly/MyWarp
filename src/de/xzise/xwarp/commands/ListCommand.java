@@ -103,32 +103,29 @@ public class ListCommand extends DefaultSubCommand {
             final List<Warp> warps = this.list.getWarps(sender, creators, owners, worlds, visibilites);
             
             final int maxPages = getNumberOfPages(warps.size(), sender);
-            final int numLines = MinecraftUtil.getMaximumLines(sender);
+            final int numLines = MinecraftUtil.getMaximumLines(sender) - 1;
 
             final ListSection section = new ListSection("", numLines);
 
             if (maxPages < 1) {
                 sender.sendMessage(ChatColor.RED + "There are no warps to list");
-                return true;
             } else if (page < 1) {
                 sender.sendMessage(ChatColor.RED + "Page number can't be below 1.");
-                return true;
             } else if (page > maxPages) {
                 sender.sendMessage(ChatColor.RED + "There are only " + maxPages + " pages of warps");
-                return true;
+            } else {
+                // Get only those warps one the page
+                List<Warp> pageWarps = new ArrayList<Warp>(numLines);
+                final int offset = (page - 1) * numLines;
+                final int lines = Math.min(warps.size() - offset, numLines);
+                for (int i = 0; i < lines; i++) {
+                    pageWarps.add(warps.get(i + offset));
+                }
+    
+                section.addWarps(pageWarps);
+    
+                GenericLister.listPage(page, maxPages, sender, section);
             }
-            
-            // Get only those warps one the page
-            List<Warp> pageWarps = new ArrayList<Warp>(numLines);
-            final int offset = (page - 1) * numLines;
-            final int lines = Math.min(warps.size() - offset, numLines);
-            for (int i = 0; i < lines; i++) {
-                pageWarps.add(warps.get(i + offset));
-            }
-
-            section.addWarps(pageWarps);
-
-            GenericLister.listPage(page, maxPages, sender, section);
         }
         return true;
     }

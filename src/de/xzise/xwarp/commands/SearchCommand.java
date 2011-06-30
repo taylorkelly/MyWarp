@@ -19,19 +19,24 @@ public class SearchCommand extends DefaultSubCommand {
 
     @Override
     protected boolean internalExecute(CommandSender sender, String[] parameters) {
-        Integer page = null;
-        if (parameters.length == 2 || (parameters.length == 3 && (page = MinecraftUtil.tryAndGetInteger(parameters[2])) != null)) {
+        if (parameters.length == 2 || parameters.length == 3) {
             if (!MyWarp.permissions.permission(sender, PermissionTypes.CMD_SEARCH)) {
                 sender.sendMessage(ChatColor.RED + "You have no permission to search warps.");
             } else {
-                if (page == null) {
+                Integer page = null;
+                if (parameters.length == 3) {
+                    page = MinecraftUtil.tryAndGetInteger(parameters[2]);
+                } else {
                     page = 1;
                 }
-    
-                Searcher searcher = new Searcher(this.list);
-                searcher.addPlayer(sender);
-                searcher.setQuery(parameters[1]);
-                searcher.search(page);
+                if (page != null) {
+                    Searcher searcher = new Searcher(this.list);
+                    searcher.addPlayer(sender);
+                    searcher.setQuery(parameters[1]);
+                    searcher.search(page);
+                } else {
+                    sender.sendMessage(ChatColor.RED + "Invalid page number entered.");
+                }
             }
             return true;
         } else {
