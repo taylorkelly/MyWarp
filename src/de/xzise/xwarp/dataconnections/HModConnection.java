@@ -532,27 +532,6 @@ public class HModConnection implements DataConnection {
         this.writeWarps(new ArrayList<Warp>(0));
     }
 
-    private final class NameIdentification implements IdentificationInterface {
-
-        private final String name;
-        private final String owner;
-
-        public NameIdentification(Warp warp) {
-            this(warp.name, warp.getOwner());
-        }
-
-        public NameIdentification(String name, String owner) {
-            this.name = name;
-            this.owner = owner;
-        }
-
-        @Override
-        public boolean isIdentificated(Warp warp) {
-            return warp.name.equalsIgnoreCase(this.name) && warp.getOwner().equals(this.owner);
-        }
-
-    }
-
     @Override
     public IdentificationInterface createIdentification(Warp warp) {
         return new NameIdentification(warp);

@@ -11,6 +11,8 @@ public final class DataConnectionFactory {
             return new SQLiteConnection(server);
         } else if (type.equalsIgnoreCase("hmod")) {
             return new HModConnection(server);
+        } else if (type.equalsIgnoreCase("yml")) {
+            ;
         } else {
             return null;
         }

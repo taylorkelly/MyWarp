@@ -30,7 +30,7 @@ import me.taylorkelly.mywarp.Warp.Visibility;
 public class SQLiteConnection implements DataConnection {
 
     public final static String DATABASE = "jdbc:sqlite:homes-warps.db";
-    private final static String WARP_TABLE = "CREATE TABLE `warpTable` (" + "`id` INTEGER PRIMARY KEY," + "`name` varchar(32) NOT NULL DEFAULT 'warp'," + "`creator` varchar(32) NOT NULL DEFAULT 'Player'," + "`world` varchar(32) NOT NULL," + "`x` DPUBLE NOT NULL DEFAULT '0'," + "`y` DOUBLE NOT NULL DEFAULT '0'," + "`z` DOUBLE NOT NULL DEFAULT '0'," + "`yaw` smallint NOT NULL DEFAULT '0'," + "`pitch` smallint NOT NULL DEFAULT '0'," + "`publicLevel` smallint NOT NULL DEFAULT '1'," + "`welcomeMessage` varchar(100) NOT NULL DEFAULT ''," + "`owner` varchar(32) NOT NULL DEFAULT '', " + "`price` int NOT NULL DEFAULT '0'" + ");";
+    private final static String WARP_TABLE = "CREATE TABLE `warpTable` (" + "`id` INTEGER PRIMARY KEY," + "`name` varchar(32) NOT NULL DEFAULT 'warp'," + "`creator` varchar(32) NOT NULL DEFAULT 'Player'," + "`world` varchar(32) NOT NULL," + "`x` DOUBLE NOT NULL DEFAULT '0'," + "`y` DOUBLE NOT NULL DEFAULT '0'," + "`z` DOUBLE NOT NULL DEFAULT '0'," + "`yaw` smallint NOT NULL DEFAULT '0'," + "`pitch` smallint NOT NULL DEFAULT '0'," + "`publicLevel` smallint NOT NULL DEFAULT '1'," + "`welcomeMessage` varchar(100) NOT NULL DEFAULT ''," + "`owner` varchar(32) NOT NULL DEFAULT '', " + "`price` int NOT NULL DEFAULT '0'" + ");";
     private final static String PERMISSIONS_TABLE = "CREATE TABLE `permissions` (" + "`id` INTEGER NOT NULL," + "`editor` varchar(32) NOT NULL," + "`value` " + ");";
 
     private final static String VERSION_TABLE = "CREATE TABLE `meta` (`name` varchar(32) NOT NULL, `value` int NOT NULL);";

@@ -23,20 +23,22 @@ import de.xzise.xwarp.wrappers.permission.WorldPermission;
 public class Warp {
 
     public enum Visibility {
-        PRIVATE(0), PUBLIC(1), GLOBAL(2);
+        PRIVATE(0, "private"), PUBLIC(1, "public"), GLOBAL(2, "global");
 
         private static final Map<String, Visibility> names = new HashMap<String, Warp.Visibility>();
         
         static {
-            names.put("private", PRIVATE);
-            names.put("public", PUBLIC);
-            names.put("global", GLOBAL);
+            for (Visibility v : Visibility.values()) {
+                names.put(v.name, v);
+            }
         }
         
         public final int level;
+        public final String name;
 
-        private Visibility(int level) {
+        private Visibility(int level, String name) {
             this.level = level;
+            this.name = name;
         }
 
         public static Visibility parseString(String string) {
@@ -69,7 +71,7 @@ public class Warp {
     private String creator;
     private LocationWrapper location;
     /** This price value will be transfered to the owner. */
-    private int price;
+    private double price;
     private boolean listed;
     private String owner;
     public Visibility visibility;
@@ -403,11 +405,11 @@ public class Warp {
         }
     }
 
-    public void setPrice(int price) {
+    public void setPrice(double price) {
         this.price = price;
     }
 
-    public int getPrice() {
+    public double getPrice() {
         return this.price;
     }
 

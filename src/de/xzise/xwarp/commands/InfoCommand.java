@@ -26,7 +26,7 @@ public class InfoCommand extends WarpCommand {
         this.wrapper = wrapper;
     }
     
-    private String getPrice(int price, double base) {
+    private String getPrice(double price, double base) {
         if (price < 0 || (price == 0 && base == 0)) {
             return "Gratis";
         } else if (price == 0 && base != 0) {

@@ -77,7 +77,7 @@ public class EconomyHandler extends Handler<EconomyWrapper> {
      * @param basic The basic price like an tax.
      * @return If the price could be paid or if there was nothing to pay.
      */
-    public PayResult pay(CommandSender sender, String reciever, int price, double basic) {
+    public PayResult pay(CommandSender sender, String reciever, double price, double basic) {
         if (this.getWrapper() != null) {
            Player player = MinecraftUtil.getPlayer(sender);
            if (player != null) {
