@@ -107,8 +107,10 @@ public enum PermissionTypes implements Permission<Boolean>, VisibilityPermission
     ADMIN_FREE("warp.admin.price.free", false),
     // Hide from list/Show on list
     ADMIN_LIST_CHANGE("warp.admin.list.change", false),
-    // Hide from list/Show on list
-    ADMIN_LIST_VIEW("warp.admin.list.view", false),
+    // Ignore listed status
+    ADMIN_LIST_VIEW("warp.admin.list.view", false), 
+    // Ignore protection areas
+    ADMIN_IGNORE_PROTECTION_AREA("warp.admin.area.ignore", false),
     ;
 
     // Maybe upcoming permissions:

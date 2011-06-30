@@ -40,6 +40,7 @@ import de.xzise.xwarp.wrappers.permission.PermissionValues;
 public class WarpManager {
 
     private WarpList list;
+    private List<WarpProtectionArea> protectionAreas;
     private Server server;
     private DataConnection data;
     private CoolDown coolDown;
@@ -49,6 +50,7 @@ public class WarpManager {
 
     public WarpManager(Plugin plugin, EconomyHandler economy, PluginProperties properties, DataConnection data) {
         this.list = new WarpList();
+        this.protectionAreas = new ArrayList<WarpProtectionArea>();
         this.server = plugin.getServer();
         this.properties = properties;
         this.data = data;
@@ -147,35 +149,49 @@ public class WarpManager {
                     } else if (visibility == Visibility.GLOBAL && globalWarp != null) {
                         sender.sendMessage(ChatColor.RED + "Global warp called '" + name + "' already exists (" + globalWarp.name + ").");
                     } else {
-                        double price = MyWarp.permissions.getDouble(sender, Groups.PRICES_CREATE_GROUP.get(visibility));
-    
-                        switch (this.economy.pay(sender, price)) {
-                        case PAID:
-                            this.printPayMessage(sender, price);
-                        case UNABLE:
-                            warp = new Warp(name, creator, newOwner, new LocationWrapper(player.getLocation()));
-                            warp.visibility = visibility;
-                            this.list.addWarp(warp);
-                            this.data.addWarp(warp);
-                            sender.sendMessage("Successfully created '" + ChatColor.GREEN + warp.name + ChatColor.WHITE + "'.");
-                            switch (visibility) {
-                            case PRIVATE:
-                                WarpManager.printPrivatizeMessage(sender, warp);
-                                break;
-                            case PUBLIC:
-                                if (MyWarp.permissions.permissionOr(sender, PermissionTypes.CREATE_PRIVATE, PermissionTypes.ADMIN_PRIVATE)) {
-                                    sender.sendMessage("If you'd like to privatize it, use:");
-                                    sender.sendMessage(ChatColor.GREEN + "/warp private \"" + warp.name + "\" " + warp.getOwner());
+                        boolean inProtectionArea = false;
+                        boolean skipProtectionTest = MyWarp.permissions.permission(sender, PermissionTypes.ADMIN_IGNORE_PROTECTION_AREA);
+                        if (!skipProtectionTest) {
+                            for (WarpProtectionArea area : this.protectionAreas) {
+                                if (area.isWithIn(player) && creator != null && area.isAllowed(creator)) {
+                                    inProtectionArea = true;
+                                }
+                            }
+                        }
+                    
+                        if (!skipProtectionTest && inProtectionArea) {
+                            player.sendMessage(ChatColor.RED + "Here is a warp creation protection area.");
+                        } else {
+                            double price = MyWarp.permissions.getDouble(sender, Groups.PRICES_CREATE_GROUP.get(visibility));
+        
+                            switch (this.economy.pay(sender, price)) {
+                            case PAID:
+                                this.printPayMessage(sender, price);
+                            case UNABLE:
+                                warp = new Warp(name, creator, newOwner, new LocationWrapper(player.getLocation()));
+                                warp.visibility = visibility;
+                                this.list.addWarp(warp);
+                                this.data.addWarp(warp);
+                                sender.sendMessage("Successfully created '" + ChatColor.GREEN + warp.name + ChatColor.WHITE + "'.");
+                                switch (visibility) {
+                                case PRIVATE:
+                                    WarpManager.printPrivatizeMessage(sender, warp);
+                                    break;
+                                case PUBLIC:
+                                    if (MyWarp.permissions.permissionOr(sender, PermissionTypes.CREATE_PRIVATE, PermissionTypes.ADMIN_PRIVATE)) {
+                                        sender.sendMessage("If you'd like to privatize it, use:");
+                                        sender.sendMessage(ChatColor.GREEN + "/warp private \"" + warp.name + "\" " + warp.getOwner());
+                                    }
+                                    break;
+                                case GLOBAL:
+                                    sender.sendMessage("This warp is now global available.");
+                                    break;
                                 }
                                 break;
-                            case GLOBAL:
-                                sender.sendMessage("This warp is now global available.");
+                            case NOT_ENOUGH:
+                                sender.sendMessage(ChatColor.RED + "You have not enough money to pay this creation.");
                                 break;
                             }
-                            break;
-                        case NOT_ENOUGH:
-                            sender.sendMessage(ChatColor.RED + "You have not enough money to pay this creation.");
-                            break;
                         }
                     }
                 }
