@@ -2,6 +2,7 @@ package de.xzise.xwarp.commands;
 
 import me.taylorkelly.mywarp.Warp;
 
+import org.bukkit.ChatColor;
 import org.bukkit.Server;
 import org.bukkit.command.CommandSender;
 
@@ -19,8 +20,14 @@ public class MessageCommand extends WarpCommand {
         if (parameters.length == 0) {
             Warp warp = this.list.getWarp(warpName, owner, MinecraftUtil.getPlayerName(sender));
             if (warp != null) {
-                sender.sendMessage("Welcome message of '" + warp.name + "' is:");
-                sender.sendMessage(warp.welcomeMessage);
+                String message = warp.getWelcomeMessage();
+                if (message.isEmpty()) {
+                    sender.sendMessage("Welcome message of '" + warp.name + "' is empty.");
+                } else {
+                    sender.sendMessage("Welcome message of '" + warp.name + "' is:");
+                    boolean def = warp.getRawWelcomeMessage() == null;
+                    sender.sendMessage(ChatColor.AQUA + message + (def ? ChatColor.WHITE + " (default)" : ""));
+                }
             } else {
                 WarpManager.sendMissingWarp(warpName, owner, sender);
             }
@@ -35,7 +42,7 @@ public class MessageCommand extends WarpCommand {
 
     @Override
     protected String[] getFullHelpText() {
-        return new String[] {"Sets the welcome message which appears if you teleport to this warp."};
+        return new String[] {"Sets the welcome message which appears if you teleport to this warp." , "If set to 'default' it will show the default message."};
     }
 
     @Override

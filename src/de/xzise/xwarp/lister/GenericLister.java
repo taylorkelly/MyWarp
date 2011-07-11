@@ -1,7 +1,9 @@
 package de.xzise.xwarp.lister;
 
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
+import java.util.Set;
 
 import me.taylorkelly.mywarp.Warp;
 
@@ -30,7 +32,17 @@ public class GenericLister {
     private GenericLister() {
     }
     
+    public enum Column {
+        OWNER,
+        WORLD,
+        LOCATION;
+    }
+    
     public static void listPage(int page, int maxPages, CommandSender sender, ListSection... sections) {
+        listPage(page, maxPages, sender, EnumSet.allOf(Column.class), sections);
+    }
+    
+    public static void listPage(int page, int maxPages, CommandSender sender, Set<Column> columns, ListSection... sections) {
 
         int charsPerLine = 40;
         WidthCalculator widther = null;
@@ -49,7 +61,7 @@ public class GenericLister {
 
         sender.sendMessage(ChatColor.WHITE + intro);
 
-        int width = widther.getWidth(intro);
+        final int width = widther.getWidth(intro);
 
         for (ListSection listSection : sections) {
             if (listSection.title != null && !listSection.title.isEmpty()) {
@@ -70,9 +82,9 @@ public class GenericLister {
                     color = GenericLister.getColor(warp, null);
                 }
 
-                String location = GenericLister.getLocationString(warp.getLocationWrapper());
-                String creatorString = " by " + owner;
-
+                String location = GenericLister.getLocationString(warp.getLocationWrapper(), columns.contains(Column.WORLD), columns.contains(Column.LOCATION));
+                final String creatorString = columns.contains(Column.OWNER) ? " by " + owner : "";
+                
                 // Find remaining length left
                 int left = width - widther.getWidth("''" + creatorString + location);
 
@@ -80,7 +92,11 @@ public class GenericLister {
                 if (left > nameLength) {
                     name = "'" + name + "'" + ChatColor.WHITE + creatorString + whitespace(left - nameLength, widther.getWidth(" "));
                 } else if (left < nameLength) {
-                    name = "'" + substring(name, left, widther) + "'" + ChatColor.WHITE + creatorString;
+                    name = "'" + substring(name, left, widther) + ChatColor.WHITE + "..." + color + "'";
+                    nameLength = widther.getWidth(name);
+                    // Cut location if needed
+                    location = substring(location, width - nameLength - widther.getWidth(creatorString), widther);
+                    name += ChatColor.WHITE + creatorString;
                 }
 
                 sender.sendMessage(color + name + location);
@@ -92,7 +108,7 @@ public class GenericLister {
      * Lob shit off that string till it fits.
      */
     private static String substring(String name, int left, WidthCalculator widthCalculator) {
-        while (widthCalculator.getWidth(name) > left && !name.isEmpty()) {
+        while (widthCalculator.getWidth(name) > left && name.length() > 3) {
             name = name.substring(0, name.length() - 1);
         }
         return name;
@@ -161,13 +177,28 @@ public class GenericLister {
         return GenericLister.PRIVATE_OTHER;
     }
 
-    public static String getLocationString(LocationWrapper wrapper) {
-        FixedLocation location = wrapper.getLocation();
-        String invalidString = "";
-        if (!wrapper.isValid()) {
-            invalidString = " " + ChatColor.RED + "(invalid)" + ChatColor.WHITE;
+    public static String getLocationString(LocationWrapper wrapper, boolean world, boolean coordinates) {
+        if (world || coordinates) {
+            FixedLocation location = wrapper.getLocation();
+            StringBuilder result = new StringBuilder("@(");
+            if (world) {
+                result.append(wrapper.getWorld());
+                if (!wrapper.isValid()) {
+                    result.append(" " + ChatColor.RED + "(invalid)" + ChatColor.WHITE);
+                }
+                if (coordinates) {
+                    result.append(", ");
+                }
+            }
+            if (coordinates) {
+                result.append(location.getBlockX()).append(", ");
+                result.append(location.getBlockY()).append(", ");
+                result.append(location.getBlockZ());
+            }
+            return result.append(")").toString();
+        } else {
+            return "";
         }
-        return " @(" + wrapper.getWorld() + invalidString + ", " + location.getBlockX() + ", " + location.getBlockY() + ", " + location.getBlockZ() + ")";
     }
 
 }

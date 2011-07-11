@@ -1,6 +1,6 @@
 package de.xzise.xwarp.commands;
 
-import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -17,6 +17,7 @@ import org.bukkit.entity.Player;
 import de.xzise.MinecraftUtil;
 import de.xzise.xwarp.WarpManager;
 import de.xzise.xwarp.lister.GenericLister;
+import de.xzise.xwarp.lister.GenericLister.Column;
 import de.xzise.xwarp.lister.ListSection;
 import de.xzise.xwarp.wrappers.permission.PermissionTypes;
 
@@ -58,10 +59,18 @@ public class ListCommand extends DefaultSubCommand {
              * v:<visibility>
              */
             
+            // Whitelist
             Set<String> creators = new HashSet<String>();
             Set<String> owners = new HashSet<String>();
             Set<String> worlds = new HashSet<String>();
             Set<Visibility> visibilites = new HashSet<Visibility>();
+            
+            // Blacklist
+            /* not implemented yet */
+            
+            // Column blacklist
+            EnumSet<Column> blackColumns = EnumSet.noneOf(Column.class);
+            
             Integer page = null; // Default page = 1
             // 0 = list/ls
             for (int i = 1; i < parameters.length; i++) {
@@ -81,6 +90,16 @@ public class ListCommand extends DefaultSubCommand {
                         add(sender, visibilites, v);
                     } else {
                         sender.sendMessage(ChatColor.RED + "Inputed an invalid visibility value: " + parameters[i].substring(2));
+                    }
+                } else if (parameters[i].startsWith("-col:")) {
+                    if (parameters[i].equalsIgnoreCase("-col:owner")) {
+                        add(sender, blackColumns, Column.OWNER);
+                    } else if (parameters[i].equalsIgnoreCase("-col:world")) {
+                        add(sender, blackColumns, Column.WORLD);
+                    } else if (parameters[i].equalsIgnoreCase("-col:loc")) {
+                        add(sender, blackColumns, Column.LOCATION);
+                    } else {
+                        sender.sendMessage(ChatColor.RED + "Unknown column: " + parameters[i].substring(5));
                     }
                 } else {
                     Integer buffer = MinecraftUtil.tryAndGetInteger(parameters[i]);
@@ -115,16 +134,13 @@ public class ListCommand extends DefaultSubCommand {
                 sender.sendMessage(ChatColor.RED + "There are only " + maxPages + " pages of warps");
             } else {
                 // Get only those warps one the page
-                List<Warp> pageWarps = new ArrayList<Warp>(numLines);
                 final int offset = (page - 1) * numLines;
                 final int lines = Math.min(warps.size() - offset, numLines);
-                for (int i = 0; i < lines; i++) {
-                    pageWarps.add(warps.get(i + offset));
-                }
+                List<Warp> pageWarps = warps.subList(offset, offset + lines);
     
                 section.addWarps(pageWarps);
     
-                GenericLister.listPage(page, maxPages, sender, section);
+                GenericLister.listPage(page, maxPages, sender, EnumSet.complementOf(blackColumns), section);
             }
         }
         return true;

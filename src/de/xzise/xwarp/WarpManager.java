@@ -2,8 +2,11 @@ package de.xzise.xwarp;
 
 import java.text.Collator;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import me.taylorkelly.mywarp.MyWarp;
@@ -23,11 +26,11 @@ import de.xzise.metainterfaces.Nameable;
 import de.xzise.wrappers.economy.EconomyHandler;
 import de.xzise.xwarp.dataconnections.DataConnection;
 import de.xzise.xwarp.dataconnections.IdentificationInterface;
+import de.xzise.xwarp.dataconnections.WarpProtectionConnection;
 import de.xzise.xwarp.timer.CoolDown;
 import de.xzise.xwarp.timer.WarmUp;
 import de.xzise.xwarp.warpable.Positionable;
 import de.xzise.xwarp.warpable.Warpable;
-import de.xzise.xwarp.warpable.WarperFactory;
 import de.xzise.xwarp.wrappers.permission.Groups;
 import de.xzise.xwarp.wrappers.permission.PermissionTypes;
 import de.xzise.xwarp.wrappers.permission.PermissionValues;
@@ -39,8 +42,8 @@ import de.xzise.xwarp.wrappers.permission.PermissionValues;
  */
 public class WarpManager {
 
-    private WarpList list;
-    private List<WarpProtectionArea> protectionAreas;
+    private WarpList<Warp> list;
+    private WarpList<WarpProtectionArea> protectionAreas;
     private Server server;
     private DataConnection data;
     private CoolDown coolDown;
@@ -50,7 +53,7 @@ public class WarpManager {
 
     public WarpManager(Plugin plugin, EconomyHandler economy, PluginProperties properties, DataConnection data) {
         this.list = new WarpList();
-        this.protectionAreas = new ArrayList<WarpProtectionArea>();
+        this.protectionAreas = new HashMap<String, WarpProtectionArea>();
         this.server = plugin.getServer();
         this.properties = properties;
         this.data = data;
@@ -66,6 +69,14 @@ public class WarpManager {
 
     private void loadFromDatabase() {
         this.list.loadList(this.data.getWarps());
+        if (this.data instanceof WarpProtectionConnection) {
+            List<WarpProtectionArea> areas = ((WarpProtectionConnection) this.data).getProtectionAreas();
+            for (WarpProtectionArea area : areas) {
+                this.protectionAreas.put(area.getName().toLowerCase(), area);
+            }
+        } else {
+            MyWarp.logger.info("No warp protection area feature available.");
+        }
     }
     
     public void reload(CommandSender sender) {
@@ -116,8 +127,8 @@ public class WarpManager {
     }
     
     public void addWarp(String name, Positionable player, String newOwner, Visibility visibility) {
-        Warp warp = this.list.getWarp(name, newOwner, null);
-        Warp globalWarp = (visibility == Visibility.GLOBAL ? this.list.getWarp(name) : null);
+        Warp warp = this.list.getWarpObject(name, newOwner, null);
+        Warp globalWarp = (visibility == Visibility.GLOBAL ? this.list.getWarpObject(name) : null);
         if ((warp == null && globalWarp == null) || !this.properties.isCreationUpdating()) {
             if (globalWarp != warp && Visibility.GLOBAL == visibility)
                 MyWarp.logger.info("Everything okay! But inform the developer (xZise), that the global warp wasn't equals warp!");
@@ -149,17 +160,18 @@ public class WarpManager {
                     } else if (visibility == Visibility.GLOBAL && globalWarp != null) {
                         sender.sendMessage(ChatColor.RED + "Global warp called '" + name + "' already exists (" + globalWarp.name + ").");
                     } else {
-                        boolean inProtectionArea = false;
+                        List<String> inProtectionArea = new ArrayList<String>();
                         boolean skipProtectionTest = MyWarp.permissions.permission(sender, PermissionTypes.ADMIN_IGNORE_PROTECTION_AREA);
                         if (!skipProtectionTest) {
-                            for (WarpProtectionArea area : this.protectionAreas) {
+                            for (WarpProtectionArea area : this.protectionAreas.values()) {
                                 if (area.isWithIn(player) && creator != null && area.isAllowed(creator)) {
-                                    inProtectionArea = true;
+                                    inProtectionArea.add(area.getName());
                                 }
                             }
                         }
                     
-                        if (!skipProtectionTest && inProtectionArea) {
+                        if (!skipProtectionTest && inProtectionArea.size() > 0) {
+                            //TODO: Tell which protection areas?
                             player.sendMessage(ChatColor.RED + "Here is a warp creation protection area.");
                         } else {
                             double price = MyWarp.permissions.getDouble(sender, Groups.PRICES_CREATE_GROUP.get(visibility));
@@ -296,7 +308,11 @@ public class WarpManager {
         Warp warp = this.getWarp(name, owner, MinecraftUtil.getPlayerName(sender));
         if (warp != null) {
             if (playerCanModifyWarp(sender, warp, Permissions.MESSAGE)) {
-                warp.welcomeMessage = message;
+                if (message.equalsIgnoreCase("default")) {
+                    warp.setWelcomeMessage(null);
+                } else {
+                    warp.setWelcomeMessage(message);
+                }
                 this.data.updateMessage(warp);
                 sender.sendMessage("You have successfully changed the welcome message.");
             } else {
@@ -308,7 +324,7 @@ public class WarpManager {
     }
 
     public void privatize(String name, String owner, CommandSender sender) {
-        Warp warp = this.list.getWarp(name, owner, MinecraftUtil.getPlayerName(sender));
+        Warp warp = this.list.getWarpObject(name, owner, MinecraftUtil.getPlayerName(sender));
         if (warp != null) {
             if (WarpManager.playerCanModifyWarp(sender, warp, Permissions.PRIVATE)) {
                 warp.visibility = Visibility.PRIVATE;
@@ -324,7 +340,7 @@ public class WarpManager {
     }
 
     public void publicize(String name, String owner, CommandSender sender) {
-        Warp warp = this.list.getWarp(name, owner, MinecraftUtil.getPlayerName(sender));
+        Warp warp = this.list.getWarpObject(name, owner, MinecraftUtil.getPlayerName(sender));
         if (warp != null) {
             if (WarpManager.playerCanModifyWarp(sender, warp, Permissions.PUBLIC)) {
                 warp.visibility = Visibility.PUBLIC;
@@ -340,7 +356,7 @@ public class WarpManager {
     }
 
     public void setPrice(String name, String owner, CommandSender sender, int price) {
-        Warp warp = this.list.getWarp(name, owner, MinecraftUtil.getPlayerName(sender));
+        Warp warp = this.list.getWarpObject(name, owner, MinecraftUtil.getPlayerName(sender));
         if (warp != null) {
             Permissions p;
             if (price < 0) {
@@ -365,10 +381,10 @@ public class WarpManager {
     }
 
     public void globalize(String name, String owner, CommandSender sender) {
-        Warp warp = this.list.getWarp(name, owner, MinecraftUtil.getPlayerName(sender));
+        Warp warp = this.list.getWarpObject(name, owner, MinecraftUtil.getPlayerName(sender));
         if (warp != null) {
             if (playerCanModifyWarp(sender, warp, Permissions.GLOBAL)) {
-                Warp existing = this.list.getWarp(name);
+                Warp existing = this.list.getWarpObject(name);
                 if (existing == null || existing.visibility != Visibility.GLOBAL) {
                     warp.visibility = Visibility.GLOBAL;
                     this.data.updateVisibility(warp);
@@ -388,7 +404,7 @@ public class WarpManager {
     }
 
     public void invite(String name, String owner, CommandSender sender, String inviteeName) {
-        Warp warp = this.list.getWarp(name, owner, MinecraftUtil.getPlayerName(sender));
+        Warp warp = this.list.getWarpObject(name, owner, MinecraftUtil.getPlayerName(sender));
         if (warp != null) {
             if (playerCanModifyWarp(sender, warp, Permissions.INVITE)) {
                 if (warp.playerIsInvited(inviteeName)) {
@@ -417,7 +433,7 @@ public class WarpManager {
     }
 
     public void uninvite(String name, String owner, CommandSender sender, String inviteeName) {
-        Warp warp = this.list.getWarp(name, owner, MinecraftUtil.getPlayerName(sender));
+        Warp warp = this.list.getWarpObject(name, owner, MinecraftUtil.getPlayerName(sender));
         if (warp != null) {
             if (WarpManager.playerCanModifyWarp(sender, warp, Permissions.UNINVITE)) {
                 if (!warp.playerIsInvited(inviteeName)) {
@@ -503,7 +519,7 @@ public class WarpManager {
     }
 
     public Warp getWarp(String name, String owner, String playerName) {
-        return this.list.getWarp(name, owner, playerName);
+        return this.list.getWarpObject(name, owner, playerName);
     }
 
     public List<Warp> getWarps() {
@@ -565,15 +581,14 @@ public class WarpManager {
         this.warpTo(name, owner, warper, warped, viaSign, this.properties.isForceToUsed());
     }
 
-    public void warpTo(String name, String owner, CommandSender warper, Warpable warped, boolean viaSign, boolean worldForce) {
+    public void warpTo(String name, String owner, CommandSender warper, Warpable warped, boolean viaSign, boolean forced) {
         Warp warp = this.getWarp(name, owner, MinecraftUtil.getPlayerName(warper));
         if (warp != null) {
             if (warp.getLocationWrapper().isValid()) {
                 if (warped.equals(warper) || MyWarp.permissions.permission(warper, PermissionTypes.ADMIN_WARP_OTHERS)) {
                     if (warp.playerCanWarp(warper, viaSign)) {
-                        Positionable warpedPos = WarperFactory.getPositionable(warped);
-                        if (!worldForce && warpedPos != null && warp.getLocation().world != warpedPos.getLocation().getWorld()) {
-                            warper.sendMessage(ChatColor.RED + "The selected warp is in another world.");
+                        if (!forced && !warp.isSave()) {
+                            warper.sendMessage(ChatColor.RED + "The selected warp is maybe not save!");
                             warper.sendMessage(ChatColor.RED + "To force warping use /warp force-to <warp> [owner].");
                         } else {
                             double price = MyWarp.permissions.getDouble(warper, Groups.PRICES_TO_GROUP.get(warp.visibility));
@@ -613,34 +628,84 @@ public class WarpManager {
         }
     }
     
+    private interface Tester<T> {
+        boolean test(T t);
+    }
+    
+    private static class SimpleTester<T> implements Tester<T> {
+        
+        private final boolean t;
+        
+        public SimpleTester(boolean value) {
+            this.t = value;
+        }
+
+        @Override
+        public boolean test(T o) {
+            return t;
+        }
+
+    }
+    
+    private static final class CollectionContainCheck<T> implements Tester<T> {
+        
+        private final Collection<T> collection;
+        
+        public CollectionContainCheck(Collection<T> collection) {
+            this.collection = collection;
+        }
+
+        @Override
+        public boolean test(T t) {
+            return collection.contains(t);
+        }
+        
+    }
+    
+    public static <T> Tester<T> getTester(Collection<T> collection) {
+        if (MinecraftUtil.isSet(collection)) {
+            return new CollectionContainCheck<T>(collection);
+        } else {
+            return new SimpleTester<T>(true);
+        }
+    }
+    
     public List<Warp> getWarps(CommandSender sender, Set<String> creators, Set<String> owners, Set<String> worlds, Set<Visibility> visibilites) {
-        List<Warp> warps = new ArrayList<Warp>();
+        List<Warp> allWarps = new ArrayList<Warp>();
         
         if (MinecraftUtil.isSet(owners)) {
             for (String owner : owners) {
-                warps.addAll(this.list.getWarps(owner));
+                allWarps.addAll(this.list.getWarps(owner));
             }
         } else {
-            warps.addAll(this.list.getWarps());
+            allWarps.addAll(this.list.getWarps());
         }
         
-        for (int i = warps.size() - 1; i >= 0; i--) {
-            Warp w = warps.get(i);
-            if ((MinecraftUtil.isSet(creators) && !creators.contains(w.getCreator().toLowerCase())) ||
-                (MinecraftUtil.isSet(worlds) && !worlds.contains(w.getLocationWrapper().getWorld().toLowerCase())) ||
-                (MinecraftUtil.isSet(visibilites) && !visibilites.contains(w.visibility)) ||
-                (!w.listWarp(sender))) {
-                warps.remove(i);
+        ArrayList<Warp> validWarps = new ArrayList<Warp>(allWarps.size());
+        
+        Tester<String> creatorTester = getTester(creators);
+        Tester<String> ownerTester = getTester(owners);
+        Tester<String> worldTester = getTester(worlds);
+        Tester<Visibility> visibilityTester = getTester(visibilites);
+        
+        for (int i = allWarps.size() - 1; i >= 0; i--) {
+            Warp w = allWarps.get(i);
+            if ((creatorTester.test(w.getCreator().toLowerCase())) &&
+                (ownerTester.test(w.getOwner())) &&
+                (worldTester.test(w.getLocationWrapper().getWorld().toLowerCase())) &&
+                (visibilityTester.test(w.visibility)) &&
+                (w.listWarp(sender))) {
+                validWarps.add(w);
             }
         }
 
-        if (warps.size() > 0) {
-            final Collator collator = Collator.getInstance();
-            collator.setStrength(Collator.SECONDARY);
-            Collections.sort(warps, Warp.WARP_NAME_COMPARATOR);
+        if (validWarps.size() > 0) {
+            // Removes everything which was to much
+            validWarps.trimToSize();
+            Collections.sort(validWarps, Warp.WARP_NAME_COMPARATOR);
         }
         
-        return warps;
+        return validWarps;
     }
 
     public int getSize(CommandSender sender, String creator) {
@@ -652,7 +717,7 @@ public class WarpManager {
     }
 
     public boolean isNameAvailable(String name, String owner) {
-        return this.list.getWarp(name, owner, null) == null;
+        return this.list.getWarpObject(name, owner, null) == null;
     }
 
     public static void sendMissingWarp(String name, String owner, CommandSender sender) {

@@ -1,5 +1,6 @@
 package de.xzise.xwarp;
 
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -10,10 +11,10 @@ import java.util.Set;
 
 public class EditorPermissions implements Map<Permissions, Boolean> {
 
-    private final Boolean[] values;
+    private final boolean[] values;
 
     public EditorPermissions() {
-        this.values = new Boolean[Permissions.values().length];
+        this.values = new boolean[Permissions.values().length];
     }
 
     public String getPermissionString() {
@@ -37,15 +38,19 @@ public class EditorPermissions implements Map<Permissions, Boolean> {
 
     @Override
     public boolean containsKey(Object key) {
-        if (key instanceof Permissions) {
-            return this.values[((Permissions) key).id] != null;
-        }
-        return false;
+        return key instanceof Permissions;
     }
 
     @Override
     public boolean containsValue(Object value) {
-        // TODO Auto-generated method stub
+        if (value instanceof Boolean) {
+            boolean v = (Boolean) value;
+            for (boolean b : this.values) {
+                if (b == v) {
+                    return true;
+                }
+            }
+        }
         return false;
     }
 
@@ -66,29 +71,26 @@ public class EditorPermissions implements Map<Permissions, Boolean> {
     @Override
     public Boolean get(Object key) {
         if (key instanceof Permissions) {
-            return this.values[((Permissions) key).id];
+            return get((Permissions) key);
         }
         return null;
     }
 
     public boolean get(Permissions permission) {
-        Boolean b = this.get((Object) permission);
-        if (b != null) {
-            return b;
-        } else {
-            return false;
-        }
+        return this.values[permission.id];
     }
 
     @Override
     public Boolean put(Permissions key, Boolean value) {
-        return this.values[key.id] = value;
+        boolean old = this.values[key.id];
+        this.values[key.id] = value == null ? false : value;
+        return old;
     }
 
     @Override
     public Boolean remove(Object key) {
         if (key instanceof Permissions) {
-            return this.put((Permissions) key, null);
+            return put((Permissions) key, false);
         } else {
             return null;
         }
@@ -96,17 +98,16 @@ public class EditorPermissions implements Map<Permissions, Boolean> {
 
     @Override
     public void putAll(Map<? extends Permissions, ? extends Boolean> m) {
-        // TODO Auto-generated method stub
-
+        for (Entry<? extends Permissions, ? extends Boolean> entry : m.entrySet()) {
+            put(entry.getKey(), entry.getValue());
+        }
     }
 
     @Override
     public void clear() {
-        for (int i = 0; i < this.values.length; i++) {
-            this.values[i] = null;
-        }
+        Arrays.fill(this.values, false);
     }
-
+    
     @Override
     public Set<Permissions> keySet() {
         Set<Permissions> set = new HashSet<Permissions>();
@@ -118,43 +119,45 @@ public class EditorPermissions implements Map<Permissions, Boolean> {
 
     @Override
     public Collection<Boolean> values() {
-        return Arrays.asList(this.values);
+        List<Boolean> list = new ArrayList<Boolean>(this.values.length);
+        for (int i = 0; i < this.values.length; i++) {
+            list.add(this.values[i]);
+        }
+        return list;
     }
+    
+    public static class AbstractEntry<Key, Value> implements Entry<Key, Value> {
+        private Key k;
+        private Value v;
 
-    private class EditorPermissionEntry implements Entry<Permissions, Boolean> {
-
-        private Permissions p;
-        private Boolean b;
-
-        public EditorPermissionEntry(Permissions p, Boolean b) {
-            this.p = p;
-            this.b = b;
+        public AbstractEntry(Key k, Value v) {
+            this.k = k;
+            this.v = v;
         }
 
         @Override
-        public Permissions getKey() {
-            return this.p;
+        public Key getKey() {
+            return this.k;
         }
 
         @Override
-        public Boolean getValue() {
-            return this.b;
+        public Value getValue() {
+            return this.v;
         }
 
         @Override
-        public Boolean setValue(Boolean value) {
-            Boolean old = this.b;
-            this.b = value;
+        public Value setValue(Value value) {
+            Value old = this.v;
+            this.v = value;
             return old;
         }
-
     }
 
     @Override
     public Set<java.util.Map.Entry<Permissions, Boolean>> entrySet() {
         Set<java.util.Map.Entry<Permissions, Boolean>> set = new HashSet<Map.Entry<Permissions, Boolean>>();
         for (Permissions permissions : Permissions.values()) {
-            set.add(new EditorPermissionEntry(permissions, this.values[permissions.id]));
+            set.add(new AbstractMap.SimpleImmutableEntry<Permissions, Boolean>(permissions, this.values[permissions.id]));
         }
         return set;
     }

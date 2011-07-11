@@ -77,7 +77,10 @@ public class WarmUp {
 
     private void sendPlayer(CommandSender warper, Warpable warped, Warp warp) {
         if (warped.teleport(warp.getLocation().toLocation())) {
-            warped.sendMessage(ChatColor.AQUA + warp.welcomeMessage);
+            String msg = warp.getWelcomeMessage();
+            if (MinecraftUtil.isSet(msg)) {
+                warped.sendMessage(ChatColor.AQUA + msg);
+            }
             this.down.addPlayer(warp.visibility, warper);
             this.players.remove(warper);
             if (!warped.equals(warper)) {

@@ -10,42 +10,41 @@ import org.bukkit.command.CommandSender;
 
 import de.xzise.MinecraftUtil;
 
-import me.taylorkelly.mywarp.Warp;
 import me.taylorkelly.mywarp.Warp.Visibility;
 
-public class WarpList {
+public class WarpList<T extends WarpObject> {
 
-    private class GlobalMap {
+    private class GlobalMap<globalMapObject extends WarpObject> {
 
-        private Warp global;
-        private final Map<String, Warp> all;
+        private globalMapObject global;
+        private final Map<String, globalMapObject> all;
 
         public GlobalMap() {
             this.global = null;
-            this.all = new HashMap<String, Warp>();
+            this.all = new HashMap<String, globalMapObject>();
         }
 
-        public void put(Warp warp) {
-            if (warp.visibility == Visibility.GLOBAL) {
-                this.global = warp;
+        public void put(globalMapObject warpObject) {
+            if (warpObject.getVisibility() == Visibility.GLOBAL) {
+                this.global = warpObject;
             }
-            this.all.put(warp.getCreator().toLowerCase(), warp);
+            this.all.put(warpObject.getCreator().toLowerCase(), warpObject);
         }
 
-        public void delete(Warp warp) {
+        public void delete(globalMapObject warp) {
             if (warp.equals(this.global)) {
                 this.global = null;
             }
             this.all.remove(warp.getCreator().toLowerCase());
         }
 
-        public Warp getWarp(String playerName) {
+        public globalMapObject getWarpObject(String playerName) {
             if (this.global != null) {
                 return this.global;
             }
 
             if (this.all.size() == 1) {
-                return this.all.values().toArray(new Warp[1])[0];
+                return this.all.values().iterator().next();
             } else if (playerName != null && !playerName.isEmpty()) {
                 return this.all.get(playerName.toLowerCase());
             } else {
@@ -53,10 +52,10 @@ public class WarpList {
             }
         }
 
-        public void updateGlobal(Warp warp) {
-            if (this.global == null && warp.visibility == Visibility.GLOBAL) {
-                this.global = warp;
-            } else if (warp.equals(this.global) && warp.visibility != Visibility.GLOBAL) {
+        public void updateGlobal(globalMapObject warpObject) {
+            if (this.global == null && warpObject.getVisibility() == Visibility.GLOBAL) {
+                this.global = warpObject;
+            } else if (warpObject.equals(this.global) && warpObject.getVisibility() != Visibility.GLOBAL) {
                 this.global = null;
             }
         }
@@ -68,80 +67,80 @@ public class WarpList {
     }
 
     // Warps sorted by owner, name
-    private final Map<String, Map<String, Warp>> personal;
+    private final Map<String, Map<String, T>> personal;
     // Warps sorted by creator
-    private final Map<String, List<Warp>> creatorMap;
+    private final Map<String, List<T>> creatorMap;
     // Warps sorted by name
-    private final Map<String, GlobalMap> global;
+    private final Map<String, GlobalMap<T>> global;
 
     public WarpList() {
-        this.personal = new HashMap<String, Map<String, Warp>>();
-        this.global = new HashMap<String, GlobalMap>();
-        this.creatorMap = new HashMap<String, List<Warp>>();
+        this.personal = new HashMap<String, Map<String, T>>();
+        this.global = new HashMap<String, GlobalMap<T>>();
+        this.creatorMap = new HashMap<String, List<T>>();
     }
 
-    public void loadList(Collection<Warp> warps) {
-        for (Map<String, Warp> personalWarps : this.personal.values()) {
+    public void loadList(Collection<T> warpObjects) {
+        for (Map<?, ?> personalWarps : this.personal.values()) {
             personalWarps.clear();
         }
-        for (List<Warp> creatorWarps : this.creatorMap.values()) {
+        for (List<?> creatorWarps : this.creatorMap.values()) {
             creatorWarps.clear();
         }
-        for (GlobalMap globalWarps : this.global.values()) {
+        for (GlobalMap<?> globalWarps : this.global.values()) {
             globalWarps.clear();
         }
 
         // Load elements here
-        for (Warp warp : warps) {
-            this.addWarp(warp);
+        for (T warpObject : warpObjects) {
+            this.addWarp(warpObject);
         }
     }
 
-    public void addWarp(Warp warp) {
-        GlobalMap namedWarps = this.global.get(warp.name.toLowerCase());
+    public void addWarp(T warpObject) {
+        GlobalMap<T> namedWarps = this.global.get(warpObject.getName().toLowerCase());
         if (namedWarps == null) {
-            namedWarps = new GlobalMap();
-            this.global.put(warp.name.toLowerCase(), namedWarps);
+            namedWarps = new GlobalMap<T>();
+            this.global.put(warpObject.getName().toLowerCase(), namedWarps);
         }
-        namedWarps.put(warp);
+        namedWarps.put(warpObject);
 
-        Map<String, Warp> personalWarps = this.personal.get(warp.getOwner().toLowerCase());
+        Map<String, T> personalWarps = this.personal.get(warpObject.getOwner().toLowerCase());
         if (personalWarps == null) {
-            personalWarps = new HashMap<String, Warp>();
-            this.personal.put(warp.getOwner().toLowerCase(), personalWarps);
+            personalWarps = new HashMap<String, T>();
+            this.personal.put(warpObject.getOwner().toLowerCase(), personalWarps);
         }
-        personalWarps.put(warp.name.toLowerCase(), warp);
+        personalWarps.put(warpObject.getName().toLowerCase(), warpObject);
 
-        if (MinecraftUtil.isSet(warp.getCreator())) {
-            List<Warp> creatorWarps = this.creatorMap.get(warp.getCreator().toLowerCase());
+        if (MinecraftUtil.isSet(warpObject.getCreator())) {
+            List<T> creatorWarps = this.creatorMap.get(warpObject.getCreator().toLowerCase());
             if (creatorWarps == null) {
-                creatorWarps = new ArrayList<Warp>();
-                this.creatorMap.put(warp.getCreator().toLowerCase(), creatorWarps);
+                creatorWarps = new ArrayList<T>();
+                this.creatorMap.put(warpObject.getCreator().toLowerCase(), creatorWarps);
             }
-            creatorWarps.add(warp);
+            creatorWarps.add(warpObject);
         }
     }
 
-    public void deleteWarp(Warp warp) {
-        this.global.get(warp.name.toLowerCase()).delete(warp);
+    public void deleteWarp(T warp) {
+        this.global.get(warp.getName().toLowerCase()).delete(warp);
         if (MinecraftUtil.isSet(warp.getCreator())) {
             this.creatorMap.get(warp.getCreator().toLowerCase()).remove(warp);
         }
-        this.personal.get(warp.getOwner().toLowerCase()).remove(warp.name.toLowerCase());
+        this.personal.get(warp.getOwner().toLowerCase()).remove(warp.getName().toLowerCase());
     }
 
-    public void updateOwner(Warp warp, String preOwner) {
-        this.personal.get(preOwner.toLowerCase()).remove(warp.name.toLowerCase());
-        Map<String, Warp> personalWarps = this.personal.get(warp.getOwner().toLowerCase());
+    public void updateOwner(T warp, String preOwner) {
+        this.personal.get(preOwner.toLowerCase()).remove(warp.getName().toLowerCase());
+        Map<String, T> personalWarps = this.personal.get(warp.getOwner().toLowerCase());
         if (personalWarps == null) {
-            personalWarps = new HashMap<String, Warp>();
+            personalWarps = new HashMap<String, T>();
             this.personal.put(warp.getOwner().toLowerCase(), personalWarps);
         }
-        personalWarps.put(warp.name.toLowerCase(), warp);
+        personalWarps.put(warp.getName().toLowerCase(), warp);
     }
 
-    public void updateVisibility(Warp warp) {
-        this.global.get(warp.name.toLowerCase()).updateGlobal(warp);
+    public void updateVisibility(T warp) {
+        this.global.get(warp.getName().toLowerCase()).updateGlobal(warp);
     }
 
     /**
@@ -161,10 +160,10 @@ public class WarpList {
     public int getNumberOfWarps(String creator, Visibility visibility, String world) {
         int number = 0;
         if (MinecraftUtil.isSet(creator)) {
-            List<Warp> warps = this.creatorMap.get(creator.toLowerCase());
-            if (warps != null) {
-                for (Warp warp : warps) {
-                    if ((visibility == null || warp.visibility == visibility) && (world == null || warp.getLocationWrapper().getWorld().equals(world))) {
+            List<T> warpObjects = this.creatorMap.get(creator.toLowerCase());
+            if (warpObjects != null) {
+                for (T warpObject : warpObjects) {
+                    if ((visibility == null || warpObject.getVisibility() == visibility) && (world == null || warpObject.getWorld().equals(world))) {
                         number++;
                     }
                 }
@@ -173,16 +172,16 @@ public class WarpList {
         return number;
     }
 
-    public Warp getWarp(String name, String owner, String playerName) {
+    public T getWarpObject(String name, String owner, String playerName) {
         if (owner == null || owner.isEmpty()) {
-            GlobalMap namedWarps = this.global.get(name.toLowerCase());
+            GlobalMap<T> namedWarps = this.global.get(name.toLowerCase());
             if (namedWarps != null) {
-                return namedWarps.getWarp(playerName);
+                return namedWarps.getWarpObject(playerName);
             } else {
                 return null;
             }
         } else {
-            Map<String, Warp> ownerWarps = this.personal.get(owner.toLowerCase());
+            Map<String, T> ownerWarps = this.personal.get(owner.toLowerCase());
             if (ownerWarps != null) {
                 return ownerWarps.get(name.toLowerCase());
             }
@@ -190,24 +189,24 @@ public class WarpList {
         }
     }
 
-    public Warp getWarp(String name) {
-        return this.getWarp(name, null, null);
+    public T getWarpObject(String name) {
+        return this.getWarpObject(name, null, null);
     }
 
-    public List<Warp> getWarps() {
-        List<Warp> result = new ArrayList<Warp>();
-        for (Map<String, Warp> map : this.personal.values()) {
+    public List<T> getWarps() {
+        List<T> result = new ArrayList<T>();
+        for (Map<String, T> map : this.personal.values()) {
             result.addAll(map.values());
         }
         return result;
     }
 
-    public List<Warp> getWarps(String owner) {
-        Map<String, Warp> personalWarps = this.personal.get(owner.toLowerCase());
+    public List<T> getWarps(String owner) {
+        Map<String, T> personalWarps = this.personal.get(owner.toLowerCase());
         if (personalWarps != null) {
-            return new ArrayList<Warp>(personalWarps.values());
+            return new ArrayList<T>(personalWarps.values());
         } else {
-            return new ArrayList<Warp>(0);
+            return new ArrayList<T>(0);
         }
     }
 
@@ -220,7 +219,7 @@ public class WarpList {
      */
     public int getSize(CommandSender sender) {
         int size = 0;
-        for (Map<String, Warp> map : this.personal.values()) {
+        for (Map<String, T> map : this.personal.values()) {
             size += this.getSize(sender, map);
         }
         return size;
@@ -230,17 +229,17 @@ public class WarpList {
         if (creator == null || creator.isEmpty()) {
             return this.getSize(sender);
         } else {
-            Map<String, Warp> map = this.personal.get(creator.toLowerCase());
+            Map<String, T> map = this.personal.get(creator.toLowerCase());
             return map == null ? 0 : this.getSize(sender, map);
         }
     }
 
-    private int getSize(CommandSender sender, Map<String, Warp> map) {
+    private int getSize(CommandSender sender, Map<String, T> map) {
         if (sender == null) {
             return map.size();
         } else {
             int size = 0;
-            for (Warp warp : map.values()) {
+            for (T warp : map.values()) {
                 if (warp.listWarp(sender)) {
                     size++;
                 }

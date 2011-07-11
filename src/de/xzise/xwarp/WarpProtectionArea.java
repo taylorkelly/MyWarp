@@ -2,21 +2,27 @@ package de.xzise.xwarp;
 
 import java.util.List;
 
+import me.taylorkelly.mywarp.Warp.Visibility;
+
+import org.bukkit.command.CommandSender;
+
 import de.xzise.metainterfaces.FixedLocation;
+import de.xzise.metainterfaces.LocationWrapper;
 import de.xzise.xwarp.warpable.Positionable;
 
-public class WarpProtectionArea {
+public class WarpProtectionArea implements WarpObject {
 
-    private final FixedLocation firstCorner;
-    private final FixedLocation secondCorner;
+    private final LocationWrapper firstCorner;
+    private final LocationWrapper secondCorner;
     private final String name;
     private String owner;
+    private String creator;
     private List<String> allowed;
     
-    public WarpProtectionArea(FixedLocation firstEdge, FixedLocation secondEdge, String name, String owner) {
-        if (this.firstCorner.world.equals(this.secondCorner.world)) {
-            this.firstCorner = firstEdge;
-            this.secondCorner = secondEdge;
+    public WarpProtectionArea(FixedLocation firstCorner, FixedLocation secondCorner, String name, String owner) {
+        if (firstCorner.world.equals(secondCorner.world)) {
+            this.firstCorner = new LocationWrapper(firstCorner);
+            this.secondCorner = new LocationWrapper(secondCorner);
             this.owner = owner;
             this.name = name;
         } else {
@@ -29,13 +35,15 @@ public class WarpProtectionArea {
     }
     
     public boolean isWithIn(FixedLocation location) {
-        if (location.world.equals(firstCorner.world)) {
-            double lowerX = Math.min(firstCorner.x, secondCorner.x);
-            double upperX = Math.max(firstCorner.x, secondCorner.x);
-            double lowerY = Math.min(firstCorner.y, secondCorner.y);
-            double upperY = Math.max(firstCorner.y, secondCorner.y);
-            double lowerZ = Math.min(firstCorner.z, secondCorner.z);
-            double upperZ = Math.max(firstCorner.z, secondCorner.z);
+        if (location.world.getName().equals(firstCorner.getWorld())) {
+            FixedLocation firstCornerBuf = this.firstCorner.getLocation();
+            FixedLocation secondCornerBuf = this.secondCorner.getLocation();
+            double lowerX = Math.min(firstCornerBuf.x, secondCornerBuf.x);
+            double upperX = Math.max(firstCornerBuf.x, secondCornerBuf.x);
+            double lowerY = Math.min(firstCornerBuf.y, secondCornerBuf.y);
+            double upperY = Math.max(firstCornerBuf.y, secondCornerBuf.y);
+            double lowerZ = Math.min(firstCornerBuf.z, secondCornerBuf.z);
+            double upperZ = Math.max(firstCornerBuf.z, secondCornerBuf.z);
             double x = location.x;
             double y = location.y;
             double z = location.z;
@@ -71,4 +79,33 @@ public class WarpProtectionArea {
         }
     }
     
+    public String getName() {
+        return this.name;
+    }
+
+    @Override
+    public String getOwner() {
+        return this.owner;
+    }
+
+    @Override
+    public String getCreator() {
+        return this.creator;
+    }
+
+    @Override
+    public String getWorld() {
+        return null;
+    }
+
+    @Override
+    public Visibility getVisibility() {
+        return null;
+    }
+
+    @Override
+    public boolean listWarp(CommandSender sender) {
+        // TODO Auto-generated method stub
+        return false;
+    }
 }

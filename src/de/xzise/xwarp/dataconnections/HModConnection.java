@@ -185,7 +185,8 @@ public class HModConnection implements DataConnection {
                     FixedLocation location = new FixedLocation(world, x, y, z, yaw, pitch);
                     LocationWrapper wrapper = new LocationWrapper(location, segments[6]);
                     warp = new Warp(name, warpOwner, warpOwner, wrapper);
-                    warp.setMessage(segments[9]);
+                    String msg = segments[9];
+                    warp.setWelcomeMessage(msg.equals("null") ? null : msg);
                     for (int i = GEN_2_LENGTH; i < segments.length; i += 2) {
                         warp.addEditor(segments[i], segments[i + 1]);
                     }
@@ -239,7 +240,8 @@ public class HModConnection implements DataConnection {
                     FixedLocation location = new FixedLocation(world, x, y, z, yaw, pitch);
                     LocationWrapper wrapper = new LocationWrapper(location, segments[6]);
                     warp = new Warp(name, segments[segments.length - 1], warpOwner, wrapper);
-                    warp.setMessage(segments[9]);
+                    String msg = segments[9];
+                    warp.setWelcomeMessage(msg.equals("null") ? null : msg);
                     for (int i = GEN_2_LENGTH; i < segments.length - 1; i += 2) {
                         warp.addEditor(segments[i], segments[i + 1]);
                     }
@@ -294,7 +296,8 @@ public class HModConnection implements DataConnection {
                     FixedLocation location = new FixedLocation(world, x, y, z, yaw, pitch);
                     LocationWrapper wrapper = new LocationWrapper(location, segments[6]);
                     warp = new Warp(name, creator, warpOwner, wrapper);
-                    warp.setMessage(segments[9]);
+                    String msg = segments[9];
+                    warp.setWelcomeMessage(msg.equals("null") ? null : msg);
                     warp.setPrice(Integer.parseInt(segments[11]));
                     for (int i = GEN_4_LENGTH; i < segments.length - 1; i += 2) {
                         warp.addEditor(segments[i], segments[i + 1]);
@@ -358,7 +361,7 @@ public class HModConnection implements DataConnection {
                 warpLine.append(makeParsable(l.getWorld()) + SEPARATOR);
                 warpLine.append(makeParsable(warp.getOwner()) + SEPARATOR);
                 warpLine.append(makeParsable(warp.visibility.level) + SEPARATOR);
-                warpLine.append(makeParsable(warp.welcomeMessage) + SEPARATOR);
+                warpLine.append(makeNullsParsable(warp.getRawWelcomeMessage()) + SEPARATOR);
                 if (version >= 3) {
                     warpLine.append(makeParsable(warp.getCreator()) + SEPARATOR);
                     warpLine.append(makeParsable(warp.getPrice()) + SEPARATOR);
@@ -412,6 +415,14 @@ public class HModConnection implements DataConnection {
         return new String(Arrays.copyOf(output, length));
     }
 
+    private static String makeNullsParsable(String input) {
+        if (input == null) {
+            return "null";
+        } else {
+            return makeParsable(input);
+        }
+    }
+    
     @Override
     public void addWarp(Warp... warps) {
         if (warps.length > 0) {
@@ -485,7 +496,7 @@ public class HModConnection implements DataConnection {
     public void updateMessage(Warp warp) {
         List<Warp> warps = this.getWarps();
         Warp updated = warps.get(warps.indexOf(warp));
-        updated.setMessage(warp.welcomeMessage);
+        updated.setWelcomeMessage(warp.getRawWelcomeMessage());
         this.writeWarps(warps);
     }
 

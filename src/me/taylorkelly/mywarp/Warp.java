@@ -1,5 +1,6 @@
 package me.taylorkelly.mywarp;
 
+import java.text.Collator;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
@@ -14,13 +15,14 @@ import de.xzise.metainterfaces.FixedLocation;
 import de.xzise.metainterfaces.LocationWrapper;
 import de.xzise.xwarp.EditorPermissions;
 import de.xzise.xwarp.Permissions;
+import de.xzise.xwarp.WarpObject;
 import de.xzise.xwarp.warpable.Positionable;
 import de.xzise.xwarp.warpable.Warpable;
 import de.xzise.xwarp.warpable.WarperFactory;
 import de.xzise.xwarp.wrappers.permission.PermissionTypes;
 import de.xzise.xwarp.wrappers.permission.WorldPermission;
 
-public class Warp {
+public class Warp implements WarpObject {
 
     public enum Visibility {
         PRIVATE(0, "private"), PUBLIC(1, "public"), GLOBAL(2, "global");
@@ -74,26 +76,30 @@ public class Warp {
     private double price;
     private boolean listed;
     private String owner;
+    private String welcomeMessage;
     public Visibility visibility;
-    public String welcomeMessage;
     public Map<String, EditorPermissions> playerEditors;
     public Map<String, EditorPermissions> groupEditors;
 
     public static int nextIndex = 1;
+    
+    public static <K, V> Map<K, V> copyMap(Map<? extends K, ? extends V> map) {
+        if (map == null) {
+            return new HashMap<K, V>();
+        } else {
+            return new HashMap<K, V>(map);
+        }
+    }
 
-    public Warp(int index, String name, String creator, String owner, LocationWrapper wrapper, Visibility visibility, Map<String, EditorPermissions> permissions, String welcomeMessage) {
+    public Warp(int index, String name, String creator, String owner, LocationWrapper wrapper, Visibility visibility, Map<String, EditorPermissions> playerPermission, Map<String, EditorPermissions> groupPermission, String welcomeMessage) {
         this.index = index;
         this.name = name;
         this.creator = creator;
         this.owner = owner;
         this.location = wrapper;
         this.visibility = visibility;
-        if (permissions == null) {
-            this.playerEditors = new HashMap<String, EditorPermissions>();
-        } else {
-            this.playerEditors = new HashMap<String, EditorPermissions>(permissions);
-        }
-        this.groupEditors = new HashMap<String, EditorPermissions>();
+        this.playerEditors = copyMap(playerPermission);
+        this.groupEditors = copyMap(groupPermission);
         this.welcomeMessage = welcomeMessage;
         this.listed = true;
         if (index > nextIndex)
@@ -102,7 +108,7 @@ public class Warp {
     }
 
     public Warp(String name, String creator, String owner, LocationWrapper wrapper) {
-        this(nextIndex, name, creator, owner, wrapper, Visibility.PUBLIC, null, "Welcome to '" + name + "'");
+        this(nextIndex, name, creator, owner, wrapper, Visibility.PUBLIC, null, null, null);
     }
 
     public Warp(String name, Player creator) {
@@ -167,6 +173,8 @@ public class Warp {
      */
     public boolean isSave()
     {
+        //TODO: Check if the player can fall through: Check below if there is a torch (not on ground), wall sign
+        
         if (this.location.isValid()) {
             Location location = this.getLocation().toLocation();
             Material lower = location.getBlock().getType();
@@ -286,6 +294,11 @@ public class Warp {
         if (ep != null) {
             return ep.get(permission);
         }
+        String group = MyWarp.permissions.getGroup(player.getWorld().getName(), player.getName());
+        EditorPermissions grpPerm = this.groupEditors.get(group.toLowerCase());
+        if (grpPerm != null) {
+            return grpPerm.get(permission);
+        }
         return false;
     }
 
@@ -317,10 +330,6 @@ public class Warp {
 
     public void setCreator(String creator) {
         this.creator = creator;
-    }
-
-    public void setMessage(String message) {
-        this.welcomeMessage = message;
     }
 
     public FixedLocation getLocation() {
@@ -363,6 +372,22 @@ public class Warp {
         return this.playerEditors.keySet().toArray(new String[0]);
     }
 
+    public void setWelcomeMessage(String message) {
+        this.welcomeMessage = message;
+    }
+    
+    public String getWelcomeMessage() {
+        if (this.welcomeMessage == null) {
+            return "Welcome to '" + name + "'!";
+        } else {
+            return this.welcomeMessage;
+        }
+    }
+    
+    public String getRawWelcomeMessage() {
+        return this.welcomeMessage;
+    }
+    
     private EditorPermissions getPermissions(String name) {
         EditorPermissions player = this.playerEditors.get(name.toLowerCase());
         if (player == null) {
@@ -380,16 +405,16 @@ public class Warp {
         this.playerEditors.remove(name.toLowerCase());
     }
 
-    public static final WarpComparator WARP_NAME_COMPARATOR = new WarpComparator() {
+    public static final Comparator<Warp> WARP_NAME_COMPARATOR = new StringComparator<Warp>() {
 
         @Override
-        public int compare(Warp warp1, Warp warp2) {
-            return warp1.name.compareToIgnoreCase(warp2.name);
+        protected String getValue(Warp warp) {
+            return warp.name;
         }
 
     };
 
-    public static final WarpComparator WARP_INDEX_COMPARATOR = new WarpComparator() {
+    public static final Comparator<Warp> WARP_INDEX_COMPARATOR = new Comparator<Warp>() {
 
         @Override
         public int compare(Warp warp1, Warp warp2) {
@@ -426,7 +451,40 @@ public class Warp {
     public boolean isFree() {
         return this.price < 0;
     }
+
+    @Override
+    public String getName() {
+        return this.name;
+    }
+
+    @Override
+    public String getWorld() {
+        return this.location.getWorld();
+    }
+
+    @Override
+    public Visibility getVisibility() {
+        return this.visibility;
+    }
 }
 
-interface WarpComparator extends Comparator<Warp> {
+abstract class StringComparator<T> implements Comparator<T> {
+    
+    private final Collator collator;
+    
+    public StringComparator(Collator collator) {
+        this.collator = collator;
+    }
+    
+    public StringComparator() {
+        this(Collator.getInstance());
+        this.collator.setStrength(Collator.SECONDARY);
+    }
+    
+    protected abstract String getValue(T t);
+    
+    @Override
+    public int compare(T t1, T t2) {
+        return this.collator.compare(this.getValue(t1), this.getValue(t2));
+    }
 }
