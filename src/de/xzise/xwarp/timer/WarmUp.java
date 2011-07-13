@@ -5,7 +5,6 @@ import java.util.Map;
 
 import me.taylorkelly.mywarp.MyWarp;
 import me.taylorkelly.mywarp.Warp;
-import me.taylorkelly.mywarp.Warp.Visibility;
 
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
@@ -30,7 +29,7 @@ public class WarmUp {
     }
 
     public void addPlayer(CommandSender warper, Warpable warped, Warp warp) {
-        int warmup = this.warmupTime(warp.visibility, warper);
+        int warmup = this.warmupTime(warp, warper);
         if (warmup > 0) {
             if (this.properties.isWarmupNotify()) {
                 warper.sendMessage(ChatColor.AQUA + "You will have to warm up for " + warmup + " secs");
@@ -53,8 +52,13 @@ public class WarmUp {
         }
     }
 
-    public int warmupTime(Visibility visibility, CommandSender warper) {
-        return MyWarp.permissions.getInteger(warper, Groups.TIMERS_WARMUP_GROUP.get(visibility));
+    public int warmupTime(Warp warp, CommandSender warper) {
+        int time = warp.getWarmUp();
+        if (time < 0) {
+            return MyWarp.permissions.getInteger(warper, Groups.TIMERS_WARMUP_GROUP.get(warp.getVisibility()));
+        } else {
+            return time;
+        }
     }
 
     // public static boolean warmupNeeded(Warp warp, Player player) {
@@ -81,7 +85,7 @@ public class WarmUp {
             if (MinecraftUtil.isSet(msg)) {
                 warped.sendMessage(ChatColor.AQUA + msg);
             }
-            this.down.addPlayer(warp.visibility, warper);
+            this.down.addPlayer(warp, warper);
             this.players.remove(warper);
             if (!warped.equals(warper)) {
                 warper.sendMessage("Sucessfully warped '" + ChatColor.GREEN + MinecraftUtil.getName(warped) + ChatColor.WHITE + "'");

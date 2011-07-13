@@ -74,12 +74,14 @@ public class Warp implements WarpObject {
     private LocationWrapper location;
     /** This price value will be transfered to the owner. */
     private double price;
+    private int cooldown;
+    private int warmup;
     private boolean listed;
     private String owner;
     private String welcomeMessage;
-    public Visibility visibility;
-    public Map<String, EditorPermissions> playerEditors;
-    public Map<String, EditorPermissions> groupEditors;
+    private Visibility visibility;
+    private Map<String, EditorPermissions> playerEditors;
+    private Map<String, EditorPermissions> groupEditors;
 
     public static int nextIndex = 1;
     
@@ -262,11 +264,11 @@ public class Warp implements WarpObject {
     }
 
     public void invite(String player) {
-        this.getPermissions(player).put(Permissions.WARP, true);
+        this.getPlayerEditorPermissions(player).put(Permissions.WARP, true);
     }
 
     public void uninvite(String inviteeName) {
-        this.getPermissions(inviteeName).put(Permissions.WARP, false);
+        this.getPlayerEditorPermissions(inviteeName).put(Permissions.WARP, false);
     }
 
     public boolean canModify(CommandSender sender, boolean defaultModification, PermissionTypes defaultPermission, PermissionTypes adminPermission) {
@@ -360,12 +362,34 @@ public class Warp implements WarpObject {
         this.location = new LocationWrapper(location);
     }
 
-    public EditorPermissions getEditorPermissions(String name) {
-        EditorPermissions player = this.playerEditors.get(name.toLowerCase());
-        if (player == null) {
-            return null;
+    public EditorPermissions getPlayerEditorPermissions(String name) {
+        return this.getPlayerEditorPermissions(name, false);
+    }
+    
+    public EditorPermissions getPlayerEditorPermissions(String name, boolean create) {
+        EditorPermissions editorPermissions = this.playerEditors.get(name.toLowerCase());
+        if (editorPermissions == null) {
+            if (create) {
+                editorPermissions = new EditorPermissions();
+                this.playerEditors.put(name.toLowerCase(), editorPermissions);
+            }
         }
-        return player;
+        return editorPermissions;
+    }
+    
+    public EditorPermissions getGroupEditorPermissions(String name) {
+        return this.getGroupEditorPermissions(name, false);
+    }
+    
+    public EditorPermissions getGroupEditorPermissions(String name, boolean create) {
+        EditorPermissions editorPermissions = this.groupEditors.get(name.toLowerCase());
+        if (editorPermissions == null) {
+            if (create) {
+                editorPermissions = new EditorPermissions();
+                this.groupEditors.put(name.toLowerCase(), editorPermissions);
+            }
+        }
+        return editorPermissions;
     }
 
     public String[] getEditors() {
@@ -387,18 +411,9 @@ public class Warp implements WarpObject {
     public String getRawWelcomeMessage() {
         return this.welcomeMessage;
     }
-    
-    private EditorPermissions getPermissions(String name) {
-        EditorPermissions player = this.playerEditors.get(name.toLowerCase());
-        if (player == null) {
-            player = new EditorPermissions();
-            this.playerEditors.put(name.toLowerCase(), player);
-        }
-        return player;
-    }
 
     public void addEditor(String name, String permissions) {
-        this.getPermissions(name).parseString(permissions, true);
+        this.getPlayerEditorPermissions(name, true).parseString(permissions, true);
     }
 
     public void removeEditor(String name) {
@@ -461,8 +476,27 @@ public class Warp implements WarpObject {
     public String getWorld() {
         return this.location.getWorld();
     }
+    
+    public void setWarmUp(int warmup) {
+        this.warmup = warmup;
+    }
+    
+    public int getWarmUp() {
+        return this.warmup;
+    }
+    
+    public void setCoolDown(int cooldown) {
+        this.cooldown = cooldown;
+    }
+    
+    public int getCoolDown() {
+        return this.cooldown;
+    }
+    
+    public void setVisibility(Visibility visibility) {
+        this.visibility = visibility;
+    }
 
-    @Override
     public Visibility getVisibility() {
         return this.visibility;
     }

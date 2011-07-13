@@ -4,9 +4,7 @@ import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import me.taylorkelly.mywarp.MyWarp;
@@ -27,6 +25,8 @@ import de.xzise.wrappers.economy.EconomyHandler;
 import de.xzise.xwarp.dataconnections.DataConnection;
 import de.xzise.xwarp.dataconnections.IdentificationInterface;
 import de.xzise.xwarp.dataconnections.WarpProtectionConnection;
+import de.xzise.xwarp.list.NonGlobalList;
+import de.xzise.xwarp.list.WarpList;
 import de.xzise.xwarp.timer.CoolDown;
 import de.xzise.xwarp.timer.WarmUp;
 import de.xzise.xwarp.warpable.Positionable;
@@ -43,7 +43,7 @@ import de.xzise.xwarp.wrappers.permission.PermissionValues;
 public class WarpManager {
 
     private WarpList<Warp> list;
-    private WarpList<WarpProtectionArea> protectionAreas;
+    private NonGlobalList<WarpProtectionArea> protectionAreas;
     private Server server;
     private DataConnection data;
     private CoolDown coolDown;
@@ -52,8 +52,8 @@ public class WarpManager {
     private PluginProperties properties;
 
     public WarpManager(Plugin plugin, EconomyHandler economy, PluginProperties properties, DataConnection data) {
-        this.list = new WarpList();
-        this.protectionAreas = new HashMap<String, WarpProtectionArea>();
+        this.list = new WarpList<Warp>();
+        this.protectionAreas = new NonGlobalList<WarpProtectionArea>();
         this.server = plugin.getServer();
         this.properties = properties;
         this.data = data;
@@ -72,7 +72,7 @@ public class WarpManager {
         if (this.data instanceof WarpProtectionConnection) {
             List<WarpProtectionArea> areas = ((WarpProtectionConnection) this.data).getProtectionAreas();
             for (WarpProtectionArea area : areas) {
-                this.protectionAreas.put(area.getName().toLowerCase(), area);
+                this.protectionAreas.addWarpObject(area);
             }
         } else {
             MyWarp.logger.info("No warp protection area feature available.");
@@ -163,7 +163,7 @@ public class WarpManager {
                         List<String> inProtectionArea = new ArrayList<String>();
                         boolean skipProtectionTest = MyWarp.permissions.permission(sender, PermissionTypes.ADMIN_IGNORE_PROTECTION_AREA);
                         if (!skipProtectionTest) {
-                            for (WarpProtectionArea area : this.protectionAreas.values()) {
+                            for (WarpProtectionArea area : this.protectionAreas.getWarpObjects()) {
                                 if (area.isWithIn(player) && creator != null && area.isAllowed(creator)) {
                                     inProtectionArea.add(area.getName());
                                 }
@@ -181,8 +181,8 @@ public class WarpManager {
                                 this.printPayMessage(sender, price);
                             case UNABLE:
                                 warp = new Warp(name, creator, newOwner, new LocationWrapper(player.getLocation()));
-                                warp.visibility = visibility;
-                                this.list.addWarp(warp);
+                                warp.setVisibility(visibility);
+                                this.list.addWarpObject(warp);
                                 this.data.addWarp(warp);
                                 sender.sendMessage("Successfully created '" + ChatColor.GREEN + warp.name + ChatColor.WHITE + "'.");
                                 switch (visibility) {
@@ -221,7 +221,7 @@ public class WarpManager {
 
     public void blindAdd(Warp... warps) {
         for (Warp warp : warps) {
-            this.list.addWarp(warp);
+            this.list.addWarpObject(warp);
         }
         // if (this.getWarp(warp.name) == null) {
         // this.global.put(warp.name.toLowerCase(), warp);
@@ -327,7 +327,7 @@ public class WarpManager {
         Warp warp = this.list.getWarpObject(name, owner, MinecraftUtil.getPlayerName(sender));
         if (warp != null) {
             if (WarpManager.playerCanModifyWarp(sender, warp, Permissions.PRIVATE)) {
-                warp.visibility = Visibility.PRIVATE;
+                warp.setVisibility(Visibility.PRIVATE);
                 this.list.updateVisibility(warp);
                 this.data.updateVisibility(warp);
                 WarpManager.printPrivatizeMessage(sender, warp);
@@ -343,7 +343,7 @@ public class WarpManager {
         Warp warp = this.list.getWarpObject(name, owner, MinecraftUtil.getPlayerName(sender));
         if (warp != null) {
             if (WarpManager.playerCanModifyWarp(sender, warp, Permissions.PUBLIC)) {
-                warp.visibility = Visibility.PUBLIC;
+                warp.setVisibility(Visibility.PUBLIC);
                 this.list.updateVisibility(warp);
                 this.data.updateVisibility(warp);
                 sender.sendMessage(ChatColor.AQUA + "You have publicized '" + warp.name + "'");
@@ -385,12 +385,12 @@ public class WarpManager {
         if (warp != null) {
             if (playerCanModifyWarp(sender, warp, Permissions.GLOBAL)) {
                 Warp existing = this.list.getWarpObject(name);
-                if (existing == null || existing.visibility != Visibility.GLOBAL) {
-                    warp.visibility = Visibility.GLOBAL;
+                if (existing == null || existing.getVisibility() != Visibility.GLOBAL) {
+                    warp.setVisibility(Visibility.GLOBAL);
                     this.data.updateVisibility(warp);
                     this.list.updateVisibility(warp);
                     sender.sendMessage("You have globalized '" + ChatColor.GREEN + warp.name + ChatColor.WHITE + "'");
-                } else if (existing.equals(warp) && existing.visibility == Visibility.GLOBAL) {
+                } else if (existing.equals(warp) && existing.getVisibility() == Visibility.GLOBAL) {
                     sender.sendMessage(ChatColor.RED + "This warp is already globalized.");
                 } else {
                     sender.sendMessage(ChatColor.RED + "One global warp with this name already exists.");
@@ -415,7 +415,7 @@ public class WarpManager {
                     warp.invite(inviteeName);
                     this.data.updateEditor(warp, inviteeName);
                     sender.sendMessage("You have invited " + ChatColor.GREEN + inviteeName + ChatColor.WHITE + " to '" + ChatColor.GREEN + warp.name + ChatColor.WHITE + "'.");
-                    if (warp.visibility != Visibility.PRIVATE) {
+                    if (warp.getVisibility() != Visibility.PRIVATE) {
                         sender.sendMessage(ChatColor.RED + "But '" + warp.name + "' is still public.");
                     }
                     Player match = this.server.getPlayer(inviteeName);
@@ -444,7 +444,7 @@ public class WarpManager {
                     warp.addEditor(inviteeName, "w");
                     this.data.updateEditor(warp, inviteeName);
                     sender.sendMessage("You have uninvited " + ChatColor.GREEN + inviteeName + ChatColor.WHITE + " from '" + ChatColor.GREEN + warp.name + ChatColor.WHITE + "'.");
-                    if (warp.visibility != Visibility.PRIVATE) {
+                    if (warp.getVisibility() != Visibility.PRIVATE) {
                         sender.sendMessage(ChatColor.RED + "But '" + warp.name + "' is still public.");
                     }
                     Player match = this.server.getPlayer(inviteeName);
@@ -468,7 +468,7 @@ public class WarpManager {
                 if (owner == null || owner.isEmpty()) {
                     owner = warp.getOwner();
                 }
-                if (warp.visibility == Visibility.GLOBAL && (this.getWarp(newName, null, null) != null)) {
+                if (warp.getVisibility() == Visibility.GLOBAL && (this.getWarp(newName, null, null) != null)) {
                     sender.sendMessage(ChatColor.RED + "A global warp with this name already exists!");
                 } else if (this.getWarp(newName, owner, null) != null) {
                     sender.sendMessage(ChatColor.RED + "You already have a warp with this name.");
@@ -476,7 +476,7 @@ public class WarpManager {
                     IdentificationInterface ii = this.data.createIdentification(warp);
                     this.list.deleteWarp(warp);
                     warp.rename(newName);
-                    this.list.addWarp(warp);
+                    this.list.addWarpObject(warp);
                     this.data.updateName(warp, ii);
                     sender.sendMessage(ChatColor.AQUA + "You have renamed '" + warp.name + "'");
                 }
@@ -523,7 +523,7 @@ public class WarpManager {
     }
 
     public List<Warp> getWarps() {
-        return this.list.getWarps();
+        return this.list.getWarpObjects();
     }
 
     public MatchList getMatches(String name, CommandSender sender) {
@@ -549,7 +549,7 @@ public class WarpManager {
     }
 
     public void blindAdd(Warp warp) {
-        this.list.addWarp(warp);
+        this.list.addWarpObject(warp);
         // if (this.getWarp(warp.name) == null) {
         // this.global.put(warp.name.toLowerCase(), warp);
         // } else if (warp.visibility == Visibility.GLOBAL) {
@@ -591,7 +591,7 @@ public class WarpManager {
                             warper.sendMessage(ChatColor.RED + "The selected warp is maybe not save!");
                             warper.sendMessage(ChatColor.RED + "To force warping use /warp force-to <warp> [owner].");
                         } else {
-                            double price = MyWarp.permissions.getDouble(warper, Groups.PRICES_TO_GROUP.get(warp.visibility));
+                            double price = MyWarp.permissions.getDouble(warper, Groups.PRICES_TO_GROUP.get(warp.getVisibility()));
 
                             if (this.coolDown.playerHasCooled(warper)) {
                                 if (warp.isFree()) {
@@ -611,7 +611,7 @@ public class WarpManager {
                                     }
                                 }
                             } else {
-                                warper.sendMessage(ChatColor.RED + "You need to wait for the cooldown of " + this.coolDown.cooldownTime(warp.visibility, warper) + " s");
+                                warper.sendMessage(ChatColor.RED + "You need to wait for the cooldown of " + this.coolDown.cooldownTime(warp, warper) + " s");
                             }
                         }
                     } else {
@@ -678,7 +678,7 @@ public class WarpManager {
                 allWarps.addAll(this.list.getWarps(owner));
             }
         } else {
-            allWarps.addAll(this.list.getWarps());
+            allWarps.addAll(this.list.getWarpObjects());
         }
         
         ArrayList<Warp> validWarps = new ArrayList<Warp>(allWarps.size());
@@ -693,7 +693,7 @@ public class WarpManager {
             if ((creatorTester.test(w.getCreator().toLowerCase())) &&
                 (ownerTester.test(w.getOwner())) &&
                 (worldTester.test(w.getLocationWrapper().getWorld().toLowerCase())) &&
-                (visibilityTester.test(w.visibility)) &&
+                (visibilityTester.test(w.getVisibility())) &&
                 (w.listWarp(sender))) {
                 validWarps.add(w);
             }

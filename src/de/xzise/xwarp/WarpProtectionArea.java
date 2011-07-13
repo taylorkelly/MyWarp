@@ -2,8 +2,6 @@ package de.xzise.xwarp;
 
 import java.util.List;
 
-import me.taylorkelly.mywarp.Warp.Visibility;
-
 import org.bukkit.command.CommandSender;
 
 import de.xzise.metainterfaces.FixedLocation;
@@ -95,12 +93,7 @@ public class WarpProtectionArea implements WarpObject {
 
     @Override
     public String getWorld() {
-        return null;
-    }
-
-    @Override
-    public Visibility getVisibility() {
-        return null;
+        return this.firstCorner.getWorld();
     }
 
     @Override

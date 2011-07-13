@@ -4,14 +4,20 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 
+import org.bukkit.Bukkit;
+import org.bukkit.World;
 import org.bukkit.util.config.Configuration;
 import org.bukkit.util.config.ConfigurationNode;
 
 import de.xzise.metainterfaces.FixedLocation;
 import de.xzise.metainterfaces.LocationWrapper;
+import de.xzise.xwarp.EditorPermissions;
+import de.xzise.xwarp.Permissions;
 
 import me.taylorkelly.mywarp.MyWarp;
 import me.taylorkelly.mywarp.Warp;
@@ -32,15 +38,15 @@ public class YmlConnection implements DataConnection {
      *           y: 3.0
      *           z: 10.0
      *   warps:
-     *     - name: foo
-     *       owner: xZise
-     *       creator: xZise
+     *     - name: 'foo'
+     *       owner: 'xZise'
+     *       creator: 'xZise'
      *       editors:
-     *         somebody:
-     *           type: player
+     *         - name: 'somebody'
+     *           type: 'player'
      *           permissions:
-     *             - location
-     *             - invite
+     *             - 'location'
+     *             - 'invite'
      *       x: 0.0
      *       y: 65.0
      *       z: -0.5
@@ -118,21 +124,70 @@ public class YmlConnection implements DataConnection {
         String name = node.getString("name");
         String owner = node.getString("owner");
         String creator = node.getString("creator");
-        //TODO: Implement editors
-        List<String> editorPlayers = new ArrayList<String>();
-        List<String> editorGroups = new ArrayList<String>();
-        for (Entry<String, ConfigurationNode> editorEntry : node.getNodes("editors").entrySet()) {
-            String editorName = editorEntry.getKey();
-            ConfigurationNode editorNode = editorEntry.getValue();
+        
+        List<ConfigurationNode> editorNodes = node.getNodeList("editors", null);
+        Map<String, EditorPermissions> groupPermissions = new HashMap<String, EditorPermissions>();
+        Map<String, EditorPermissions> playerPermissions = new HashMap<String, EditorPermissions>();
+        for (ConfigurationNode editorNode : editorNodes) {
+            String editorName = editorNode.getString("name");
             String editorType = editorNode.getString("type");
-            if (editorType.equals("player")) {
+            
+            EditorPermissions permissions = new EditorPermissions();
+            
+            List<String> editorPermissions = editorNode.getStringList("permissions", null);
+            for (String editorPermission : editorPermissions) {
+                Permissions perms = null;
                 
-            } else if (editorEntry.equals("group")) {
+                if (editorPermission.equalsIgnoreCase("location")) {
+                    perms = Permissions.UPDATE;
+                } else if (editorPermission.equalsIgnoreCase("rename")) {
+                    perms = Permissions.RENAME;
+                } else if (editorPermission.equalsIgnoreCase("uninvite")) {
+                    perms = Permissions.UNINVITE;
+                } else if (editorPermission.equalsIgnoreCase("invite")) {
+                    perms = Permissions.INVITE;
+                } else if (editorPermission.equalsIgnoreCase("private")) {
+                    perms = Permissions.PRIVATE;
+                } else if (editorPermission.equalsIgnoreCase("public")) {
+                    perms = Permissions.PUBLIC;
+                } else if (editorPermission.equalsIgnoreCase("global")) {
+                    perms = Permissions.GLOBAL;
+                } else if (editorPermission.equalsIgnoreCase("give")) {
+                    perms = Permissions.GIVE;
+                } else if (editorPermission.equalsIgnoreCase("delete")) {
+                    perms = Permissions.DELETE;
+                } else if (editorPermission.equalsIgnoreCase("warp")) {
+                    perms = Permissions.WARP;
+                } else if (editorPermission.equalsIgnoreCase("add editor")) {
+                    perms = Permissions.ADD_EDITOR;
+                } else if (editorPermission.equalsIgnoreCase("remove editor")) {
+                    perms = Permissions.REMOVE_EDITOR;
+                } else if (editorPermission.equalsIgnoreCase("message")) {
+                    perms = Permissions.MESSAGE;
+                } else if (editorPermission.equalsIgnoreCase("price")) {
+                    perms = Permissions.PRICE;
+                } else if (editorPermission.equalsIgnoreCase("free")) {
+                    perms = Permissions.FREE;
+                } else if (editorPermission.equalsIgnoreCase("list")) {
+                    perms = Permissions.LIST;
+                }
                 
+                if (perms == null) {
+                    // Unknown permission
+                } else {
+                    permissions.put(perms, true);
+                }
+            }
+            
+            if (editorType.equalsIgnoreCase("player")) {
+                playerPermissions.put(editorName, permissions);
+            } else if (editorType.equalsIgnoreCase("group")) {
+                groupPermissions.put(editorName, permissions);
             } else {
-                
+                // Unknown editor type
             }
         }
+
         // Location:
         Double x = getDouble(node, "x");
         Double y = getDouble(node, "y");
@@ -140,22 +195,28 @@ public class YmlConnection implements DataConnection {
         Float yaw = getFloat(node, "yaw");
         Float pitch = getFloat(node, "pitch");
         String world = node.getString("world");
+        World worldObject = Bukkit.getServer().getWorld(world);
         
         Visibility visibility = Visibility.parseString(node.getString("visibility"));
-        Boolean listed = getBool(node, "listed");
+        boolean listed = node.getBoolean("listed", true);
         double price = node.getDouble("price", -1);
         double cooldown = node.getDouble("cooldown", -1);
         double warmup = node.getDouble("warmup", -1);
         String welcomeMessage = node.getString("welcome");
-        /*
-         *       editors:
-         *         somebody:
-         *           type: player
-         *           permissions:
-         *             - location
-         *             - invite
-         */
+
+        Warp warp = new Warp(name, creator, owner, new LocationWrapper(new FixedLocation(worldObject, x, y, z, yaw, pitch), world));
+        warp.setWelcomeMessage(welcomeMessage);
+        for (Entry<String, EditorPermissions> permissionEntry : playerPermissions.entrySet()) {
+            warp.getPlayerEditorPermissions(permissionEntry.getKey(), true).putAll(permissionEntry.getValue());
+        }
+        for (Entry<String, EditorPermissions> permissionEntry : groupPermissions.entrySet()) {
+            warp.getGroupEditorPermissions(permissionEntry.getKey(), true).putAll(permissionEntry.getValue());
+        }
+        warp.setVisibility(visibility);
+        warp.setListed(listed);
+        warp.setPrice(price);
         
+        return warp;
     }
     
     @Override
@@ -205,7 +266,13 @@ public class YmlConnection implements DataConnection {
 
     @Override
     public void deleteWarp(Warp warp) {
-
+        List<ConfigurationNode> nodes = this.config.getNodeList("xwarp.warps", null);
+        IdentificationInterface id = new NameIdentification(warp);
+        for (int i = nodes.size() - 1; i >= 0; i--) {
+            if (id.isIdentificated(getWarp(nodes.get(i)))) {
+                nodes.remove(i);
+            }
+        }
     }
 
     private ConfigurationNode getNode(IdentificationInterface id) {
@@ -245,12 +312,12 @@ public class YmlConnection implements DataConnection {
 
     @Override
     public void updateMessage(Warp warp) {
-        this.updateField(warp, "creator", warp.welcomeMessage);
+        this.updateField(warp, "creator", warp.getWelcomeMessage());
     }
 
     @Override
     public void updateVisibility(Warp warp) {
-        this.updateField(warp, "creator", warp.visibility.name);
+        this.updateField(warp, "creator", warp.getVisibility().name);
     }
 
     @Override

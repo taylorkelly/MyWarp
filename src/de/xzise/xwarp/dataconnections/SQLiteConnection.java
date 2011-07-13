@@ -379,7 +379,7 @@ public class SQLiteConnection implements DataConnection {
                     ps.addBatch();
 
                     for (String editor : warp.getEditors()) {
-                        EditorPermissions ep = warp.getEditorPermissions(editor);
+                        EditorPermissions ep = warp.getPlayerEditorPermissions(editor);
                         if (ep != null) {
                             for (Entry<Permissions, Boolean> p : ep.entrySet()) {
                                 if (p.getValue() != null && p.getValue() == true) {
@@ -553,7 +553,7 @@ public class SQLiteConnection implements DataConnection {
             ps.setString(2, name.toLowerCase());
             ps.executeUpdate();
 
-            EditorPermissions p = warp.getEditorPermissions(name);
+            EditorPermissions p = warp.getPlayerEditorPermissions(name);
             if (p != null) {
                 ps = this.connection.prepareStatement("INSERT OR IGNORE INTO permissions (id, editor, value) VALUES (?,?,?)");
 

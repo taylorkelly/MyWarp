@@ -12,7 +12,7 @@ public final class DataConnectionFactory {
         } else if (type.equalsIgnoreCase("hmod")) {
             return new HModConnection(server);
         } else if (type.equalsIgnoreCase("yml")) {
-            ;
+            return new YmlConnection();
         } else {
             return null;
         }

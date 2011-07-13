@@ -36,7 +36,7 @@ public class XWBlockListener extends BlockListener {
                 if (warp == null) {
                     type = PermissionTypes.SIGN_CREATE_UNKNOWN;
                 } else {
-                    type = Groups.SIGN_CREATE_GROUP.get(warp.visibility);
+                    type = Groups.SIGN_CREATE_GROUP.get(warp.getVisibility());
                 }
                 if (MyWarp.permissions.permission(event.getPlayer(), type)) {
                     String line = "Warp sign found: ";

@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import me.taylorkelly.mywarp.MyWarp;
-import me.taylorkelly.mywarp.Warp.Visibility;
+import me.taylorkelly.mywarp.Warp;
 
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
@@ -25,8 +25,8 @@ public class CoolDown {
         this.properties = properties;
     }
     
-    public void addPlayer(Visibility visibility, CommandSender sender) {
-        int time = this.cooldownTime(visibility, sender);
+    public void addPlayer(Warp warp, CommandSender sender) {
+        int time = this.cooldownTime(warp, sender);
         if (time > 0) {
             if (this.players.containsKey(sender)) {
                 this.plugin.getServer().getScheduler().cancelTask(this.players.get(sender).id);
@@ -56,8 +56,13 @@ public class CoolDown {
         }
     }
     
-    public int cooldownTime(Visibility visibility, CommandSender sender) {
-        return MyWarp.permissions.getInteger(sender, Groups.TIMERS_COOLDOWN_GROUP.get(visibility));
+    public int cooldownTime(Warp warp, CommandSender sender) {
+        int time = warp.getCoolDown();
+        if (time < 0) {
+            return MyWarp.permissions.getInteger(sender, Groups.TIMERS_COOLDOWN_GROUP.get(warp.getVisibility()));
+        } else {
+            return time;
+        }
     }
     
     public void cooledDown(CommandSender warpable) {

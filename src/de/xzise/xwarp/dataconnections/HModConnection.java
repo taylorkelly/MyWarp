@@ -144,7 +144,7 @@ public class HModConnection implements DataConnection {
 
                     LocationWrapper location = new LocationWrapper(new Location(def, x, y, z, (float) yaw, (float) pitch));
                     warp = new Warp(name, "", "", location);
-                    warp.visibility = Visibility.GLOBAL;
+                    warp.setVisibility(Visibility.GLOBAL);
                 } catch (NumberFormatException nfe) {
                     valid = false;
                     MyWarp.logger.warning("Unable to parse a location value (" + nfe.getMessage() + ")");
@@ -194,7 +194,7 @@ public class HModConnection implements DataConnection {
                     int visibilityValue = Integer.parseInt(segments[8]);
                     Visibility v = Visibility.parseLevel(visibilityValue);
                     if (v != null) {
-                        warp.visibility = v;
+                        warp.setVisibility(v);
                         warp.setListed(Visibility.isListed(visibilityValue));
                     } else {
                         MyWarp.logger.warning("Illegal visibilty found (" + warp.name + " by " + warp.getOwner() + ")");
@@ -249,7 +249,7 @@ public class HModConnection implements DataConnection {
                     int visibilityValue = Integer.parseInt(segments[8]);
                     Visibility v = Visibility.parseLevel(visibilityValue);
                     if (v != null) {
-                        warp.visibility = v;
+                        warp.setVisibility(v);
                         warp.setListed(Visibility.isListed(visibilityValue));
                     } else {
                         MyWarp.logger.warning("Illegal visibilty found (" + warp.name + " by " + warp.getOwner() + ")");
@@ -306,7 +306,7 @@ public class HModConnection implements DataConnection {
                     int visibilityValue = Integer.parseInt(segments[8]);
                     Visibility v = Visibility.parseLevel(visibilityValue);
                     if (v != null) {
-                        warp.visibility = v;
+                        warp.setVisibility(v);
                         warp.setListed(Visibility.isListed(visibilityValue));
                     } else {
                         MyWarp.logger.warning("Illegal visibility found (" + warp.name + " by " + warp.getOwner() + ")");
@@ -360,14 +360,14 @@ public class HModConnection implements DataConnection {
             if (version >= 1) {
                 warpLine.append(makeParsable(l.getWorld()) + SEPARATOR);
                 warpLine.append(makeParsable(warp.getOwner()) + SEPARATOR);
-                warpLine.append(makeParsable(warp.visibility.level) + SEPARATOR);
+                warpLine.append(makeParsable(warp.getVisibility().level) + SEPARATOR);
                 warpLine.append(makeNullsParsable(warp.getRawWelcomeMessage()) + SEPARATOR);
                 if (version >= 3) {
                     warpLine.append(makeParsable(warp.getCreator()) + SEPARATOR);
                     warpLine.append(makeParsable(warp.getPrice()) + SEPARATOR);
                 }
                 for (String editor : warp.getEditors()) {
-                    EditorPermissions ep = warp.getEditorPermissions(editor);
+                    EditorPermissions ep = warp.getPlayerEditorPermissions(editor);
                     if (ep != null) {
                         warpLine.append(makeParsable(editor) + SEPARATOR);
                         warpLine.append(makeParsable(ep.getPermissionString()) + SEPARATOR);
@@ -504,7 +504,7 @@ public class HModConnection implements DataConnection {
     public void updateVisibility(Warp warp) {
         List<Warp> warps = this.getWarps();
         Warp updated = warps.get(warps.indexOf(warp));
-        updated.visibility = warp.visibility;
+        updated.setVisibility(warp.getVisibility());
         this.writeWarps(warps);
     }
 

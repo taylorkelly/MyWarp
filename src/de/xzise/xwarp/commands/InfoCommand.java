@@ -57,7 +57,7 @@ public class InfoCommand extends WarpCommand {
             sender.sendMessage("Owner: " + getPlayerLine(warp.getOwner(), world));
             String visibility = "";
             double basePrice = 0;
-            switch (warp.visibility) {
+            switch (warp.getVisibility()) {
             case GLOBAL:
                 visibility = "Global";
                 basePrice = MyWarp.permissions.getDouble(sender, PricePermissions.WARP_PRICES_TO_GLOBAL);
@@ -89,7 +89,7 @@ public class InfoCommand extends WarpCommand {
             } else {
                 for (int i = 0; i < editors.length; i++) {
                     String string = editors[i];
-                    Permissions[] pms = warp.getEditorPermissions(string).getByValue(true);
+                    Permissions[] pms = warp.getPlayerEditorPermissions(string).getByValue(true);
                     if (pms.length > 0) {
                         editor += ChatColor.GREEN + string + " ";
                         char[] editorPermissions = new char[pms.length];
