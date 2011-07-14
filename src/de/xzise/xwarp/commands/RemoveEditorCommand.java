@@ -3,7 +3,10 @@ package de.xzise.xwarp.commands;
 import org.bukkit.Server;
 import org.bukkit.command.CommandSender;
 
+import de.xzise.MinecraftUtil;
+import de.xzise.xwarp.EditorPermissions;
 import de.xzise.xwarp.WarpManager;
+import de.xzise.xwarp.EditorPermissions.Type;
 
 public class RemoveEditorCommand extends WarpCommand {
 
@@ -13,7 +16,17 @@ public class RemoveEditorCommand extends WarpCommand {
 
     @Override
     protected boolean executeEdit(CommandSender sender, String warpName, String creator, String[] parameters) {
-        this.list.removeEditor(warpName, creator, sender, this.getPlayer(parameters[0]));
+        String editor = parameters[0];
+        EditorPermissions.Type type;
+        if (editor.startsWith("g:")) {
+            type = Type.GROUP;
+        } else {
+            type = Type.GROUP;
+            if (!editor.startsWith("o:")) {
+                editor = MinecraftUtil.expandName(editor, this.server);
+            }
+        }
+        this.list.removeEditor(warpName, creator, sender, editor, type);
         return true;
     }
 

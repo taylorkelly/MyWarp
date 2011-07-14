@@ -18,6 +18,7 @@ import de.xzise.MinecraftUtil;
 import de.xzise.metainterfaces.FixedLocation;
 import de.xzise.metainterfaces.LocationWrapper;
 import de.xzise.xwarp.EditorPermissions;
+import de.xzise.xwarp.EditorPermissions.Type;
 
 import me.taylorkelly.mywarp.MyWarp;
 import me.taylorkelly.mywarp.Warp;
@@ -188,7 +189,7 @@ public class HModConnection implements DataConnection {
                     String msg = segments[9];
                     warp.setWelcomeMessage(msg.equals("null") ? null : msg);
                     for (int i = GEN_2_LENGTH; i < segments.length; i += 2) {
-                        warp.addEditor(segments[i], segments[i + 1]);
+                        warp.addEditor(segments[i], segments[i + 1], Type.PLAYER);
                     }
 
                     int visibilityValue = Integer.parseInt(segments[8]);
@@ -243,7 +244,7 @@ public class HModConnection implements DataConnection {
                     String msg = segments[9];
                     warp.setWelcomeMessage(msg.equals("null") ? null : msg);
                     for (int i = GEN_2_LENGTH; i < segments.length - 1; i += 2) {
-                        warp.addEditor(segments[i], segments[i + 1]);
+                        warp.addEditor(segments[i], segments[i + 1], Type.PLAYER);
                     }
 
                     int visibilityValue = Integer.parseInt(segments[8]);
@@ -300,7 +301,7 @@ public class HModConnection implements DataConnection {
                     warp.setWelcomeMessage(msg.equals("null") ? null : msg);
                     warp.setPrice(Integer.parseInt(segments[11]));
                     for (int i = GEN_4_LENGTH; i < segments.length - 1; i += 2) {
-                        warp.addEditor(segments[i], segments[i + 1]);
+                        warp.addEditor(segments[i], segments[i + 1], Type.PLAYER);
                     }
 
                     int visibilityValue = Integer.parseInt(segments[8]);
@@ -360,7 +361,7 @@ public class HModConnection implements DataConnection {
             if (version >= 1) {
                 warpLine.append(makeParsable(l.getWorld()) + SEPARATOR);
                 warpLine.append(makeParsable(warp.getOwner()) + SEPARATOR);
-                warpLine.append(makeParsable(warp.getVisibility().level) + SEPARATOR);
+                warpLine.append(makeParsable(warp.getVisibility().getInt(warp.isListed())) + SEPARATOR);
                 warpLine.append(makeNullsParsable(warp.getRawWelcomeMessage()) + SEPARATOR);
                 if (version >= 3) {
                     warpLine.append(makeParsable(warp.getCreator()) + SEPARATOR);
@@ -505,6 +506,7 @@ public class HModConnection implements DataConnection {
         List<Warp> warps = this.getWarps();
         Warp updated = warps.get(warps.indexOf(warp));
         updated.setVisibility(warp.getVisibility());
+        updated.setListed(warp.isListed());
         this.writeWarps(warps);
     }
 

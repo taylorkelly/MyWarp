@@ -9,10 +9,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.logging.Level;
 
 import org.bukkit.Server;
@@ -27,15 +27,15 @@ import me.taylorkelly.mywarp.MyWarp;
 import me.taylorkelly.mywarp.Warp;
 import me.taylorkelly.mywarp.Warp.Visibility;
 
-public class SQLiteConnection implements DataConnection {
+public class SQLiteConnection implements WarpProtectionConnection {
 
     public final static String DATABASE = "jdbc:sqlite:homes-warps.db";
-    private final static String WARP_TABLE = "CREATE TABLE `warpTable` (" + "`id` INTEGER PRIMARY KEY," + "`name` varchar(32) NOT NULL DEFAULT 'warp'," + "`creator` varchar(32) NOT NULL DEFAULT 'Player'," + "`world` varchar(32) NOT NULL," + "`x` DOUBLE NOT NULL DEFAULT '0'," + "`y` DOUBLE NOT NULL DEFAULT '0'," + "`z` DOUBLE NOT NULL DEFAULT '0'," + "`yaw` smallint NOT NULL DEFAULT '0'," + "`pitch` smallint NOT NULL DEFAULT '0'," + "`publicLevel` smallint NOT NULL DEFAULT '1'," + "`welcomeMessage` varchar(100) NOT NULL DEFAULT ''," + "`owner` varchar(32) NOT NULL DEFAULT '', " + "`price` int NOT NULL DEFAULT '0'" + ");";
-    private final static String PERMISSIONS_TABLE = "CREATE TABLE `permissions` (" + "`id` INTEGER NOT NULL," + "`editor` varchar(32) NOT NULL," + "`value` " + ");";
+    private final static String WARP_TABLE = "CREATE TABLE `warps` (" + "`id` INTEGER PRIMARY KEY," + "`name` varchar(32) NOT NULL," + "`creator` varchar(32) NOT NULL," + "`world` varchar(32) NOT NULL," + "`x` DOUBLE NOT NULL DEFAULT '0'," + "`y` DOUBLE NOT NULL DEFAULT '0'," + "`z` DOUBLE NOT NULL DEFAULT '0'," + "`yaw` smallint NOT NULL DEFAULT '0'," + "`pitch` smallint NOT NULL DEFAULT '0'," + "`publicLevel` smallint NOT NULL DEFAULT '1'," + "`welcomeMessage` varchar(100) DEFAULT NULL," + "`owner` varchar(32) NOT NULL DEFAULT '', " + "`price` DOUBLE NOT NULL DEFAULT '0', " + "`cooldown` INTEGER NOT NULL DEFAULT '0', " + "`warmup` INTEGER NOT NULL DEFAULT '0'" + ");";
+    private final static String PERMISSIONS_TABLE = "CREATE TABLE `permissions` (" + "`id` INTEGER NOT NULL," + "`editor` varchar(32) NOT NULL," + "`value` INTEGER NOT NULL," + "`type` INTEGER NOT NULL" + ");";
 
     private final static String VERSION_TABLE = "CREATE TABLE `meta` (`name` varchar(32) NOT NULL, `value` int NOT NULL);";
 
-    private final static int TARGET_VERSION = 4;
+    private final static int TARGET_VERSION = 5;
 
     private Server server;
     private Connection connection;
@@ -97,30 +97,54 @@ public class SQLiteConnection implements DataConnection {
             MyWarp.logger.info("Database layout is outdated (" + version + ")! Updating to " + TARGET_VERSION + ".");
             Statement statement = null;
             PreparedStatement convertedWarp = null;
+            PreparedStatement convertedPermissions = null;
             PreparedStatement permissionsInsert = null;
             ResultSet set = null;
             try {
                 statement = this.connection.createStatement();
 
-                if (!tableExists("permissions")) {
-                    MyWarp.logger.info("Creating permission table.");
-                    statement.execute(PERMISSIONS_TABLE);
+                if (tableExists("permissions")) {
+                    // Backup old permissions table
+                    statement.execute("ALTER TABLE permissions RENAME TO permissions_backup");
+                    MyWarp.logger.info("Backuping old permissions table.");
+                }
+                
+                MyWarp.logger.info("Creating permission table.");
+                statement.execute(PERMISSIONS_TABLE);
+                
+                if (tableExists("permissions_backup")) {
+                    set = statement.executeQuery("SELECT * FROM permissions_backup");
+                    convertedPermissions = this.connection.prepareStatement("INSERT INTO permissions (id, editor, value, type) VALUES (?,?,?,?)");
+                    while (set.next()) {
+                        convertedPermissions.setInt(1, set.getInt("id"));
+                        convertedPermissions.setString(2, set.getString("editor"));
+                        convertedPermissions.setInt(3, set.getInt("value"));
+                        if (version < 5) {
+                            convertedPermissions.setInt(4, EditorPermissions.Type.PLAYER.id);
+                        } else {
+                            convertedPermissions.setInt(4, set.getInt("type"));
+                        }
+                    }
                 }
 
-                // Copy old database
-                if (tableExists("warpTable")) {
+                if (tableExists("warps")) {
                     // Backup it
-                    statement.execute("ALTER TABLE warpTable RENAME TO warpTable_backup");
-                    MyWarp.logger.info("Backuping old database.");
+                    statement.execute("ALTER TABLE warps RENAME TO warps_backup");
+                    MyWarp.logger.info("Backuping old warp table.");
+                } else if (tableExists("warpTable")) {
+                    // Backup it
+                    statement.execute("ALTER TABLE warpTable RENAME TO warps_backup");
+                    MyWarp.logger.info("Backuping old warp table.");
                 }
+
                 // Create new database
                 statement.executeUpdate(WARP_TABLE);
-                if (tableExists("warpTable_backup")) {
+                if (tableExists("warps_backup")) {
                     // Select line by line
                     String world = server.getWorlds().get(0).getName();
-                    set = statement.executeQuery("SELECT * FROM warpTable_backup");
+                    set = statement.executeQuery("SELECT * FROM warps_backup");
                     List<WarpPermission> list = new ArrayList<WarpPermission>();
-                    convertedWarp = this.connection.prepareStatement("INSERT INTO warpTable (id, name, creator, world, x, y, z, yaw, pitch, publicLevel, welcomeMessage, owner, price) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)");
+                    convertedWarp = this.connection.prepareStatement("INSERT INTO warps (id, name, creator, world, x, y, z, yaw, pitch, publicLevel, welcomeMessage, owner, price, cooldown, warmup) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
                     while (set.next()) {
                         int id = set.getInt("id");
                         convertedWarp.setInt(1, id);
@@ -140,7 +164,7 @@ public class SQLiteConnection implements DataConnection {
                             convertedWarp.setString(4, set.getString("world"));
                         }
                         convertedWarp.setDouble(5, set.getDouble("x"));
-                        convertedWarp.setInt(6, set.getInt("y"));
+                        convertedWarp.setDouble(6, set.getDouble("y"));
                         convertedWarp.setDouble(7, set.getDouble("z"));
                         convertedWarp.setInt(8, set.getInt("yaw"));
                         convertedWarp.setInt(9, set.getInt("pitch"));
@@ -166,9 +190,9 @@ public class SQLiteConnection implements DataConnection {
                             convertedWarp.setString(12, set.getString("owner"));
                         }
                         if (version < 4) {
-                            convertedWarp.setInt(13, 0);
+                            convertedWarp.setDouble(13, 0);
                         } else {
-                            convertedWarp.setInt(13, set.getInt("price"));
+                            convertedWarp.setDouble(13, set.getDouble("price"));
                         }
                         convertedWarp.executeUpdate();
                     }
@@ -181,12 +205,13 @@ public class SQLiteConnection implements DataConnection {
                         MyWarp.logger.info("Adding permissions table");
 
                         if (list.size() > 0) {
-                            permissionsInsert = this.connection.prepareStatement("INSERT OR IGNORE INTO permissions (id, editor, value) VALUES (?,?,?)");
+                            permissionsInsert = this.connection.prepareStatement("INSERT OR IGNORE INTO permissions (id, editor, value, type) VALUES (?,?,?,?)");
 
                             for (WarpPermission warpPermission : list) {
                                 permissionsInsert.setInt(1, warpPermission.id);
                                 permissionsInsert.setString(2, warpPermission.editor);
                                 permissionsInsert.setInt(3, Permissions.WARP.id);
+                                permissionsInsert.setInt(4, EditorPermissions.Type.PLAYER.id);
                                 permissionsInsert.addBatch();
                             }
                             permissionsInsert.executeBatch();
@@ -289,19 +314,27 @@ public class SQLiteConnection implements DataConnection {
         try {
             statement = this.connection.createStatement();
             set = statement.executeQuery("SELECT * FROM permissions");
-            Map<Integer, Map<String, EditorPermissions>> allPermissions = new HashMap<Integer, Map<String, EditorPermissions>>();
+            Map<Integer, Map<EditorPermissions.Type, Map<String, EditorPermissions>>> allPermissions = new HashMap<Integer, Map<EditorPermissions.Type, Map<String, EditorPermissions>>>();
             while (set.next()) {
                 int index = set.getInt("id");
-                Map<String, EditorPermissions> warpPermissions = allPermissions.get(index);
+                Map<EditorPermissions.Type, Map<String, EditorPermissions>> warpPermissions = allPermissions.get(index);
                 if (warpPermissions == null) {
-                    warpPermissions = new HashMap<String, EditorPermissions>();
+                    warpPermissions = new EnumMap<EditorPermissions.Type, Map<String, EditorPermissions>>(EditorPermissions.Type.class);
                     allPermissions.put(index, warpPermissions);
                 }
+                
+                EditorPermissions.Type type = EditorPermissions.Type.parseInt(set.getInt("type"));
+                Map<String, EditorPermissions> typePermissions = warpPermissions.get(type);
+                if (typePermissions == null) {
+                    typePermissions = new HashMap<String, EditorPermissions>();
+                    warpPermissions.put(type, typePermissions);
+                }
+                
                 String editor = set.getString("editor");
-                EditorPermissions editorPermissions = warpPermissions.get(editor.toLowerCase());
+                EditorPermissions editorPermissions = typePermissions.get(editor.toLowerCase());
                 if (editorPermissions == null) {
                     editorPermissions = new EditorPermissions();
-                    warpPermissions.put(editor.toLowerCase(), editorPermissions);
+                    typePermissions.put(editor.toLowerCase(), editorPermissions);
                 }
                 int value = set.getInt("value");
                 editorPermissions.put(Permissions.getById(value), true);
@@ -365,29 +398,27 @@ public class SQLiteConnection implements DataConnection {
             PreparedStatement ps = null;
             PreparedStatement insertPermissions = null;
             try {
-                ps = this.connection.prepareStatement("INSERT INTO warpTable (id, name, creator, world, x, y, z, yaw, pitch, publicLevel, welcomeMessage, owner, price) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)");
+                ps = this.connection.prepareStatement("INSERT INTO warps (id, name, creator, world, x, y, z, yaw, pitch, publicLevel, welcomeMessage, owner, price) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)");
                 insertPermissions = this.connection.prepareStatement("INSERT INTO permissions (id, editor, value) VALUES (?,?,?)");
                 for (Warp warp : warps) {
                     ps.setInt(1, warp.index);
                     ps.setString(2, warp.name);
                     ps.setString(3, warp.getCreator());
                     setLocation(warp.getLocationWrapper(), 4, ps);
-                    ps.setInt(10, warp.visibility.level);
-                    ps.setString(11, warp.welcomeMessage);
+                    ps.setInt(10, warp.getVisibility().getInt(warp.isListed()));
+                    ps.setString(11, warp.getWelcomeMessage());
                     ps.setString(12, warp.getOwner());
-                    ps.setInt(13, warp.getPrice());
+                    ps.setDouble(13, warp.getPrice());
                     ps.addBatch();
 
                     for (String editor : warp.getEditors()) {
                         EditorPermissions ep = warp.getPlayerEditorPermissions(editor);
                         if (ep != null) {
-                            for (Entry<Permissions, Boolean> p : ep.entrySet()) {
-                                if (p.getValue() != null && p.getValue() == true) {
-                                    insertPermissions.setInt(1, warp.index);
-                                    insertPermissions.setString(2, editor);
-                                    insertPermissions.setInt(3, p.getKey().id);
-                                    insertPermissions.addBatch();
-                                }
+                            for (Permissions p : ep.getByValue(true)) {
+                                insertPermissions.setInt(1, warp.index);
+                                insertPermissions.setString(2, editor);
+                                insertPermissions.setInt(3, p.id);
+                                insertPermissions.addBatch();
                             }
                         }
                     }
@@ -489,7 +520,7 @@ public class SQLiteConnection implements DataConnection {
 
             @Override
             public void fillStatement(Warp warp, PreparedStatement statement) throws SQLException {
-                statement.setString(1, warp.welcomeMessage);
+                statement.setString(1, warp.getRawWelcomeMessage());
                 statement.setInt(2, warp.index);
             }
         });
@@ -513,7 +544,7 @@ public class SQLiteConnection implements DataConnection {
 
             @Override
             public void fillStatement(Warp warp, PreparedStatement statement) throws SQLException {
-                statement.setInt(1, warp.visibility.level);
+                statement.setInt(1, warp.getVisibility().getInt(warp.isListed()));
                 statement.setInt(2, warp.index);
             }
         });
@@ -537,7 +568,7 @@ public class SQLiteConnection implements DataConnection {
 
             @Override
             public void fillStatement(Warp warp, PreparedStatement statement) throws SQLException {
-                statement.setInt(1, warp.getPrice());
+                statement.setDouble(1, warp.getPrice());
                 statement.setInt(2, warp.index);
             }
         });
@@ -559,14 +590,12 @@ public class SQLiteConnection implements DataConnection {
 
                 boolean permissionAdded = false;
                 
-                for (Entry<Permissions, Boolean> entry : p.entrySet()) {
-                    if (entry.getValue() != null && entry.getValue()) {
-                        ps.setInt(1, warp.index);
-                        ps.setString(2, name.toLowerCase());
-                        ps.setInt(3, entry.getKey().id);
-                        ps.addBatch();
-                        permissionAdded = true;
-                    }
+                for (Permissions perm : p.getByValue(true)) {
+                    ps.setInt(1, warp.index);
+                    ps.setString(2, name.toLowerCase());
+                    ps.setInt(3, perm.id);
+                    ps.addBatch();
+                    permissionAdded = true;
                 }
 
                 if (permissionAdded) {

@@ -20,12 +20,13 @@ import de.xzise.xwarp.warpable.Positionable;
 import de.xzise.xwarp.warpable.Warpable;
 import de.xzise.xwarp.warpable.WarperFactory;
 import de.xzise.xwarp.wrappers.permission.PermissionTypes;
+import de.xzise.xwarp.wrappers.permission.WarpToWarpPermission;
 import de.xzise.xwarp.wrappers.permission.WorldPermission;
 
 public class Warp implements WarpObject {
 
     public enum Visibility {
-        PRIVATE(0, "private"), PUBLIC(1, "public"), GLOBAL(2, "global");
+        PRIVATE((byte) 0, "private"), PUBLIC((byte) 1, "public"), GLOBAL((byte) 2, "global");
 
         private static final Map<String, Visibility> names = new HashMap<String, Warp.Visibility>();
         
@@ -35,29 +36,40 @@ public class Warp implements WarpObject {
             }
         }
         
-        public final int level;
+        public final byte level;
         public final String name;
 
-        private Visibility(int level, String name) {
+        private Visibility(byte level, String name) {
             this.level = level;
             this.name = name;
+        }
+        
+        public byte getInt(boolean listed) {
+            byte v = (byte) (this.level & 0x7F);
+            if (listed) {
+                v |= 1 << 7;
+            }
+            return v;
         }
 
         public static Visibility parseString(String string) {
             return names.get(string);
+        }
+        
+        private static Visibility parseCleanedLevel(byte level) {
+            for (Visibility visibility : Visibility.values()) {
+                if (visibility.level == level) {
+                    return visibility;
+                }
+            }
+            return null;
         }
 
         public static Visibility parseLevel(int level) {
             // Bit 31 - 08 = unused
             // Bit      07 = !listed (→ bit set = not listed)
             // Bit 06 - 00 = visibility
-            byte cleanedLevel = (byte) (level & 0x7F);
-            for (Visibility visibility : Visibility.values()) {
-                if (visibility.level == cleanedLevel) {
-                    return visibility;
-                }
-            }
-            return null;
+            return parseCleanedLevel((byte) (level & 0x7F));
         }
         
         public static boolean isListed(int level) {
@@ -92,16 +104,24 @@ public class Warp implements WarpObject {
             return new HashMap<K, V>(map);
         }
     }
+    
+    public static <K, V> V getDefault(Map<? extends K, ? extends V> map, K key, V def) {
+        if (map != null && map.containsKey(key)) {
+            return map.get(key);
+        } else {
+            return def;
+        }
+    }
 
-    public Warp(int index, String name, String creator, String owner, LocationWrapper wrapper, Visibility visibility, Map<String, EditorPermissions> playerPermission, Map<String, EditorPermissions> groupPermission, String welcomeMessage) {
+    public Warp(int index, String name, String creator, String owner, LocationWrapper wrapper, Visibility visibility, Map<EditorPermissions.Type, Map<String, EditorPermissions>> editorPermissions, String welcomeMessage) {
         this.index = index;
         this.name = name;
         this.creator = creator;
         this.owner = owner;
         this.location = wrapper;
         this.visibility = visibility;
-        this.playerEditors = copyMap(playerPermission);
-        this.groupEditors = copyMap(groupPermission);
+        this.playerEditors = copyMap(getDefault(editorPermissions, EditorPermissions.Type.PLAYER, null));
+        this.groupEditors = copyMap(getDefault(editorPermissions, EditorPermissions.Type.GROUP, null));
         this.welcomeMessage = welcomeMessage;
         this.listed = true;
         if (index > nextIndex)
@@ -110,7 +130,7 @@ public class Warp implements WarpObject {
     }
 
     public Warp(String name, String creator, String owner, LocationWrapper wrapper) {
-        this(nextIndex, name, creator, owner, wrapper, Visibility.PUBLIC, null, null, null);
+        this(nextIndex, name, creator, owner, wrapper, Visibility.PUBLIC, null, null);
     }
 
     public Warp(String name, Player creator) {
@@ -135,6 +155,10 @@ public class Warp implements WarpObject {
     }
 
     public boolean playerCanWarp(CommandSender sender, boolean viaSign) {
+        if (MyWarp.permissions.permission(sender, new WarpToWarpPermission(this))) {
+            return true;
+        }
+        
         Player player = WarperFactory.getPlayer(sender);
         Positionable pos = WarperFactory.getPositionable(sender);
         String name = null;
@@ -362,6 +386,17 @@ public class Warp implements WarpObject {
         this.location = new LocationWrapper(location);
     }
 
+    public EditorPermissions getEditorPermissions(String name, boolean create, EditorPermissions.Type type) {
+        switch (type) {
+        case GROUP :
+            return this.getGroupEditorPermissions(name, create);
+        case PLAYER :
+            return this.getPlayerEditorPermissions(name, create);
+        default :
+            return null;
+        }
+    }
+    
     public EditorPermissions getPlayerEditorPermissions(String name) {
         return this.getPlayerEditorPermissions(name, false);
     }
@@ -412,12 +447,19 @@ public class Warp implements WarpObject {
         return this.welcomeMessage;
     }
 
-    public void addEditor(String name, String permissions) {
-        this.getPlayerEditorPermissions(name, true).parseString(permissions, true);
+    public void addEditor(String name, String permissions, EditorPermissions.Type type) {
+        this.getEditorPermissions(name, true, type).parseString(permissions, true);
     }
 
-    public void removeEditor(String name) {
-        this.playerEditors.remove(name.toLowerCase());
+    public void removeEditor(String name, EditorPermissions.Type type) {
+        switch (type) {
+        case GROUP :
+            this.groupEditors.remove(name.toLowerCase());
+            break;
+        case PLAYER :
+            this.playerEditors.remove(name.toLowerCase());
+            break;
+        }
     }
 
     public static final Comparator<Warp> WARP_NAME_COMPARATOR = new StringComparator<Warp>() {

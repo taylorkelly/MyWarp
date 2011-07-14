@@ -152,14 +152,12 @@ public class ListCommand extends DefaultSubCommand {
 
     @Override
     protected String[] getFullHelpText() {
-        String[] legend = GenericLister.getLegend();
-        String[] lines = new String[2 + legend.length];
-        lines[0] = "Shows the given page of the warp list.";
-        lines[1] = "If creator is set only the warps of the creator are listed.";
-        for (int i = 0; i < legend.length; i++) {
-            lines[i + 2] = legend[i];
-        }
-        return lines;
+        return new String[] {
+        "Shows a list of warps. Following filters are available:",
+        "oo:<owner>, o:<exp. owner>, oc:<creator>, c:<exp. creator>",
+        "w:<world>, v:<visibility>, -col:{owner,world,location}",
+        "Example: /warp list o:xZise -col:owner"
+        };
     }
 
     @Override
@@ -169,6 +167,6 @@ public class ListCommand extends DefaultSubCommand {
 
     @Override
     protected String getCommand() {
-        return "warp list [creator] [#page]";
+        return "warp list [filters|#page]";
     }
 }

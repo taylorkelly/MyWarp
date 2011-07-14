@@ -200,8 +200,8 @@ public class YmlConnection implements DataConnection {
         Visibility visibility = Visibility.parseString(node.getString("visibility"));
         boolean listed = node.getBoolean("listed", true);
         double price = node.getDouble("price", -1);
-        double cooldown = node.getDouble("cooldown", -1);
-        double warmup = node.getDouble("warmup", -1);
+        int cooldown = node.getInt("cooldown", -1);
+        int warmup = node.getInt("warmup", -1);
         String welcomeMessage = node.getString("welcome");
 
         Warp warp = new Warp(name, creator, owner, new LocationWrapper(new FixedLocation(worldObject, x, y, z, yaw, pitch), world));
@@ -215,6 +215,8 @@ public class YmlConnection implements DataConnection {
         warp.setVisibility(visibility);
         warp.setListed(listed);
         warp.setPrice(price);
+        warp.setCoolDown(cooldown);
+        warp.setWarmUp(warmup);
         
         return warp;
     }
@@ -249,30 +251,57 @@ public class YmlConnection implements DataConnection {
         }
     }
     
-    public static Boolean getBool(ConfigurationNode node, String path) {
-        Object o = node.getProperty(path);
-        if (o instanceof Boolean) {
-            return ((Boolean) o);
-        } else {
-            return null;
-        }
-    }
-    
     @Override
     public void addWarp(Warp... warp) {
         // TODO Auto-generated method stub
 
     }
 
-    @Override
-    public void deleteWarp(Warp warp) {
-        List<ConfigurationNode> nodes = this.config.getNodeList("xwarp.warps", null);
-        IdentificationInterface id = new NameIdentification(warp);
-        for (int i = nodes.size() - 1; i >= 0; i--) {
-            if (id.isIdentificated(getWarp(nodes.get(i)))) {
-                nodes.remove(i);
+    private static Map<String, Object> nodeToMap(ConfigurationNode node) {
+        Map<String, Object> map = new HashMap<String, Object>();
+        for (String key : node.getKeys()) {
+            map.put(key, node.getProperty(key));
+        }
+        return map;
+    }
+    
+    public static boolean bool(Boolean b, boolean nullIsTrue) {
+        return b == null ? nullIsTrue : b;
+    }
+    
+    public static interface Callback<Result, Parameter> {
+        Result call(Parameter parameter);
+    }
+    
+    public static class WarpCallback implements Callback<Boolean, ConfigurationNode> {
+        
+        public final IdentificationInterface id;
+
+        public WarpCallback(IdentificationInterface id) {
+            this.id = id;
+        }
+
+        @Override
+        public Boolean call(ConfigurationNode parameter) {
+            return !id.isIdentificated(getWarp(parameter));
+        }
+        
+    }
+    
+    public static void removeFromList(ConfigurationNode node, String key, Callback<Boolean, ConfigurationNode> callback) {
+        List<ConfigurationNode> nodes = node.getNodeList(key, null);
+        List<Map<String, Object>> mapList = new ArrayList<Map<String,Object>>(Math.max(nodes.size() - 1, 0));
+        for (ConfigurationNode singleNode : nodes) {
+            if (bool(callback.call(singleNode), false)) {
+                mapList.add(nodeToMap(node));
             }
         }
+        node.setProperty(key, mapList);
+    }
+    
+    @Override
+    public void deleteWarp(Warp warp) {
+        removeFromList(this.config, "xwarp.warps", new WarpCallback(new NameIdentification(warp)));
     }
 
     private ConfigurationNode getNode(IdentificationInterface id) {
@@ -337,7 +366,8 @@ public class YmlConnection implements DataConnection {
 
     @Override
     public void updateEditor(Warp warp, String name) {
-        ConfigurationNode editorNode = getNode(new NameIdentification(warp)).getNode("editors." + name);
+        List<ConfigurationNode> editorNodes = getNode(new NameIdentification(warp)).getNodeList("editors", null);
+        
     }
 
     @Override

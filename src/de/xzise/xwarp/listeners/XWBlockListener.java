@@ -26,6 +26,7 @@ public class XWBlockListener extends BlockListener {
         this.list = list;
     }
 
+    @Override
     public void onSignChange(SignChangeEvent event) {
         Block block = event.getBlock();
         if (block.getState() instanceof Sign && !event.isCancelled() && event.getPlayer() != null) {

@@ -441,15 +441,17 @@ public class WarpManager {
                 } else if (warp.isOwn(inviteeName)) {
                     sender.sendMessage(ChatColor.RED + "You can't uninvite yourself. You're the creator!");
                 } else {
-                    warp.addEditor(inviteeName, "w");
-                    this.data.updateEditor(warp, inviteeName);
-                    sender.sendMessage("You have uninvited " + ChatColor.GREEN + inviteeName + ChatColor.WHITE + " from '" + ChatColor.GREEN + warp.name + ChatColor.WHITE + "'.");
-                    if (warp.getVisibility() != Visibility.PRIVATE) {
-                        sender.sendMessage(ChatColor.RED + "But '" + warp.name + "' is still public.");
-                    }
-                    Player match = this.server.getPlayer(inviteeName);
-                    if (match != null) {
-                        match.sendMessage("You've been uninvited to warp '" + ChatColor.GREEN + warp.name + ChatColor.WHITE + "' by " + ChatColor.GREEN + MinecraftUtil.getName(sender) + ChatColor.WHITE + ". Sorry.");
+                    EditorPermissions permissions = warp.getPlayerEditorPermissions(inviteeName, false);
+                    if (permissions != null && permissions.remove(Permissions.WARP)) {
+                        this.data.updateEditor(warp, inviteeName);
+                        sender.sendMessage("You have uninvited " + ChatColor.GREEN + inviteeName + ChatColor.WHITE + " from '" + ChatColor.GREEN + warp.name + ChatColor.WHITE + "'.");
+                        if (warp.getVisibility() != Visibility.PRIVATE) {
+                            sender.sendMessage(ChatColor.RED + "But '" + warp.name + "' is still public.");
+                        }
+                        Player match = this.server.getPlayer(inviteeName);
+                        if (match != null) {
+                            match.sendMessage("You've been uninvited to warp '" + ChatColor.GREEN + warp.name + ChatColor.WHITE + "' by " + ChatColor.GREEN + MinecraftUtil.getName(sender) + ChatColor.WHITE + ". Sorry.");
+                        }
                     }
                 }
             } else {
@@ -488,11 +490,11 @@ public class WarpManager {
         }
     }
 
-    public void addEditor(String name, String owner, CommandSender sender, String editor, String permissions) {
+    public void addEditor(String name, String owner, CommandSender sender, String editor, String permissions, EditorPermissions.Type type) {
         Warp warp = this.getWarp(name, owner, MinecraftUtil.getPlayerName(sender));
         if (warp != null) {
             if (WarpManager.playerCanModifyWarp(sender, warp, Permissions.ADD_EDITOR)) {
-                warp.addEditor(editor, permissions);
+                warp.addEditor(editor, permissions, type);
                 this.data.updateEditor(warp, editor);
                 sender.sendMessage("You have added " + ChatColor.GREEN + editor + ChatColor.WHITE + " to '" + warp.name + ChatColor.WHITE + "'.");
             } else {
@@ -503,11 +505,11 @@ public class WarpManager {
         }
     }
 
-    public void removeEditor(String name, String owner, CommandSender sender, String editor) {
+    public void removeEditor(String name, String owner, CommandSender sender, String editor, EditorPermissions.Type type) {
         Warp warp = this.getWarp(name, owner, MinecraftUtil.getPlayerName(sender));
         if (warp != null) {
             if (WarpManager.playerCanModifyWarp(sender, warp, Permissions.REMOVE_EDITOR)) {
-                warp.removeEditor(editor);
+                warp.removeEditor(editor, type);
                 this.data.updateEditor(warp, editor);
                 sender.sendMessage("You have removed " + ChatColor.GREEN + editor + ChatColor.WHITE + " from '" + warp.name + ChatColor.WHITE + "'.");
             } else {
