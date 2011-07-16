@@ -3,6 +3,8 @@ package de.xzise.xwarp.dataconnections;
 import java.io.File;
 import java.util.List;
 
+import de.xzise.xwarp.editors.EditorPermissions;
+
 import me.taylorkelly.mywarp.Warp;
 
 public interface DataConnection {
@@ -45,7 +47,7 @@ public interface DataConnection {
 
     void updateLocation(Warp warp);
 
-    void updateEditor(Warp warp, String name);
+    void updateEditor(Warp warp, String name, EditorPermissions.Type type);
 
     void updatePrice(Warp warp);
 }

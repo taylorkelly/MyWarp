@@ -17,8 +17,8 @@ import org.bukkit.World;
 import de.xzise.MinecraftUtil;
 import de.xzise.metainterfaces.FixedLocation;
 import de.xzise.metainterfaces.LocationWrapper;
-import de.xzise.xwarp.EditorPermissions;
-import de.xzise.xwarp.EditorPermissions.Type;
+import de.xzise.xwarp.editors.EditorPermissions;
+import de.xzise.xwarp.editors.EditorPermissions.Type;
 
 import me.taylorkelly.mywarp.MyWarp;
 import me.taylorkelly.mywarp.Warp;

@@ -4,9 +4,9 @@ import org.bukkit.Server;
 import org.bukkit.command.CommandSender;
 
 import de.xzise.MinecraftUtil;
-import de.xzise.xwarp.EditorPermissions;
 import de.xzise.xwarp.WarpManager;
-import de.xzise.xwarp.EditorPermissions.Type;
+import de.xzise.xwarp.editors.EditorPermissions;
+import de.xzise.xwarp.editors.EditorPermissions.Type;
 
 public class RemoveEditorCommand extends WarpCommand {
 

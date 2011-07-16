@@ -13,9 +13,9 @@ import org.bukkit.entity.Player;
 import de.xzise.MinecraftUtil;
 import de.xzise.metainterfaces.FixedLocation;
 import de.xzise.metainterfaces.LocationWrapper;
-import de.xzise.xwarp.EditorPermissions;
-import de.xzise.xwarp.Permissions;
 import de.xzise.xwarp.WarpObject;
+import de.xzise.xwarp.editors.EditorPermissions;
+import de.xzise.xwarp.editors.WarpPermissions;
 import de.xzise.xwarp.warpable.Positionable;
 import de.xzise.xwarp.warpable.Warpable;
 import de.xzise.xwarp.warpable.WarperFactory;
@@ -92,8 +92,8 @@ public class Warp implements WarpObject {
     private String owner;
     private String welcomeMessage;
     private Visibility visibility;
-    private Map<String, EditorPermissions> playerEditors;
-    private Map<String, EditorPermissions> groupEditors;
+    private Map<String, EditorPermissions<WarpPermissions>> playerEditors;
+    private Map<String, EditorPermissions<WarpPermissions>> groupEditors;
 
     public static int nextIndex = 1;
     
@@ -113,7 +113,7 @@ public class Warp implements WarpObject {
         }
     }
 
-    public Warp(int index, String name, String creator, String owner, LocationWrapper wrapper, Visibility visibility, Map<EditorPermissions.Type, Map<String, EditorPermissions>> editorPermissions, String welcomeMessage) {
+    public Warp(int index, String name, String creator, String owner, LocationWrapper wrapper, Visibility visibility, Map<EditorPermissions.Type, Map<String, EditorPermissions<WarpPermissions>>> editorPermissions, String welcomeMessage) {
         this.index = index;
         this.name = name;
         this.creator = creator;
@@ -142,9 +142,9 @@ public class Warp implements WarpObject {
     }
 
     public boolean playerIsInvited(String name) {
-        EditorPermissions ep = this.playerEditors.get(name.toLowerCase());
+        EditorPermissions<WarpPermissions> ep = this.playerEditors.get(name.toLowerCase());
         if (ep != null) {
-            return ep.get(Permissions.WARP);
+            return ep.get(WarpPermissions.WARP);
         } else {
             return false;
         }
@@ -288,11 +288,11 @@ public class Warp implements WarpObject {
     }
 
     public void invite(String player) {
-        this.getPlayerEditorPermissions(player).put(Permissions.WARP, true);
+        this.getPlayerEditorPermissions(player).put(WarpPermissions.WARP, true);
     }
 
     public void uninvite(String inviteeName) {
-        this.getPlayerEditorPermissions(inviteeName).put(Permissions.WARP, false);
+        this.getPlayerEditorPermissions(inviteeName).put(WarpPermissions.WARP, false);
     }
 
     public boolean canModify(CommandSender sender, boolean defaultModification, PermissionTypes defaultPermission, PermissionTypes adminPermission) {
@@ -303,7 +303,7 @@ public class Warp implements WarpObject {
         }
     }
     
-    public boolean canModify(CommandSender sender, Permissions permission) {
+    public boolean canModify(CommandSender sender, WarpPermissions permission) {
         Player player = WarperFactory.getPlayer(sender);
         boolean canModify = false;
         if (player != null) {
@@ -313,15 +313,15 @@ public class Warp implements WarpObject {
         return this.canModify(sender, canModify, permission.defaultPermission, permission.adminPermission);
     }
     
-    public boolean playerCanModify(Player player, Permissions permission) {
+    public boolean playerCanModify(Player player, WarpPermissions permission) {
         if (this.isOwn(player.getName()))
             return true;
-        EditorPermissions ep = this.playerEditors.get(player.getName().toLowerCase());
+        EditorPermissions<WarpPermissions> ep = this.playerEditors.get(player.getName().toLowerCase());
         if (ep != null) {
             return ep.get(permission);
         }
         String group = MyWarp.permissions.getGroup(player.getWorld().getName(), player.getName());
-        EditorPermissions grpPerm = this.groupEditors.get(group.toLowerCase());
+        EditorPermissions<WarpPermissions> grpPerm = this.groupEditors.get(group.toLowerCase());
         if (grpPerm != null) {
             return grpPerm.get(permission);
         }
@@ -386,7 +386,7 @@ public class Warp implements WarpObject {
         this.location = new LocationWrapper(location);
     }
 
-    public EditorPermissions getEditorPermissions(String name, boolean create, EditorPermissions.Type type) {
+    public EditorPermissions<WarpPermissions> getEditorPermissions(String name, boolean create, EditorPermissions.Type type) {
         switch (type) {
         case GROUP :
             return this.getGroupEditorPermissions(name, create);
@@ -397,30 +397,30 @@ public class Warp implements WarpObject {
         }
     }
     
-    public EditorPermissions getPlayerEditorPermissions(String name) {
+    public EditorPermissions<WarpPermissions> getPlayerEditorPermissions(String name) {
         return this.getPlayerEditorPermissions(name, false);
     }
     
-    public EditorPermissions getPlayerEditorPermissions(String name, boolean create) {
-        EditorPermissions editorPermissions = this.playerEditors.get(name.toLowerCase());
+    public EditorPermissions<WarpPermissions> getPlayerEditorPermissions(String name, boolean create) {
+        EditorPermissions<WarpPermissions> editorPermissions = this.playerEditors.get(name.toLowerCase());
         if (editorPermissions == null) {
             if (create) {
-                editorPermissions = new EditorPermissions();
+                editorPermissions = new EditorPermissions<WarpPermissions>(WarpPermissions.class);
                 this.playerEditors.put(name.toLowerCase(), editorPermissions);
             }
         }
         return editorPermissions;
     }
     
-    public EditorPermissions getGroupEditorPermissions(String name) {
+    public EditorPermissions<WarpPermissions> getGroupEditorPermissions(String name) {
         return this.getGroupEditorPermissions(name, false);
     }
     
-    public EditorPermissions getGroupEditorPermissions(String name, boolean create) {
-        EditorPermissions editorPermissions = this.groupEditors.get(name.toLowerCase());
+    public EditorPermissions<WarpPermissions> getGroupEditorPermissions(String name, boolean create) {
+        EditorPermissions<WarpPermissions> editorPermissions = this.groupEditors.get(name.toLowerCase());
         if (editorPermissions == null) {
             if (create) {
-                editorPermissions = new EditorPermissions();
+                editorPermissions = new EditorPermissions<WarpPermissions>(WarpPermissions.class);
                 this.groupEditors.put(name.toLowerCase(), editorPermissions);
             }
         }
@@ -448,7 +448,7 @@ public class Warp implements WarpObject {
     }
 
     public void addEditor(String name, String permissions, EditorPermissions.Type type) {
-        this.getEditorPermissions(name, true, type).parseString(permissions, true);
+        this.getEditorPermissions(name, true, type).parseString(WarpPermissions.parseString(permissions), true);
     }
 
     public void removeEditor(String name, EditorPermissions.Type type) {

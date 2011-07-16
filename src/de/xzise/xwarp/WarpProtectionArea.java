@@ -1,31 +1,48 @@
 package de.xzise.xwarp;
 
+import java.util.EnumMap;
 import java.util.List;
+import java.util.Map;
+
+import me.taylorkelly.mywarp.MyWarp;
 
 import org.bukkit.command.CommandSender;
 
 import de.xzise.metainterfaces.FixedLocation;
-import de.xzise.metainterfaces.LocationWrapper;
+import de.xzise.xwarp.editors.EditorPermissions;
+import de.xzise.xwarp.editors.WarpPermissions;
+import de.xzise.xwarp.editors.WarpProtectionAreaPermissions;
+import de.xzise.xwarp.editors.EditorPermissions.Type;
 import de.xzise.xwarp.warpable.Positionable;
 
 public class WarpProtectionArea implements WarpObject {
 
-    private final LocationWrapper firstCorner;
-    private final LocationWrapper secondCorner;
+    public final int index;
+    private final WorldWrapper world;
+    private final FixedLocation firstCorner;
+    private final FixedLocation secondCorner;
     private final String name;
     private String owner;
     private String creator;
-    private List<String> allowed;
+    private Map<EditorPermissions.Type, Map<String, EditorPermissions<WarpProtectionAreaPermissions>>> editors;
     
-    public WarpProtectionArea(FixedLocation firstCorner, FixedLocation secondCorner, String name, String owner) {
-        if (firstCorner.world.equals(secondCorner.world)) {
-            this.firstCorner = new LocationWrapper(firstCorner);
-            this.secondCorner = new LocationWrapper(secondCorner);
-            this.owner = owner;
-            this.name = name;
-        } else {
-            throw new IllegalArgumentException("The corners have to be in the same world.");
-        }
+    public static int nextIndex = 1;
+    
+    public WarpProtectionArea(WorldWrapper world, FixedLocation firstCorner, FixedLocation secondCorner, String name, String owner) {
+        this(nextIndex, world, firstCorner, secondCorner, name, owner);
+    }
+    
+    public WarpProtectionArea(int index, WorldWrapper world, FixedLocation firstCorner, FixedLocation secondCorner, String name, String owner) {
+        this.index = index;
+        this.world = world;
+        this.firstCorner = firstCorner;
+        this.secondCorner = secondCorner;
+        this.owner = owner;
+        this.name = name;
+        this.editors = new EnumMap<EditorPermissions.Type, Map<String, EditorPermissions<WarpProtectionAreaPermissions>>>(EditorPermissions.Type.class);
+        if (index > nextIndex)
+            nextIndex = index;
+        nextIndex++;
     }
     
     public boolean isWithIn(Positionable positionable) {
@@ -33,15 +50,13 @@ public class WarpProtectionArea implements WarpObject {
     }
     
     public boolean isWithIn(FixedLocation location) {
-        if (location.world.getName().equals(firstCorner.getWorld())) {
-            FixedLocation firstCornerBuf = this.firstCorner.getLocation();
-            FixedLocation secondCornerBuf = this.secondCorner.getLocation();
-            double lowerX = Math.min(firstCornerBuf.x, secondCornerBuf.x);
-            double upperX = Math.max(firstCornerBuf.x, secondCornerBuf.x);
-            double lowerY = Math.min(firstCornerBuf.y, secondCornerBuf.y);
-            double upperY = Math.max(firstCornerBuf.y, secondCornerBuf.y);
-            double lowerZ = Math.min(firstCornerBuf.z, secondCornerBuf.z);
-            double upperZ = Math.max(firstCornerBuf.z, secondCornerBuf.z);
+        if (this.isValid() && location.world.equals(world.getWorld())) {
+            double lowerX = Math.min(this.firstCorner.x, this.secondCorner.x);
+            double upperX = Math.max(this.firstCorner.x, this.secondCorner.x);
+            double lowerY = Math.min(this.firstCorner.y, this.secondCorner.y);
+            double upperY = Math.max(this.firstCorner.y, this.secondCorner.y);
+            double lowerZ = Math.min(this.firstCorner.z, this.secondCorner.z);
+            double upperZ = Math.max(this.firstCorner.z, this.secondCorner.z);
             double x = location.x;
             double y = location.y;
             double z = location.z;
@@ -69,10 +84,16 @@ public class WarpProtectionArea implements WarpObject {
     }
     
     public boolean isAllowed(String name) {
-    //TODO: Allow positionable & differ between the visibility?
+        //TODO: Allow positionable
         if (name.equals(this.owner)) {
             return true;
         } else {
+            EditorPermissions<WarpProtectionAreaPermissions> ep = this.editors.get(Type.PLAYER).get(name.toLowerCase());
+            
+            //TODO: Revisit the world parameter!
+            String grp = MyWarp.permissions.getGroup(world.getWorldName(), name);
+            
+            
             return this.allowed.contains(name);
         }
     }
@@ -93,12 +114,16 @@ public class WarpProtectionArea implements WarpObject {
 
     @Override
     public String getWorld() {
-        return this.firstCorner.getWorld();
+        return this.world.getWorldName();
     }
 
     @Override
     public boolean listWarp(CommandSender sender) {
         // TODO Auto-generated method stub
         return false;
+    }
+
+    public boolean isValid() {
+        return this.world.isValid();
     }
 }

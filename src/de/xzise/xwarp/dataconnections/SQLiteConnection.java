@@ -20,8 +20,14 @@ import org.bukkit.World;
 
 import de.xzise.metainterfaces.FixedLocation;
 import de.xzise.metainterfaces.LocationWrapper;
-import de.xzise.xwarp.EditorPermissions;
-import de.xzise.xwarp.Permissions;
+import de.xzise.xwarp.editors.Editor;
+import de.xzise.xwarp.editors.EditorPermissions;
+import de.xzise.xwarp.editors.ReverseEnumMap;
+import de.xzise.xwarp.editors.WarpPermissions;
+import de.xzise.xwarp.editors.EditorPermissions.Table;
+import de.xzise.xwarp.editors.WarpProtectionAreaPermissions;
+import de.xzise.xwarp.WarpProtectionArea;
+import de.xzise.xwarp.WorldWrapper;
 
 import me.taylorkelly.mywarp.MyWarp;
 import me.taylorkelly.mywarp.Warp;
@@ -30,9 +36,10 @@ import me.taylorkelly.mywarp.Warp.Visibility;
 public class SQLiteConnection implements WarpProtectionConnection {
 
     public final static String DATABASE = "jdbc:sqlite:homes-warps.db";
-    private final static String WARP_TABLE = "CREATE TABLE `warps` (" + "`id` INTEGER PRIMARY KEY," + "`name` varchar(32) NOT NULL," + "`creator` varchar(32) NOT NULL," + "`world` varchar(32) NOT NULL," + "`x` DOUBLE NOT NULL DEFAULT '0'," + "`y` DOUBLE NOT NULL DEFAULT '0'," + "`z` DOUBLE NOT NULL DEFAULT '0'," + "`yaw` smallint NOT NULL DEFAULT '0'," + "`pitch` smallint NOT NULL DEFAULT '0'," + "`publicLevel` smallint NOT NULL DEFAULT '1'," + "`welcomeMessage` varchar(100) DEFAULT NULL," + "`owner` varchar(32) NOT NULL DEFAULT '', " + "`price` DOUBLE NOT NULL DEFAULT '0', " + "`cooldown` INTEGER NOT NULL DEFAULT '0', " + "`warmup` INTEGER NOT NULL DEFAULT '0'" + ");";
-    private final static String PERMISSIONS_TABLE = "CREATE TABLE `permissions` (" + "`id` INTEGER NOT NULL," + "`editor` varchar(32) NOT NULL," + "`value` INTEGER NOT NULL," + "`type` INTEGER NOT NULL" + ");";
-
+    private final static String WARP_TABLE = "CREATE TABLE `warps` (" + "`id` INTEGER PRIMARY KEY," + "`name` varchar(32) NOT NULL," + "`creator` varchar(32) NOT NULL," + "`world` varchar(32) NOT NULL," + "`x` DOUBLE NOT NULL DEFAULT '0'," + "`y` DOUBLE NOT NULL DEFAULT '0'," + "`z` DOUBLE NOT NULL DEFAULT '0'," + "`yaw` smallint NOT NULL DEFAULT '0'," + "`pitch` smallint NOT NULL DEFAULT '0'," + "`publicLevel` smallint NOT NULL DEFAULT '1'," + "`welcomeMessage` varchar(100) DEFAULT NULL," + "`owner` varchar(32) NOT NULL DEFAULT '', " + "`price` DOUBLE NOT NULL DEFAULT '0', " + "`cooldown` INTEGER NOT NULL DEFAULT -1, " + "`warmup` INTEGER NOT NULL DEFAULT -1" + ");";
+    private final static String PERMISSIONS_TABLE = "CREATE TABLE `permissions` (" + "`id` INTEGER NOT NULL," + "`editor` varchar(32) NOT NULL," + "`value` INTEGER NOT NULL," + "`type` INTEGER NOT NULL," + "`table` INTEGER NOT NULL" + ");";
+    private final static String PROTECTION_AREA_TABLE = "CREATE TABLE `protectionAreas` (" + "`id` INTEGER PRIMARY KEY," + "`name` varchar(32) NOT NULL," + "`creator` varchar(32) NOT NULL," + "`world` varchar(32) NOT NULL," + "`x1` DOUBLE NOT NULL DEFAULT '0'," + "`y1` DOUBLE NOT NULL DEFAULT '0'," + "`z1` DOUBLE NOT NULL DEFAULT '0'," + "`x2` DOUBLE NOT NULL DEFAULT '0'," + "`y2` DOUBLE NOT NULL DEFAULT '0'," + "`z2` DOUBLE NOT NULL DEFAULT '0'," + "`owner` varchar(32) NOT NULL DEFAULT '', " + ");";
+    
     private final static String VERSION_TABLE = "CREATE TABLE `meta` (`name` varchar(32) NOT NULL, `value` int NOT NULL);";
 
     private final static int TARGET_VERSION = 5;
@@ -98,13 +105,14 @@ public class SQLiteConnection implements WarpProtectionConnection {
             Statement statement = null;
             PreparedStatement convertedWarp = null;
             PreparedStatement convertedPermissions = null;
+            PreparedStatement convertedProtectionArea = null;
             PreparedStatement permissionsInsert = null;
             ResultSet set = null;
             try {
                 statement = this.connection.createStatement();
 
+                // Backup old permissions table (if exists)
                 if (tableExists("permissions")) {
-                    // Backup old permissions table
                     statement.execute("ALTER TABLE permissions RENAME TO permissions_backup");
                     MyWarp.logger.info("Backuping old permissions table.");
                 }
@@ -114,19 +122,56 @@ public class SQLiteConnection implements WarpProtectionConnection {
                 
                 if (tableExists("permissions_backup")) {
                     set = statement.executeQuery("SELECT * FROM permissions_backup");
-                    convertedPermissions = this.connection.prepareStatement("INSERT INTO permissions (id, editor, value, type) VALUES (?,?,?,?)");
+                    convertedPermissions = this.connection.prepareStatement("INSERT INTO permissions (id, editor, value, type, table) VALUES (?,?,?,?,?)");
                     while (set.next()) {
                         convertedPermissions.setInt(1, set.getInt("id"));
                         convertedPermissions.setString(2, set.getString("editor"));
                         convertedPermissions.setInt(3, set.getInt("value"));
                         if (version < 5) {
                             convertedPermissions.setInt(4, EditorPermissions.Type.PLAYER.id);
+                            convertedPermissions.setInt(5, EditorPermissions.Table.WARP.id);
                         } else {
                             convertedPermissions.setInt(4, set.getInt("type"));
+                            convertedPermissions.setInt(5, set.getInt("table"));
                         }
+                        convertedPermissions.executeUpdate();
                     }
+                    
+                    statement.executeUpdate("DROP TABLE permissions_backup");
+                    MyWarp.logger.info("Permissions backup recovered.");
+                }
+                
+                // Backup old protection areas table (if exists)
+                if (tableExists("protectionAreas")) {
+                    statement.execute("ALTER TABLE protectionAreas RENAME TO protectionAreas_backup");
+                    MyWarp.logger.info("Backuping old protection area table.");
+                }
+                
+                MyWarp.logger.info("Creating protection area table.");
+                statement.execute(PROTECTION_AREA_TABLE);
+                
+                if (tableExists("protectionAreas_backup")) {
+                    set = statement.executeQuery("SELECT * FROM protectionAreas_backup");
+                    convertedProtectionArea = this.connection.prepareStatement("INSERT INTO protectionAreas (id, name, creator, x1, y1, z1, x2, y2, z2, owner) VALUES (?,?,?,?,?,?,?,?,?,?)");
+                    while (set.next()) {
+                        convertedProtectionArea.setInt(1, set.getInt("id"));
+                        convertedProtectionArea.setString(2, set.getString("name"));
+                        convertedProtectionArea.setString(3, set.getString("creator"));
+                        convertedProtectionArea.setDouble(4, set.getDouble("x1"));
+                        convertedProtectionArea.setDouble(5, set.getDouble("y1"));
+                        convertedProtectionArea.setDouble(6, set.getDouble("z1"));
+                        convertedProtectionArea.setDouble(7, set.getDouble("x2"));
+                        convertedProtectionArea.setDouble(8, set.getDouble("y2"));
+                        convertedProtectionArea.setDouble(9, set.getDouble("z2"));
+                        convertedProtectionArea.setString(10, set.getString("owner"));
+                        convertedProtectionArea.executeUpdate();
+                    }
+                    
+                    statement.executeUpdate("DROP TABLE permissions_backup");
+                    MyWarp.logger.info("Permissions backup recovered.");
                 }
 
+                // Backup old warp table (if exists)
                 if (tableExists("warps")) {
                     // Backup it
                     statement.execute("ALTER TABLE warps RENAME TO warps_backup");
@@ -205,20 +250,21 @@ public class SQLiteConnection implements WarpProtectionConnection {
                         MyWarp.logger.info("Adding permissions table");
 
                         if (list.size() > 0) {
-                            permissionsInsert = this.connection.prepareStatement("INSERT OR IGNORE INTO permissions (id, editor, value, type) VALUES (?,?,?,?)");
+                            permissionsInsert = this.connection.prepareStatement("INSERT OR IGNORE INTO permissions (id, editor, value, type, table) VALUES (?,?,?,?,?)");
 
                             for (WarpPermission warpPermission : list) {
                                 permissionsInsert.setInt(1, warpPermission.id);
                                 permissionsInsert.setString(2, warpPermission.editor);
-                                permissionsInsert.setInt(3, Permissions.WARP.id);
+                                permissionsInsert.setInt(3, WarpPermissions.WARP.id);
                                 permissionsInsert.setInt(4, EditorPermissions.Type.PLAYER.id);
+                                permissionsInsert.setInt(5, EditorPermissions.Table.WARP.id);
                                 permissionsInsert.addBatch();
                             }
                             permissionsInsert.executeBatch();
                         }
                     }
 
-                    statement.executeUpdate("DROP TABLE warpTable_backup");
+                    statement.executeUpdate("DROP TABLE warps_backup");
                     MyWarp.logger.info("Recovering the backup.");
                 }
                 if (version < 0) {
@@ -240,6 +286,10 @@ public class SQLiteConnection implements WarpProtectionConnection {
                         permissionsInsert.close();
                     if (convertedWarp != null)
                         convertedWarp.close();
+                    if (convertedPermissions != null)
+                        convertedPermissions.close();
+                    if (convertedProtectionArea != null)
+                        convertedProtectionArea.close();
                     if (statement != null)
                         statement.close();
                     if (set != null)
@@ -313,38 +363,9 @@ public class SQLiteConnection implements WarpProtectionConnection {
         ResultSet set = null;
         try {
             statement = this.connection.createStatement();
-            set = statement.executeQuery("SELECT * FROM permissions");
-            Map<Integer, Map<EditorPermissions.Type, Map<String, EditorPermissions>>> allPermissions = new HashMap<Integer, Map<EditorPermissions.Type, Map<String, EditorPermissions>>>();
-            while (set.next()) {
-                int index = set.getInt("id");
-                Map<EditorPermissions.Type, Map<String, EditorPermissions>> warpPermissions = allPermissions.get(index);
-                if (warpPermissions == null) {
-                    warpPermissions = new EnumMap<EditorPermissions.Type, Map<String, EditorPermissions>>(EditorPermissions.Type.class);
-                    allPermissions.put(index, warpPermissions);
-                }
-                
-                EditorPermissions.Type type = EditorPermissions.Type.parseInt(set.getInt("type"));
-                Map<String, EditorPermissions> typePermissions = warpPermissions.get(type);
-                if (typePermissions == null) {
-                    typePermissions = new HashMap<String, EditorPermissions>();
-                    warpPermissions.put(type, typePermissions);
-                }
-                
-                String editor = set.getString("editor");
-                EditorPermissions editorPermissions = typePermissions.get(editor.toLowerCase());
-                if (editorPermissions == null) {
-                    editorPermissions = new EditorPermissions();
-                    typePermissions.put(editor.toLowerCase(), editorPermissions);
-                }
-                int value = set.getInt("value");
-                editorPermissions.put(Permissions.getById(value), true);
-            }
+            Map<Integer, Map<EditorPermissions.Type, Map<String, EditorPermissions<WarpPermissions>>>> allPermissions = this.getEditorPermissions(Table.WARP, WarpPermissions.class, WarpPermissions.ID_MAP);
 
-            if (set != null) {
-                set.close();
-            }
-
-            set = statement.executeQuery("SELECT * FROM warpTable");
+            set = statement.executeQuery("SELECT * FROM warps");
             int size = 0;
             int invalidSize = 0;
             while (set.next()) {
@@ -362,12 +383,16 @@ public class SQLiteConnection implements WarpProtectionConnection {
                 LocationWrapper loc = new LocationWrapper(new FixedLocation(world, x, y, z, yaw, pitch), worldName);
                 int publicLevel = set.getInt("publicLevel");
                 Visibility visibility = Visibility.parseLevel(publicLevel);
-                boolean listed = (publicLevel & 0x80) == 0;
+                boolean listed = Visibility.isListed(publicLevel);
                 String welcomeMessage = set.getString("welcomeMessage");
                 String owner = set.getString("owner");
+                int cooldown = set.getInt("cooldown");
+                int warmup = set.getInt("warmup");
                 Warp warp = new Warp(index, name, creator, owner, loc, visibility, allPermissions.get(index), welcomeMessage);
                 warp.setPrice(set.getInt("price"));
                 warp.setListed(listed);
+                warp.setCoolDown(cooldown);
+                warp.setWarmUp(warmup);
                 result.add(warp);
                 if (!warp.getLocationWrapper().isValid()) {
                     invalidSize++;
@@ -399,7 +424,7 @@ public class SQLiteConnection implements WarpProtectionConnection {
             PreparedStatement insertPermissions = null;
             try {
                 ps = this.connection.prepareStatement("INSERT INTO warps (id, name, creator, world, x, y, z, yaw, pitch, publicLevel, welcomeMessage, owner, price) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)");
-                insertPermissions = this.connection.prepareStatement("INSERT INTO permissions (id, editor, value) VALUES (?,?,?)");
+                insertPermissions = this.connection.prepareStatement("INSERT INTO permissions (id, editor, value, type, table) VALUES (?,?,?,?,?)");
                 for (Warp warp : warps) {
                     ps.setInt(1, warp.index);
                     ps.setString(2, warp.name);
@@ -411,13 +436,16 @@ public class SQLiteConnection implements WarpProtectionConnection {
                     ps.setDouble(13, warp.getPrice());
                     ps.addBatch();
 
+                    //TODO: Non player permissions
                     for (String editor : warp.getEditors()) {
-                        EditorPermissions ep = warp.getPlayerEditorPermissions(editor);
+                        EditorPermissions<WarpPermissions> ep = warp.getPlayerEditorPermissions(editor);
                         if (ep != null) {
-                            for (Permissions p : ep.getByValue(true)) {
+                            for (WarpPermissions p : ep.getByValue(true)) {
                                 insertPermissions.setInt(1, warp.index);
                                 insertPermissions.setString(2, editor);
                                 insertPermissions.setInt(3, p.id);
+                                insertPermissions.setInt(4, EditorPermissions.Type.PLAYER.id);
+                                insertPermissions.setInt(5, EditorPermissions.Table.WARP.id);
                                 insertPermissions.addBatch();
                             }
                         }
@@ -574,26 +602,28 @@ public class SQLiteConnection implements WarpProtectionConnection {
         });
     }
 
-    @Override
-    public void updateEditor(Warp warp, String name) {
+    private void updateEditor(int id, String name, EditorPermissions<? extends Editor> editorPerms, EditorPermissions.Type type, EditorPermissions.Table table) {
         PreparedStatement ps = null;
         ResultSet set = null;
         try {
-            ps = this.connection.prepareStatement("DELETE FROM permissions WHERE id = ? AND editor = ?");
-            ps.setInt(1, warp.index);
+            ps = this.connection.prepareStatement("DELETE FROM permissions WHERE id = ? AND editor = ? AND type = ? AND table = ?");
+            ps.setInt(1, id);
             ps.setString(2, name.toLowerCase());
+            ps.setInt(3, type.id);
+            ps.setInt(4, table.id);
             ps.executeUpdate();
 
-            EditorPermissions p = warp.getPlayerEditorPermissions(name);
-            if (p != null) {
-                ps = this.connection.prepareStatement("INSERT OR IGNORE INTO permissions (id, editor, value) VALUES (?,?,?)");
+            if (editorPerms != null) {
+                ps = this.connection.prepareStatement("INSERT OR IGNORE INTO permissions (id, editor, value, type, table) VALUES (?,?,?,?,?)");
 
                 boolean permissionAdded = false;
                 
-                for (Permissions perm : p.getByValue(true)) {
-                    ps.setInt(1, warp.index);
+                for (Editor perm : editorPerms.getByValue(true)) {
+                    ps.setInt(1, id);
                     ps.setString(2, name.toLowerCase());
-                    ps.setInt(3, perm.id);
+                    ps.setInt(3, perm.getId());
+                    ps.setInt(4, type.id);
+                    ps.setInt(5, table.id);
                     ps.addBatch();
                     permissionAdded = true;
                 }
@@ -620,6 +650,11 @@ public class SQLiteConnection implements WarpProtectionConnection {
                 MyWarp.logger.log(Level.SEVERE, "Warp Editor Exception (on close)", ex);
             }
         }
+    }
+    
+    @Override
+    public void updateEditor(Warp warp, String name, EditorPermissions.Type type) {
+        this.updateEditor(warp.index, name, warp.getEditorPermissions(name, false, type), type, EditorPermissions.Table.WARP);
     }
 
     public static List<String> processList(String permissions) {
@@ -730,5 +765,117 @@ public class SQLiteConnection implements WarpProtectionConnection {
     @Override
     public IdentificationInterface createIdentification(Warp warp) {
         return new IdIdentification(warp);
+    }
+    
+    private <T extends Enum<T> & Editor> Map<Integer, Map<EditorPermissions.Type, Map<String, EditorPermissions<T>>>> getEditorPermissions(EditorPermissions.Table table, Class<T> clazz, ReverseEnumMap<Integer, T> idMap) {
+        Map<Integer, Map<EditorPermissions.Type, Map<String, EditorPermissions<T>>>> result = new HashMap<Integer, Map<EditorPermissions.Type, Map<String, EditorPermissions<T>>>>();
+        Statement statement = null;
+        ResultSet set = null;
+        try {
+            statement = this.connection.createStatement();
+            set = statement.executeQuery("SELECT * FROM permissions WHERE table = " + table.id);
+            Map<Integer, Map<EditorPermissions.Type, Map<String, EditorPermissions<T>>>> allPermissions = new HashMap<Integer, Map<EditorPermissions.Type, Map<String, EditorPermissions<T>>>>();
+            while (set.next()) {
+                int index = set.getInt("id");
+                Map<EditorPermissions.Type, Map<String, EditorPermissions<T>>> warpPermissions = allPermissions.get(index);
+                if (warpPermissions == null) {
+                    warpPermissions = new EnumMap<EditorPermissions.Type, Map<String, EditorPermissions<T>>>(EditorPermissions.Type.class);
+                    allPermissions.put(index, warpPermissions);
+                }
+                
+                EditorPermissions.Type type = EditorPermissions.Type.parseInt(set.getInt("type"));
+                Map<String, EditorPermissions<T>> typePermissions = warpPermissions.get(type);
+                if (typePermissions == null) {
+                    typePermissions = new HashMap<String, EditorPermissions<T>>();
+                    warpPermissions.put(type, typePermissions);
+                }
+                
+                String editor = set.getString("editor");
+                EditorPermissions<T> editorPermissions = typePermissions.get(editor.toLowerCase());
+                if (editorPermissions == null) {
+                    editorPermissions = new EditorPermissions<T>(clazz);
+                    typePermissions.put(editor.toLowerCase(), editorPermissions);
+                }
+                int value = set.getInt("value");
+                editorPermissions.put(idMap.get(value), true);
+            }
+        } catch (SQLException ex) {
+            MyWarp.logger.severe("Permission database load exception", ex);
+        } finally {
+            try {
+                if (statement != null)
+                    statement.close();
+                if (set != null)
+                    set.close();
+            } catch (SQLException ex) {
+                MyWarp.logger.severe("Permission database load exception (on close)");
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public List<WarpProtectionArea> getProtectionAreas() {
+        List<WarpProtectionArea> result = new ArrayList<WarpProtectionArea>();
+        Statement statement = null;
+        ResultSet set = null;
+        try {
+            Map<Integer, Map<EditorPermissions.Type, Map<String, EditorPermissions<WarpProtectionAreaPermissions>>>> allPermissions = this.getEditorPermissions(Table.PROTECTION_AREA, WarpProtectionAreaPermissions.class, WarpProtectionAreaPermissions.ID_MAP);
+
+            statement = this.connection.createStatement();
+            set = statement.executeQuery("SELECT * FROM protectionAreas");
+            int size = 0;
+            int invalidSize = 0;
+            while (set.next()) {
+                size++;
+                int index = set.getInt("id");
+                String name = set.getString("name");
+                String creator = set.getString("creator");
+                String owner = set.getString("owner");
+                String worldName = set.getString("world");
+                double x1 = set.getDouble("x1");
+                double y1 = set.getDouble("y1");
+                double z1 = set.getDouble("z1");
+                double x2 = set.getDouble("x2");
+                double y2 = set.getDouble("y2");
+                double z2 = set.getDouble("z2");
+                FixedLocation loc1 = new FixedLocation(x1, y1, z1);
+                FixedLocation loc2 = new FixedLocation(x2, y2, z2);
+                WorldWrapper worldWrapper = new WorldWrapper(worldName);
+                WarpProtectionArea wpa = new WarpProtectionArea(index, worldWrapper, loc1, loc2, name, owner);
+                result.add(wpa);
+                if (!wpa.isValid()) {
+                    invalidSize++;
+                }
+            }
+            MyWarp.logger.info(size + " warps loaded");
+            if (invalidSize > 0) {
+                MyWarp.logger.warning(invalidSize + " invalid warps found.");
+            }
+        } catch (SQLException ex) {
+            MyWarp.logger.severe("Warp protection area load exception", ex);
+        } finally {
+            try {
+                if (statement != null)
+                    statement.close();
+                if (set != null)
+                    set.close();
+            } catch (SQLException ex) {
+                MyWarp.logger.severe("Warp protection area load exception (on close)");
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public void addProtectionArea(WarpProtectionArea area) {
+        // TODO Auto-generated method stub
+        1 == 0;
+    }
+
+    @Override
+    public void deleteProtectionArea(WarpProtectionArea area) {
+        // TODO Auto-generated method stub
+        1 == 0;
     }
 }

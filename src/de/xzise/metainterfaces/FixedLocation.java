@@ -22,6 +22,14 @@ public class FixedLocation implements Moveable<FixedLocation> {
         this(location.getWorld(), location.getX(), location.getY(), location.getZ(), location.getYaw(), location.getPitch());
     }
     
+    public FixedLocation(final double x, final double y, final double z) {
+        this((World) null, x, y, z);
+    }
+    
+    public FixedLocation(final World world, final double x, final double y, final double z) {
+        this(world, x, y, z, 0, 0);
+    }
+    
     public FixedLocation(final World world, final double x, final double y, final double z, final float yaw, final float pitch) {
         this.world = world;
         this.x = x;

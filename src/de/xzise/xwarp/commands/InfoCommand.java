@@ -11,8 +11,8 @@ import org.bukkit.entity.Player;
 import de.xzise.MinecraftUtil;
 import de.xzise.metainterfaces.FixedLocation;
 import de.xzise.wrappers.economy.EconomyHandler;
-import de.xzise.xwarp.Permissions;
 import de.xzise.xwarp.WarpManager;
+import de.xzise.xwarp.editors.WarpPermissions;
 import de.xzise.xwarp.lister.GenericLister;
 import de.xzise.xwarp.wrappers.permission.PermissionTypes;
 import de.xzise.xwarp.wrappers.permission.PricePermissions;
@@ -89,13 +89,13 @@ public class InfoCommand extends WarpCommand {
             } else {
                 for (int i = 0; i < editors.length; i++) {
                     String string = editors[i];
-                    Permissions[] pms = warp.getPlayerEditorPermissions(string).getByValue(true);
+                    WarpPermissions[] pms = warp.getPlayerEditorPermissions(string).getByValue(true);
                     if (pms.length > 0) {
                         editor += ChatColor.GREEN + string + " ";
                         char[] editorPermissions = new char[pms.length];
                         for (int j = 0; j < pms.length; j++) {
                             editorPermissions[j] = pms[j].value;
-                            if (pms[j] == Permissions.WARP) {
+                            if (pms[j] == WarpPermissions.WARP) {
                                 if (!invitees.isEmpty()) {
                                     invitees += ", ";
                                 }

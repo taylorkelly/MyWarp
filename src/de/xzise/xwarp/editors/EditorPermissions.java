@@ -1,4 +1,4 @@
-package de.xzise.xwarp;
+package de.xzise.xwarp.editors;
 
 import java.util.ArrayList;
 import java.util.EnumMap;
@@ -7,7 +7,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public class EditorPermissions {
+
+public class EditorPermissions<T extends Enum<T> & Editor> {
     
     public enum Type {
         PLAYER(0),
@@ -31,21 +32,49 @@ public class EditorPermissions {
             return TYPES.get(id);
         }
     }
+    
+    public enum Table {
+        WARP(0),
+        PROTECTION_AREA(1);
+        
+        private static final Map<Integer, Type> TYPES = new HashMap<Integer, EditorPermissions.Type>();
+        
+        static {
+            for (Type type : Type.values()) {
+                TYPES.put(type.id, type);
+            }
+        }
+        
+        public final int id;
+        
+        private Table(int id) {
+            this.id = id;
+        }
+        
+        public static Type parseInt(int id) {
+            return TYPES.get(id);
+        }
+    }
 
-    private final Map<Permissions, Boolean> permissions = new EnumMap<Permissions, Boolean>(Permissions.class);
+    private final Map<T, Boolean> permissions;
 
+    public EditorPermissions(Class<T> clazz) {
+        this.permissions = new EnumMap<T, Boolean>(clazz); 
+    }
+    
     public String getPermissionString() {
-        Permissions[] pms = this.getByValue(true);
+        T[] pms = this.getByValue(true);
         char[] editorPermissions = new char[pms.length];
         for (int j = 0; j < pms.length; j++) {
-            editorPermissions[j] = pms[j].value;
+            editorPermissions[j] = pms[j].getValue();
         }
         return new String(editorPermissions);
     }
 
-    public Permissions[] getByValue(boolean value) {
-        List<Permissions> result = new ArrayList<Permissions>();
-        for (Map.Entry<Permissions, Boolean> entry : this.permissions.entrySet()) {
+    @SuppressWarnings("unchecked")
+    public T[] getByValue(boolean value) {
+        List<T> result = new ArrayList<T>();
+        for (Map.Entry<T, Boolean> entry : this.permissions.entrySet()) {
             if (entry.getValue() == null) {
                 if (!value) {
                     result.add(entry.getKey());
@@ -54,35 +83,33 @@ public class EditorPermissions {
                 result.add(entry.getKey());
             }
         }
-        return result.toArray(new Permissions[0]);
+        return (T[]) result.toArray();
     }
 
-    public boolean get(Permissions permission) {
+    public boolean get(T permission) {
         Boolean bool = this.permissions.get(permission);
         return bool == null ? false : bool;
     }
 
-    public boolean put(Permissions key, boolean value) {
+    public boolean put(T key, boolean value) {
         Boolean bool = this.permissions.put(key, value);
         return bool == null ? false : bool;
     }
 
-    public Boolean remove(Permissions key) {
-        return this.put((Permissions) key, false);
+    public Boolean remove(T key) {
+        return this.put(key, false);
     }
 
-    public void putAll(EditorPermissions p) {
+    public void putAll(EditorPermissions<T> p) {
         this.permissions.putAll(p.permissions);
     }
 
-    public void parseString(String string, boolean reset) {
-        Set<Permissions> p = Permissions.parseString(string);
+    public void parseString(Set<T> permissions, boolean reset) {
         if (reset) {
             this.permissions.clear();
         }
-        for (Permissions permissions : p) {
-            this.put(permissions, true);
+        for (T permission : permissions) {
+            this.put(permission, true);
         }
     }
-
 }

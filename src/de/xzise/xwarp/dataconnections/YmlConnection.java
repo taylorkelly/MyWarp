@@ -16,8 +16,8 @@ import org.bukkit.util.config.ConfigurationNode;
 
 import de.xzise.metainterfaces.FixedLocation;
 import de.xzise.metainterfaces.LocationWrapper;
-import de.xzise.xwarp.EditorPermissions;
-import de.xzise.xwarp.Permissions;
+import de.xzise.xwarp.editors.EditorPermissions;
+import de.xzise.xwarp.editors.WarpPermissions;
 
 import me.taylorkelly.mywarp.MyWarp;
 import me.taylorkelly.mywarp.Warp;
@@ -136,40 +136,40 @@ public class YmlConnection implements DataConnection {
             
             List<String> editorPermissions = editorNode.getStringList("permissions", null);
             for (String editorPermission : editorPermissions) {
-                Permissions perms = null;
+                WarpPermissions perms = null;
                 
                 if (editorPermission.equalsIgnoreCase("location")) {
-                    perms = Permissions.UPDATE;
+                    perms = WarpPermissions.UPDATE;
                 } else if (editorPermission.equalsIgnoreCase("rename")) {
-                    perms = Permissions.RENAME;
+                    perms = WarpPermissions.RENAME;
                 } else if (editorPermission.equalsIgnoreCase("uninvite")) {
-                    perms = Permissions.UNINVITE;
+                    perms = WarpPermissions.UNINVITE;
                 } else if (editorPermission.equalsIgnoreCase("invite")) {
-                    perms = Permissions.INVITE;
+                    perms = WarpPermissions.INVITE;
                 } else if (editorPermission.equalsIgnoreCase("private")) {
-                    perms = Permissions.PRIVATE;
+                    perms = WarpPermissions.PRIVATE;
                 } else if (editorPermission.equalsIgnoreCase("public")) {
-                    perms = Permissions.PUBLIC;
+                    perms = WarpPermissions.PUBLIC;
                 } else if (editorPermission.equalsIgnoreCase("global")) {
-                    perms = Permissions.GLOBAL;
+                    perms = WarpPermissions.GLOBAL;
                 } else if (editorPermission.equalsIgnoreCase("give")) {
-                    perms = Permissions.GIVE;
+                    perms = WarpPermissions.GIVE;
                 } else if (editorPermission.equalsIgnoreCase("delete")) {
-                    perms = Permissions.DELETE;
+                    perms = WarpPermissions.DELETE;
                 } else if (editorPermission.equalsIgnoreCase("warp")) {
-                    perms = Permissions.WARP;
+                    perms = WarpPermissions.WARP;
                 } else if (editorPermission.equalsIgnoreCase("add editor")) {
-                    perms = Permissions.ADD_EDITOR;
+                    perms = WarpPermissions.ADD_EDITOR;
                 } else if (editorPermission.equalsIgnoreCase("remove editor")) {
-                    perms = Permissions.REMOVE_EDITOR;
+                    perms = WarpPermissions.REMOVE_EDITOR;
                 } else if (editorPermission.equalsIgnoreCase("message")) {
-                    perms = Permissions.MESSAGE;
+                    perms = WarpPermissions.MESSAGE;
                 } else if (editorPermission.equalsIgnoreCase("price")) {
-                    perms = Permissions.PRICE;
+                    perms = WarpPermissions.PRICE;
                 } else if (editorPermission.equalsIgnoreCase("free")) {
-                    perms = Permissions.FREE;
+                    perms = WarpPermissions.FREE;
                 } else if (editorPermission.equalsIgnoreCase("list")) {
-                    perms = Permissions.LIST;
+                    perms = WarpPermissions.LIST;
                 }
                 
                 if (perms == null) {
@@ -269,6 +269,7 @@ public class YmlConnection implements DataConnection {
         return b == null ? nullIsTrue : b;
     }
     
+    //TODO: Move to MinecraftUtil
     public static interface Callback<Result, Parameter> {
         Result call(Parameter parameter);
     }
