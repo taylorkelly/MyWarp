@@ -13,6 +13,7 @@ import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.logging.Level;
 
 import org.bukkit.Server;
@@ -26,9 +27,11 @@ import de.xzise.xwarp.editors.Editor;
 import de.xzise.xwarp.editors.EditorPermissions;
 import de.xzise.xwarp.editors.WarpPermissions;
 import de.xzise.xwarp.editors.EditorPermissions.Table;
+import de.xzise.xwarp.editors.EditorPermissions.Type;
 import de.xzise.xwarp.editors.WarpProtectionAreaPermissions;
 import de.xzise.xwarp.DefaultWarpObject.EditorPermissionEntry;
 import de.xzise.xwarp.Warp;
+import de.xzise.xwarp.WarpObject;
 import de.xzise.xwarp.WarpProtectionArea;
 import de.xzise.xwarp.WorldWrapper;
 
@@ -437,7 +440,6 @@ public class SQLiteConnection implements WarpProtectionConnection {
                     ps.setDouble(13, warp.getPrice());
                     ps.addBatch();
 
-                    //TODO: Non player permissions
                     for (EditorPermissionEntry<WarpPermissions> editorPermissionEntry : warp.getEditorPermissionsList()) {
                         for (WarpPermissions p : editorPermissionEntry.editorPermissions.getByValue(true)) {
                             insertPermissions.setInt(1, warp.index);
@@ -460,6 +462,9 @@ public class SQLiteConnection implements WarpProtectionConnection {
                     if (ps != null) {
                         ps.close();
                     }
+                    if (insertPermissions != null) {
+                        insertPermissions.close();
+                    }
                 } catch (SQLException ex) {
                     MyWarp.logger.log(Level.SEVERE, "Warp Insert Exception (on close)", ex);
                 }
@@ -479,7 +484,7 @@ public class SQLiteConnection implements WarpProtectionConnection {
 
     @Override
     public void deleteWarp(Warp warp) {
-        this.updateWarp(warp, "Delete", "DELETE FROM warps WHERE id = ?", new UpdateFiller() {
+        this.updateWarp(warp, "Delete", "DELETE FROM warps WHERE id = ?", new UpdateFiller<Warp>() {
 
             @Override
             public void fillStatement(Warp warp, PreparedStatement statement) throws SQLException {
@@ -488,20 +493,20 @@ public class SQLiteConnection implements WarpProtectionConnection {
         });
     }
 
-    private interface UpdateFiller {
-        void fillStatement(Warp warp, PreparedStatement statement) throws SQLException;
+    private interface UpdateFiller<T extends WarpObject> {
+        void fillStatement(T warp, PreparedStatement statement) throws SQLException;
     }
 
-    private void updateWarp(Warp warp, String name, String sql, UpdateFiller filler) {
+    private <T extends WarpObject> void updateWarpObject(T warpObject, String type, String name, String sql, UpdateFiller<T> filler) {
         PreparedStatement ps = null;
         ResultSet set = null;
         try {
             ps = this.connection.prepareStatement(sql);
-            filler.fillStatement(warp, ps);
+            filler.fillStatement(warpObject, ps);
             ps.executeUpdate();
             this.connection.commit();
         } catch (SQLException ex) {
-            MyWarp.logger.log(Level.SEVERE, "Warp " + name + " Exception", ex);
+            MyWarp.logger.log(Level.SEVERE, type + " " + name + " exception", ex);
         } finally {
             try {
                 if (ps != null) {
@@ -511,14 +516,18 @@ public class SQLiteConnection implements WarpProtectionConnection {
                     set.close();
                 }
             } catch (SQLException ex) {
-                MyWarp.logger.log(Level.SEVERE, "Warp " + name + " Exception (on close)", ex);
+                MyWarp.logger.log(Level.SEVERE, type + " " + name + " exception (on close)", ex);
             }
         }
     }
+    
+    private void updateWarp(Warp warp, String name, String sql, UpdateFiller<Warp> filler) {
+        this.updateWarpObject(warp, "Warp", name, sql, filler);
+    }
 
     @Override
-    public void updateOwner(Warp warp, IdentificationInterface identification) {
-        this.updateWarp(warp, "Owner", "UPDATE warps SET owner = ? WHERE id = ?", new UpdateFiller() {
+    public void updateOwner(Warp warp, IdentificationInterface<Warp> identification) {
+        this.updateWarp(warp, "owner", "UPDATE warps SET owner = ? WHERE id = ?", new UpdateFiller<Warp>() {
 
             @Override
             public void fillStatement(Warp warp, PreparedStatement statement) throws SQLException {
@@ -530,7 +539,7 @@ public class SQLiteConnection implements WarpProtectionConnection {
 
     @Override
     public void updateCreator(Warp warp) {
-        this.updateWarp(warp, "Creator", "UPDATE warps SET creator = ? WHERE id = ?", new UpdateFiller() {
+        this.updateWarp(warp, "creator", "UPDATE warps SET creator = ? WHERE id = ?", new UpdateFiller<Warp>() {
 
             @Override
             public void fillStatement(Warp warp, PreparedStatement statement) throws SQLException {
@@ -542,7 +551,7 @@ public class SQLiteConnection implements WarpProtectionConnection {
 
     @Override
     public void updateMessage(Warp warp) {
-        this.updateWarp(warp, "Welcome Message", "UPDATE warps SET welcomeMessage = ? WHERE id = ?", new UpdateFiller() {
+        this.updateWarp(warp, "welcome message", "UPDATE warps SET welcomeMessage = ? WHERE id = ?", new UpdateFiller<Warp>() {
 
             @Override
             public void fillStatement(Warp warp, PreparedStatement statement) throws SQLException {
@@ -553,8 +562,8 @@ public class SQLiteConnection implements WarpProtectionConnection {
     }
 
     @Override
-    public void updateName(Warp warp, IdentificationInterface identification) {
-        this.updateWarp(warp, "Name", "UPDATE warps SET name = ? WHERE id = ?", new UpdateFiller() {
+    public void updateName(Warp warp, IdentificationInterface<Warp> identification) {
+        this.updateWarp(warp, "name", "UPDATE warps SET name = ? WHERE id = ?", new UpdateFiller<Warp>() {
 
             @Override
             public void fillStatement(Warp warp, PreparedStatement statement) throws SQLException {
@@ -566,7 +575,7 @@ public class SQLiteConnection implements WarpProtectionConnection {
 
     @Override
     public void updateVisibility(Warp warp) {
-        this.updateWarp(warp, "Visibility", "UPDATE warps SET publicLevel = ? WHERE id = ?", new UpdateFiller() {
+        this.updateWarp(warp, "visibility", "UPDATE warps SET publicLevel = ? WHERE id = ?", new UpdateFiller<Warp>() {
 
             @Override
             public void fillStatement(Warp warp, PreparedStatement statement) throws SQLException {
@@ -578,7 +587,7 @@ public class SQLiteConnection implements WarpProtectionConnection {
 
     @Override
     public void updateLocation(Warp warp) {
-        this.updateWarp(warp, "Location", "UPDATE warps SET world = ?, x = ?, y = ?, z = ?, yaw = ?, pitch = ? WHERE id = ?", new UpdateFiller() {
+        this.updateWarp(warp, "location", "UPDATE warps SET world = ?, x = ?, y = ?, z = ?, yaw = ?, pitch = ? WHERE id = ?", new UpdateFiller<Warp>() {
 
             @Override
             public void fillStatement(Warp warp, PreparedStatement statement) throws SQLException {
@@ -590,7 +599,7 @@ public class SQLiteConnection implements WarpProtectionConnection {
 
     @Override
     public void updatePrice(Warp warp) {
-        this.updateWarp(warp, "Location", "UPDATE warps SET price = ? WHERE id = ?", new UpdateFiller() {
+        this.updateWarp(warp, "price", "UPDATE warps SET price = ? WHERE id = ?", new UpdateFiller<Warp>() {
 
             @Override
             public void fillStatement(Warp warp, PreparedStatement statement) throws SQLException {
@@ -600,7 +609,7 @@ public class SQLiteConnection implements WarpProtectionConnection {
         });
     }
 
-    private void updateEditor(int id, String name, EditorPermissions<? extends Editor> editorPerms, EditorPermissions.Type type, EditorPermissions.Table table) {
+    private void updateEditor(int id, String name, String typeMsg, EditorPermissions<? extends Editor> editorPerms, EditorPermissions.Type type, EditorPermissions.Table table) {
         PreparedStatement ps = null;
         ResultSet set = null;
         try {
@@ -635,7 +644,7 @@ public class SQLiteConnection implements WarpProtectionConnection {
 
             this.connection.commit();
         } catch (SQLException ex) {
-            MyWarp.logger.log(Level.SEVERE, "Warp Editor Exception", ex);
+            MyWarp.logger.log(Level.SEVERE, typeMsg + " editor exception", ex);
         } finally {
             try {
                 if (ps != null) {
@@ -645,14 +654,14 @@ public class SQLiteConnection implements WarpProtectionConnection {
                     set.close();
                 }
             } catch (SQLException ex) {
-                MyWarp.logger.log(Level.SEVERE, "Warp Editor Exception (on close)", ex);
+                MyWarp.logger.log(Level.SEVERE, typeMsg + " editor exception (on close)", ex);
             }
         }
     }
     
     @Override
     public void updateEditor(Warp warp, String name, EditorPermissions.Type type) {
-        this.updateEditor(warp.index, name, warp.getEditorPermissions(name, false, type), type, EditorPermissions.Table.WARP);
+        this.updateEditor(warp.index, name, "Warp", warp.getEditorPermissions(name, false, type), type, EditorPermissions.Table.WARP);
     }
 
     public static List<String> processList(String permissions) {
@@ -747,24 +756,42 @@ public class SQLiteConnection implements WarpProtectionConnection {
         return true;
     }
 
-    private final class IdIdentification implements IdentificationInterface {
+    private static final class IdIdentification<T extends WarpObject> implements IdentificationInterface<T> {
 
         private final int id;
 
-        public IdIdentification(Warp warp) {
-            this.id = warp.index;
+        public IdIdentification(int id) {
+            this.id = id;
         }
-
+        
+        public static IdIdentification<Warp> create(Warp warp) {
+            return new IdIdentification<Warp>(warp.index);
+        }
+        
+        public static IdIdentification<WarpProtectionArea> create(WarpProtectionArea wpa) {
+            return new IdIdentification<WarpProtectionArea>(wpa.index);
+        }
+        
         @Override
-        public boolean isIdentificated(Warp warp) {
-            return this.id == warp.index;
+        public boolean isIdentificated(T warp) {
+            return this.id == getWarpObjectIndex(warp);
         }
 
     }
+    
+    public static int getWarpObjectIndex(WarpObject o) {
+        if (o instanceof Warp) {
+            return ((Warp) o).index;
+        } else if (o instanceof WarpProtectionArea) {
+            return ((WarpProtectionArea) o).index;
+        } else {
+            return -1;
+        }
+    }
 
     @Override
-    public IdentificationInterface createIdentification(Warp warp) {
-        return new IdIdentification(warp);
+    public IdentificationInterface<Warp> createWarpIdentification(Warp warp) {
+        return IdIdentification.create(warp);
     }
     
     private <T extends Enum<T> & Editor> Map<Integer, Map<EditorPermissions.Type, Map<String, EditorPermissions<T>>>> getEditorPermissions(EditorPermissions.Table table, Class<T> clazz, ImmutableMap<Integer, T> idMap) {
@@ -843,6 +870,16 @@ public class SQLiteConnection implements WarpProtectionConnection {
                 FixedLocation loc2 = new FixedLocation(x2, y2, z2);
                 WorldWrapper worldWrapper = new WorldWrapper(worldName);
                 WarpProtectionArea wpa = new WarpProtectionArea(index, worldWrapper, loc1, loc2, name, owner, creator);
+                
+                Map<EditorPermissions.Type, Map<String, EditorPermissions<WarpProtectionAreaPermissions>>> wpaPermissions = allPermissions.get(index);
+                if (wpaPermissions != null) {
+                    for (Entry<EditorPermissions.Type, Map<String, EditorPermissions<WarpProtectionAreaPermissions>>> typeEntry : wpaPermissions.entrySet()) {
+                        for (Entry<String, EditorPermissions<WarpProtectionAreaPermissions>> editorEntry : typeEntry.getValue().entrySet()) {
+                            wpa.getEditorPermissions(editorEntry.getKey(), true, typeEntry.getKey()).putAll(editorEntry.getValue());
+                        }
+                    }
+                }
+                
                 result.add(wpa);
                 if (!wpa.isValid()) {
                     invalidSize++;
@@ -868,14 +905,115 @@ public class SQLiteConnection implements WarpProtectionConnection {
     }
 
     @Override
-    public void addProtectionArea(WarpProtectionArea area) {
-        // TODO Auto-generated method stub
-        1 == 0;
+    public void addProtectionArea(WarpProtectionArea... areas) {
+        if (areas.length > 0) {
+            PreparedStatement ps = null;
+            PreparedStatement insertPermissions = null;
+            try {
+                ps = this.connection.prepareStatement("INSERT INTO protectionAreas (id, name, owner, creator, world, x1, y1, z1, x2, y2, z2) VALUES (?,?,?,?,?,?,?,?,?,?,?)");
+                insertPermissions = this.connection.prepareStatement("INSERT INTO permissions (id, editor, value, type, table) VALUES (?,?,?,?,?)");
+                for (WarpProtectionArea area : areas) {
+                    ps.setInt(1, area.index);
+                    ps.setString(2, area.getName());
+                    ps.setString(3, area.getOwner());
+                    ps.setString(4, area.getCreator());
+                    ps.setString(5, area.getWorld());
+                    FixedLocation loc = area.getCorner(0);
+                    ps.setDouble(6, loc.x);
+                    ps.setDouble(7, loc.y);
+                    ps.setDouble(8, loc.z);
+                    loc = area.getCorner(1);
+                    ps.setDouble(9, loc.x);
+                    ps.setDouble(10, loc.y);
+                    ps.setDouble(11, loc.z);
+                    ps.addBatch();
+
+                    for (EditorPermissionEntry<WarpProtectionAreaPermissions> editorPermissionEntry : area.getEditorPermissionsList()) {
+                        for (WarpProtectionAreaPermissions p : editorPermissionEntry.editorPermissions.getByValue(true)) {
+                            insertPermissions.setInt(1, area.index);
+                            insertPermissions.setString(2, editorPermissionEntry.name);
+                            insertPermissions.setInt(3, p.id);
+                            insertPermissions.setInt(4, editorPermissionEntry.type.id);
+                            insertPermissions.setInt(5, EditorPermissions.Table.PROTECTION_AREA.id);
+                            insertPermissions.addBatch();
+                        }
+                    }
+                }
+                ps.executeBatch();
+                insertPermissions.executeBatch();
+
+                this.connection.commit();
+            } catch (SQLException ex) {
+                MyWarp.logger.log(Level.SEVERE, "Warp protection area insert exception", ex);
+            } finally {
+                try {
+                    if (ps != null) {
+                        ps.close();
+                    }
+                    if (insertPermissions != null) {
+                        insertPermissions.close();
+                    }
+                } catch (SQLException ex) {
+                    MyWarp.logger.log(Level.SEVERE, "Warp protection area insert exception (on close)", ex);
+                }
+            }
+        }
     }
 
     @Override
     public void deleteProtectionArea(WarpProtectionArea area) {
-        // TODO Auto-generated method stub
-        1 == 0;
+        this.updateWarpObject(area, "Warp protection area", "delete", "DELETE FROM protectionAreas WHERE id = ?", new UpdateFiller<WarpProtectionArea>() {
+
+            @Override
+            public void fillStatement(WarpProtectionArea warp, PreparedStatement statement) throws SQLException {
+                statement.setInt(1, warp.index);
+            }
+        });
+    }
+
+    @Override
+    public void updateEditor(WarpProtectionArea area, String name, Type type) {
+        this.updateEditor(area.index, name, "Warp protection area", area.getEditorPermissions(name, false, type), type, EditorPermissions.Table.PROTECTION_AREA);
+    }
+
+    @Override
+    public void updateCreator(WarpProtectionArea area) {
+        this.updateWarpObject(area, "Warp protection area", "creator", "UPDATE protectionAreas SET creator = ? WHERE id = ?", new UpdateFiller<WarpProtectionArea>() {
+
+            @Override
+            public void fillStatement(WarpProtectionArea warp, PreparedStatement statement) throws SQLException {
+                statement.setString(1, warp.getCreator());
+                statement.setInt(2, warp.index);
+            }
+        });        
+    }
+
+    @Override
+    public void updateOwner(WarpProtectionArea area, IdentificationInterface<WarpProtectionArea> identification) {
+        this.updateWarpObject(area, "Warp protection area", "owner", "UPDATE protectionAreas SET owner = ? WHERE id = ?", new UpdateFiller<WarpProtectionArea>() {
+
+            @Override
+            public void fillStatement(WarpProtectionArea warp, PreparedStatement statement) throws SQLException {
+                statement.setString(1, warp.getOwner());
+                statement.setInt(2, warp.index);
+            }
+        });
+    }
+
+    @Override
+    public void updateName(WarpProtectionArea area, IdentificationInterface<WarpProtectionArea> identification) {
+        this.updateWarpObject(area, "Warp protection area", "name", "UPDATE protectionAreas SET name = ? WHERE id = ?", new UpdateFiller<WarpProtectionArea>() {
+
+            @Override
+            public void fillStatement(WarpProtectionArea warp, PreparedStatement statement) throws SQLException {
+                statement.setString(1, warp.getName());
+                statement.setInt(2, warp.index);
+            }
+        });
+    }
+
+    @Override
+    public IdentificationInterface<WarpProtectionArea> createWarpProtectionAreaIdentification(WarpProtectionArea area) {
+        return IdIdentification.create(area);
     }
 }

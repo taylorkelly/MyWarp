@@ -7,11 +7,15 @@ import de.xzise.xwarp.editors.EditorPermissions;
 
 public interface WarpProtectionConnection extends DataConnection {
 
+    IdentificationInterface<WarpProtectionArea> createWarpProtectionAreaIdentification(WarpProtectionArea area);
+    
     List<WarpProtectionArea> getProtectionAreas();
     
-    void addProtectionArea(WarpProtectionArea... area);
+    void addProtectionArea(WarpProtectionArea... areas);
     void deleteProtectionArea(WarpProtectionArea area);
     
-    void updateEditor(WarpProtectionArea warp, String name, EditorPermissions.Type type);
-    
+    void updateEditor(WarpProtectionArea area, String name, EditorPermissions.Type type);
+    void updateCreator(WarpProtectionArea area);
+    void updateOwner(WarpProtectionArea area, IdentificationInterface<WarpProtectionArea> identification);
+    void updateName(WarpProtectionArea area, IdentificationInterface<WarpProtectionArea> identification);
 }

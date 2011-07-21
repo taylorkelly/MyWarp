@@ -544,7 +544,7 @@ public class HModConnection implements DataConnection {
         this.writeWarps(warps);
     }
 
-    private static Warp getWarp(List<Warp> warps, IdentificationInterface identification) {
+    private static Warp getWarp(List<Warp> warps, IdentificationInterface<Warp> identification) {
         for (Warp warp : warps) {
             if (identification.isIdentificated(warp)) {
                 return warp;
@@ -562,7 +562,7 @@ public class HModConnection implements DataConnection {
     }
 
     @Override
-    public void updateOwner(Warp warp, IdentificationInterface identification) {
+    public void updateOwner(Warp warp, IdentificationInterface<Warp> identification) {
         List<Warp> warps = this.getWarps();
         Warp updated = getWarp(warps, identification);
         updated.setOwner(warp.getOwner());
@@ -570,7 +570,7 @@ public class HModConnection implements DataConnection {
     }
 
     @Override
-    public void updateName(Warp warp, IdentificationInterface identification) {
+    public void updateName(Warp warp, IdentificationInterface<Warp> identification) {
         List<Warp> warps = this.getWarps();
         Warp updated = getWarp(warps, identification);
         updated.setName(warp.getName());
@@ -638,7 +638,7 @@ public class HModConnection implements DataConnection {
     }
 
     @Override
-    public IdentificationInterface createIdentification(Warp warp) {
-        return new NameIdentification(warp);
+    public IdentificationInterface<Warp> createWarpIdentification(Warp warp) {
+        return NameIdentification.create(warp);
     }
 }

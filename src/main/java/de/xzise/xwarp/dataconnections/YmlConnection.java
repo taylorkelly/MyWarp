@@ -197,7 +197,7 @@ public class YmlConnection implements WarpProtectionConnection {
     }
 
     @Override
-    public IdentificationInterface<Warp> createIdentification(Warp warp) {
+    public IdentificationInterface<Warp> createWarpIdentification(Warp warp) {
         return NameIdentification.create(warp);
     }
 
@@ -264,27 +264,6 @@ public class YmlConnection implements WarpProtectionConnection {
         }
     }
     
-    public static class DefConfigurationNode extends ConfigurationNode {
-
-        public DefConfigurationNode(Map<String, Object> root) {
-            super(root);
-        }
-        
-        public DefConfigurationNode() {
-            this(new HashMap<String, Object>());
-        }
-        
-        public DefConfigurationNode(WarpObject warpObject) {
-            this();
-            this.setProperty("name", warpObject.getName());
-            this.setProperty("owner", warpObject.getOwner());
-            this.setProperty("creator", warpObject.getCreator());
-            this.setProperty("world", warpObject.getWorld());
-            
-        }
-        
-    }
-    
     private static <T extends Enum<T> & Editor> Map<String, Object> warpObjectToMap(DefaultWarpObject<T> object, Map<T, String> nameForPermMap) {
         Map<String, Object> map = Maps.newHashMap();
         map.put("name", object.getName());
@@ -319,12 +298,7 @@ public class YmlConnection implements WarpProtectionConnection {
         
         for (Warp warp : warps) {
             Map<String, Object> warpMap = warpObjectToMap(warp, WARP_PERM_PERM_TO_NAME);
-            FixedLocation loc = warp.getLocation();
-            warpMap.put("x", loc.x);
-            warpMap.put("y", loc.y);
-            warpMap.put("z", loc.z);
-            warpMap.put("yaw", loc.yaw);
-            warpMap.put("pitch", loc.pitch);
+            fixedLocToMap(warpMap, warp.getLocation(), false, true);
             warpMap.put("visibility", warp.getVisibility().name);
             warpMap.put("listed", warp.isListed());
             warpMap.put("price", warp.getPrice());
@@ -336,6 +310,8 @@ public class YmlConnection implements WarpProtectionConnection {
             }
             rawNodes.add(warpMap);
         }
+        
+        this.config.save();
     }
 
     private static Map<String, Object> nodeToMap(ConfigurationNode node) {
@@ -385,6 +361,7 @@ public class YmlConnection implements WarpProtectionConnection {
     @Override
     public void deleteWarp(Warp warp) {
         removeFromList(this.config, WARP_PATH, WarpObjectCallback.create(NameIdentification.create(warp), NODE_TO_WARP));
+        this.config.save();
     }
 
     private <T extends WarpObject> ConfigurationNode getNode(IdentificationInterface<T> id, String path, Callback<T, ConfigurationNode> nodeToWarpObject) {
@@ -405,39 +382,46 @@ public class YmlConnection implements WarpProtectionConnection {
         return getNode(id, WPA_PATH, NODE_TO_WPA);
     }
     
-    private void updateField(IdentificationInterface<Warp> id, String path, Object value) {
-        ConfigurationNode node = this.getWarpNode(id);
+    private void updateField(ConfigurationNode node, String path, Object value) {
         node.setProperty(path, value);
         this.config.save();
     }
     
-    private void updateField(Warp warp, String path, Object value) {
-        updateField(NameIdentification.create(warp), path, value);
+    private void updateWarpField(IdentificationInterface<Warp> id, String path, Object value) {
+        updateField(this.getWarpNode(id), path, value);
+    }
+    
+    private void updateWPAField(IdentificationInterface<WarpProtectionArea> id, String path, Object value) {
+        updateField(this.getWarpProtectionAreaNode(id), path, value);
+    }
+    
+    private void updateWarpField(Warp warp, String path, Object value) {
+        updateWarpField(NameIdentification.create(warp), path, value);
     }
     
     @Override
     public void updateCreator(Warp warp) {
-        this.updateField(warp, "creator", warp.getCreator());
+        this.updateWarpField(warp, "creator", warp.getCreator());
     }
 
     @Override
     public void updateOwner(Warp warp, IdentificationInterface<Warp> identification) {
-        this.updateField(identification, "owner", warp.getOwner());
+        this.updateWarpField(identification, "owner", warp.getOwner());
     }
 
     @Override
     public void updateName(Warp warp, IdentificationInterface<Warp> identification) {
-        this.updateField(identification, "name", warp.getName());
+        this.updateWarpField(identification, "name", warp.getName());
     }
 
     @Override
     public void updateMessage(Warp warp) {
-        this.updateField(warp, "creator", warp.getWelcomeMessage());
+        this.updateWarpField(warp, "creator", warp.getWelcomeMessage());
     }
 
     @Override
     public void updateVisibility(Warp warp) {
-        this.updateField(warp, "creator", warp.getVisibility().name);
+        this.updateWarpField(warp, "creator", warp.getVisibility().name);
     }
 
     @Override
@@ -452,7 +436,7 @@ public class YmlConnection implements WarpProtectionConnection {
         node.setProperty("yaw", loc.yaw);
         node.setProperty("pitch", loc.pitch);
         node.setProperty("world", world);
-        config.save();
+        this.config.save();
     }
     
     private <T extends Enum<T> & Editor> void updateEditor(ConfigurationNode warpObjectNode, DefaultWarpObject<T> warpObject, final String name, final EditorPermissions.Type type, Map<T, String> nameForPermissionMap) {
@@ -485,6 +469,8 @@ public class YmlConnection implements WarpProtectionConnection {
                 }
             }
         }
+        
+        this.config.save();
     }
 
     @Override
@@ -495,7 +481,7 @@ public class YmlConnection implements WarpProtectionConnection {
 
     @Override
     public void updatePrice(Warp warp) {
-        this.updateField(warp, "creator", warp.getPrice());
+        this.updateWarpField(warp, "creator", warp.getPrice());
     }
     
     private static <T extends Enum<T> & Editor> Map<EditorPermissions.Type, Map<String, EditorPermissions<T>>> getEditorPermissions(List<ConfigurationNode> editorNodes, Map<String, T> names, Class<T> clazz) {
@@ -596,8 +582,7 @@ public class YmlConnection implements WarpProtectionConnection {
         return getList(WPA_PATH, NODE_TO_WPA);
     }
 
-    private static Map<String, Object> fixedLocToMap(FixedLocation location, boolean world, boolean direction) {
-        Map<String, Object> locMap = Maps.newHashMap();
+    private static void fixedLocToMap(Map<String, Object> locMap, FixedLocation location, boolean world, boolean direction) {
         locMap.put("x", location.x);
         locMap.put("y", location.y);
         locMap.put("z", location.z);
@@ -608,6 +593,11 @@ public class YmlConnection implements WarpProtectionConnection {
         if (world) {
             locMap.put("world", location.world.getName());
         }
+    }
+    
+    private static Map<String, Object> fixedLocToMap(FixedLocation location, boolean world, boolean direction) {
+        Map<String, Object> locMap = Maps.newHashMap();
+        fixedLocToMap(locMap, location, world, direction);
         return locMap;
     }
     
@@ -634,6 +624,26 @@ public class YmlConnection implements WarpProtectionConnection {
     public void updateEditor(WarpProtectionArea warp, String name, Type type) {
         ConfigurationNode warpNode = getWarpProtectionAreaNode(NameIdentification.create(warp));
         this.updateEditor(warpNode, warp, name, type, WPA_PERM_PERM_TO_NAME);
+    }
+
+    @Override
+    public void updateCreator(WarpProtectionArea area) {
+        updateWPAField(NameIdentification.create(area), "creator", area.getCreator());
+    }
+
+    @Override
+    public void updateOwner(WarpProtectionArea warp, IdentificationInterface<WarpProtectionArea> identification) {
+        updateWPAField(identification, "owner", warp.getOwner());
+    }
+
+    @Override
+    public void updateName(WarpProtectionArea warp, IdentificationInterface<WarpProtectionArea> identification) {
+        updateWPAField(identification, "name", warp.getName());
+    }
+
+    @Override
+    public IdentificationInterface<WarpProtectionArea> createWarpProtectionAreaIdentification(WarpProtectionArea area) {
+        return NameIdentification.create(area);
     }
 
 }

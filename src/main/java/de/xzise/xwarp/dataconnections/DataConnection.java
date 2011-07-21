@@ -27,7 +27,7 @@ public interface DataConnection {
      *            The identification for the warp will be created.
      * @return An identification.
      */
-    IdentificationInterface<Warp> createIdentification(Warp warp);
+    IdentificationInterface<Warp> createWarpIdentification(Warp warp);
 
     List<Warp> getWarps();
 

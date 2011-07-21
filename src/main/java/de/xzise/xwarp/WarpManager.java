@@ -285,7 +285,7 @@ public class WarpManager {
                     Warp giveeWarp = this.getWarp(name, giveeName, null);
                     if (giveeWarp == null) {
                         String preOwner = warp.getOwner();
-                        IdentificationInterface ii = this.data.createIdentification(warp);
+                        IdentificationInterface<Warp> ii = this.data.createWarpIdentification(warp);
                         warp.setOwner(giveeName);
                         this.list.updateOwner(warp, preOwner);
                         this.data.updateOwner(warp, ii);
@@ -477,7 +477,7 @@ public class WarpManager {
                 } else if (this.getWarp(newName, owner, null) != null) {
                     sender.sendMessage(ChatColor.RED + "You already have a warp with this name.");
                 } else {
-                    IdentificationInterface ii = this.data.createIdentification(warp);
+                    IdentificationInterface<Warp> ii = this.data.createWarpIdentification(warp);
                     this.list.deleteWarp(warp);
                     warp.setName(newName);
                     this.list.addWarpObject(warp);
