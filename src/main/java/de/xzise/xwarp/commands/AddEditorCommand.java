@@ -18,10 +18,12 @@ public class AddEditorCommand extends WarpCommand {
     protected boolean executeEdit(CommandSender sender, String warpName, String creator, String[] parameters) {
         String editor = parameters[0];
         EditorPermissions.Type type;
-        if (editor.startsWith("g:")) {
+        if (editor.startsWith("p:")) {
+            type = Type.PERMISSIONS;
+        } else if (editor.startsWith("g:")) {
             type = Type.GROUP;
         } else {
-            type = Type.GROUP;
+            type = Type.PLAYER;
             if (!editor.startsWith("o:")) {
                 editor = MinecraftUtil.expandName(editor, this.server);
             }

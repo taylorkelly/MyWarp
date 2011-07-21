@@ -22,7 +22,7 @@ import de.xzise.xwarp.warpable.Positionable;
 import de.xzise.xwarp.warpable.Warpable;
 import de.xzise.xwarp.warpable.WarperFactory;
 import de.xzise.xwarp.wrappers.permission.PermissionTypes;
-import de.xzise.xwarp.wrappers.permission.WarpToWarpPermission;
+import de.xzise.xwarp.wrappers.permission.WarpEditorPermission;
 import de.xzise.xwarp.wrappers.permission.WorldPermission;
 
 public class Warp extends DefaultWarpObject<WarpPermissions> {
@@ -93,22 +93,6 @@ public class Warp extends DefaultWarpObject<WarpPermissions> {
     private Visibility visibility;
 
     public static int nextIndex = 1;
-    
-    public static <K, V> Map<K, V> copyMap(Map<? extends K, ? extends V> map) {
-        if (map == null) {
-            return new HashMap<K, V>();
-        } else {
-            return new HashMap<K, V>(map);
-        }
-    }
-    
-    public static <K, V> V getDefault(Map<? extends K, ? extends V> map, K key, V def) {
-        if (map != null && map.containsKey(key)) {
-            return map.get(key);
-        } else {
-            return def;
-        }
-    }
 
     public Warp(int index, String name, String creator, String owner, LocationWrapper wrapper, Visibility visibility, Map<EditorPermissions.Type, Map<String, EditorPermissions<WarpPermissions>>> editorPermissions, String welcomeMessage) {
         super(name, owner, creator, editorPermissions, WarpPermissions.class);
@@ -153,7 +137,7 @@ public class Warp extends DefaultWarpObject<WarpPermissions> {
     }
 
     public boolean playerCanWarp(CommandSender sender, boolean viaSign) {
-        if (MyWarp.permissions.permission(sender, new WarpToWarpPermission(this))) {
+        if (MyWarp.permissions.permission(sender, new WarpEditorPermission(this, WarpPermissions.WARP))) {
             return true;
         }
         
@@ -194,8 +178,7 @@ public class Warp extends DefaultWarpObject<WarpPermissions> {
      * Returns if the location is save.
      * @return if the location is save. Is false if invalid.
      */
-    public boolean isSave()
-    {
+    public boolean isSave() {
         //TODO: Check if the player can fall through: Check below if there is a torch (not on ground), wall sign
         
         if (this.location.isValid()) {
@@ -209,19 +192,14 @@ public class Warp extends DefaultWarpObject<WarpPermissions> {
             Boolean save = null;
             double comma = MinecraftUtil.getDecimalPlaces(location.getY());
             
-            //TODO: Determine comma for “step height”
-            if (comma > 0.5D) {
-                if (checkMaterials(lower, Material.STEP) && checkOpaqueMaterials(higher)) {
-                    save = true;
-                }
-            }
-            
             if (save == null) {
-                //TODO: Determine comma
-                if (comma <= 0.01D) {
+                if (comma <= 0.05D) {
                     save = checkOpaqueMaterials(lower, higher);
                 } else {
-                    save = checkOpaqueMaterials(lower, higher, top);
+                    if (comma > 0.5D) {
+                        save = checkMaterials(lower, Material.STEP);
+                    }
+                    save = ((comma > 0.5D && checkMaterials(lower, Material.STEP)) || checkOpaqueMaterials(lower)) && checkOpaqueMaterials(higher, top);
                 }
             }
 

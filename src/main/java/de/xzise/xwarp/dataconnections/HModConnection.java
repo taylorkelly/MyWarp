@@ -8,6 +8,7 @@ import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Scanner;
 
@@ -15,7 +16,6 @@ import org.bukkit.Location;
 import org.bukkit.Server;
 import org.bukkit.World;
 
-import de.xzise.ImmutableMap;
 import de.xzise.MinecraftUtil;
 import de.xzise.metainterfaces.FixedLocation;
 import de.xzise.metainterfaces.LocationWrapper;
@@ -466,12 +466,12 @@ public class HModConnection implements DataConnection {
         }
     }
     
-    private static void appendEditorPermissions(StringBuilder builder, ImmutableMap<String, EditorPermissions<WarpPermissions>> permissions, String type) {
+    private static void appendEditorPermissions(StringBuilder builder, Map<String, EditorPermissions<WarpPermissions>> permissions, String type) {
         String parsableType = "";
         if (MinecraftUtil.isSet(type)) {
             parsableType = makeParsable(type) + SEPARATOR;
         }
-        for (Entry<String, EditorPermissions<WarpPermissions>> entry : permissions.values()) {
+        for (Entry<String, EditorPermissions<WarpPermissions>> entry : permissions.entrySet()) {
             builder.append(makeParsable(entry.getKey()) + SEPARATOR);
             builder.append(makeParsable(entry.getValue().getPermissionString()) + SEPARATOR);
             builder.append(parsableType);

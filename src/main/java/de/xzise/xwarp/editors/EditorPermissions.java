@@ -14,9 +14,9 @@ import de.xzise.MinecraftUtil;
 public class EditorPermissions<T extends Enum<T> & Editor> {
     
     public enum Type {
-        PLAYER(0, "player", "u"),
-        GROUP(1, "group", "g"),
-        PERMISSIONS(2, "permission", "p");
+        PLAYER(0, "player"),
+        GROUP(1, "group"),
+        PERMISSIONS(2, "permission");
         
         private static final Map<Integer, Type> TYPES = new HashMap<Integer, EditorPermissions.Type>();
         private static final Map<String, Type> NAMES = MinecraftUtil.createReverseMultiEnumMap(Type.class, new Callback<String[], Type>() {

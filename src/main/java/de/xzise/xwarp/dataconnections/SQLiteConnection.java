@@ -19,7 +19,6 @@ import java.util.logging.Level;
 import org.bukkit.Server;
 import org.bukkit.World;
 
-import de.xzise.ImmutableMap;
 import de.xzise.metainterfaces.FixedLocation;
 import de.xzise.metainterfaces.LocationWrapper;
 import de.xzise.xwarp.Warp.Visibility;
@@ -763,29 +762,30 @@ public class SQLiteConnection implements WarpProtectionConnection {
         public IdIdentification(int id) {
             this.id = id;
         }
-        
+
         public static IdIdentification<Warp> create(Warp warp) {
             return new IdIdentification<Warp>(warp.index);
         }
-        
+
         public static IdIdentification<WarpProtectionArea> create(WarpProtectionArea wpa) {
             return new IdIdentification<WarpProtectionArea>(wpa.index);
         }
-        
+
         @Override
-        public boolean isIdentificated(T warp) {
-            return this.id == getWarpObjectIndex(warp);
+        public boolean isIdentificated(T warpObject) {
+            Integer parameterId = getWarpObjectIndex(warpObject);
+            return parameterId != null && parameterId == this.id;
         }
 
     }
-    
-    public static int getWarpObjectIndex(WarpObject o) {
+
+    public static Integer getWarpObjectIndex(WarpObject o) {
         if (o instanceof Warp) {
             return ((Warp) o).index;
         } else if (o instanceof WarpProtectionArea) {
             return ((WarpProtectionArea) o).index;
         } else {
-            return -1;
+            return null;
         }
     }
 
@@ -794,7 +794,7 @@ public class SQLiteConnection implements WarpProtectionConnection {
         return IdIdentification.create(warp);
     }
     
-    private <T extends Enum<T> & Editor> Map<Integer, Map<EditorPermissions.Type, Map<String, EditorPermissions<T>>>> getEditorPermissions(EditorPermissions.Table table, Class<T> clazz, ImmutableMap<Integer, T> idMap) {
+    private <T extends Enum<T> & Editor> Map<Integer, Map<EditorPermissions.Type, Map<String, EditorPermissions<T>>>> getEditorPermissions(EditorPermissions.Table table, Class<T> clazz, Map<Integer, T> idMap) {
         Map<Integer, Map<EditorPermissions.Type, Map<String, EditorPermissions<T>>>> result = new HashMap<Integer, Map<EditorPermissions.Type, Map<String, EditorPermissions<T>>>>();
         Statement statement = null;
         ResultSet set = null;

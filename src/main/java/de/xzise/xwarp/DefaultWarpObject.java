@@ -5,10 +5,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 
-import de.xzise.ImmutableMap;
 import de.xzise.MinecraftUtil;
 import de.xzise.xwarp.editors.Editor;
 import de.xzise.xwarp.editors.EditorPermissions;
@@ -67,20 +66,10 @@ public abstract class DefaultWarpObject<T extends Enum<T> & Editor> implements W
     public ImmutableMap<String, EditorPermissions<T>> getEditorPermissions(EditorPermissions.Type type) {
         Map<String, EditorPermissions<T>> typePermissions = this.editors.get(type);
         if (typePermissions != null) {
-            return ImmutableMap.create(typePermissions);
+            return ImmutableMap.copyOf(typePermissions);
         } else {
             return null;
         }
-    }
-    
-    //TODO: Check if needed? maybe the list is better?
-    @Deprecated
-    public ImmutableMap<EditorPermissions.Type, ImmutableMap<String, EditorPermissions<T>>> getEditorPermissions() {
-        Map<EditorPermissions.Type, ImmutableMap<String, EditorPermissions<T>>> m = Maps.newEnumMap(EditorPermissions.Type.class);
-        for (EditorPermissions.Type type : EditorPermissions.Type.values()) {
-            m.put(type, this.getEditorPermissions(type));
-        }
-        return ImmutableMap.create(m);
     }
     
     /**

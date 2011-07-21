@@ -15,8 +15,6 @@ import org.bukkit.World;
 import org.bukkit.util.config.Configuration;
 import org.bukkit.util.config.ConfigurationNode;
 
-import com.google.common.collect.BiMap;
-import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
@@ -85,42 +83,6 @@ public class YmlConnection implements WarpProtectionConnection {
      *       welcome: 'Welcome!'
      * 
      */
-    
-    //@formatter:off
-    public static BiMap<String, WarpPermissions> WARP_PERM_NAME_TO_PERM = new ImmutableBiMap.Builder<String, WarpPermissions>()
-            .put("location", WarpPermissions.UPDATE)
-            .put("rename", WarpPermissions.RENAME)
-            .put("invite", WarpPermissions.INVITE)
-            .put("uninvite", WarpPermissions.UNINVITE)
-            .put("private", WarpPermissions.PRIVATE)
-            .put("public", WarpPermissions.PUBLIC)
-            .put("global", WarpPermissions.GLOBAL)
-            .put("give", WarpPermissions.GIVE)
-            .put("delete", WarpPermissions.DELETE)
-            .put("warp", WarpPermissions.WARP)
-            .put("add editor", WarpPermissions.ADD_EDITOR)
-            .put("remove editor", WarpPermissions.REMOVE_EDITOR)
-            .put("message", WarpPermissions.MESSAGE)
-            .put("price", WarpPermissions.PRICE)
-            .put("free", WarpPermissions.FREE)
-            .put("list", WarpPermissions.LIST)
-            .build();
-    public static BiMap<WarpPermissions, String> WARP_PERM_PERM_TO_NAME = WARP_PERM_NAME_TO_PERM.inverse();
-    
-    public static BiMap<String, WarpProtectionAreaPermissions> WPA_PERM_NAME_TO_PERM = new ImmutableBiMap.Builder<String, WarpProtectionAreaPermissions>()
-            .put("location", WarpProtectionAreaPermissions.UPDATE)
-            .put("rename", WarpProtectionAreaPermissions.RENAME)
-            .put("invite", WarpProtectionAreaPermissions.INVITE)
-            .put("uninvite", WarpProtectionAreaPermissions.UNINVITE)
-            .put("give", WarpProtectionAreaPermissions.GIVE)
-            .put("delete", WarpProtectionAreaPermissions.DELETE)
-            .put("overwrite", WarpProtectionAreaPermissions.OVERWRITE)
-            .put("add editor", WarpProtectionAreaPermissions.ADD_EDITOR)
-            .put("remove editor", WarpProtectionAreaPermissions.REMOVE_EDITOR)
-            .put("list", WarpProtectionAreaPermissions.LIST)
-            .build();
-    public static BiMap<WarpProtectionAreaPermissions, String> WPA_PERM_PERM_TO_NAME = WPA_PERM_NAME_TO_PERM.inverse();
-    //@formatter:on
 
     private static final Callback<Warp, ConfigurationNode> NODE_TO_WARP = new Callback<Warp, ConfigurationNode>() {
         @Override
@@ -207,7 +169,7 @@ public class YmlConnection implements WarpProtectionConnection {
         String creator = node.getString("creator");
         
         List<ConfigurationNode> editorNodes = node.getNodeList("editors", null);
-        Map<EditorPermissions.Type, Map<String, EditorPermissions<WarpPermissions>>> allPermissions = getEditorPermissions(editorNodes, WARP_PERM_NAME_TO_PERM, WarpPermissions.class); 
+        Map<EditorPermissions.Type, Map<String, EditorPermissions<WarpPermissions>>> allPermissions = getEditorPermissions(editorNodes, WarpPermissions.STRING_MAP, WarpPermissions.class); 
 
         // Location:
         Double x = getDouble(node, "x");
@@ -264,7 +226,7 @@ public class YmlConnection implements WarpProtectionConnection {
         }
     }
     
-    private static <T extends Enum<T> & Editor> Map<String, Object> warpObjectToMap(DefaultWarpObject<T> object, Map<T, String> nameForPermMap) {
+    private static <T extends Enum<T> & Editor> Map<String, Object> warpObjectToMap(DefaultWarpObject<T> object) {
         Map<String, Object> map = Maps.newHashMap();
         map.put("name", object.getName());
         map.put("owner", object.getOwner());
@@ -273,20 +235,20 @@ public class YmlConnection implements WarpProtectionConnection {
         Collection<EditorPermissionEntry<T>> editorPermissionEntries = object.getEditorPermissionsList();
         List<Map<String, Object>> editorPermissionMaps = Lists.newArrayListWithCapacity(editorPermissionEntries.size());
         for (EditorPermissionEntry<T> entry : editorPermissionEntries) {
-            editorPermissionMaps.add(editorPermissionToMap(entry.editorPermissions, entry.name, entry.type, nameForPermMap));
+            editorPermissionMaps.add(editorPermissionToMap(entry.editorPermissions, entry.name, entry.type));
         }
         map.put("editors", editorPermissionMaps);
         return map;
     }
     
-    private static <T extends Enum<T> & Editor> Map<String, Object> editorPermissionToMap(EditorPermissions<T> perm, String name, EditorPermissions.Type type, Map<T, String> nameForPermMap) {
+    private static <T extends Enum<T> & Editor> Map<String, Object> editorPermissionToMap(EditorPermissions<T> perm, String name, EditorPermissions.Type type) {
         Map<String, Object> map = Maps.newHashMap();
         map.put("name", name);
         map.put("type", type.name[0]);
         T[] perms = perm.getByValue(true);
         List<String> permNames = Lists.newArrayListWithCapacity(perms.length);
         for (T p : perms) {
-            permNames.add(nameForPermMap.get(p));
+            permNames.add(p.getName());
         }
         map.put("permissions", permNames);
         return map;
@@ -297,7 +259,7 @@ public class YmlConnection implements WarpProtectionConnection {
         List<Object> rawNodes = this.config.getList(WPA_PATH);
         
         for (Warp warp : warps) {
-            Map<String, Object> warpMap = warpObjectToMap(warp, WARP_PERM_PERM_TO_NAME);
+            Map<String, Object> warpMap = warpObjectToMap(warp);
             fixedLocToMap(warpMap, warp.getLocation(), false, true);
             warpMap.put("visibility", warp.getVisibility().name);
             warpMap.put("listed", warp.isListed());
@@ -439,7 +401,7 @@ public class YmlConnection implements WarpProtectionConnection {
         this.config.save();
     }
     
-    private <T extends Enum<T> & Editor> void updateEditor(ConfigurationNode warpObjectNode, DefaultWarpObject<T> warpObject, final String name, final EditorPermissions.Type type, Map<T, String> nameForPermissionMap) {
+    private <T extends Enum<T> & Editor> void updateEditor(ConfigurationNode warpObjectNode, DefaultWarpObject<T> warpObject, final String name, final EditorPermissions.Type type) {
         
         final Callback<Boolean, ConfigurationNode> editorCheck = new Callback<Boolean, ConfigurationNode>() {
             @Override
@@ -463,7 +425,7 @@ public class YmlConnection implements WarpProtectionConnection {
                     // Fill
                     int i = 0;
                     for (T warpPerm : warpPermissions) {
-                        warpPermissionsNames[i++] = nameForPermissionMap.get(warpPerm);
+                        warpPermissionsNames[i++] = warpPerm.getName();
                     }
                     editorNode.setProperty("permissions", warpPermissionsNames);
                 }
@@ -476,7 +438,7 @@ public class YmlConnection implements WarpProtectionConnection {
     @Override
     public void updateEditor(Warp warp, final String name, final EditorPermissions.Type type) {
         ConfigurationNode warpNode = getWarpNode(NameIdentification.create(warp));
-        this.updateEditor(warpNode, warp, name, type, WARP_PERM_PERM_TO_NAME);
+        this.updateEditor(warpNode, warp, name, type);
     }
 
     @Override
@@ -531,7 +493,7 @@ public class YmlConnection implements WarpProtectionConnection {
         WorldWrapper worldObject = new WorldWrapper(node.getString("world"));
         
         List<ConfigurationNode> editorNodes = node.getNodeList("editors", null);
-        Map<EditorPermissions.Type, Map<String, EditorPermissions<WarpProtectionAreaPermissions>>> editorPermissions = getEditorPermissions(editorNodes, WPA_PERM_NAME_TO_PERM, WarpProtectionAreaPermissions.class);
+        Map<EditorPermissions.Type, Map<String, EditorPermissions<WarpProtectionAreaPermissions>>> editorPermissions = getEditorPermissions(editorNodes, WarpProtectionAreaPermissions.STRING_MAP, WarpProtectionAreaPermissions.class);
         
         // Corners:
         List<ConfigurationNode> cornerNodes = node.getNodeList("corner", null);
@@ -606,7 +568,7 @@ public class YmlConnection implements WarpProtectionConnection {
         List<Object> rawNodes = this.config.getList(WPA_PATH);
         
         for (WarpProtectionArea wpa : areas) {
-            Map<String, Object> wpaMap = warpObjectToMap(wpa, WPA_PERM_PERM_TO_NAME);
+            Map<String, Object> wpaMap = warpObjectToMap(wpa);
             List<Map<String, Object>> corners = Lists.newArrayListWithCapacity(2);
             corners.add(fixedLocToMap(wpa.getCorner(0), false, false));
             corners.add(fixedLocToMap(wpa.getCorner(1), false, false));
@@ -623,7 +585,7 @@ public class YmlConnection implements WarpProtectionConnection {
     @Override
     public void updateEditor(WarpProtectionArea warp, String name, Type type) {
         ConfigurationNode warpNode = getWarpProtectionAreaNode(NameIdentification.create(warp));
-        this.updateEditor(warpNode, warp, name, type, WPA_PERM_PERM_TO_NAME);
+        this.updateEditor(warpNode, warp, name, type);
     }
 
     @Override
