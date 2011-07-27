@@ -1,0 +1,22 @@
+3.0.0
+  - testing
+  - add "wpa" create command
+  - case sensitive check
+  - pay creation price for change visibility
+  - Bukkit permissions support
+  
+  - status command support wpa size
+
+3.1.0
+  - auto completion
+  - fix search command
+
+3.2.0
+  - pay only difference for change visibility (maybe 3.1.0)
+  - default warping price for a warp
+
+Undetermined
+  - separated permission for warp.create.private.set/warp.create.private.change
+  - Move warps for world
+  - Export hmod compatible warps
+  - status command show invalid warp/wpa size count

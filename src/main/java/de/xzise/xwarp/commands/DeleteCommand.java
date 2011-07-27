@@ -3,28 +3,29 @@ package de.xzise.xwarp.commands;
 import org.bukkit.Server;
 import org.bukkit.command.CommandSender;
 
-import de.xzise.xwarp.WarpManager;
+import de.xzise.xwarp.Manager;
+import de.xzise.xwarp.WarpObject;
 
-public class DeleteCommand extends WarpCommand {
+public class DeleteCommand<W extends WarpObject<?>, M extends Manager<W>> extends ManagerCommand<W, M> {
 
-	public DeleteCommand(WarpManager list, Server server) {
-		super(list, server, "", "delete", "-");
-	}	
+    public DeleteCommand(M manager, Server server, String label) {
+        super(manager, server, label, "", "delete", "-");
+    }
 
-	@Override
-	protected boolean executeEdit(CommandSender sender, String warpName, String creator, String[] parameters) {
-		this.list.deleteWarp(warpName, creator, sender);
-		return true;
-	}
+    @Override
+    protected boolean executeEdit(W warpObject, CommandSender sender, String[] parameters) {
+        this.manager.delete(warpObject, sender);
+        return true;
+    }
 
-	@Override
-	protected String[] getFullHelpText() {
-		return new String[] { "Deletes the given warp." };
-	}
+    @Override
+    public String[] getFullHelpText() {
+        return new String[] { "Deletes the given warp." };
+    }
 
-	@Override
-	protected String getSmallHelpText() {
-		return "Deletes the warp.";
-	}
+    @Override
+    public String getSmallHelpText() {
+        return "Deletes the warp.";
+    }
 
 }

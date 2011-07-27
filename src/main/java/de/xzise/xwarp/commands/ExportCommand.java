@@ -13,7 +13,7 @@ import de.xzise.xwarp.WarpManager;
 import de.xzise.xwarp.dataconnections.DataConnection;
 import de.xzise.xwarp.dataconnections.DataConnectionFactory;
 
-public class ExportCommand extends DefaultSubCommand {
+public class ExportCommand extends DefaultSubCommand<WarpManager> {
 
     private final File pluginPath;
 
@@ -23,7 +23,7 @@ public class ExportCommand extends DefaultSubCommand {
     }
 
     @Override
-    protected boolean internalExecute(CommandSender sender, String[] parameters) {
+    public boolean execute(CommandSender sender, String[] parameters) {
         if (parameters.length > 1) {
             DataConnection connection = DataConnectionFactory.getConnection(this.server, parameters[1]);
 
@@ -36,7 +36,7 @@ public class ExportCommand extends DefaultSubCommand {
                 }
                 try {
                     connection.create(file);
-                    connection.addWarp(this.list.getWarps().toArray(new Warp[0]));
+                    connection.addWarp(this.manager.getWarps().toArray(new Warp[0]));
                     connection.free();
                 } catch (Exception e) {
                     MyWarp.logger.severe("Unable to export warps.", e);
@@ -51,17 +51,17 @@ public class ExportCommand extends DefaultSubCommand {
     }
 
     @Override
-    protected String[] getFullHelpText() {
+    public String[] getFullHelpText() {
         return new String[] { "Exports the loaded warps to the given file.", "Valid types are: 'sqlite', 'hmod'" };
     }
 
     @Override
-    protected String getSmallHelpText() {
+    public String getSmallHelpText() {
         return "Export warps";
     }
 
     @Override
-    protected String getCommand() {
+    public String getCommand() {
         return "warp export <type> [file]";
     }
 }

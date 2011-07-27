@@ -1,4 +1,4 @@
-package de.xzise.xwarp.commands;
+package de.xzise.xwarp.commands.warp;
 
 import java.util.EnumSet;
 import java.util.HashSet;
@@ -16,12 +16,13 @@ import de.xzise.MinecraftUtil;
 import de.xzise.xwarp.Warp;
 import de.xzise.xwarp.WarpManager;
 import de.xzise.xwarp.Warp.Visibility;
+import de.xzise.xwarp.commands.DefaultSubCommand;
 import de.xzise.xwarp.lister.GenericLister;
 import de.xzise.xwarp.lister.GenericLister.Column;
 import de.xzise.xwarp.lister.ListSection;
 import de.xzise.xwarp.wrappers.permission.PermissionTypes;
 
-public class ListCommand extends DefaultSubCommand {
+public class ListCommand extends DefaultSubCommand<WarpManager> {
 
     public ListCommand(WarpManager list, Server server) {
         super(list, server, "list", "ls");
@@ -34,7 +35,7 @@ public class ListCommand extends DefaultSubCommand {
     }
     
     @Override
-    protected boolean internalExecute(CommandSender sender, String[] parameters) {
+    public boolean execute(CommandSender sender, String[] parameters) {
         if (!MyWarp.permissions.permission(sender, PermissionTypes.CMD_LIST)) {
             sender.sendMessage(ChatColor.RED + "You have no permission to list warps.");
             return true;
@@ -119,7 +120,7 @@ public class ListCommand extends DefaultSubCommand {
                 page = 1;
             }
 
-            final List<Warp> warps = this.list.getWarps(sender, creators, owners, worlds, visibilites);
+            final List<Warp> warps = this.manager.getWarps(sender, creators, owners, worlds, visibilites);
             
             final int maxPages = getNumberOfPages(warps.size(), sender);
             final int numLines = MinecraftUtil.getMaximumLines(sender) - 1;
@@ -151,7 +152,7 @@ public class ListCommand extends DefaultSubCommand {
     }
 
     @Override
-    protected String[] getFullHelpText() {
+    public String[] getFullHelpText() {
         return new String[] {
         "Shows a list of warps. Following filters are available:",
         "oo:<owner>, o:<exp. owner>, oc:<creator>, c:<exp. creator>",
@@ -161,12 +162,12 @@ public class ListCommand extends DefaultSubCommand {
     }
 
     @Override
-    protected String getSmallHelpText() {
+    public String getSmallHelpText() {
         return "Shows the warp list";
     }
 
     @Override
-    protected String getCommand() {
+    public String getCommand() {
         return "warp list [filters|#page]";
     }
 }

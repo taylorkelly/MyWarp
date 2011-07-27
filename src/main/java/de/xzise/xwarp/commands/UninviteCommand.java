@@ -3,27 +3,28 @@ package de.xzise.xwarp.commands;
 import org.bukkit.Server;
 import org.bukkit.command.CommandSender;
 
-import de.xzise.xwarp.WarpManager;
+import de.xzise.xwarp.Manager;
+import de.xzise.xwarp.WarpObject;
 
-public class UninviteCommand extends WarpCommand {
+public class UninviteCommand<W extends WarpObject<?>, M extends Manager<W>> extends ManagerCommand<W, M> {
 
-	public UninviteCommand(WarpManager list, Server server) {
-		super(list, server, "player", "uninvite");
-	}
+    public UninviteCommand(M list, Server server, String label) {
+        super(list, server, label, "player", "uninvite");
+    }
 
-	@Override
-	protected boolean executeEdit(CommandSender sender, String warpName, String creator, String[] parameters) {
-		this.list.uninvite(warpName, creator, sender, this.getPlayer(parameters[0]));
-		return true;
-	}
+    @Override
+    protected boolean executeEdit(W warpObject, CommandSender sender, String[] parameters) {
+        this.manager.uninvite(warpObject, sender, this.getPlayer(parameters[0]));
+        return true;
+    }
 
-	@Override
-	protected String[] getFullHelpText() {
-		return new String[] { "Revokes the invitation of the invited user." };
-	}
+    @Override
+    public String[] getFullHelpText() {
+        return new String[] { "Revokes the invitation of the invited user." };
+    }
 
-	@Override
-	protected String getSmallHelpText() {
-		return "Uninvites the user.";
-	}
+    @Override
+    public String getSmallHelpText() {
+        return "Uninvites the user.";
+    }
 }

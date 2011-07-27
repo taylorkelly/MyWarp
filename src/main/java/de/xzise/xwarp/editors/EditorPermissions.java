@@ -1,15 +1,15 @@
 package de.xzise.xwarp.editors;
 
 import java.util.ArrayList;
-import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.google.common.collect.Maps;
+
 import de.xzise.Callback;
 import de.xzise.MinecraftUtil;
-
 
 public class EditorPermissions<T extends Enum<T> & Editor> {
     
@@ -83,7 +83,7 @@ public class EditorPermissions<T extends Enum<T> & Editor> {
     private final Map<T, Boolean> permissions;
 
     public EditorPermissions(Class<T> clazz) {
-        this.permissions = new EnumMap<T, Boolean>(clazz); 
+        this.permissions = Maps.newEnumMap(clazz); 
     }
     
     public static <T extends Enum<T> & Editor> EditorPermissions<T> create(Class<T> clazz) {

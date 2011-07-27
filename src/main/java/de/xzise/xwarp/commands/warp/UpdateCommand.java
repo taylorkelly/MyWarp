@@ -1,9 +1,11 @@
-package de.xzise.xwarp.commands;
+package de.xzise.xwarp.commands.warp;
 
 import org.bukkit.Server;
 import org.bukkit.command.CommandSender;
 
+import de.xzise.xwarp.Warp;
 import de.xzise.xwarp.WarpManager;
+import de.xzise.xwarp.commands.WarpCommand;
 import de.xzise.xwarp.warpable.Positionable;
 import de.xzise.xwarp.warpable.WarperFactory;
 
@@ -14,10 +16,10 @@ public class UpdateCommand extends WarpCommand {
     }
 
     @Override
-    protected boolean executeEdit(CommandSender sender, String warpName, String creator, String[] parameters) {
+    protected boolean executeEdit(Warp warp, CommandSender sender, String[] parameters) {
         Positionable positionable = WarperFactory.getPositionable(sender);
         if (positionable != null) {
-            this.list.updateLocation(warpName, creator, positionable);
+            this.manager.updateLocation(warp, positionable);
             return true;
         } else {
             return false;
@@ -25,12 +27,12 @@ public class UpdateCommand extends WarpCommand {
     }
 
     @Override
-    protected String[] getFullHelpText() {
+    public String[] getFullHelpText() {
         return new String[] { "Updates the position of the warp." };
     }
 
     @Override
-    protected String getSmallHelpText() {
+    public String getSmallHelpText() {
         return "Updates the warp's position.";
     }
 }

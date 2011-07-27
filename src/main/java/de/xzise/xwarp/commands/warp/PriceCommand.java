@@ -1,11 +1,13 @@
-package de.xzise.xwarp.commands;
+package de.xzise.xwarp.commands.warp;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Server;
 import org.bukkit.command.CommandSender;
 
 import de.xzise.MinecraftUtil;
+import de.xzise.xwarp.Warp;
 import de.xzise.xwarp.WarpManager;
+import de.xzise.xwarp.commands.WarpCommand;
 
 public class PriceCommand extends WarpCommand {
 
@@ -14,13 +16,13 @@ public class PriceCommand extends WarpCommand {
     }
 
     @Override
-    protected boolean executeEdit(CommandSender sender, String warpName, String owner, String[] parameters) {
+    protected boolean executeEdit(Warp warp, CommandSender sender, String[] parameters) {
         if (parameters.length == 1) {
-            Integer price = MinecraftUtil.tryAndGetInteger(parameters[0]);
+            Double price = MinecraftUtil.tryAndGetDouble(parameters[0]);
             if (price == null) {
-                sender.sendMessage(ChatColor.RED + "Invalid price given. The price has to be a integer.");
+                sender.sendMessage(ChatColor.RED + "Invalid price given. The price has to be a double.");
             } else {
-                this.list.setPrice(warpName, owner, sender, price);
+                this.manager.setPrice(warp, sender, price);
             }
             return true;
         } else {
@@ -29,12 +31,12 @@ public class PriceCommand extends WarpCommand {
     }
 
     @Override
-    protected String[] getFullHelpText() {
+    public String[] getFullHelpText() {
         return new String[] { "Sets the price for the warp." };
     }
 
     @Override
-    protected String getSmallHelpText() {
+    public String getSmallHelpText() {
         return "Set price";
     }
 

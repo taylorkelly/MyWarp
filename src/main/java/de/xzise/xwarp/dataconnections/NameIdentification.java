@@ -2,7 +2,7 @@ package de.xzise.xwarp.dataconnections;
 
 import de.xzise.xwarp.WarpObject;
 
-public final class NameIdentification<T extends WarpObject> implements IdentificationInterface<T> {
+public final class NameIdentification<T extends WarpObject<?>> implements IdentificationInterface<T> {
 
     private final String name;
     private final String owner;
@@ -11,7 +11,7 @@ public final class NameIdentification<T extends WarpObject> implements Identific
         this(warpObject.getName(), warpObject.getOwner());
     }
     
-    public static <T extends WarpObject> NameIdentification<T> create(T warpObject) {
+    public static <T extends WarpObject<?>> NameIdentification<T> create(T warpObject) {
         return new NameIdentification<T>(warpObject);
     }
 

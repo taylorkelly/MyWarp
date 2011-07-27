@@ -4,20 +4,21 @@ import me.taylorkelly.mywarp.MyWarp;
 
 import org.bukkit.command.CommandSender;
 
-import de.xzise.xwarp.WarpManager;
+import de.xzise.commands.CommonHelpableSubCommand;
+import de.xzise.xwarp.Manager;
 import de.xzise.xwarp.wrappers.permission.PermissionTypes;
 
-public class ReloadCommand extends SubCommand {
+public class ReloadCommand extends CommonHelpableSubCommand {
 
-    private WarpManager manager;
+    private Manager<?> manager;
 
-    public ReloadCommand(WarpManager manager) {
+    public ReloadCommand(Manager<?> manager) {
         super("reload");
         this.manager = manager;
     }
 
     @Override
-    protected boolean internalExecute(CommandSender sender, String[] parameters) {
+    public boolean execute(CommandSender sender, String[] parameters) {
         if (parameters.length == 1) {
             this.manager.reload(sender);
             return true;
@@ -27,22 +28,22 @@ public class ReloadCommand extends SubCommand {
     }
 
     @Override
-    protected String[] getFullHelpText() {
+    public String[] getFullHelpText() {
         return new String[] { "Reloads xWarp's settings and warps." };
     }
 
     @Override
-    protected String getSmallHelpText() {
+    public String getSmallHelpText() {
         return "Reloads xWarp.";
     }
 
     @Override
-    protected String getCommand() {
+    public String getCommand() {
         return "warp reload";
     }
 
     @Override
-    protected boolean listHelp(CommandSender sender) {
+    public boolean listHelp(CommandSender sender) {
         return MyWarp.permissions.permission(sender, PermissionTypes.ADMIN_RELOAD);
     }
 

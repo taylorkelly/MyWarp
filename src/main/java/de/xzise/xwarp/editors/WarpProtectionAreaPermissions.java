@@ -5,10 +5,9 @@ import java.util.Set;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 
-import de.xzise.xwarp.PermissionDouble;
 import de.xzise.xwarp.wrappers.permission.PermissionTypes;
 
-public enum WarpProtectionAreaPermissions implements PermissionDouble, Editor {
+public enum WarpProtectionAreaPermissions implements Editor {
     UPDATE('l', 0, "update", PermissionTypes.ADMIN_UPDATE, PermissionTypes.EDIT_LOCATION),
     RENAME('m', 1, "rename", PermissionTypes.ADMIN_RENAME, PermissionTypes.EDIT_RENAME),
     UNINVITE('u', 2, "uninvite", PermissionTypes.ADMIN_UNINVITE, PermissionTypes.EDIT_UNINVITE),

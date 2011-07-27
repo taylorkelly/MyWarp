@@ -32,7 +32,7 @@ public class XWBlockListener extends BlockListener {
         if (block.getState() instanceof Sign && !event.isCancelled() && event.getPlayer() != null) {
             WarpDestination destination = SignWarp.getDestination(SignWarp.getFilledLines(event.getLines()), event.getPlayer());
             if (destination != null) {
-                Warp warp = this.list.getWarp(destination.name, destination.owner, null);
+                Warp warp = this.list.getWarpObject(destination.name, destination.owner, null);
                 PermissionTypes type = null;
                 if (warp == null) {
                     type = PermissionTypes.SIGN_CREATE_UNKNOWN;

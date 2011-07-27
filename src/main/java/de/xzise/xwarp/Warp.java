@@ -250,10 +250,6 @@ public class Warp extends DefaultWarpObject<WarpPermissions> {
         this.setLocation(positionable.getLocation());
     }
 
-    public boolean isOwn(String name) {
-        return this.getOwner().equals(name);
-    }
-
     public boolean isCreator(String name) {
         return this.getCreator().equals(name);
     }
@@ -264,41 +260,6 @@ public class Warp extends DefaultWarpObject<WarpPermissions> {
 
     public void uninvite(String inviteeName) {
         this.getEditorPermissions(inviteeName, Type.PLAYER).put(WarpPermissions.WARP, false);
-    }
-
-    public boolean canModify(CommandSender sender, boolean defaultModification, PermissionTypes defaultPermission, PermissionTypes adminPermission) {
-        if (defaultPermission != null) {
-            return ((defaultModification && MyWarp.permissions.permission(sender, defaultPermission)) || MyWarp.permissions.permission(sender, adminPermission));
-        } else {
-            return (defaultModification || MyWarp.permissions.permission(sender, adminPermission));
-        }
-    }
-    
-    public boolean canModify(CommandSender sender, WarpPermissions permission) {
-        Player player = WarperFactory.getPlayer(sender);
-        boolean canModify = false;
-        if (player != null) {
-            canModify = this.playerCanModify(player, permission);
-        }
-
-        return this.canModify(sender, canModify, permission.defaultPermission, permission.adminPermission);
-    }
-    
-    public boolean playerCanModify(Player player, WarpPermissions permission) {
-        if (this.isOwn(player.getName()))
-            return true;
-        EditorPermissions<WarpPermissions> ep = this.getEditorPermissions(player.getName().toLowerCase(), Type.PLAYER);
-        if (ep != null && ep.get(permission)) {
-            return true;
-        }
-        String[] groups = MyWarp.permissions.getGroup(player.getWorld().getName(), player.getName());
-        for (String group : groups) {
-            EditorPermissions<WarpPermissions> groupPerm = this.getEditorPermissions(group, Type.GROUP);
-            if (groupPerm != null && groupPerm.get(permission)) {
-                return true;
-            }    
-        }
-        return false;
     }
 
     public boolean list(CommandSender sender) {

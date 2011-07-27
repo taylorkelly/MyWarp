@@ -3,27 +3,28 @@ package de.xzise.xwarp.commands;
 import org.bukkit.Server;
 import org.bukkit.command.CommandSender;
 
-import de.xzise.xwarp.WarpManager;
+import de.xzise.xwarp.Manager;
+import de.xzise.xwarp.WarpObject;
 
-public class RenameCommand extends WarpCommand {
+public class RenameCommand<W extends WarpObject<?>, M extends Manager<W>> extends ManagerCommand<W, M> {
 
-    public RenameCommand(WarpManager list, Server server) {
-        super(list, server, "new name", "rename", "mv");
+    public RenameCommand(M list, Server server, String label) {
+        super(list, server, label, "new name", "rename", "mv");
     }
 
     @Override
-    protected boolean executeEdit(CommandSender sender, String warpName, String creator, String[] parameters) {
-        this.list.rename(warpName, creator, sender, parameters[0]);
+    protected boolean executeEdit(W warpObject, CommandSender sender, String[] parameters) {
+        this.manager.setName(warpObject, sender, parameters[0]);
         return true;
     }
 
     @Override
-    protected String[] getFullHelpText() {
+    public String[] getFullHelpText() {
         return new String[] { "Changes the name of the warp." };
     }
 
     @Override
-    protected String getSmallHelpText() {
+    public String getSmallHelpText() {
         return "Renames the warp";
     }
 }

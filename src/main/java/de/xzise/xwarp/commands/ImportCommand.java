@@ -17,19 +17,19 @@ import de.xzise.xwarp.dataconnections.DataConnection;
 import de.xzise.xwarp.dataconnections.DataConnectionFactory;
 import de.xzise.xwarp.dataconnections.HModConnection;
 
-public class ImportCommand extends DefaultSubCommand {
+public class ImportCommand extends DefaultSubCommand<WarpManager> {
 
     private final DataConnection data;
     private final File directory;
 
-    public ImportCommand(WarpManager list, File directory, DataConnection data, Server server) {
-        super(list, server, "import");
+    public ImportCommand(WarpManager manager, File directory, DataConnection data, Server server) {
+        super(manager, server, "import");
         this.data = data;
         this.directory = directory;
     }
 
     @Override
-    protected boolean internalExecute(CommandSender sender, String[] parameters) {
+    public boolean execute(CommandSender sender, String[] parameters) {
         if (parameters.length >= 2) {
             DataConnection connection = DataConnectionFactory.getConnection(this.server, parameters[1]);
             if (connection == null) {
@@ -67,7 +67,7 @@ public class ImportCommand extends DefaultSubCommand {
             List<Warp> allowedWarps = new ArrayList<Warp>(warps.size());
             List<Warp> notAllowedWarps = new ArrayList<Warp>(warps.size());
             for (Warp warp : warps) {
-                if (this.list.isNameAvailable(warp)) {
+                if (this.manager.isNameAvailable(warp)) {
                     allowedWarps.add(warp);
                 } else {
                     notAllowedWarps.add(warp);
@@ -79,7 +79,7 @@ public class ImportCommand extends DefaultSubCommand {
             }
 
             if (allowedWarps.size() > 0) {
-                this.list.blindAdd(allowedWarps);
+                this.manager.blindAdd(allowedWarps);
                 this.data.addWarp(allowedWarps.toArray(new Warp[0]));
                 sender.sendMessage("Imported " + ChatColor.GREEN + allowedWarps.size() + ChatColor.WHITE + " warps into the database.");
             }
@@ -101,17 +101,17 @@ public class ImportCommand extends DefaultSubCommand {
     }
 
     @Override
-    protected String[] getFullHelpText() {
+    public String[] getFullHelpText() {
         return new String[] { "Imports a warplist and store it in the database.", "Types could be: 'sqlite' or 'hmod'.", "In hmod mode the creator is either the 3rd parameter (if set) or the initiator (if player) or nobody." };
     }
 
     @Override
-    protected String getSmallHelpText() {
+    public String getSmallHelpText() {
         return "Imports a warplist";
     }
 
     @Override
-    protected String getCommand() {
+    public String getCommand() {
         return "warp import <type> [file]";
     }
 

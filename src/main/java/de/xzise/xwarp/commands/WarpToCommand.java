@@ -13,14 +13,14 @@ import de.xzise.xwarp.warpable.WarpablePlayer;
 import de.xzise.xwarp.warpable.WarperFactory;
 import de.xzise.xwarp.wrappers.permission.PermissionTypes;
 
-public class WarpToCommand extends DefaultSubCommand {
+public class WarpToCommand extends DefaultSubCommand<WarpManager> {
 
-    public WarpToCommand(WarpManager list, Server server) {
-        super(list, server, "to");
+    public WarpToCommand(WarpManager manager, Server server) {
+        super(manager, server, "to");
     }
 
     @Override
-    protected boolean internalExecute(CommandSender sender, String[] parameters) {
+    public boolean execute(CommandSender sender, String[] parameters) {
         Warpable warped;
         String otherName = null;
         if (parameters.length == 4 && parameters[0].equalsIgnoreCase("to")) {
@@ -54,28 +54,27 @@ public class WarpToCommand extends DefaultSubCommand {
         if (parameters.length > start + 1) {
             creator = this.getPlayer(parameters[start + 1]);
         }
-        // TODO Chunkloading
-        this.list.warpTo(parameters[start], creator, sender, warped, false);
+        this.manager.warpTo(parameters[start], creator, sender, warped, false);
         return true;
     }
 
     @Override
-    protected String[] getFullHelpText() {
+    public String[] getFullHelpText() {
         return new String[] { "Warps the player to the given warp.", "This command is only ingame available." };
     }
 
     @Override
-    protected String getSmallHelpText() {
+    public String getSmallHelpText() {
         return "Warps the player";
     }
 
     @Override
-    protected String getCommand() {
+    public String getCommand() {
         return "warp [to] <name> [creator] [warped]";
     }
 
     @Override
-    protected boolean listHelp(CommandSender sender) {
+    public boolean listHelp(CommandSender sender) {
         return MyWarp.permissions.permissionOr(sender, PermissionTypes.WARP_TO_PERMISSIONS);
     }
 }

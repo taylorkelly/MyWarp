@@ -3,16 +3,17 @@ package de.xzise.xwarp.commands;
 import org.bukkit.Server;
 
 import de.xzise.MinecraftUtil;
-import de.xzise.xwarp.WarpManager;
+import de.xzise.commands.CommonHelpableSubCommand;
+import de.xzise.xwarp.Manager;
 
 /**
  * Command like list/create etc.
  * 
  * @author Fabian Neundorf.
  */
-public abstract class DefaultSubCommand extends SubCommand {
+public abstract class DefaultSubCommand<M extends Manager<?>> extends CommonHelpableSubCommand {
 
-    protected final WarpManager list;
+    protected final M manager;
     protected final Server server;
 
     /**
@@ -27,9 +28,9 @@ public abstract class DefaultSubCommand extends SubCommand {
      * @throws IllegalArgumentException
      *             If commands is empty.
      */
-    protected DefaultSubCommand(WarpManager list, Server server, String... commands) {
+    protected DefaultSubCommand(M manager, Server server, String... commands) {
         super(commands);
-        this.list = list;
+        this.manager = manager;
         this.server = server;
     }
 

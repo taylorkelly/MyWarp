@@ -8,8 +8,12 @@ authors:
 commands:
   warp:
     description: Warp commands
-    usage: /<command> help - Displays the help for xWarp
+    usage: /<command> help - Displays the help for all warp commands.
     aliases: [xwarp, w]
+  wpa:
+    description: Warp protection area handling commands.
+    usage: /<command> help - Displays the help for all wpa commands.
+    aliases: [xwpa]
   go:
     description: Warps you to the saved location.
     usage: /<command> [to] <warpname> [owner] [warped player]

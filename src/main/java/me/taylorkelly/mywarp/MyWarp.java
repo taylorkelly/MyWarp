@@ -15,10 +15,10 @@ import org.bukkit.plugin.java.JavaPlugin;
 import de.xzise.MinecraftUtil;
 import de.xzise.XLogger;
 import de.xzise.wrappers.permissions.PermissionsHandler;
-import de.xzise.xwarp.CommandMap;
 import de.xzise.wrappers.economy.EconomyHandler;
 import de.xzise.xwarp.PluginProperties;
 import de.xzise.xwarp.WarpManager;
+import de.xzise.xwarp.commands.WarpCommandMap;
 import de.xzise.xwarp.dataconnections.DataConnection;
 import de.xzise.xwarp.listeners.XWBlockListener;
 import de.xzise.xwarp.listeners.XWEntityListener;
@@ -33,7 +33,7 @@ public class MyWarp extends JavaPlugin {
     private EconomyHandler economyWrapper;
     private PermissionsHandler permissionsWrapper = permissions;
 
-    private CommandMap commands;
+    private WarpCommandMap commands;
     private DataConnection dataConnection;
 
     public String name;
@@ -97,7 +97,7 @@ public class MyWarp extends JavaPlugin {
         // Create commands
         this.commands = null;
         try {
-            this.commands = new CommandMap(warpManager, this.economyWrapper, this.getServer(), this.dataConnection, this.getDataFolder(), properties);
+            this.commands = new WarpCommandMap(warpManager, this.economyWrapper, this.getServer(), this.dataConnection, this.getDataFolder(), properties);
         } catch (IllegalArgumentException iae) {
             MyWarp.logger.severe("Couldn't initalize commands. Disabling " + this.name + "!", iae);
             this.getServer().getPluginManager().disablePlugin(this);

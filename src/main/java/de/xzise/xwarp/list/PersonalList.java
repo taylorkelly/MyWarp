@@ -11,7 +11,7 @@ import org.bukkit.command.CommandSender;
 import de.xzise.MinecraftUtil;
 import de.xzise.xwarp.WarpObject;
 
-public abstract class PersonalList<T extends WarpObject, G extends GlobalMap<T>> {
+public abstract class PersonalList<T extends WarpObject<?>, G extends GlobalMap<T>> {
     
     // WarpObjects sorted by owner, name
     private final Map<String, Map<String, T>> personalMap = new HashMap<String, Map<String,T>>();
@@ -64,7 +64,7 @@ public abstract class PersonalList<T extends WarpObject, G extends GlobalMap<T>>
         namedWarps.put(warpObject);
     }
     
-    public void deleteWarp(T warp) {
+    public void deleteWarpObject(T warp) {
         if (MinecraftUtil.isSet(warp.getCreator())) {
             this.creatorMap.get(warp.getCreator().toLowerCase()).remove(warp);
         }

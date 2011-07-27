@@ -2,26 +2,30 @@ package de.xzise.xwarp.commands;
 
 import me.taylorkelly.mywarp.MyWarp;
 
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Server;
 import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import de.xzise.commands.CommonHelpableSubCommand;
 import de.xzise.xwarp.WarpManager;
 import de.xzise.xwarp.wrappers.permission.PermissionTypes;
 import de.xzise.xwarp.wrappers.permission.PermissionValues;
 import de.xzise.xwarp.wrappers.permission.PricePermissions;
 import de.xzise.xwarp.wrappers.permission.WorldPermission;
 
-public class PermissionsCommand extends DefaultSubCommand {
+public class PermissionsCommand extends CommonHelpableSubCommand {
 
+    private final Server server = Bukkit.getServer();
+    
     public PermissionsCommand(WarpManager list, Server server) {
-        super(list, server, "permissions");
+        super("permissions");
     }
 
     @Override
-    protected boolean internalExecute(CommandSender sender, String[] parameters) {
+    public boolean execute(CommandSender sender, String[] parameters) {
         Player player = null;
         boolean showGranted = true;
         boolean showDenied = true;
@@ -114,22 +118,22 @@ public class PermissionsCommand extends DefaultSubCommand {
     }
 
     @Override
-    protected String[] getFullHelpText() {
+    public String[] getFullHelpText() {
         return new String[] { "Shows all your permissions." };
     }
 
     @Override
-    protected String getSmallHelpText() {
+    public String getSmallHelpText() {
         return "Shows the permissions of you";
     }
 
     @Override
-    protected String getCommand() {
+    public String getCommand() {
         return "warp permissions";
     }
 
     @Override
-    protected boolean listHelp(CommandSender sender) {
+    public boolean listHelp(CommandSender sender) {
         // It is only a debug function so: false?
         return false;
     }

@@ -16,25 +16,25 @@ import de.xzise.xwarp.wrappers.permission.PermissionTypes;
 import de.xzise.xwarp.wrappers.permission.PermissionValues;
 import de.xzise.xwarp.WarpManager;
 
-public class CreateCommand extends DefaultSubCommand {
+public class CreateCommand extends DefaultSubCommand<WarpManager> {
 
     private final Visibility visibility;
 
-    protected CreateCommand(WarpManager list, Server server, String suffix, Visibility visibility) {
-        super(list, server, CreateCommand.getCreateCommands(suffix));
+    protected CreateCommand(WarpManager manager, Server server, String suffix, Visibility visibility) {
+        super(manager, server, CreateCommand.getCreateCommands(suffix));
         this.visibility = visibility;
     }
 
-    public static CreateCommand newCreatePrivate(WarpManager list, Server server) {
-        return new CreateCommand(list, server, "p", Visibility.PRIVATE);
+    public static CreateCommand newCreatePrivate(WarpManager manager, Server server) {
+        return new CreateCommand(manager, server, "p", Visibility.PRIVATE);
     }
 
-    public static CreateCommand newCreatePublic(WarpManager list, Server server) {
-        return new CreateCommand(list, server, "", Visibility.PUBLIC);
+    public static CreateCommand newCreatePublic(WarpManager manager, Server server) {
+        return new CreateCommand(manager, server, "", Visibility.PUBLIC);
     }
 
-    public static CreateCommand newCreateGlobal(WarpManager list, Server server) {
-        return new CreateCommand(list, server, "g", Visibility.GLOBAL);
+    public static CreateCommand newCreateGlobal(WarpManager manager, Server server) {
+        return new CreateCommand(manager, server, "g", Visibility.GLOBAL);
     }
 
     private static String[] getCreateCommands(String suffix) {
@@ -53,14 +53,14 @@ public class CreateCommand extends DefaultSubCommand {
     }
 
     @Override
-    protected boolean internalExecute(CommandSender sender, String[] parameters) {
+    public boolean execute(CommandSender sender, String[] parameters) {
         Player player = MinecraftUtil.getPlayer(sender);
         if (parameters.length == 1 && player != null) {
             player.sendMessage("You could create following amount of warps:");
-            player.sendMessage(GenericLister.GLOBAL_OWN + "Global: " + ChatColor.GREEN + getAmount(player, PermissionValues.WARP_LIMIT_GLOBAL) + ChatColor.WHITE + " (created: " + ChatColor.GREEN + this.list.getAmountOfWarps(player.getName(), Visibility.GLOBAL, player.getWorld().getName()) + ChatColor.WHITE + ")");
-            player.sendMessage(GenericLister.PUBLIC_OWN + "Public: " + ChatColor.GREEN + getAmount(player, PermissionValues.WARP_LIMIT_PUBLIC) + ChatColor.WHITE + " (created: " + ChatColor.GREEN + this.list.getAmountOfWarps(player.getName(), Visibility.PUBLIC, player.getWorld().getName()) + ChatColor.WHITE + ")");
-            player.sendMessage(GenericLister.PRIVATE_OWN + "Private: " + ChatColor.GREEN + getAmount(player, PermissionValues.WARP_LIMIT_PRIVATE) + ChatColor.WHITE + " (created: " + ChatColor.GREEN + this.list.getAmountOfWarps(player.getName(), Visibility.PRIVATE, player.getWorld().getName()) + ChatColor.WHITE + ")");
-            player.sendMessage(ChatColor.GREEN + "Total: " + getAmount(player, PermissionValues.WARP_LIMIT_TOTAL) + ChatColor.WHITE + " (created: " + ChatColor.GREEN + this.list.getAmountOfWarps(player.getName(), null, player.getWorld().getName()) + ChatColor.WHITE + ")");
+            player.sendMessage(GenericLister.GLOBAL_OWN + "Global: " + ChatColor.GREEN + getAmount(player, PermissionValues.WARP_LIMIT_GLOBAL) + ChatColor.WHITE + " (created: " + ChatColor.GREEN + this.manager.getAmountOfWarps(player.getName(), Visibility.GLOBAL, player.getWorld().getName()) + ChatColor.WHITE + ")");
+            player.sendMessage(GenericLister.PUBLIC_OWN + "Public: " + ChatColor.GREEN + getAmount(player, PermissionValues.WARP_LIMIT_PUBLIC) + ChatColor.WHITE + " (created: " + ChatColor.GREEN + this.manager.getAmountOfWarps(player.getName(), Visibility.PUBLIC, player.getWorld().getName()) + ChatColor.WHITE + ")");
+            player.sendMessage(GenericLister.PRIVATE_OWN + "Private: " + ChatColor.GREEN + getAmount(player, PermissionValues.WARP_LIMIT_PRIVATE) + ChatColor.WHITE + " (created: " + ChatColor.GREEN + this.manager.getAmountOfWarps(player.getName(), Visibility.PRIVATE, player.getWorld().getName()) + ChatColor.WHITE + ")");
+            player.sendMessage(ChatColor.GREEN + "Total: " + getAmount(player, PermissionValues.WARP_LIMIT_TOTAL) + ChatColor.WHITE + " (created: " + ChatColor.GREEN + this.manager.getAmountOfWarps(player.getName(), null, player.getWorld().getName()) + ChatColor.WHITE + ")");
 //            player.sendMessage(ChatColor.GREEN + "Global total: " + /* TODO: Get global value */ getAmount(player, PermissionValues.WARP_LIMIT_TOTAL) + ChatColor.WHITE + " (created: " + ChatColor.GREEN + this.list.getAmountOfWarps(player.getName(), null, null) + ChatColor.WHITE + ")");
             return true;
         } else {
@@ -82,7 +82,7 @@ public class CreateCommand extends DefaultSubCommand {
                 default:
                     return false;
                 }
-                this.list.addWarp(parameters[1], position, newOwner, this.visibility);
+                this.manager.addWarp(parameters[1], position, newOwner, this.visibility);
                 return true;
             } else {
                 sender.sendMessage(ChatColor.RED + "You are unable to create a warp, because you have no position.");
@@ -92,7 +92,7 @@ public class CreateCommand extends DefaultSubCommand {
     }
 
     @Override
-    protected String[] getFullHelpText() {
+    public String[] getFullHelpText() {
         String visibilityText = "";
         switch (this.visibility) {
         case PRIVATE:
@@ -109,7 +109,7 @@ public class CreateCommand extends DefaultSubCommand {
     }
 
     @Override
-    protected String getSmallHelpText() {
+    public String getSmallHelpText() {
         switch (this.visibility) {
         case PRIVATE:
             return "Creates private warp";
@@ -123,12 +123,12 @@ public class CreateCommand extends DefaultSubCommand {
     }
 
     @Override
-    protected String getCommand() {
+    public String getCommand() {
         return "warp " + this.commands[0] + " <name> [new owner]";
     }
 
     @Override
-    protected boolean listHelp(CommandSender sender) {
+    public boolean listHelp(CommandSender sender) {
         switch (this.visibility) {
         case PRIVATE:
             return MyWarp.permissions.permission(sender, PermissionTypes.CREATE_PRIVATE);

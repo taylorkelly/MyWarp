@@ -5,7 +5,7 @@ import java.util.Map;
 
 import de.xzise.xwarp.WarpObject;
 
-public class GlobalMap<globalMapObject extends WarpObject> {
+public class GlobalMap<globalMapObject extends WarpObject<?>> {
 
     private final Map<String, globalMapObject> all = new HashMap<String, globalMapObject>();
 

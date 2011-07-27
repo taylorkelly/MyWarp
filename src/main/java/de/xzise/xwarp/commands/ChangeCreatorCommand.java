@@ -3,27 +3,28 @@ package de.xzise.xwarp.commands;
 import org.bukkit.Server;
 import org.bukkit.command.CommandSender;
 
-import de.xzise.xwarp.WarpManager;
+import de.xzise.xwarp.Manager;
+import de.xzise.xwarp.WarpObject;
 
-public class ChangeCreatorCommand extends WarpCommand {
+public class ChangeCreatorCommand<W extends WarpObject<?>, M extends Manager<W>> extends ManagerCommand<W, M> {
 
-    public ChangeCreatorCommand(WarpManager list, Server server) {
-        super(list, server, "player", "change-creator", "chcre");
+    public ChangeCreatorCommand(M manager, Server server, String label) {
+        super(manager, server, label, "player", "change-creator", "chcre");
     }
 
     @Override
-    protected boolean executeEdit(CommandSender sender, String warpName, String creator, String[] parameters) {
-        this.list.changeCreator(warpName, creator, sender, this.getPlayer(parameters[0]));
+    public boolean executeEdit(W warp, CommandSender sender, String[] parameters) {
+        this.manager.setCreator(warp, sender, this.getPlayer(parameters[0]));
         return true;
     }
 
     @Override
-    protected String[] getFullHelpText() {
+    public String[] getFullHelpText() {
         return new String[] { "Changes the creator of the warp." };
     }
 
     @Override
-    protected String getSmallHelpText() {
+    public String getSmallHelpText() {
         return "Change the creator";
     }
 

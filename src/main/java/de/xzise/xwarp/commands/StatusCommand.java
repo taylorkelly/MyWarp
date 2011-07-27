@@ -2,11 +2,12 @@ package de.xzise.xwarp.commands;
 
 import org.bukkit.command.CommandSender;
 
+import de.xzise.commands.CommonHelpableSubCommand;
 import de.xzise.wrappers.economy.EconomyHandler;
 import de.xzise.wrappers.permissions.PermissionsHandler;
 import de.xzise.xwarp.WarpManager;
 
-public class StatusCommand extends SubCommand {
+public class StatusCommand extends CommonHelpableSubCommand {
 
     private final WarpManager m;
     private final EconomyHandler economy;
@@ -20,7 +21,7 @@ public class StatusCommand extends SubCommand {
     }
 
     @Override
-    protected boolean internalExecute(CommandSender sender, String[] parameters) {
+    public boolean execute(CommandSender sender, String[] parameters) {
         if (parameters.length == 1) {
             sender.sendMessage("xWarp status:");
             sender.sendMessage("Number of warps: " + this.m.getSize(null, null));
@@ -33,17 +34,17 @@ public class StatusCommand extends SubCommand {
     }
 
     @Override
-    protected String[] getFullHelpText() {
+    public String[] getFullHelpText() {
         return new String[] { "Shows the status of xWarp." };
     }
 
     @Override
-    protected String getSmallHelpText() {
+    public String getSmallHelpText() {
         return "Shows status";
     }
 
     @Override
-    protected String getCommand() {
+    public String getCommand() {
         return "warp status";
     }
 

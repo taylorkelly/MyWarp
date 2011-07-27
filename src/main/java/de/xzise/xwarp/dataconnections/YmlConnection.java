@@ -154,7 +154,7 @@ public class YmlConnection implements WarpProtectionConnection {
         }
     }
     
-    public <T extends WarpObject> IdentificationInterface<T> createIdentification(T warp) {
+    public <T extends WarpObject<?>> IdentificationInterface<T> createIdentification(T warp) {
         return NameIdentification.create(warp);
     }
 
@@ -288,7 +288,7 @@ public class YmlConnection implements WarpProtectionConnection {
         return b == null ? nullIsTrue : b;
     }
     
-    public static class WarpObjectCallback<T extends WarpObject> implements Callback<Boolean, ConfigurationNode> {
+    public static class WarpObjectCallback<T extends WarpObject<?>> implements Callback<Boolean, ConfigurationNode> {
         
         public final IdentificationInterface<T> id;
         public final Callback<T, ConfigurationNode> warpObjectGetter;
@@ -298,7 +298,7 @@ public class YmlConnection implements WarpProtectionConnection {
             this.warpObjectGetter = warpObjectGetter;
         }
         
-        public static <T extends WarpObject> WarpObjectCallback<T> create(IdentificationInterface<T> id, Callback<T, ConfigurationNode> warpObjectGetter) {
+        public static <T extends WarpObject<?>> WarpObjectCallback<T> create(IdentificationInterface<T> id, Callback<T, ConfigurationNode> warpObjectGetter) {
             return new WarpObjectCallback<T>(id, warpObjectGetter);
         }
 
@@ -326,7 +326,7 @@ public class YmlConnection implements WarpProtectionConnection {
         this.config.save();
     }
 
-    private <T extends WarpObject> ConfigurationNode getNode(IdentificationInterface<T> id, String path, Callback<T, ConfigurationNode> nodeToWarpObject) {
+    private <T extends WarpObject<?>> ConfigurationNode getNode(IdentificationInterface<T> id, String path, Callback<T, ConfigurationNode> nodeToWarpObject) {
         List<ConfigurationNode> nodes = this.config.getNodeList(path, null);
         for (ConfigurationNode node : nodes) {
             T w = nodeToWarpObject.call(node);

@@ -492,11 +492,11 @@ public class SQLiteConnection implements WarpProtectionConnection {
         });
     }
 
-    private interface UpdateFiller<T extends WarpObject> {
+    private interface UpdateFiller<T extends WarpObject<?>> {
         void fillStatement(T warp, PreparedStatement statement) throws SQLException;
     }
 
-    private <T extends WarpObject> void updateWarpObject(T warpObject, String type, String name, String sql, UpdateFiller<T> filler) {
+    private <T extends WarpObject<?>> void updateWarpObject(T warpObject, String type, String name, String sql, UpdateFiller<T> filler) {
         PreparedStatement ps = null;
         ResultSet set = null;
         try {
@@ -755,7 +755,7 @@ public class SQLiteConnection implements WarpProtectionConnection {
         return true;
     }
 
-    private static final class IdIdentification<T extends WarpObject> implements IdentificationInterface<T> {
+    private static final class IdIdentification<T extends WarpObject<?>> implements IdentificationInterface<T> {
 
         private final int id;
 
@@ -779,7 +779,7 @@ public class SQLiteConnection implements WarpProtectionConnection {
 
     }
 
-    public static Integer getWarpObjectIndex(WarpObject o) {
+    public static Integer getWarpObjectIndex(WarpObject<?> o) {
         if (o instanceof Warp) {
             return ((Warp) o).index;
         } else if (o instanceof WarpProtectionArea) {

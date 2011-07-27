@@ -5,6 +5,7 @@ import me.taylorkelly.mywarp.MyWarp;
 import org.bukkit.Server;
 import org.bukkit.command.CommandSender;
 
+import de.xzise.xwarp.Warp;
 import de.xzise.xwarp.WarpManager;
 import de.xzise.xwarp.warpable.Warpable;
 import de.xzise.xwarp.warpable.WarperFactory;
@@ -20,30 +21,30 @@ public class WarpForceToCommand extends WarpCommand {
     }
 
     @Override
-    protected boolean executeEdit(CommandSender sender, String warpName, String creator, String[] parameters) {
+    public boolean executeEdit(Warp warp, CommandSender sender, String[] parameters) {
         Warpable warpable = WarperFactory.getWarpable(sender);
         if (warpable != null) {
-            this.list.warpTo(warpName, creator, sender, warpable, false, true);
+            this.manager.warpTo(warp, sender, warpable, false, true);
         }
         return true;
     }
     @Override
-    protected String[] getFullHelpText() {
+    public String[] getFullHelpText() {
         return new String[] { "Warps the player to the given warp.", "This command is only ingame available." };
     }
 
     @Override
-    protected String getSmallHelpText() {
+    public String getSmallHelpText() {
         return "Warps the player";
     }
 
     @Override
-    protected String getCommand() {
-        return "warp force-to <name> [creator]";
+    public String getCommand() {
+        return "warp force-to <name> [owner]";
     }
 
     @Override
-    protected boolean listHelp(CommandSender sender) {
+    public boolean listHelp(CommandSender sender) {
         return MyWarp.permissions.permissionOr(sender, PermissionTypes.WARP_TO_PERMISSIONS);
     }
 }

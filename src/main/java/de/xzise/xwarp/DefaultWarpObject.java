@@ -5,6 +5,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import me.taylorkelly.mywarp.MyWarp;
+
+import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
+
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 
@@ -12,8 +17,10 @@ import de.xzise.MinecraftUtil;
 import de.xzise.xwarp.editors.Editor;
 import de.xzise.xwarp.editors.EditorPermissions;
 import de.xzise.xwarp.editors.EditorPermissions.Type;
+import de.xzise.xwarp.warpable.WarperFactory;
+import de.xzise.xwarp.wrappers.permission.PermissionTypes;
 
-public abstract class DefaultWarpObject<T extends Enum<T> & Editor> implements WarpObject {
+public abstract class DefaultWarpObject<T extends Enum<T> & Editor> implements WarpObject<T> {
 
     private String name;
     private String owner;
@@ -120,5 +127,45 @@ public abstract class DefaultWarpObject<T extends Enum<T> & Editor> implements W
             }
         }
         return allEntries;
+    }
+
+    public boolean isOwn(String name) {
+        return this.getOwner().equals(name);
+    }
+
+    public static boolean canModify(CommandSender sender, boolean defaultModification, PermissionTypes defaultPermission, PermissionTypes adminPermission) {
+        if (defaultPermission != null) {
+            return ((defaultModification && MyWarp.permissions.permission(sender, defaultPermission)) || MyWarp.permissions.permission(sender, adminPermission));
+        } else {
+            return (defaultModification || MyWarp.permissions.permission(sender, adminPermission));
+        }
+    }
+
+    public boolean playerCanModify(Player player, T permission) {
+        if (this.isOwn(player.getName()))
+            return true;
+        EditorPermissions<T> ep = this.getEditorPermissions(player.getName().toLowerCase(), Type.PLAYER);
+        if (ep != null && ep.get(permission)) {
+            return true;
+        }
+        String[] groups = MyWarp.permissions.getGroup(player.getWorld().getName(), player.getName());
+        for (String group : groups) {
+            EditorPermissions<T> groupPerm = this.getEditorPermissions(group, Type.GROUP);
+            if (groupPerm != null && groupPerm.get(permission)) {
+                return true;
+            }    
+        }
+        return false;
+    }
+
+    @Override
+    public boolean canModify(CommandSender sender, T permission) {
+        Player player = WarperFactory.getPlayer(sender);
+        boolean canModify = false;
+        if (player != null) {
+            canModify = this.playerCanModify(player, permission);
+        }
+
+        return canModify(sender, canModify, permission.getDefault(), permission.getAdmin());
     }
 }
