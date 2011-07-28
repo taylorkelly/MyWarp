@@ -1,7 +1,5 @@
 package de.xzise.xwarp.editors;
 
-import java.util.Set;
-
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 
@@ -44,20 +42,8 @@ public enum WarpProtectionAreaPermissions implements Editor {
         DEFAULT = ImmutableSet.of(UPDATE, RENAME, UNINVITE, INVITE, OVERWRITE);
     }
 
-    public static WarpProtectionAreaPermissions getById(int id) {
-        return ID_MAP.get(id);
-    }
-
-    public static WarpProtectionAreaPermissions getByChar(char ch) {
-        return CHARACTER_MAP.get(ch);
-    }
-
-    public static Set<WarpProtectionAreaPermissions> parseString(String permissions) {
+    public static ImmutableSet<WarpProtectionAreaPermissions> parseString(String permissions) {
         return EditorPermissionUtil.parseString(permissions, WarpProtectionAreaPermissions.class, DEFAULT, CHARACTER_MAP);
-    }
-
-    public static void parseString(String permissions, Set<WarpProtectionAreaPermissions> result) {
-        EditorPermissionUtil.parseString(permissions, result, WarpProtectionAreaPermissions.values(), DEFAULT, CHARACTER_MAP);
     }
 
     @Override

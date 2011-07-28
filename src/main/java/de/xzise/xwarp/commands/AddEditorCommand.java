@@ -13,6 +13,10 @@ public class AddEditorCommand<W extends WarpObject<?>, M extends Manager<W>> ext
         super(list, server, label, new String[] { "editor", "permissions" }, "add-editor");
     }
 
+    public static <W extends WarpObject<?>, M extends Manager<W>> AddEditorCommand<W, M> create(M manager, Server server, String label) {
+        return new AddEditorCommand<W, M>(manager, server, label);
+    }
+    
     @Override
     protected boolean executeEditorEdit(W warpObject, CommandSender sender, String editor, EditorPermissions.Type type, String[] parameters) {
         if (parameters.length == 1) {

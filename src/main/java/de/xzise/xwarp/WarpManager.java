@@ -23,13 +23,9 @@ import de.xzise.wrappers.economy.EconomyHandler;
 import de.xzise.xwarp.Warp.Visibility;
 import de.xzise.xwarp.dataconnections.DataConnection;
 import de.xzise.xwarp.dataconnections.IdentificationInterface;
-import de.xzise.xwarp.dataconnections.WarpProtectionConnection;
-import de.xzise.xwarp.editors.Editor;
 import de.xzise.xwarp.editors.EditorPermissions;
 import de.xzise.xwarp.editors.EditorPermissions.Type;
 import de.xzise.xwarp.editors.WarpPermissions;
-import de.xzise.xwarp.editors.WarpProtectionAreaPermissions;
-import de.xzise.xwarp.list.NonGlobalList;
 import de.xzise.xwarp.list.WarpList;
 import de.xzise.xwarp.timer.CoolDown;
 import de.xzise.xwarp.timer.WarmUp;
@@ -47,63 +43,36 @@ import de.xzise.xwarp.wrappers.permission.PermissionValues;
 public class WarpManager implements Manager<Warp> {
 
     private WarpList<Warp> list;
-    private NonGlobalList<WarpProtectionArea> protectionAreas;
     private Server server;
     private DataConnection data;
     private CoolDown coolDown;
     private WarmUp warmUp;
     private EconomyHandler economy;
     private PluginProperties properties;
+    private Manager<WarpProtectionArea> wpaManager;
 
     public WarpManager(Plugin plugin, EconomyHandler economy, PluginProperties properties, DataConnection data) {
         this.list = new WarpList<Warp>();
-        this.protectionAreas = new NonGlobalList<WarpProtectionArea>();
         this.server = plugin.getServer();
         this.properties = properties;
         this.data = data;
         this.coolDown = new CoolDown(plugin, properties);
         this.warmUp = new WarmUp(plugin, properties, this.coolDown);
         this.economy = economy;
-        this.loadFromDatabase();
+        this.reload();
     }
     
     public WarmUp getWarmUp() {
         return this.warmUp;
     }
 
-    private void loadFromDatabase() {
-        this.list.loadList(this.data.getWarps());
-        if (this.data instanceof WarpProtectionConnection) {
-            List<WarpProtectionArea> areas = ((WarpProtectionConnection) this.data).getProtectionAreas();
-            for (WarpProtectionArea area : areas) {
-                this.protectionAreas.addWarpObject(area);
-            }
-        } else {
-            MyWarp.logger.info("No warp protection area feature available.");
-        }
+    public void setWPAManager(Manager<WarpProtectionArea> manager) {
+        this.wpaManager = manager;
     }
     
-    private WarpProtectionConnection getWPAConnection() {
-        if (this.data instanceof WarpProtectionConnection) {
-            return (WarpProtectionConnection) this.data;
-        } else {
-            return null;
-        }
-    }
-    
-    /* (non-Javadoc)
-     * @see de.xzise.xwarp.Manager#reload(org.bukkit.command.CommandSender)
-     */
     @Override
-    public void reload(CommandSender sender) {
-        if (MyWarp.permissions.permission(sender, PermissionTypes.ADMIN_RELOAD)) {
-            this.properties.read();
-            this.loadFromDatabase();
-            this.economy.reloadConfig(this.properties.getEconomyPlugin(), this.properties.getEconomyBaseAccount());
-            sender.sendMessage("Reload successfully!");
-        } else {
-            sender.sendMessage(ChatColor.RED + "You have no permission to reload.");
-        }
+    public void reload() {
+        this.list.loadList(this.data.getWarps());
     }
     
     /**
@@ -178,8 +147,8 @@ public class WarpManager implements Manager<Warp> {
                     } else {
                         List<String> inProtectionArea = new ArrayList<String>();
                         boolean skipProtectionTest = MyWarp.permissions.permission(sender, PermissionTypes.ADMIN_IGNORE_PROTECTION_AREA);
-                        if (!skipProtectionTest) {
-                            for (WarpProtectionArea area : this.protectionAreas.getWarpObjects()) {
+                        if (!skipProtectionTest && this.wpaManager != null) {
+                            for (WarpProtectionArea area : this.wpaManager.getWarpObjects()) {
                                 if (area.isWithIn(player) && creator != null && area.isAllowed(creator)) {
                                     inProtectionArea.add(area.getName());
                                 }
@@ -254,7 +223,7 @@ public class WarpManager implements Manager<Warp> {
     public void deleteWarp(String name, String owner, CommandSender sender) {
         Warp warp = this.getWarpObject(name, owner, MinecraftUtil.getPlayerName(sender));
         if (warp != null) {
-            if (playerCanModifyWarp(sender, warp, WarpPermissions.DELETE)) {
+            if (warp.canModify(sender, WarpPermissions.DELETE)) {
                 this.list.deleteWarpObject(warp);
                 this.data.deleteWarp(warp);
                 sender.sendMessage("You have deleted '" + ChatColor.GREEN + warp.getName() + ChatColor.WHITE + "'.");
@@ -265,39 +234,15 @@ public class WarpManager implements Manager<Warp> {
             WarpManager.sendMissingWarp(name, owner, sender);
         }
     }
-    
-    private boolean isWPAEnabled(CommandSender sender) {
-        if (this.data instanceof WarpProtectionConnection) {
-            return true;
-        } else {
-            sender.sendMessage(ChatColor.RED + "Warp protection areas are not enabled on this server.");
-            return false;
-        }
-    }
-    
-    /* (non-Javadoc)
-     * @see de.xzise.xwarp.Manager#deleteWarp(de.xzise.xwarp.Warp, org.bukkit.command.CommandSender)
-     */
+
     @Override
     public void delete(Warp warp, CommandSender sender) {
-        if (playerCanModifyWarp(sender, warp, WarpPermissions.DELETE)) {
+        if (warp.canModify(sender, WarpPermissions.DELETE)) {
             this.list.deleteWarpObject(warp);
             this.data.deleteWarp(warp);
             sender.sendMessage("You have deleted '" + ChatColor.GREEN + warp.getName() + ChatColor.WHITE + "'.");
         } else {
             sender.sendMessage(ChatColor.RED + "You do not have permission to delete '" + warp.getName() + "'");
-        }
-    }
-    
-    public void deleteWPA(WarpProtectionArea wpa, CommandSender sender) {
-        if (isWPAEnabled(sender)) {
-            if (playerCanModifyWarp(sender, wpa, WarpProtectionAreaPermissions.DELETE)) {
-                this.protectionAreas.deleteWarpObject(wpa);
-                this.getWPAConnection().deleteProtectionArea(wpa);
-                sender.sendMessage("You have deleted '" + ChatColor.GREEN + wpa.getName() + ChatColor.WHITE + "'.");
-            } else {
-                sender.sendMessage(ChatColor.RED + "You do not have permission to delete '" + wpa.getName() + "'");
-            }
         }
     }
 
@@ -322,7 +267,7 @@ public class WarpManager implements Manager<Warp> {
 
     @Override
     public void setOwner(Warp warp, CommandSender sender, String owner) {
-        if (playerCanModifyWarp(sender, warp, WarpPermissions.GIVE)) {
+        if (warp.canModify(sender, WarpPermissions.GIVE)) {
             if (warp.isOwn(owner)) {
                 sender.sendMessage(ChatColor.RED + owner + " is already the owner.");
             } else {
@@ -348,7 +293,7 @@ public class WarpManager implements Manager<Warp> {
     }
 
     public void setMessage(Warp warp, CommandSender sender, String message) {
-        if (playerCanModifyWarp(sender, warp, WarpPermissions.MESSAGE)) {
+        if (warp.canModify(sender, WarpPermissions.MESSAGE)) {
             warp.setWelcomeMessage(message);
             this.data.updateMessage(warp);
             sender.sendMessage("You have successfully changed the welcome message.");
@@ -358,7 +303,7 @@ public class WarpManager implements Manager<Warp> {
     }
 
     public void privatize(Warp warp, CommandSender sender) {
-        if (WarpManager.playerCanModifyWarp(sender, warp, WarpPermissions.PRIVATE)) {
+        if (warp.canModify(sender, WarpPermissions.PRIVATE)) {
             warp.setVisibility(Visibility.PRIVATE);
             this.list.updateVisibility(warp);
             this.data.updateVisibility(warp);
@@ -369,7 +314,7 @@ public class WarpManager implements Manager<Warp> {
     }
 
     public void publicize(Warp warp, CommandSender sender) {
-        if (WarpManager.playerCanModifyWarp(sender, warp, WarpPermissions.PUBLIC)) {
+        if (warp.canModify(sender, WarpPermissions.PUBLIC)) {
             warp.setVisibility(Visibility.PUBLIC);
             this.list.updateVisibility(warp);
             this.data.updateVisibility(warp);
@@ -386,7 +331,7 @@ public class WarpManager implements Manager<Warp> {
         } else {
             p = WarpPermissions.PRICE;
         }
-        if (WarpManager.playerCanModifyWarp(sender, warp, p)) {
+        if (warp.canModify(sender, p)) {
             warp.setPrice(price);
             this.data.updatePrice(warp);
             if (price < 0) {
@@ -400,7 +345,7 @@ public class WarpManager implements Manager<Warp> {
     }
 
     public void globalize(Warp warp, CommandSender sender) {
-        if (playerCanModifyWarp(sender, warp, WarpPermissions.GLOBAL)) {
+        if (warp.canModify(sender, WarpPermissions.GLOBAL)) {
             Warp existing = this.list.getWarpObject(warp.getName());
             if (existing == null || existing.getVisibility() != Visibility.GLOBAL) {
                 warp.setVisibility(Visibility.GLOBAL);
@@ -419,7 +364,7 @@ public class WarpManager implements Manager<Warp> {
 
     @Override
     public void invite(Warp warp, CommandSender sender, String inviteeName) {
-        if (playerCanModifyWarp(sender, warp, WarpPermissions.INVITE)) {
+        if (warp.canModify(sender, WarpPermissions.INVITE)) {
             if (warp.isInvited(inviteeName, true)) {
                 sender.sendMessage(ChatColor.RED + inviteeName + " is already invited to this warp.");
             } else if (warp.isOwn(inviteeName)) {
@@ -444,7 +389,7 @@ public class WarpManager implements Manager<Warp> {
 
     @Override
     public void uninvite(Warp warp, CommandSender sender, String inviteeName) {
-        if (WarpManager.playerCanModifyWarp(sender, warp, WarpPermissions.UNINVITE)) {
+        if (warp.canModify(sender, WarpPermissions.UNINVITE)) {
             if (!warp.isInvited(inviteeName, true)) {
                 sender.sendMessage(ChatColor.RED + inviteeName + " is not invited to this warp.");
             } else if (warp.isOwn(inviteeName)) {
@@ -470,7 +415,7 @@ public class WarpManager implements Manager<Warp> {
 
     @Override
     public void setName(Warp warp, CommandSender sender, String newName) {
-        if (playerCanModifyWarp(sender, warp, WarpPermissions.RENAME)) {
+        if (warp.canModify(sender, WarpPermissions.RENAME)) {
             String owner = warp.getOwner();
             if (warp.getVisibility() == Visibility.GLOBAL && (this.getWarpObject(newName, null, null) != null)) {
                 sender.sendMessage(ChatColor.RED + "A global warp with this name already exists!");
@@ -491,7 +436,7 @@ public class WarpManager implements Manager<Warp> {
 
     @Override
     public void addEditor(Warp warp, CommandSender sender, String editor, EditorPermissions.Type type, String permissions) {
-        if (WarpManager.playerCanModifyWarp(sender, warp, WarpPermissions.ADD_EDITOR)) {
+        if (warp.canModify(sender, WarpPermissions.ADD_EDITOR)) {
             warp.addEditor(editor, permissions, type);
             this.data.updateEditor(warp, editor, type);
             sender.sendMessage("You have added " + ChatColor.GREEN + editor + ChatColor.WHITE + " to '" + warp.getName() + ChatColor.WHITE + "'.");
@@ -502,7 +447,7 @@ public class WarpManager implements Manager<Warp> {
 
     @Override
     public void removeEditor(Warp warp, CommandSender sender, String editor, EditorPermissions.Type type) {
-        if (WarpManager.playerCanModifyWarp(sender, warp, WarpPermissions.REMOVE_EDITOR)) {
+        if (warp.canModify(sender, WarpPermissions.REMOVE_EDITOR)) {
             warp.removeEditor(editor, type);
             this.data.updateEditor(warp, editor, type);
             sender.sendMessage("You have removed " + ChatColor.GREEN + editor + ChatColor.WHITE + " from '" + warp.getName() + ChatColor.WHITE + "'.");
@@ -514,10 +459,6 @@ public class WarpManager implements Manager<Warp> {
     @Override
     public Warp getWarpObject(String name, String owner, String playerName) {
         return this.list.getWarpObject(name, owner, playerName);
-    }
-    
-    public WarpProtectionArea getWarpProtectionArea(String name, String owner, String playerName) {
-        return this.protectionAreas.getWarpObject(name, owner, playerName);
     }
 
     public List<Warp> getWarps() {
@@ -561,7 +502,7 @@ public class WarpManager implements Manager<Warp> {
     }
 
     public void updateLocation(Warp warp, Positionable player) {
-        if (WarpManager.playerCanModifyWarp(player, warp, WarpPermissions.UPDATE)) {
+        if (warp.canModify(player, WarpPermissions.UPDATE)) {
             warp.setLocation(player);
             this.data.updateLocation(warp);
             player.sendMessage("You have updated '" + ChatColor.GREEN + warp.getName() + ChatColor.WHITE + "'.");
@@ -740,17 +681,18 @@ public class WarpManager implements Manager<Warp> {
         sender.sendMessage(ChatColor.GREEN + "/warp invite \"" + warp.getName() + "\" " + warp.getOwner() + " <player>");
     }
 
-    private static <T extends Editor> boolean playerCanModifyWarp(CommandSender sender, WarpObject<T> warp, T permission) {
-        return warp.canModify(sender, permission);
-    }
-
     public void setListed(Warp warp, CommandSender sender, Boolean listed) {
-        if (WarpManager.playerCanModifyWarp(sender, warp, WarpPermissions.LIST)) {
+        if (warp.canModify(sender, WarpPermissions.LIST)) {
             warp.setListed(listed);
             this.data.updateVisibility(warp);
             sender.sendMessage("You have " + (listed ? "listed" : "unlisted") + " '" + ChatColor.GREEN + warp.getName() + ChatColor.WHITE + "'.");
         } else {
             sender.sendMessage(ChatColor.RED + "You do not have permission to change the listed status from '" + warp.getName() + "'");
         }
+    }
+
+    @Override
+    public Warp[] getWarpObjects() {
+        return this.list.getWarpObjects().toArray(new Warp[0]);
     }
 }

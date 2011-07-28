@@ -12,6 +12,10 @@ public class GiveCommand<W extends WarpObject<?>, M extends Manager<W>> extends 
         super(manager, server, label, "player", "give", "chown");
     }
 
+    public static <W extends WarpObject<?>, M extends Manager<W>> GiveCommand<W, M> create(M manager, Server server, String label) {
+        return new GiveCommand<W, M>(manager, server, label);
+    }
+    
     @Override
     protected boolean executeEdit(W warpObject, CommandSender sender, String[] parameters) {
         this.manager.setOwner(warpObject, sender, this.getPlayer(parameters[0]));

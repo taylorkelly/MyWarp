@@ -12,6 +12,10 @@ public class InviteCommand<W extends WarpObject<?>, M extends Manager<W>> extend
     public InviteCommand(M list, Server server, String label) {
         super(list, server, label, "invited", "invite");
     }
+    
+    public static <W extends WarpObject<?>, M extends Manager<W>> InviteCommand<W, M> create(M manager, Server server, String label) {
+        return new InviteCommand<W, M>(manager, server, label);
+    }
 
     @Override
     protected boolean executeEdit(W warpObject, CommandSender sender, String[] parameters) {

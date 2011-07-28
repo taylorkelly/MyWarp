@@ -13,6 +13,9 @@ public class RemoveEditorCommand<W extends WarpObject<?>, M extends Manager<W>> 
         super(list, server, label, "editor", "remove-editor");
     }
 
+    public static <W extends WarpObject<?>, M extends Manager<W>> RemoveEditorCommand<W, M> create(M manager, Server server, String label) {
+        return new RemoveEditorCommand<W, M>(manager, server, label);
+    }
     
     @Override
     protected boolean executeEditorEdit(W warpObject, CommandSender sender, String editor, EditorPermissions.Type type, String[] parameters) {

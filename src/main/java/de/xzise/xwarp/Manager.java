@@ -6,7 +6,7 @@ import de.xzise.xwarp.editors.EditorPermissions;
 
 public interface Manager<T extends WarpObject<?>> {
 
-    void reload(CommandSender sender);
+    void reload();
 
     void delete(T warpObject, CommandSender sender);
     void setCreator(T warpObject, CommandSender sender, String creator);
@@ -23,7 +23,8 @@ public interface Manager<T extends WarpObject<?>> {
     boolean isNameAvailable(String name, String owner);
 
     T getWarpObject(String name, String owner, String playerName);
-
+    T[] getWarpObjects();
+    
     void missing(String name, String owner, CommandSender sender);
 
 }

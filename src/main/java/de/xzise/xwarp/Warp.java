@@ -250,10 +250,6 @@ public class Warp extends DefaultWarpObject<WarpPermissions> {
         this.setLocation(positionable.getLocation());
     }
 
-    public boolean isCreator(String name) {
-        return this.getCreator().equals(name);
-    }
-
     public void invite(String player) {
         this.getEditorPermissions(player, Type.PLAYER).put(WarpPermissions.WARP, true);
     }
@@ -327,7 +323,7 @@ public class Warp extends DefaultWarpObject<WarpPermissions> {
     }
 
     public void addEditor(String name, String permissions, EditorPermissions.Type type) {
-        this.getEditorPermissions(name, true, type).parseString(WarpPermissions.parseString(permissions), true);
+        this.addEditor(name, type, WarpPermissions.parseString(permissions));
     }
 
     public static final Comparator<Warp> WARP_NAME_COMPARATOR = new StringComparator<Warp>() {

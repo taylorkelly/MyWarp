@@ -4,8 +4,6 @@
   - case sensitive check
   - pay creation price for change visibility
   - Bukkit permissions support
-  
-  - status command support wpa size
 
 3.1.0
   - auto completion
@@ -19,4 +17,4 @@ Undetermined
   - separated permission for warp.create.private.set/warp.create.private.change
   - Move warps for world
   - Export hmod compatible warps
-  - status command show invalid warp/wpa size count
+  - status command show invalid warp/wpa count

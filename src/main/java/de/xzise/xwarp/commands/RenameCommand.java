@@ -12,6 +12,10 @@ public class RenameCommand<W extends WarpObject<?>, M extends Manager<W>> extend
         super(list, server, label, "new name", "rename", "mv");
     }
 
+    public static <W extends WarpObject<?>, M extends Manager<W>> RenameCommand<W, M> create(M manager, Server server, String label) {
+        return new RenameCommand<W, M>(manager, server, label);
+    }
+    
     @Override
     protected boolean executeEdit(W warpObject, CommandSender sender, String[] parameters) {
         this.manager.setName(warpObject, sender, parameters[0]);

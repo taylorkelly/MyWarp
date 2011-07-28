@@ -30,46 +30,47 @@ public class WarpCommandMap extends CommonCommandMap {
 
     private static final String LABEL = "warp";
     
-    public WarpCommandMap(WarpManager list, EconomyHandler economyWrapper, Server server, DataConnection data, File pluginPath, PluginProperties properties) {
+    public WarpCommandMap(WarpManager manager, EconomyHandler economyWrapper, Server server, DataConnection data, File pluginPath, PluginProperties properties) {
         super();
 
         CommonHelpCommand helper = new CommonHelpCommand("xWarp");
-        WarpToCommand warper = new WarpToCommand(list, server);
+        WarpToCommand warper = new WarpToCommand(manager, server);
 
         Collection<SubCommand> subCommands = new ArrayList<SubCommand>();
 
         subCommands.add(warper);
-        subCommands.add(CreateCommand.newCreatePrivate(list, server));
-        subCommands.add(CreateCommand.newCreatePublic(list, server));
-        subCommands.add(CreateCommand.newCreateGlobal(list, server));
-        subCommands.add(new DeleteCommand<Warp, WarpManager>(list, server, LABEL));
-        subCommands.add(new UpdateCommand(list, server));
-        subCommands.add(new RenameCommand<Warp, WarpManager>(list, server, LABEL));
+        subCommands.add(CreateCommand.newCreatePrivate(manager, server));
+        subCommands.add(CreateCommand.newCreatePublic(manager, server));
+        subCommands.add(CreateCommand.newCreateGlobal(manager, server));
+        subCommands.add(new DeleteCommand<Warp, WarpManager>(manager, server, LABEL));
+        subCommands.add(new UpdateCommand(manager, server));
+        subCommands.add(new RenameCommand<Warp, WarpManager>(manager, server, LABEL));
         subCommands.add(helper);
-        subCommands.add(new UninviteCommand<Warp, WarpManager>(list, server, LABEL));
-        subCommands.add(new InviteCommand<Warp, WarpManager>(list, server, LABEL));
-        subCommands.add(new GiveCommand<Warp, WarpManager>(list, server, LABEL));
-        subCommands.add(new MessageCommand(list, server));
-        subCommands.add(new AddEditorCommand<Warp, WarpManager>(list, server, LABEL));
-        subCommands.add(new RemoveEditorCommand<Warp, WarpManager>(list, server, LABEL));
-        subCommands.add(new PrivatizeCommand(list, server));
-        subCommands.add(new PublicizeCommand(list, server));
-        subCommands.add(new GlobalizeCommand(list, server));
-        subCommands.add(new PriceCommand(list, server));
-        subCommands.add(new SearchCommand(list, server));
-        subCommands.add(new ListCommand(list, server));
-        subCommands.add(new ChangeCreatorCommand<Warp, WarpManager>(list, server, LABEL));
-        subCommands.add(new InfoCommand(list, server, economyWrapper));
-        subCommands.add(new ListedCommand(list, server));
-        subCommands.add(new ReloadCommand(list));
-        subCommands.add(new StatusCommand(list, economyWrapper, MyWarp.permissions));
-        subCommands.add(new PermissionsCommand(list, server));
-        subCommands.add(new ExportCommand(list, server, pluginPath));
-        subCommands.add(new ImportCommand(list, pluginPath, data, server));
-        subCommands.add(new WarpForceToCommand(list, server));
+        subCommands.add(new UninviteCommand<Warp, WarpManager>(manager, server, LABEL));
+        subCommands.add(new InviteCommand<Warp, WarpManager>(manager, server, LABEL));
+        subCommands.add(new GiveCommand<Warp, WarpManager>(manager, server, LABEL));
+        subCommands.add(new MessageCommand(manager, server));
+        subCommands.add(new AddEditorCommand<Warp, WarpManager>(manager, server, LABEL));
+        subCommands.add(new RemoveEditorCommand<Warp, WarpManager>(manager, server, LABEL));
+        subCommands.add(new PrivatizeCommand(manager, server));
+        subCommands.add(new PublicizeCommand(manager, server));
+        subCommands.add(new GlobalizeCommand(manager, server));
+        subCommands.add(new PriceCommand(manager, server));
+        subCommands.add(new SearchCommand(manager, server));
+        subCommands.add(new ListCommand(manager, server));
+        subCommands.add(new ChangeCreatorCommand<Warp, WarpManager>(manager, server, LABEL));
+        subCommands.add(new InfoCommand(manager, server, economyWrapper));
+        subCommands.add(new ListedCommand(manager, server));
+        subCommands.add(new ReloadCommand(economyWrapper, properties, manager));
+        subCommands.add(new StatusCommand(manager, economyWrapper, MyWarp.permissions));
+        subCommands.add(new PermissionsCommand(manager, server));
+        subCommands.add(new ExportCommand(manager, server, pluginPath));
+        subCommands.add(new ImportCommand(manager, pluginPath, data, server));
+        subCommands.add(new WarpForceToCommand(manager, server));
         
         this.populate(subCommands);
         
+        this.setDefault(warper);
         this.setHelper(helper);
     }
 }

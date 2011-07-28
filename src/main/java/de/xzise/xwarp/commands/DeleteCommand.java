@@ -12,6 +12,10 @@ public class DeleteCommand<W extends WarpObject<?>, M extends Manager<W>> extend
         super(manager, server, label, "", "delete", "-");
     }
 
+    public static <W extends WarpObject<?>, M extends Manager<W>> DeleteCommand<W, M> create(M manager, Server server, String label) {
+        return new DeleteCommand<W, M>(manager, server, label);
+    }
+    
     @Override
     protected boolean executeEdit(W warpObject, CommandSender sender, String[] parameters) {
         this.manager.delete(warpObject, sender);

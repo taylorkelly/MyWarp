@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Set;
 
 import com.google.common.collect.ImmutableMap.Builder;
+import com.google.common.collect.ImmutableSet;
 
 import de.xzise.Callback;
 
@@ -45,10 +46,10 @@ public class EditorPermissionUtil {
         return builder.build();
     }
     
-    public static <T extends Enum<T> & Editor> Set<T> parseString(String permissions, Class<T> clazz, Set<T> def, Map<Character, T> charMap) {
+    public static <T extends Enum<T> & Editor> ImmutableSet<T> parseString(String permissions, Class<T> clazz, Set<T> def, Map<Character, T> charMap) {
         Set<T> result = EnumSet.noneOf(clazz);
         parseString(permissions, result, clazz.getEnumConstants(), def, charMap);
-        return result;
+        return ImmutableSet.copyOf(result);
     }
     
     public static <T extends Editor> void parseString(String permissions, Set<T> result, T[] all, Set<T> def, Map<Character, T> charMap) {

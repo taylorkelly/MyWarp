@@ -11,6 +11,10 @@ public class ChangeCreatorCommand<W extends WarpObject<?>, M extends Manager<W>>
     public ChangeCreatorCommand(M manager, Server server, String label) {
         super(manager, server, label, "player", "change-creator", "chcre");
     }
+    
+    public static <W extends WarpObject<?>, M extends Manager<W>> ChangeCreatorCommand<W, M> create(M manager, Server server, String label) {
+        return new ChangeCreatorCommand<W, M>(manager, server, label);
+    }
 
     @Override
     public boolean executeEdit(W warp, CommandSender sender, String[] parameters) {

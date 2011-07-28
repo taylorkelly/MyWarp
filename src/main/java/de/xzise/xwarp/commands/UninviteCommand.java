@@ -11,6 +11,10 @@ public class UninviteCommand<W extends WarpObject<?>, M extends Manager<W>> exte
     public UninviteCommand(M list, Server server, String label) {
         super(list, server, label, "player", "uninvite");
     }
+    
+    public static <W extends WarpObject<?>, M extends Manager<W>> UninviteCommand<W, M> create(M manager, Server server, String label) {
+        return new UninviteCommand<W, M>(manager, server, label);
+    }
 
     @Override
     protected boolean executeEdit(W warpObject, CommandSender sender, String[] parameters) {

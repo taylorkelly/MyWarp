@@ -11,6 +11,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 
 import de.xzise.MinecraftUtil;
@@ -63,11 +64,17 @@ public abstract class DefaultWarpObject<T extends Enum<T> & Editor> implements W
         return this.creator;
     }
 
+    @Override
     public void removeEditor(String name, EditorPermissions.Type type) {
         Map<String, EditorPermissions<T>> typePermissions = this.editors.get(type);
         if (typePermissions != null) {
             typePermissions.remove(name.toLowerCase());
         }
+    }
+    
+    @Override
+    public void addEditor(String name, EditorPermissions.Type type, ImmutableSet<T> permissions) {
+        this.getEditorPermissions(name, true, type).putSet(permissions, true);
     }
 
     public ImmutableMap<String, EditorPermissions<T>> getEditorPermissions(EditorPermissions.Type type) {
@@ -131,6 +138,10 @@ public abstract class DefaultWarpObject<T extends Enum<T> & Editor> implements W
 
     public boolean isOwn(String name) {
         return this.getOwner().equals(name);
+    }
+    
+    public boolean isCreator(String name) {
+        return this.getCreator().equals(name);
     }
 
     public static boolean canModify(CommandSender sender, boolean defaultModification, PermissionTypes defaultPermission, PermissionTypes adminPermission) {

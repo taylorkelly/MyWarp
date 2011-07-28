@@ -132,7 +132,7 @@ public class EditorPermissions<T extends Enum<T> & Editor> {
         this.permissions.putAll(p.permissions);
     }
 
-    public void parseString(Set<T> permissions, boolean reset) {
+    public void putSet(Set<T> permissions, boolean reset) {
         if (reset) {
             this.permissions.clear();
         }

@@ -1,26 +1,46 @@
 package de.xzise.xwarp.commands;
 
+import java.util.Collection;
+
 import me.taylorkelly.mywarp.MyWarp;
 
+import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 
+import com.google.common.collect.ImmutableList;
+
 import de.xzise.commands.CommonHelpableSubCommand;
+import de.xzise.wrappers.economy.EconomyHandler;
 import de.xzise.xwarp.Manager;
+import de.xzise.xwarp.PluginProperties;
 import de.xzise.xwarp.wrappers.permission.PermissionTypes;
 
 public class ReloadCommand extends CommonHelpableSubCommand {
 
-    private Manager<?> manager;
+    private final Collection<Manager<?>> managers;
+    private final PluginProperties properties;
+    private final EconomyHandler economy;
 
-    public ReloadCommand(Manager<?> manager) {
+    public ReloadCommand(EconomyHandler economy, PluginProperties properties, Manager<?>... manager) {
         super("reload");
-        this.manager = manager;
+        this.managers = ImmutableList.copyOf(manager);
+        this.properties = properties;
+        this.economy = economy;
     }
 
     @Override
     public boolean execute(CommandSender sender, String[] parameters) {
         if (parameters.length == 1) {
-            this.manager.reload(sender);
+            if (MyWarp.permissions.permission(sender, PermissionTypes.ADMIN_RELOAD)) {
+                this.properties.read();
+                this.economy.reloadConfig(this.properties.getEconomyPlugin(), this.properties.getEconomyBaseAccount());
+                for (Manager<?> manager : this.managers) {
+                    manager.reload();
+                }
+                sender.sendMessage("Reload successfully!");
+            } else {
+                sender.sendMessage(ChatColor.RED + "You have no permission to reload.");
+            }
             return true;
         } else {
             return false;
