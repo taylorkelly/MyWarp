@@ -33,8 +33,8 @@ import de.xzise.xwarp.Warp;
 import de.xzise.xwarp.WarpObject;
 import de.xzise.xwarp.WarpProtectionArea;
 import de.xzise.xwarp.WorldWrapper;
+import de.xzise.xwarp.XWarp;
 
-import me.taylorkelly.mywarp.MyWarp;
 
 public class SQLiteConnection implements WarpProtectionConnection {
 
@@ -62,10 +62,10 @@ public class SQLiteConnection implements WarpProtectionConnection {
             this.connection = DriverManager.getConnection("jdbc:sqlite:" + file.getAbsolutePath());
             this.connection.setAutoCommit(false);
         } catch (ClassNotFoundException e) {
-            MyWarp.logger.severe("Class not found", e);
+            XWarp.logger.severe("Class not found", e);
             return false;
         } catch (SQLException e) {
-            MyWarp.logger.severe("Generic SQLException", e);
+            XWarp.logger.severe("Generic SQLException", e);
             return false;
         }
         return true;
@@ -73,7 +73,7 @@ public class SQLiteConnection implements WarpProtectionConnection {
 
     public void free() {
         if (this.connection != null) {
-            MyWarp.logger.info("Close connection!");
+            XWarp.logger.info("Close connection!");
             try {
                 this.connection.close();
                 this.connection = null;
@@ -104,7 +104,7 @@ public class SQLiteConnection implements WarpProtectionConnection {
         int version = getVersion();
 
         if (version < TARGET_VERSION) {
-            MyWarp.logger.info("Database layout is outdated (" + version + ")! Updating to " + TARGET_VERSION + ".");
+            XWarp.logger.info("Database layout is outdated (" + version + ")! Updating to " + TARGET_VERSION + ".");
             Statement statement = null;
             PreparedStatement convertedWarp = null;
             PreparedStatement convertedPermissions = null;
@@ -117,10 +117,10 @@ public class SQLiteConnection implements WarpProtectionConnection {
                 // Backup old permissions table (if exists)
                 if (tableExists("permissions")) {
                     statement.execute("ALTER TABLE permissions RENAME TO permissions_backup");
-                    MyWarp.logger.info("Backuping old permissions table.");
+                    XWarp.logger.info("Backuping old permissions table.");
                 }
                 
-                MyWarp.logger.info("Creating permission table.");
+                XWarp.logger.info("Creating permission table.");
                 statement.execute(PERMISSIONS_TABLE);
                 
                 if (tableExists("permissions_backup")) {
@@ -141,16 +141,16 @@ public class SQLiteConnection implements WarpProtectionConnection {
                     }
                     
                     statement.executeUpdate("DROP TABLE permissions_backup");
-                    MyWarp.logger.info("Permissions backup recovered.");
+                    XWarp.logger.info("Permissions backup recovered.");
                 }
                 
                 // Backup old protection areas table (if exists)
                 if (tableExists("protectionAreas")) {
                     statement.execute("ALTER TABLE protectionAreas RENAME TO protectionAreas_backup");
-                    MyWarp.logger.info("Backuping old protection area table.");
+                    XWarp.logger.info("Backuping old protection area table.");
                 }
                 
-                MyWarp.logger.info("Creating protection area table.");
+                XWarp.logger.info("Creating protection area table.");
                 statement.execute(PROTECTION_AREA_TABLE);
                 
                 if (tableExists("protectionAreas_backup")) {
@@ -171,18 +171,18 @@ public class SQLiteConnection implements WarpProtectionConnection {
                     }
                     
                     statement.executeUpdate("DROP TABLE permissions_backup");
-                    MyWarp.logger.info("Permissions backup recovered.");
+                    XWarp.logger.info("Permissions backup recovered.");
                 }
 
                 // Backup old warp table (if exists)
                 if (tableExists("warps")) {
                     // Backup it
                     statement.execute("ALTER TABLE warps RENAME TO warps_backup");
-                    MyWarp.logger.info("Backuping old warp table.");
+                    XWarp.logger.info("Backuping old warp table.");
                 } else if (tableExists("warpTable")) {
                     // Backup it
                     statement.execute("ALTER TABLE warpTable RENAME TO warps_backup");
-                    MyWarp.logger.info("Backuping old warp table.");
+                    XWarp.logger.info("Backuping old warp table.");
                 }
 
                 // Create new database
@@ -204,7 +204,7 @@ public class SQLiteConnection implements WarpProtectionConnection {
                                 convertedWarp.setString(4, world);
                             } else {
                                 if (this.server.getWorld(set.getString("world")) == null) {
-                                    MyWarp.logger.info("Found warp with unknown world. (Name: " + set.getString("name") + ")");
+                                    XWarp.logger.info("Found warp with unknown world. (Name: " + set.getString("name") + ")");
                                 }
                                 convertedWarp.setString(4, set.getString("world"));
                             }
@@ -250,7 +250,7 @@ public class SQLiteConnection implements WarpProtectionConnection {
                     }
 
                     if (version < 2) {
-                        MyWarp.logger.info("Adding permissions table");
+                        XWarp.logger.info("Adding permissions table");
 
                         if (list.size() > 0) {
                             permissionsInsert = this.connection.prepareStatement("INSERT OR IGNORE INTO permissions (id, editor, value, type, table) VALUES (?,?,?,?,?)");
@@ -268,7 +268,7 @@ public class SQLiteConnection implements WarpProtectionConnection {
                     }
 
                     statement.executeUpdate("DROP TABLE warps_backup");
-                    MyWarp.logger.info("Recovering the backup.");
+                    XWarp.logger.info("Recovering the backup.");
                 }
                 if (version < 0) {
                     statement.executeUpdate("INSERT INTO meta (name, value) VALUES (\"version\", " + TARGET_VERSION + ")");
@@ -282,7 +282,7 @@ public class SQLiteConnection implements WarpProtectionConnection {
                 // } catch (SQLException e) {
                 // MyWarp.logger.severe("Unable to rollback changes!");
                 // }
-                MyWarp.logger.log(Level.SEVERE, "Warp Load Exception", ex);
+                XWarp.logger.log(Level.SEVERE, "Warp Load Exception", ex);
             } finally {
                 try {
                     if (permissionsInsert != null)
@@ -298,7 +298,7 @@ public class SQLiteConnection implements WarpProtectionConnection {
                     if (set != null)
                         set.close();
                 } catch (SQLException ex) {
-                    MyWarp.logger.severe("Warp Load Exception (on close)");
+                    XWarp.logger.severe("Warp Load Exception (on close)");
                 }
             }
         }
@@ -313,14 +313,14 @@ public class SQLiteConnection implements WarpProtectionConnection {
                 return false;
             return true;
         } catch (SQLException ex) {
-            MyWarp.logger.log(Level.SEVERE, "Table Check Exception", ex);
+            XWarp.logger.log(Level.SEVERE, "Table Check Exception", ex);
             return false;
         } finally {
             try {
                 if (rs != null)
                     rs.close();
             } catch (SQLException ex) {
-                MyWarp.logger.severe("Table Check SQL Exception (on closing)");
+                XWarp.logger.severe("Table Check SQL Exception (on closing)");
             }
         }
     }
@@ -338,13 +338,13 @@ public class SQLiteConnection implements WarpProtectionConnection {
                     version = set.getInt("value");
                 }
             } else {
-                MyWarp.logger.info("Meta table doesn't exists... Creating new");
+                XWarp.logger.info("Meta table doesn't exists... Creating new");
                 statement.executeUpdate(VERSION_TABLE);
                 this.connection.commit();
                 version = -1;
             }
         } catch (SQLException ex) {
-            MyWarp.logger.log(Level.SEVERE, "Table Check Exception", ex);
+            XWarp.logger.log(Level.SEVERE, "Table Check Exception", ex);
         } finally {
             try {
                 if (statement != null) {
@@ -353,7 +353,7 @@ public class SQLiteConnection implements WarpProtectionConnection {
                 if (set != null)
                     set.close();
             } catch (SQLException ex) {
-                MyWarp.logger.severe("Table Check SQL Exception (on closing)");
+                XWarp.logger.severe("Table Check SQL Exception (on closing)");
             }
         }
         return version;
@@ -401,12 +401,12 @@ public class SQLiteConnection implements WarpProtectionConnection {
                     invalidSize++;
                 }
             }
-            MyWarp.logger.info(size + " warps loaded");
+            XWarp.logger.info(size + " warps loaded");
             if (invalidSize > 0) {
-                MyWarp.logger.warning(invalidSize + " invalid warps found.");
+                XWarp.logger.warning(invalidSize + " invalid warps found.");
             }
         } catch (SQLException ex) {
-            MyWarp.logger.severe("Warp Load Exception", ex);
+            XWarp.logger.severe("Warp Load Exception", ex);
         } finally {
             try {
                 if (statement != null)
@@ -414,7 +414,7 @@ public class SQLiteConnection implements WarpProtectionConnection {
                 if (set != null)
                     set.close();
             } catch (SQLException ex) {
-                MyWarp.logger.severe("Warp Load Exception (on close)");
+                XWarp.logger.severe("Warp Load Exception (on close)");
             }
         }
         return result;
@@ -455,7 +455,7 @@ public class SQLiteConnection implements WarpProtectionConnection {
 
                 this.connection.commit();
             } catch (SQLException ex) {
-                MyWarp.logger.log(Level.SEVERE, "Warp Insert Exception", ex);
+                XWarp.logger.log(Level.SEVERE, "Warp Insert Exception", ex);
             } finally {
                 try {
                     if (ps != null) {
@@ -465,7 +465,7 @@ public class SQLiteConnection implements WarpProtectionConnection {
                         insertPermissions.close();
                     }
                 } catch (SQLException ex) {
-                    MyWarp.logger.log(Level.SEVERE, "Warp Insert Exception (on close)", ex);
+                    XWarp.logger.log(Level.SEVERE, "Warp Insert Exception (on close)", ex);
                 }
             }
         }
@@ -505,7 +505,7 @@ public class SQLiteConnection implements WarpProtectionConnection {
             ps.executeUpdate();
             this.connection.commit();
         } catch (SQLException ex) {
-            MyWarp.logger.log(Level.SEVERE, type + " " + name + " exception", ex);
+            XWarp.logger.log(Level.SEVERE, type + " " + name + " exception", ex);
         } finally {
             try {
                 if (ps != null) {
@@ -515,7 +515,7 @@ public class SQLiteConnection implements WarpProtectionConnection {
                     set.close();
                 }
             } catch (SQLException ex) {
-                MyWarp.logger.log(Level.SEVERE, type + " " + name + " exception (on close)", ex);
+                XWarp.logger.log(Level.SEVERE, type + " " + name + " exception (on close)", ex);
             }
         }
     }
@@ -643,7 +643,7 @@ public class SQLiteConnection implements WarpProtectionConnection {
 
             this.connection.commit();
         } catch (SQLException ex) {
-            MyWarp.logger.log(Level.SEVERE, typeMsg + " editor exception", ex);
+            XWarp.logger.log(Level.SEVERE, typeMsg + " editor exception", ex);
         } finally {
             try {
                 if (ps != null) {
@@ -653,7 +653,7 @@ public class SQLiteConnection implements WarpProtectionConnection {
                     set.close();
                 }
             } catch (SQLException ex) {
-                MyWarp.logger.log(Level.SEVERE, typeMsg + " editor exception (on close)", ex);
+                XWarp.logger.log(Level.SEVERE, typeMsg + " editor exception (on close)", ex);
             }
         }
     }
@@ -703,7 +703,7 @@ public class SQLiteConnection implements WarpProtectionConnection {
             statement.execute("DELETE FROM protectionAreas");
             this.connection.commit();
         } catch (SQLException ex) {
-            MyWarp.logger.log(Level.SEVERE, "Table Clear Exception", ex);
+            XWarp.logger.log(Level.SEVERE, "Table Clear Exception", ex);
         } finally {
             try {
                 if (statement != null) {
@@ -712,7 +712,7 @@ public class SQLiteConnection implements WarpProtectionConnection {
                 if (set != null)
                     set.close();
             } catch (SQLException ex) {
-                MyWarp.logger.severe("Table Clear Exception (on closing)");
+                XWarp.logger.severe("Table Clear Exception (on closing)");
             }
         }
     }
@@ -738,7 +738,7 @@ public class SQLiteConnection implements WarpProtectionConnection {
             }
             this.connection.commit();
         } catch (SQLException ex) {
-            MyWarp.logger.log(Level.SEVERE, "Table Drop/Create Exception", ex);
+            XWarp.logger.log(Level.SEVERE, "Table Drop/Create Exception", ex);
             return false;
         } finally {
             try {
@@ -748,7 +748,7 @@ public class SQLiteConnection implements WarpProtectionConnection {
                 if (set != null)
                     set.close();
             } catch (SQLException ex) {
-                MyWarp.logger.severe("Table Drop/Create Exception (on closing)");
+                XWarp.logger.severe("Table Drop/Create Exception (on closing)");
                 return false;
             }
         }
@@ -827,7 +827,7 @@ public class SQLiteConnection implements WarpProtectionConnection {
                 editorPermissions.put(idMap.get(value), true);
             }
         } catch (SQLException ex) {
-            MyWarp.logger.severe("Permission database load exception", ex);
+            XWarp.logger.severe("Permission database load exception", ex);
         } finally {
             try {
                 if (statement != null)
@@ -835,7 +835,7 @@ public class SQLiteConnection implements WarpProtectionConnection {
                 if (set != null)
                     set.close();
             } catch (SQLException ex) {
-                MyWarp.logger.severe("Permission database load exception (on close)");
+                XWarp.logger.severe("Permission database load exception (on close)");
             }
         }
         return result;
@@ -885,12 +885,12 @@ public class SQLiteConnection implements WarpProtectionConnection {
                     invalidSize++;
                 }
             }
-            MyWarp.logger.info(size + " warps loaded");
+            XWarp.logger.info(size + " warps loaded");
             if (invalidSize > 0) {
-                MyWarp.logger.warning(invalidSize + " invalid warps found.");
+                XWarp.logger.warning(invalidSize + " invalid warps found.");
             }
         } catch (SQLException ex) {
-            MyWarp.logger.severe("Warp protection area load exception", ex);
+            XWarp.logger.severe("Warp protection area load exception", ex);
         } finally {
             try {
                 if (statement != null)
@@ -898,7 +898,7 @@ public class SQLiteConnection implements WarpProtectionConnection {
                 if (set != null)
                     set.close();
             } catch (SQLException ex) {
-                MyWarp.logger.severe("Warp protection area load exception (on close)");
+                XWarp.logger.severe("Warp protection area load exception (on close)");
             }
         }
         return result;
@@ -944,7 +944,7 @@ public class SQLiteConnection implements WarpProtectionConnection {
 
                 this.connection.commit();
             } catch (SQLException ex) {
-                MyWarp.logger.log(Level.SEVERE, "Warp protection area insert exception", ex);
+                XWarp.logger.log(Level.SEVERE, "Warp protection area insert exception", ex);
             } finally {
                 try {
                     if (ps != null) {
@@ -954,7 +954,7 @@ public class SQLiteConnection implements WarpProtectionConnection {
                         insertPermissions.close();
                     }
                 } catch (SQLException ex) {
-                    MyWarp.logger.log(Level.SEVERE, "Warp protection area insert exception (on close)", ex);
+                    XWarp.logger.log(Level.SEVERE, "Warp protection area insert exception (on close)", ex);
                 }
             }
         }

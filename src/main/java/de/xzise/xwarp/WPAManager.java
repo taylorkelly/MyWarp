@@ -1,7 +1,5 @@
 package de.xzise.xwarp;
 
-import me.taylorkelly.mywarp.MyWarp;
-
 import org.bukkit.ChatColor;
 import org.bukkit.Server;
 import org.bukkit.command.CommandSender;
@@ -12,19 +10,19 @@ import de.xzise.MinecraftUtil;
 import de.xzise.xwarp.dataconnections.DataConnection;
 import de.xzise.xwarp.dataconnections.IdentificationInterface;
 import de.xzise.xwarp.dataconnections.WarpProtectionConnection;
+import de.xzise.xwarp.editors.EditorPermissions;
 import de.xzise.xwarp.editors.WarpProtectionAreaPermissions;
 import de.xzise.xwarp.editors.EditorPermissions.Type;
 import de.xzise.xwarp.list.NonGlobalList;
 import de.xzise.xwarp.wrappers.permission.PermissionTypes;
 
-public class WPAManager implements Manager<WarpProtectionArea> {
+public class WPAManager extends CommonManager<WarpProtectionArea> {
 
-    private NonGlobalList<WarpProtectionArea> protectionAreas;
     private Server server;
     private WarpProtectionConnection data;
     
     public WPAManager(Plugin plugin, DataConnection data) {
-        this.protectionAreas = new NonGlobalList<WarpProtectionArea>();
+        super(new NonGlobalList<WarpProtectionArea>());
         this.server = plugin.getServer();
         this.data = saveCast(WarpProtectionConnection.class, data);
     }
@@ -39,7 +37,7 @@ public class WPAManager implements Manager<WarpProtectionArea> {
     
     @Override
     public void reload() {
-        this.protectionAreas.loadList(this.data.getProtectionAreas());
+        this.list.loadList(this.data.getProtectionAreas());
     }
     
     private boolean isWPAEnabled(CommandSender sender) {
@@ -55,7 +53,7 @@ public class WPAManager implements Manager<WarpProtectionArea> {
     public void delete(WarpProtectionArea wpa, CommandSender sender) {
         if (isWPAEnabled(sender)) {
             if (wpa.canModify(sender, WarpProtectionAreaPermissions.DELETE)) {
-                this.protectionAreas.deleteWarpObject(wpa);
+                this.list.deleteWarpObject(wpa);
                 this.data.deleteProtectionArea(wpa);
                 sender.sendMessage("You have deleted '" + ChatColor.GREEN + wpa.getName() + ChatColor.WHITE + "'.");
             } else {
@@ -67,7 +65,7 @@ public class WPAManager implements Manager<WarpProtectionArea> {
     @Override
     public void setCreator(WarpProtectionArea wpa, CommandSender sender, String creator) {
         if (isWPAEnabled(sender)) {
-            if (MyWarp.permissions.permission(sender, PermissionTypes.ADMIN_CHANGE_CREATOR)) {
+            if (XWarp.permissions.permission(sender, PermissionTypes.ADMIN_CHANGE_CREATOR)) {
                 if (wpa.isCreator(creator)) {
                     sender.sendMessage(ChatColor.RED + creator + " is already the creator.");
                 } else {
@@ -97,7 +95,7 @@ public class WPAManager implements Manager<WarpProtectionArea> {
                         String preOwner = wpa.getOwner();
                         IdentificationInterface<WarpProtectionArea> ii = this.data.createWarpProtectionAreaIdentification(wpa);
                         wpa.setOwner(owner);
-                        this.protectionAreas.updateOwner(wpa, preOwner);
+                        this.list.updateOwner(wpa, preOwner);
                         this.data.updateOwner(wpa, ii);
                         sender.sendMessage("You have given '" + ChatColor.GREEN + wpa.getName() + ChatColor.WHITE + "' to " + ChatColor.GREEN + owner + ChatColor.WHITE + ".");
                         Player match = this.server.getPlayer(owner);
@@ -123,9 +121,9 @@ public class WPAManager implements Manager<WarpProtectionArea> {
                     sender.sendMessage(ChatColor.RED + "You already have a warp with this name.");
                 } else {
                     IdentificationInterface<WarpProtectionArea> ii = this.data.createWarpProtectionAreaIdentification(wpa);
-                    this.protectionAreas.deleteWarpObject(wpa);
+                    this.list.deleteWarpObject(wpa);
                     wpa.setName(name);
-                    this.protectionAreas.addWarpObject(wpa);
+                    this.list.addWarpObject(wpa);
                     this.data.updateName(wpa, ii);
                     sender.sendMessage(ChatColor.AQUA + "You have renamed '" + wpa.getName() + "'");
                 }
@@ -136,15 +134,51 @@ public class WPAManager implements Manager<WarpProtectionArea> {
     }
 
     @Override
-    public void invite(WarpProtectionArea warpObject, CommandSender sender, String inviteeName) {
-        // TODO Auto-generated method stub
-
+    public void invite(WarpProtectionArea wpa, CommandSender sender, String inviteeName) {
+        if (isWPAEnabled(sender)) {
+            if (wpa.canModify(sender, WarpProtectionAreaPermissions.INVITE)) {
+                if (wpa.hasPlayerPermission(inviteeName, WarpProtectionAreaPermissions.OVERWRITE)) {
+                    sender.sendMessage(ChatColor.RED + inviteeName + " is already invited to this warp.");
+                } else if (wpa.isOwn(inviteeName)) {
+                    sender.sendMessage(ChatColor.RED + inviteeName + " is the creator, of course he's the invited!");
+                } else {
+                    wpa.invite(inviteeName);
+                    this.data.updateEditor(wpa, inviteeName, Type.PLAYER);
+                    sender.sendMessage("You have invited " + ChatColor.GREEN + inviteeName + ChatColor.WHITE + " to '" + ChatColor.GREEN + wpa.getName() + ChatColor.WHITE + "'.");
+                    Player match = this.server.getPlayer(inviteeName);
+                    if (match != null) {
+                        match.sendMessage("You've been invited to warp '" + ChatColor.GREEN + wpa.getName() + ChatColor.WHITE + "' by " + ChatColor.GREEN + MinecraftUtil.getName(sender) + ChatColor.WHITE + ".");
+                    }
+                }
+            } else {
+                sender.sendMessage(ChatColor.RED + "You do not have permission to invite players to '" + wpa.getName() + "'.");
+            }
+        }
     }
 
     @Override
-    public void uninvite(WarpProtectionArea warpObject, CommandSender sender, String inviteeName) {
-        // TODO Auto-generated method stub
-
+    public void uninvite(WarpProtectionArea wpa, CommandSender sender, String inviteeName) {
+        if (isWPAEnabled(sender)) {
+            if (wpa.canModify(sender, WarpProtectionAreaPermissions.UNINVITE)) {
+                if (!wpa.hasPlayerPermission(inviteeName, WarpProtectionAreaPermissions.OVERWRITE)) {
+                    sender.sendMessage(ChatColor.RED + inviteeName + " is not invited to this warp.");
+                } else if (wpa.isOwn(inviteeName)) {
+                    sender.sendMessage(ChatColor.RED + "You can't uninvite yourself. You're the creator!");
+                } else {
+                    EditorPermissions<WarpProtectionAreaPermissions> permissions = wpa.getEditorPermissions(inviteeName, Type.PLAYER);
+                    if (permissions != null && permissions.remove(WarpProtectionAreaPermissions.OVERWRITE)) {
+                        this.data.updateEditor(wpa, inviteeName, Type.PLAYER);
+                        sender.sendMessage("You have uninvited " + ChatColor.GREEN + inviteeName + ChatColor.WHITE + " from '" + ChatColor.GREEN + wpa.getName() + ChatColor.WHITE + "'.");
+                        Player match = this.server.getPlayer(inviteeName);
+                        if (match != null) {
+                            match.sendMessage("You've been uninvited to warp '" + ChatColor.GREEN + wpa.getName() + ChatColor.WHITE + "' by " + ChatColor.GREEN + MinecraftUtil.getName(sender) + ChatColor.WHITE + ". Sorry.");
+                        }
+                    }
+                }
+            } else {
+                sender.sendMessage(ChatColor.RED + "You do not have permission to uninvite players from '" + wpa.getName() + "'.");
+            }
+        }
     }
 
     @Override
@@ -174,32 +208,12 @@ public class WPAManager implements Manager<WarpProtectionArea> {
     }
 
     @Override
-    public boolean isNameAvailable(WarpProtectionArea wpa) {
-        return this.isNameAvailable(wpa.getName(), wpa.getOwner());
-    }
-
-    @Override
-    public boolean isNameAvailable(String name, String owner) {
-        return this.protectionAreas.getWarpObject(name, owner, null) == null;
-    }
-
-    @Override
-    public WarpProtectionArea getWarpObject(String name, String owner, String playerName) {
-        return this.protectionAreas.getWarpObject(name, owner, playerName);
-    }
-
-    @Override
     public void missing(String name, String owner, CommandSender sender) {
         if (owner == null || owner.isEmpty()) {
             sender.sendMessage(ChatColor.RED + "Protection area named '" + name + "' doesn't exist.");
         } else {
             sender.sendMessage(ChatColor.RED + "Player '" + owner + "' doesn't own a protection area named '" + name + "'.");
         }
-    }
-
-    @Override
-    public WarpProtectionArea[] getWarpObjects() {
-        return this.protectionAreas.getWarpObjects().toArray(new WarpProtectionArea[0]);
     }
 
 }

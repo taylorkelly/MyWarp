@@ -1,6 +1,5 @@
 package de.xzise.xwarp;
 
-import me.taylorkelly.mywarp.MyWarp;
 
 import org.bukkit.command.CommandSender;
 
@@ -25,7 +24,7 @@ public class WarpProtectionArea extends DefaultWarpObject<WarpProtectionAreaPerm
     
     public WarpProtectionArea(int index, WorldWrapper world, FixedLocation firstCorner, FixedLocation secondCorner, String name, String owner, String creator) {
         //TODO: null as editor?!
-        super(name, owner, creator, null, WarpProtectionAreaPermissions.class);
+        super(name, owner, creator, null, WarpProtectionAreaPermissions.class, WarpProtectionAreaPermissions.OVERWRITE);
         this.index = index;
         this.world = world;
         this.firstCorner = firstCorner;
@@ -85,7 +84,7 @@ public class WarpProtectionArea extends DefaultWarpObject<WarpProtectionAreaPerm
             }
             
             //TODO: Revisit the world parameter!
-            String[] groups = MyWarp.permissions.getGroup(this.world.getWorldName(), name);
+            String[] groups = XWarp.permissions.getGroup(this.world.getWorldName(), name);
             
             for (String group : groups) {
                 EditorPermissions<WarpProtectionAreaPermissions> grpEp = this.getEditorPermissions(group, Type.GROUP);

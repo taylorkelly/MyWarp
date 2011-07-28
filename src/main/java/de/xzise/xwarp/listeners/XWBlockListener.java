@@ -1,6 +1,5 @@
 package de.xzise.xwarp.listeners;
 
-import me.taylorkelly.mywarp.MyWarp;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -14,6 +13,7 @@ import de.xzise.MinecraftUtil;
 import de.xzise.xwarp.Warp;
 import de.xzise.xwarp.WarpDestination;
 import de.xzise.xwarp.WarpManager;
+import de.xzise.xwarp.XWarp;
 import de.xzise.xwarp.signwarps.SignWarp;
 import de.xzise.xwarp.wrappers.permission.Groups;
 import de.xzise.xwarp.wrappers.permission.PermissionTypes;
@@ -39,7 +39,7 @@ public class XWBlockListener extends BlockListener {
                 } else {
                     type = Groups.SIGN_CREATE_GROUP.get(warp.getVisibility());
                 }
-                if (MyWarp.permissions.permission(event.getPlayer(), type)) {
+                if (XWarp.permissions.permission(event.getPlayer(), type)) {
                     String line = "Warp sign found: ";
                     if (warp == null) {
                         String creator = "";

@@ -5,7 +5,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 
-import me.taylorkelly.mywarp.MyWarp;
 
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -95,7 +94,7 @@ public class Warp extends DefaultWarpObject<WarpPermissions> {
     public static int nextIndex = 1;
 
     public Warp(int index, String name, String creator, String owner, LocationWrapper wrapper, Visibility visibility, Map<EditorPermissions.Type, Map<String, EditorPermissions<WarpPermissions>>> editorPermissions, String welcomeMessage) {
-        super(name, owner, creator, editorPermissions, WarpPermissions.class);
+        super(name, owner, creator, editorPermissions, WarpPermissions.class, WarpPermissions.WARP);
         this.index = index;
         this.location = wrapper;
         this.visibility = visibility;
@@ -117,27 +116,13 @@ public class Warp extends DefaultWarpObject<WarpPermissions> {
     public Warp(String name, Location location) {
         this(name, "", "No Player", new LocationWrapper(location));
     }
-    
-    public boolean isInvited(String name, boolean checkPlayerOnly) {
-        EditorPermissions<WarpPermissions> ep = this.getEditorPermissions(name, Type.PLAYER);
-        if (ep != null && ep.get(WarpPermissions.WARP)) {
-            return true;
-        }
-        
-        if (!checkPlayerOnly) {
-            //TODO: Implement groups
-            //TODO: Implement permissions
-        }
-        
-        return false;
-    }
 
     public void assignNewId() {
         this.index = nextIndex++;
     }
 
     public boolean playerCanWarp(CommandSender sender, boolean viaSign) {
-        if (MyWarp.permissions.permission(sender, new WarpEditorPermission(this, WarpPermissions.WARP))) {
+        if (XWarp.permissions.permission(sender, new WarpEditorPermission(this, WarpPermissions.WARP))) {
             return true;
         }
         
@@ -155,19 +140,19 @@ public class Warp extends DefaultWarpObject<WarpPermissions> {
         }
         
         // If the player isn't allowed to warp to/within the world cancel here!
-        if (!MyWarp.permissions.permission(sender, worldPermission.getPermission(this.getLocationWrapper().getWorld(), true))) {
+        if (!XWarp.permissions.permission(sender, worldPermission.getPermission(this.getLocationWrapper().getWorld(), true))) {
             return false;
         }
 
-        if (name != null && this.getOwner().equals(name) && MyWarp.permissions.permission(sender, viaSign ? PermissionTypes.SIGN_WARP_OWN : PermissionTypes.TO_OWN))
+        if (name != null && this.getOwner().equals(name) && XWarp.permissions.permission(sender, viaSign ? PermissionTypes.SIGN_WARP_OWN : PermissionTypes.TO_OWN))
             return true;
-        if (name != null && this.isInvited(name, false) && MyWarp.permissions.permission(sender, viaSign ? PermissionTypes.SIGN_WARP_INVITED : PermissionTypes.TO_INVITED))
+        if (name != null && this.hasPermission(name, WarpPermissions.WARP) && XWarp.permissions.permission(sender, viaSign ? PermissionTypes.SIGN_WARP_INVITED : PermissionTypes.TO_INVITED))
             return true;
-        if (this.visibility == Visibility.PUBLIC && MyWarp.permissions.permission(sender, viaSign ? PermissionTypes.SIGN_WARP_OTHER : PermissionTypes.TO_OTHER))
+        if (this.visibility == Visibility.PUBLIC && XWarp.permissions.permission(sender, viaSign ? PermissionTypes.SIGN_WARP_OTHER : PermissionTypes.TO_OTHER))
             return true;
-        if (this.visibility == Visibility.GLOBAL && MyWarp.permissions.permission(sender, viaSign ? PermissionTypes.SIGN_WARP_GLOBAL : PermissionTypes.TO_GLOBAL))
+        if (this.visibility == Visibility.GLOBAL && XWarp.permissions.permission(sender, viaSign ? PermissionTypes.SIGN_WARP_GLOBAL : PermissionTypes.TO_GLOBAL))
             return true;
-        return MyWarp.permissions.permission(sender, PermissionTypes.ADMIN_TO_ALL);
+        return XWarp.permissions.permission(sender, PermissionTypes.ADMIN_TO_ALL);
     }
 
     public boolean playerCanWarp(Warpable player) {
@@ -250,21 +235,17 @@ public class Warp extends DefaultWarpObject<WarpPermissions> {
         this.setLocation(positionable.getLocation());
     }
 
-    public void invite(String player) {
-        this.getEditorPermissions(player, Type.PLAYER).put(WarpPermissions.WARP, true);
-    }
-
     public void uninvite(String inviteeName) {
         this.getEditorPermissions(inviteeName, Type.PLAYER).put(WarpPermissions.WARP, false);
     }
 
     public boolean list(CommandSender sender) {
-        if (!this.isListed() && !MyWarp.permissions.permission(sender, PermissionTypes.ADMIN_LIST_VIEW)) {
+        if (!this.isListed() && !XWarp.permissions.permission(sender, PermissionTypes.ADMIN_LIST_VIEW)) {
             return false;
         }
         
         // Admin permissions
-        if (MyWarp.permissions.permissionOr(sender, PermissionTypes.getDefaultPermissions(false)))
+        if (XWarp.permissions.permissionOr(sender, PermissionTypes.getDefaultPermissions(false)))
             return true;
 
         Warpable warpable = WarperFactory.getWarpable(sender);

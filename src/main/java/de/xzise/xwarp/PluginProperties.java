@@ -8,7 +8,6 @@ import java.io.IOException;
 
 import org.bukkit.Server;
 
-import me.taylorkelly.mywarp.MyWarp;
 
 import de.xzise.MinecraftUtil;
 import de.xzise.xwarp.dataconnections.DataConnection;
@@ -91,7 +90,7 @@ public class PluginProperties {
                 properties.load(stream);
                 stream.close();
             } catch (IOException e) {
-                MyWarp.logger.warning("Unable to load properties file.", e);
+                XWarp.logger.warning("Unable to load properties file.", e);
             }
         } else {
             try {
@@ -107,7 +106,7 @@ public class PluginProperties {
                 properties.setProperty("update-if-exists", "false");
                 properties.store(new FileWriter(this.configFile), null);
             } catch (IOException e) {
-                MyWarp.logger.warning("Unable to create properties file.", e);
+                XWarp.logger.warning("Unable to create properties file.", e);
             }
         }
         String dataConnectionProperty = properties.getProperty("data-connection", "sqlite");
@@ -116,7 +115,7 @@ public class PluginProperties {
             this.dataConnection = new HModConnection(this.server);
         } else {
             if (!dataConnectionProperty.equalsIgnoreCase("sqlite")) {
-                MyWarp.logger.warning("Unrecognized data-connection selected (" + dataConnectionProperty + ")");
+                XWarp.logger.warning("Unrecognized data-connection selected (" + dataConnectionProperty + ")");
             }
             // Per default sqlite
             this.dataConnection = new SQLiteConnection(server);

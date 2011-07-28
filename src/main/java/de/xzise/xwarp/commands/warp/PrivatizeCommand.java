@@ -5,7 +5,6 @@ import org.bukkit.command.CommandSender;
 
 import de.xzise.xwarp.Warp;
 import de.xzise.xwarp.WarpManager;
-import de.xzise.xwarp.commands.WarpCommand;
 
 public class PrivatizeCommand extends WarpCommand {
 

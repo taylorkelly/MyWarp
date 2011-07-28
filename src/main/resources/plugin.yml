@@ -1,11 +1,16 @@
 name: xWarp
 version: 3.0.0 b0
-main: me.taylorkelly.mywarp.MyWarp
+main: de.xzise.xwarp.XWarp
 description: Implementation to create warp points!
 authors:
   - 'xZise'
   - 'tkelly'
 commands:
+# Add this command in the future to handle all general managing commands.
+# For example /xwarp permissions, /xwarp status, /xwarp reload
+#  xwarp:
+#    description: xWarp managing commands
+#    usage: /<command> help - Displays the help for all xwarp commands.    
   warp:
     description: Warp commands
     usage: /<command> help - Displays the help for all warp commands.

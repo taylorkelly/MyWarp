@@ -1,9 +1,10 @@
-package de.xzise.xwarp.commands;
+package de.xzise.xwarp.commands.warp;
 
 import org.bukkit.Server;
 
 import de.xzise.xwarp.Warp;
 import de.xzise.xwarp.WarpManager;
+import de.xzise.xwarp.commands.ManagerCommand;
 
 /**
  * Default command structure with a warp definition. The command structure is:

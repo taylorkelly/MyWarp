@@ -1,10 +1,8 @@
-package me.taylorkelly.mywarp;
+package de.xzise.xwarp;
 
 import java.io.File;
 import java.io.IOException;
 
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandSender;
 import org.bukkit.event.Event;
 import org.bukkit.event.Event.Priority;
 import org.bukkit.event.server.PluginDisableEvent;
@@ -16,8 +14,7 @@ import de.xzise.MinecraftUtil;
 import de.xzise.XLogger;
 import de.xzise.wrappers.permissions.PermissionsHandler;
 import de.xzise.wrappers.economy.EconomyHandler;
-import de.xzise.xwarp.PluginProperties;
-import de.xzise.xwarp.WarpManager;
+import de.xzise.xwarp.commands.WPACommandMap;
 import de.xzise.xwarp.commands.WarpCommandMap;
 import de.xzise.xwarp.dataconnections.DataConnection;
 import de.xzise.xwarp.listeners.XWBlockListener;
@@ -25,7 +22,7 @@ import de.xzise.xwarp.listeners.XWEntityListener;
 import de.xzise.xwarp.listeners.XWPlayerListener;
 import de.xzise.xwarp.listeners.XWWorldListener;
 
-public class MyWarp extends JavaPlugin {
+public class XWarp extends JavaPlugin {
 
     public static PermissionsHandler permissions;
     public static XLogger logger;
@@ -33,13 +30,12 @@ public class MyWarp extends JavaPlugin {
     private EconomyHandler economyWrapper;
     private PermissionsHandler permissionsWrapper = permissions;
 
-    private WarpCommandMap commands;
     private DataConnection dataConnection;
 
     public String name;
     public String version;
 
-    public MyWarp() {
+    public XWarp() {
         super();
     }
 
@@ -64,11 +60,11 @@ public class MyWarp extends JavaPlugin {
             File old = new File("homes-warps.db");
             File newFile = new File(this.getDataFolder(), "warps.db");
             if (old.exists() && !newFile.exists()) {
-                MyWarp.logger.info("No database found. Copying old database.");
+                XWarp.logger.info("No database found. Copying old database.");
                 try {
                     MinecraftUtil.copy(old, newFile);
                 } catch (IOException e) {
-                    MyWarp.logger.severe("Unable to copy database", e);
+                    XWarp.logger.severe("Unable to copy database", e);
                 }
             }
         }
@@ -78,12 +74,12 @@ public class MyWarp extends JavaPlugin {
         this.dataConnection = properties.getDataConnection();
         try {
             if (!this.dataConnection.load(new File(this.getDataFolder(), this.dataConnection.getFilename()))) {
-                MyWarp.logger.severe("Could not load data. Disabling " + this.name + "!");
+                XWarp.logger.severe("Could not load data. Disabling " + this.name + "!");
                 this.getServer().getPluginManager().disablePlugin(this);
                 return;
             }
         } catch (Exception e) {
-            MyWarp.logger.severe("Could not load data. Disabling " + this.name + "!", e);
+            XWarp.logger.severe("Could not load data. Disabling " + this.name + "!", e);
             this.getServer().getPluginManager().disablePlugin(this);
             return;
         }
@@ -93,35 +89,40 @@ public class MyWarp extends JavaPlugin {
         this.economyWrapper = new EconomyHandler(this.getServer().getPluginManager(), properties.getEconomyPlugin(), properties.getEconomyBaseAccount(), logger);
         
         WarpManager warpManager = new WarpManager(this, this.economyWrapper, properties, this.dataConnection);
+        WPAManager wpaManager = new WPAManager(this, this.dataConnection);
         
         // Create commands
-        this.commands = null;
+        WarpCommandMap wcm = null;
+        WPACommandMap wpacm = null;
         try {
-            this.commands = new WarpCommandMap(warpManager, this.economyWrapper, this.getServer(), this.dataConnection, this.getDataFolder(), properties);
+            wcm = new WarpCommandMap(warpManager, this.economyWrapper, this.getServer(), this.dataConnection, this.getDataFolder(), properties);
+            wpacm = new WPACommandMap(wpaManager, this.economyWrapper, this.getServer(), this.dataConnection, this.getDataFolder(), properties);
         } catch (IllegalArgumentException iae) {
-            MyWarp.logger.severe("Couldn't initalize commands. Disabling " + this.name + "!", iae);
+            XWarp.logger.severe("Couldn't initalize commands. Disabling " + this.name + "!", iae);
             this.getServer().getPluginManager().disablePlugin(this);
             return;
         }
 
-        this.getCommand("go").setExecutor(this.commands.getCommand(""));
+        this.getCommand("go").setExecutor(wcm.getCommand(""));
+        this.getCommand("warp").setExecutor(wcm);
+        this.getCommand("wpa").setExecutor(wpacm);
 
         XWPlayerListener playerListener = new XWPlayerListener(warpManager, properties);
         XWBlockListener blockListener = new XWBlockListener(warpManager);
         ServerListener serverListner = new ServerListener() {
             @Override
             public void onPluginEnable(PluginEnableEvent event) {
-                MyWarp.this.permissionsWrapper.load(event.getPlugin());
-                MyWarp.this.economyWrapper.load(event.getPlugin());
+                XWarp.this.permissionsWrapper.load(event.getPlugin());
+                XWarp.this.economyWrapper.load(event.getPlugin());
             }
 
             @Override
             public void onPluginDisable(PluginDisableEvent event) {
-                if (MyWarp.this.permissionsWrapper.unload(event.getPlugin())) {
-                    MyWarp.this.permissionsWrapper.load();
+                if (XWarp.this.permissionsWrapper.unload(event.getPlugin())) {
+                    XWarp.this.permissionsWrapper.load();
                 }
-                if (MyWarp.this.economyWrapper.unload(event.getPlugin())) {
-                    MyWarp.this.economyWrapper.load();
+                if (XWarp.this.economyWrapper.unload(event.getPlugin())) {
+                    XWarp.this.economyWrapper.load();
                 }
             }
         };
@@ -142,22 +143,7 @@ public class MyWarp extends JavaPlugin {
         this.getServer().getPluginManager().registerEvent(Event.Type.SIGN_CHANGE, blockListener, Priority.Low, this);
         this.getServer().getPluginManager().registerEvent(Event.Type.PLUGIN_ENABLE, serverListner, Priority.Low, this);
         this.getServer().getPluginManager().registerEvent(Event.Type.PLUGIN_DISABLE, serverListner, Priority.Low, this);
-        MyWarp.logger.info(name + " " + version + " enabled");
-    }
-
-    @Override
-    public boolean onCommand(CommandSender sender, Command cmd, String commandLabel, String[] args) {
-        // workaround until I get the complete line or a parsed one
-        StringBuilder line = new StringBuilder();
-        for (int i = 0; i < args.length; i++) {
-            String arg = args[i];
-            line.append(arg);
-            if (i < args.length - 1) {
-                line.append(' ');
-            }
-        }
-
-        return this.commands.executeCommand(sender, MinecraftUtil.parseLine(line.toString()));
+        XWarp.logger.info(name + " " + version + " enabled");
     }
 
     private void updateFiles() {

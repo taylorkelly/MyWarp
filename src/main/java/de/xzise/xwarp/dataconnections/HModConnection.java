@@ -20,12 +20,12 @@ import de.xzise.MinecraftUtil;
 import de.xzise.metainterfaces.FixedLocation;
 import de.xzise.metainterfaces.LocationWrapper;
 import de.xzise.xwarp.Warp;
+import de.xzise.xwarp.XWarp;
 import de.xzise.xwarp.Warp.Visibility;
 import de.xzise.xwarp.editors.EditorPermissions;
 import de.xzise.xwarp.editors.WarpPermissions;
 import de.xzise.xwarp.editors.EditorPermissions.Type;
 
-import me.taylorkelly.mywarp.MyWarp;
 
 public class HModConnection implements DataConnection {
 
@@ -59,7 +59,7 @@ public class HModConnection implements DataConnection {
             try {
                 return this.file.createNewFile();
             } catch (IOException e) {
-                MyWarp.logger.severe("Unable to load the hmod connection", e);
+                XWarp.logger.severe("Unable to load the hmod connection", e);
                 return false;
             }
         } else {
@@ -96,12 +96,12 @@ public class HModConnection implements DataConnection {
                             try {
                                 tempVersion = Integer.parseInt(line.substring(8).trim());
                             } catch (NumberFormatException nfe) {
-                                MyWarp.logger.severe("Version tag is invalid number.");
+                                XWarp.logger.severe("Version tag is invalid number.");
                             }
                             if (version == null) {
                                 version = tempVersion;
                             } else if (version != tempVersion) {
-                                MyWarp.logger.severe("Different version tags found (line: " + lineNum + "), choose first found: " + version);
+                                XWarp.logger.severe("Different version tags found (line: " + lineNum + "), choose first found: " + version);
                             }
                         } else {
                             lines.add(line);
@@ -114,7 +114,7 @@ public class HModConnection implements DataConnection {
 
             if (version == null) {
                 version = 0;
-                MyWarp.logger.severe("No version tag found: " + version);
+                XWarp.logger.severe("No version tag found: " + version);
             }
             switch (version) {
             case 0:
@@ -128,11 +128,11 @@ public class HModConnection implements DataConnection {
             case 4:
                 return getWarpsVersion4(lines, this.server);
             default:
-                MyWarp.logger.severe("Unknown version tag: " + version);
+                XWarp.logger.severe("Unknown version tag: " + version);
                 break;
             }
         } catch (FileNotFoundException e) {
-            MyWarp.logger.info("hmod file not found!");
+            XWarp.logger.info("hmod file not found!");
         }
         return result;
     }
@@ -160,16 +160,16 @@ public class HModConnection implements DataConnection {
                     warp.setVisibility(Visibility.GLOBAL);
                 } catch (NumberFormatException nfe) {
                     valid = false;
-                    MyWarp.logger.warning("Unable to parse a location value (" + nfe.getMessage() + ")");
+                    XWarp.logger.warning("Unable to parse a location value (" + nfe.getMessage() + ")");
                 } catch (Exception e) {
-                    MyWarp.logger.severe("Catched an unhandled exception", e);
+                    XWarp.logger.severe("Catched an unhandled exception", e);
                     valid = false;
                 }
                 if (valid && warp != null) {
                     warps.add(warp);
                 }
             } else {
-                MyWarp.logger.warning("Invalid warp line found");
+                XWarp.logger.warning("Invalid warp line found");
             }
         }
         return warps;
@@ -210,21 +210,21 @@ public class HModConnection implements DataConnection {
                         warp.setVisibility(v);
                         warp.setListed(Visibility.isListed(visibilityValue));
                     } else {
-                        MyWarp.logger.warning("Illegal visibilty found (" + warp.getName() + " by " + warp.getOwner() + ")");
+                        XWarp.logger.warning("Illegal visibilty found (" + warp.getName() + " by " + warp.getOwner() + ")");
                         valid = false;
                     }
                 } catch (NumberFormatException nfe) {
                     valid = false;
-                    MyWarp.logger.warning("Unable to parse a location value (" + nfe.getMessage() + ")");
+                    XWarp.logger.warning("Unable to parse a location value (" + nfe.getMessage() + ")");
                 } catch (Exception e) {
-                    MyWarp.logger.severe("Catched an unhandled exception", e);
+                    XWarp.logger.severe("Catched an unhandled exception", e);
                     valid = false;
                 }
                 if (valid && warp != null) {
                     warps.add(warp);
                 }
             } else {
-                MyWarp.logger.warning("Invalid warp line found");
+                XWarp.logger.warning("Invalid warp line found");
             }
         }
         return warps;
@@ -265,21 +265,21 @@ public class HModConnection implements DataConnection {
                         warp.setVisibility(v);
                         warp.setListed(Visibility.isListed(visibilityValue));
                     } else {
-                        MyWarp.logger.warning("Illegal visibilty found (" + warp.getName() + " by " + warp.getOwner() + ")");
+                        XWarp.logger.warning("Illegal visibilty found (" + warp.getName() + " by " + warp.getOwner() + ")");
                         valid = false;
                     }
                 } catch (NumberFormatException nfe) {
                     valid = false;
-                    MyWarp.logger.warning("Unable to parse a location value (" + nfe.getMessage() + ")");
+                    XWarp.logger.warning("Unable to parse a location value (" + nfe.getMessage() + ")");
                 } catch (Exception e) {
-                    MyWarp.logger.severe("Catched an unhandled exception", e);
+                    XWarp.logger.severe("Catched an unhandled exception", e);
                     valid = false;
                 }
                 if (valid && warp != null) {
                     warps.add(warp);
                 }
             } else {
-                MyWarp.logger.warning("Invalid warp line found");
+                XWarp.logger.warning("Invalid warp line found");
             }
         }
         return warps;
@@ -322,22 +322,22 @@ public class HModConnection implements DataConnection {
                         warp.setVisibility(v);
                         warp.setListed(Visibility.isListed(visibilityValue));
                     } else {
-                        MyWarp.logger.warning("Illegal visibility found (" + warp.getName() + " by " + warp.getOwner() + ")");
+                        XWarp.logger.warning("Illegal visibility found (" + warp.getName() + " by " + warp.getOwner() + ")");
                         valid = false;
                     }
                 } catch (NumberFormatException nfe) {
                     valid = false;
-                    MyWarp.logger.warning("Unable to parse a value (" + nfe.getMessage() + ")");
+                    XWarp.logger.warning("Unable to parse a value (" + nfe.getMessage() + ")");
                 } catch (Exception e) {
-                    MyWarp.logger.severe("Catched an unhandled exception", e);
+                    XWarp.logger.severe("Catched an unhandled exception", e);
                     valid = false;
                 }
                 if (valid && warp != null) {
                     warps.add(warp);
                 }
             } else {
-                MyWarp.logger.warning("Invalid warp line found:");
-                MyWarp.logger.warning(line);
+                XWarp.logger.warning("Invalid warp line found:");
+                XWarp.logger.warning(line);
             }
         }
         return warps;
@@ -376,7 +376,7 @@ public class HModConnection implements DataConnection {
                             type = Type.GROUP;
                         } else {
                             if (!segments[i + 2].equalsIgnoreCase("player") && !segments[i + 2].equalsIgnoreCase("p")) {
-                                MyWarp.logger.warning("Illegal editor type found (" + warp.getName() + " by " + warp.getOwner() + ")");    
+                                XWarp.logger.warning("Illegal editor type found (" + warp.getName() + " by " + warp.getOwner() + ")");    
                             }
                             type = Type.PLAYER;
                         } 
@@ -389,22 +389,22 @@ public class HModConnection implements DataConnection {
                         warp.setVisibility(v);
                         warp.setListed(Visibility.isListed(visibilityValue));
                     } else {
-                        MyWarp.logger.warning("Illegal visibility found (" + warp.getName() + " by " + warp.getOwner() + ")");
+                        XWarp.logger.warning("Illegal visibility found (" + warp.getName() + " by " + warp.getOwner() + ")");
                         valid = false;
                     }
                 } catch (NumberFormatException nfe) {
                     valid = false;
-                    MyWarp.logger.warning("Unable to parse a value (" + nfe.getMessage() + ")");
+                    XWarp.logger.warning("Unable to parse a value (" + nfe.getMessage() + ")");
                 } catch (Exception e) {
-                    MyWarp.logger.severe("Catched an unhandled exception", e);
+                    XWarp.logger.severe("Catched an unhandled exception", e);
                     valid = false;
                 }
                 if (valid && warp != null) {
                     warps.add(warp);
                 }
             } else {
-                MyWarp.logger.warning("Invalid warp line found:");
-                MyWarp.logger.warning(line);
+                XWarp.logger.warning("Invalid warp line found:");
+                XWarp.logger.warning(line);
             }
         }
         return warps;
@@ -422,7 +422,7 @@ public class HModConnection implements DataConnection {
                 writer.close();
             }
         } catch (IOException e) {
-            MyWarp.logger.severe("Unable to write the file", e);
+            XWarp.logger.severe("Unable to write the file", e);
         }
     }
 
@@ -462,7 +462,7 @@ public class HModConnection implements DataConnection {
         } catch (IOException ioe) {
             throw ioe;
         } catch (Exception e) {
-            MyWarp.logger.severe("Unable to write warp: '" + warp.getName() + "' by " + warp.getOwner(), e);
+            XWarp.logger.severe("Unable to write warp: '" + warp.getName() + "' by " + warp.getOwner(), e);
         }
     }
     
@@ -531,7 +531,7 @@ public class HModConnection implements DataConnection {
                     writer.close();
                 }
             } catch (IOException e) {
-                MyWarp.logger.severe("Unable to write the file", e);
+                XWarp.logger.severe("Unable to write the file", e);
             }
         }
     }

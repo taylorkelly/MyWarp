@@ -2,7 +2,6 @@ package de.xzise.xwarp.commands;
 
 import java.io.File;
 
-import me.taylorkelly.mywarp.MyWarp;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Server;
@@ -10,6 +9,7 @@ import org.bukkit.command.CommandSender;
 
 import de.xzise.xwarp.Warp;
 import de.xzise.xwarp.WarpManager;
+import de.xzise.xwarp.XWarp;
 import de.xzise.xwarp.dataconnections.DataConnection;
 import de.xzise.xwarp.dataconnections.DataConnectionFactory;
 
@@ -39,7 +39,7 @@ public class ExportCommand extends DefaultSubCommand<WarpManager> {
                     connection.addWarp(this.manager.getWarps().toArray(new Warp[0]));
                     connection.free();
                 } catch (Exception e) {
-                    MyWarp.logger.severe("Unable to export warps.", e);
+                    XWarp.logger.severe("Unable to export warps.", e);
                     sender.sendMessage(ChatColor.RED + "Unable to export warps.");
                 }
             } else {

@@ -2,7 +2,6 @@ package de.xzise.xwarp.commands;
 
 import java.util.Collection;
 
-import me.taylorkelly.mywarp.MyWarp;
 
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
@@ -13,6 +12,7 @@ import de.xzise.commands.CommonHelpableSubCommand;
 import de.xzise.wrappers.economy.EconomyHandler;
 import de.xzise.xwarp.Manager;
 import de.xzise.xwarp.PluginProperties;
+import de.xzise.xwarp.XWarp;
 import de.xzise.xwarp.wrappers.permission.PermissionTypes;
 
 public class ReloadCommand extends CommonHelpableSubCommand {
@@ -31,7 +31,7 @@ public class ReloadCommand extends CommonHelpableSubCommand {
     @Override
     public boolean execute(CommandSender sender, String[] parameters) {
         if (parameters.length == 1) {
-            if (MyWarp.permissions.permission(sender, PermissionTypes.ADMIN_RELOAD)) {
+            if (XWarp.permissions.permission(sender, PermissionTypes.ADMIN_RELOAD)) {
                 this.properties.read();
                 this.economy.reloadConfig(this.properties.getEconomyPlugin(), this.properties.getEconomyBaseAccount());
                 for (Manager<?> manager : this.managers) {
@@ -64,7 +64,7 @@ public class ReloadCommand extends CommonHelpableSubCommand {
 
     @Override
     public boolean listHelp(CommandSender sender) {
-        return MyWarp.permissions.permission(sender, PermissionTypes.ADMIN_RELOAD);
+        return XWarp.permissions.permission(sender, PermissionTypes.ADMIN_RELOAD);
     }
 
 }

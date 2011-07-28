@@ -1,6 +1,5 @@
 package de.xzise.xwarp.listeners;
 
-import me.taylorkelly.mywarp.MyWarp;
 
 import org.bukkit.event.world.WorldListener;
 import org.bukkit.event.world.WorldLoadEvent;
@@ -8,6 +7,7 @@ import org.bukkit.event.world.WorldUnloadEvent;
 
 import de.xzise.xwarp.Warp;
 import de.xzise.xwarp.WarpManager;
+import de.xzise.xwarp.XWarp;
 
 public class XWWorldListener extends WorldListener {
 
@@ -26,7 +26,7 @@ public class XWWorldListener extends WorldListener {
             }
         }
         if (i > 0) {
-            MyWarp.logger.info("Because world '" + event.getWorld().getName() + "' was loaded " + i + " warp" + (i == 1 ? "" : "s") + " get valid.");
+            XWarp.logger.info("Because world '" + event.getWorld().getName() + "' was loaded " + i + " warp" + (i == 1 ? "" : "s") + " get valid.");
         }
     }
     
@@ -39,7 +39,7 @@ public class XWWorldListener extends WorldListener {
             }
         }
         if (i > 0) {
-            MyWarp.logger.info("Because world '" + event.getWorld().getName() + "' was unloaded " + i + " warp" + (i == 1 ? "" : "s") + " get invalid.");
+            XWarp.logger.info("Because world '" + event.getWorld().getName() + "' was unloaded " + i + " warp" + (i == 1 ? "" : "s") + " get invalid.");
         }
     }
 }

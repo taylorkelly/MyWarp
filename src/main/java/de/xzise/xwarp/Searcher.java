@@ -1,4 +1,4 @@
-package me.taylorkelly.mywarp;
+package de.xzise.xwarp;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -7,9 +7,6 @@ import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 
 import de.xzise.MinecraftUtil;
-import de.xzise.xwarp.MatchList;
-import de.xzise.xwarp.Warp;
-import de.xzise.xwarp.WarpManager;
 import de.xzise.xwarp.lister.GenericLister;
 import de.xzise.xwarp.lister.ListSection;
 

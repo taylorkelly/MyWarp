@@ -1,6 +1,5 @@
-package de.xzise.xwarp.commands;
+package de.xzise.xwarp.commands.warp;
 
-import me.taylorkelly.mywarp.MyWarp;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Server;
@@ -9,12 +8,14 @@ import org.bukkit.entity.Player;
 
 import de.xzise.MinecraftUtil;
 import de.xzise.xwarp.Warp.Visibility;
+import de.xzise.xwarp.commands.DefaultSubCommand;
 import de.xzise.xwarp.lister.GenericLister;
 import de.xzise.xwarp.warpable.Positionable;
 import de.xzise.xwarp.warpable.WarperFactory;
 import de.xzise.xwarp.wrappers.permission.PermissionTypes;
 import de.xzise.xwarp.wrappers.permission.PermissionValues;
 import de.xzise.xwarp.WarpManager;
+import de.xzise.xwarp.XWarp;
 
 public class CreateCommand extends DefaultSubCommand<WarpManager> {
 
@@ -42,7 +43,7 @@ public class CreateCommand extends DefaultSubCommand<WarpManager> {
     }
 
     private String getAmount(Player player, PermissionValues value) {
-        int amount = MyWarp.permissions.getInteger(player, value);
+        int amount = XWarp.permissions.getInteger(player, value);
         if (amount < 0) {
             return "Infinite";
         } else if (amount == 0) {
@@ -131,11 +132,11 @@ public class CreateCommand extends DefaultSubCommand<WarpManager> {
     public boolean listHelp(CommandSender sender) {
         switch (this.visibility) {
         case PRIVATE:
-            return MyWarp.permissions.permission(sender, PermissionTypes.CREATE_PRIVATE);
+            return XWarp.permissions.permission(sender, PermissionTypes.CREATE_PRIVATE);
         case PUBLIC:
-            return MyWarp.permissions.permission(sender, PermissionTypes.CREATE_PUBLIC);
+            return XWarp.permissions.permission(sender, PermissionTypes.CREATE_PUBLIC);
         case GLOBAL:
-            return MyWarp.permissions.permission(sender, PermissionTypes.CREATE_GLOBAL);
+            return XWarp.permissions.permission(sender, PermissionTypes.CREATE_GLOBAL);
         default:
             return false;
         }

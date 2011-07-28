@@ -3,7 +3,6 @@ package de.xzise.xwarp.timer;
 import java.util.HashMap;
 import java.util.Map;
 
-import me.taylorkelly.mywarp.MyWarp;
 
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
@@ -11,6 +10,7 @@ import org.bukkit.plugin.Plugin;
 
 import de.xzise.xwarp.PluginProperties;
 import de.xzise.xwarp.Warp;
+import de.xzise.xwarp.XWarp;
 import de.xzise.xwarp.warpable.Warpable;
 import de.xzise.xwarp.wrappers.permission.Groups;
 
@@ -59,7 +59,7 @@ public class CoolDown {
     public int cooldownTime(Warp warp, CommandSender sender) {
         int time = warp.getCoolDown();
         if (time < 0) {
-            return MyWarp.permissions.getInteger(sender, Groups.TIMERS_COOLDOWN_GROUP.get(warp.getVisibility()));
+            return XWarp.permissions.getInteger(sender, Groups.TIMERS_COOLDOWN_GROUP.get(warp.getVisibility()));
         } else {
             return time;
         }

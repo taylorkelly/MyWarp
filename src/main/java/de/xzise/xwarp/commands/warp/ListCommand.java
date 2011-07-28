@@ -5,7 +5,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import me.taylorkelly.mywarp.MyWarp;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Server;
@@ -15,6 +14,7 @@ import org.bukkit.entity.Player;
 import de.xzise.MinecraftUtil;
 import de.xzise.xwarp.Warp;
 import de.xzise.xwarp.WarpManager;
+import de.xzise.xwarp.XWarp;
 import de.xzise.xwarp.Warp.Visibility;
 import de.xzise.xwarp.commands.DefaultSubCommand;
 import de.xzise.xwarp.lister.GenericLister;
@@ -36,7 +36,7 @@ public class ListCommand extends DefaultSubCommand<WarpManager> {
     
     @Override
     public boolean execute(CommandSender sender, String[] parameters) {
-        if (!MyWarp.permissions.permission(sender, PermissionTypes.CMD_LIST)) {
+        if (!XWarp.permissions.permission(sender, PermissionTypes.CMD_LIST)) {
             sender.sendMessage(ChatColor.RED + "You have no permission to list warps.");
             return true;
         }

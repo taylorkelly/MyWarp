@@ -1,6 +1,5 @@
 package de.xzise.xwarp.commands;
 
-import me.taylorkelly.mywarp.MyWarp;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -11,6 +10,7 @@ import org.bukkit.entity.Player;
 
 import de.xzise.commands.CommonHelpableSubCommand;
 import de.xzise.xwarp.WarpManager;
+import de.xzise.xwarp.XWarp;
 import de.xzise.xwarp.wrappers.permission.PermissionTypes;
 import de.xzise.xwarp.wrappers.permission.PermissionValues;
 import de.xzise.xwarp.wrappers.permission.PricePermissions;
@@ -72,21 +72,21 @@ public class PermissionsCommand extends CommonHelpableSubCommand {
             } else {
                 sender.sendMessage(player.getName() + " permissions:");
             }
-            if (!MyWarp.permissions.isActive()) {
+            if (!XWarp.permissions.isActive()) {
                 sender.sendMessage("(Use build in permissions!)");
             }
             for (PermissionTypes type : PermissionTypes.values()) {
-                boolean hasPermission = MyWarp.permissions.permission(player, type);
+                boolean hasPermission = XWarp.permissions.permission(player, type);
                 if ((hasPermission && showGranted) || (!hasPermission && showDenied)) {
                     String message = (hasPermission ? ChatColor.GREEN : ChatColor.RED) + type.name + ": " + (hasPermission ? "Yes" : "No");
                     sender.sendMessage(message);
                 }
             }
             for (PermissionValues value : PermissionValues.values()) {
-                sender.sendMessage(value.getName() + ": " + MyWarp.permissions.getInteger(sender, value));
+                sender.sendMessage(value.getName() + ": " + XWarp.permissions.getInteger(sender, value));
             }
             for (PricePermissions value : PricePermissions.values()) {
-                sender.sendMessage(value.getName() + ": " + MyWarp.permissions.getDouble(sender, value));
+                sender.sendMessage(value.getName() + ": " + XWarp.permissions.getDouble(sender, value));
             }
             sender.sendMessage("Allowed to warp within: " + this.worldPermission(sender, WorldPermission.WITHIN_WORLD));
             sender.sendMessage("Allowed to warp into: " + this.worldPermission(sender, WorldPermission.TO_WORLD));
@@ -100,7 +100,7 @@ public class PermissionsCommand extends CommonHelpableSubCommand {
         int count = 0;
         String worlds = "";
         for (World world : this.server.getWorlds()) {
-            if (MyWarp.permissions.permission(sender, permission.getPermission(world.getName(), false))) {
+            if (XWarp.permissions.permission(sender, permission.getPermission(world.getName(), false))) {
                 if (count > 0) {
                     worlds += ", ";
                 }

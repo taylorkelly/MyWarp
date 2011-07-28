@@ -28,6 +28,7 @@ import de.xzise.xwarp.Warp;
 import de.xzise.xwarp.WarpObject;
 import de.xzise.xwarp.WarpProtectionArea;
 import de.xzise.xwarp.WorldWrapper;
+import de.xzise.xwarp.XWarp;
 import de.xzise.xwarp.Warp.Visibility;
 import de.xzise.xwarp.editors.Editor;
 import de.xzise.xwarp.editors.EditorPermissions;
@@ -35,7 +36,6 @@ import de.xzise.xwarp.editors.EditorPermissions.Type;
 import de.xzise.xwarp.editors.WarpPermissions;
 import de.xzise.xwarp.editors.WarpProtectionAreaPermissions;
 
-import me.taylorkelly.mywarp.MyWarp;
 
 public class YmlConnection implements WarpProtectionConnection {
 
@@ -150,7 +150,7 @@ public class YmlConnection implements WarpProtectionConnection {
                 writer.close();
             }
         } catch (IOException e) {
-            MyWarp.logger.severe("Unable to write the file", e);
+            XWarp.logger.severe("Unable to write the file", e);
         }
     }
     

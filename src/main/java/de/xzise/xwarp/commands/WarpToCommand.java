@@ -1,6 +1,5 @@
 package de.xzise.xwarp.commands;
 
-import me.taylorkelly.mywarp.MyWarp;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Server;
@@ -8,6 +7,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import de.xzise.xwarp.WarpManager;
+import de.xzise.xwarp.XWarp;
 import de.xzise.xwarp.warpable.Warpable;
 import de.xzise.xwarp.warpable.WarpablePlayer;
 import de.xzise.xwarp.warpable.WarperFactory;
@@ -75,6 +75,6 @@ public class WarpToCommand extends DefaultSubCommand<WarpManager> {
 
     @Override
     public boolean listHelp(CommandSender sender) {
-        return MyWarp.permissions.permissionOr(sender, PermissionTypes.WARP_TO_PERMISSIONS);
+        return XWarp.permissions.permissionOr(sender, PermissionTypes.WARP_TO_PERMISSIONS);
     }
 }

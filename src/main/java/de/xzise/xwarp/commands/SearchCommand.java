@@ -1,14 +1,14 @@
 package de.xzise.xwarp.commands;
 
-import me.taylorkelly.mywarp.MyWarp;
-import me.taylorkelly.mywarp.Searcher;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Server;
 import org.bukkit.command.CommandSender;
 
 import de.xzise.MinecraftUtil;
+import de.xzise.xwarp.Searcher;
 import de.xzise.xwarp.WarpManager;
+import de.xzise.xwarp.XWarp;
 import de.xzise.xwarp.wrappers.permission.PermissionTypes;
 
 public class SearchCommand extends DefaultSubCommand<WarpManager> {
@@ -20,7 +20,7 @@ public class SearchCommand extends DefaultSubCommand<WarpManager> {
     @Override
     public boolean execute(CommandSender sender, String[] parameters) {
         if (parameters.length == 2 || parameters.length == 3) {
-            if (!MyWarp.permissions.permission(sender, PermissionTypes.CMD_SEARCH)) {
+            if (!XWarp.permissions.permission(sender, PermissionTypes.CMD_SEARCH)) {
                 sender.sendMessage(ChatColor.RED + "You have no permission to search warps.");
             } else {
                 Integer page = null;

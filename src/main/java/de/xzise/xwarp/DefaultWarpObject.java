@@ -5,8 +5,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import me.taylorkelly.mywarp.MyWarp;
 
+import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
@@ -15,11 +15,13 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 
 import de.xzise.MinecraftUtil;
+import de.xzise.wrappers.permissions.BufferPermission;
 import de.xzise.xwarp.editors.Editor;
 import de.xzise.xwarp.editors.EditorPermissions;
 import de.xzise.xwarp.editors.EditorPermissions.Type;
 import de.xzise.xwarp.warpable.WarperFactory;
 import de.xzise.xwarp.wrappers.permission.PermissionTypes;
+import de.xzise.xwarp.wrappers.permission.WarpEditorPermission;
 
 public abstract class DefaultWarpObject<T extends Enum<T> & Editor> implements WarpObject<T> {
 
@@ -28,13 +30,16 @@ public abstract class DefaultWarpObject<T extends Enum<T> & Editor> implements W
     private String creator;
     private final Map<EditorPermissions.Type, Map<String, EditorPermissions<T>>> editors;
     private final Class<T> editorPermissionClass;
-    
-    public DefaultWarpObject(String name, String owner, String creator, Map<EditorPermissions.Type, Map<String, EditorPermissions<T>>> editors, Class<T> editorPermissionClass) {
+
+    public final T invitePermission;
+
+    protected DefaultWarpObject(String name, String owner, String creator, Map<EditorPermissions.Type, Map<String, EditorPermissions<T>>> editors, Class<T> editorPermissionClass, T invitePermission) {
         this.name = name;
         this.owner = owner;
         this.creator = creator;
         this.editors = MinecraftUtil.createEnumMap(editors, EditorPermissions.Type.class);
         this.editorPermissionClass = editorPermissionClass;
+        this.invitePermission = invitePermission;
     }
 
     public void setOwner(String owner) {
@@ -44,7 +49,7 @@ public abstract class DefaultWarpObject<T extends Enum<T> & Editor> implements W
     public void setCreator(String creator) {
         this.creator = creator;
     }
-    
+
     public void setName(String name) {
         this.name = name;
     }
@@ -71,7 +76,7 @@ public abstract class DefaultWarpObject<T extends Enum<T> & Editor> implements W
             typePermissions.remove(name.toLowerCase());
         }
     }
-    
+
     @Override
     public void addEditor(String name, EditorPermissions.Type type, ImmutableSet<T> permissions) {
         this.getEditorPermissions(name, true, type).putSet(permissions, true);
@@ -85,7 +90,7 @@ public abstract class DefaultWarpObject<T extends Enum<T> & Editor> implements W
             return null;
         }
     }
-    
+
     /**
      * Returns the editor permissions to the type and name. Doesn't create new if there are no permissions.
      * @param name Name of the editor permissions holder.
@@ -95,7 +100,7 @@ public abstract class DefaultWarpObject<T extends Enum<T> & Editor> implements W
     public EditorPermissions<T> getEditorPermissions(String name, EditorPermissions.Type type) {
         return this.getEditorPermissions(name, false, type);
     }
-    
+
     /**
      * Returns the editor permissions to the type and name. If <code>create</code> is set to true, creates a new, if there are no editor permissions. Otherwise null.
      * @param name Name of the editor permissions holder.
@@ -112,7 +117,7 @@ public abstract class DefaultWarpObject<T extends Enum<T> & Editor> implements W
         }
         return editorPermissions;
     }
-    
+
     public static class EditorPermissionEntry<T extends Enum<T> & Editor> {
         
         public final EditorPermissions<T> editorPermissions;
@@ -125,7 +130,7 @@ public abstract class DefaultWarpObject<T extends Enum<T> & Editor> implements W
             this.type = type;
         }
     }
-    
+
     public Collection<EditorPermissionEntry<T>> getEditorPermissionsList() {
         List<EditorPermissionEntry<T>> allEntries = Lists.newArrayList();
         for (Entry<EditorPermissions.Type, Map<String, EditorPermissions<T>>> typeEntry : this.editors.entrySet()) {
@@ -139,16 +144,63 @@ public abstract class DefaultWarpObject<T extends Enum<T> & Editor> implements W
     public boolean isOwn(String name) {
         return this.getOwner().equals(name);
     }
-    
+
     public boolean isCreator(String name) {
         return this.getCreator().equals(name);
     }
 
+    public boolean hasPlayerPermission(String name, T permission) {
+        EditorPermissions<T> ep = this.getEditorPermissions(name, Type.PLAYER);
+        return ep != null && ep.get(permission);
+    }
+
+    public boolean hasGroupPermission(String name, T permission) {
+        for (String group : XWarp.permissions.getGroup(this.getWorld(), name)) {
+            EditorPermissions<T> ep = this.getEditorPermissions(group, Type.GROUP);
+            if (ep != null && ep.get(permission)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean hasEditorPermission(String name, T permission) {
+        Player player = Bukkit.getServer().getPlayer(name);
+        return player != null && hasEditorPermission(player, permission);
+    }
+
+    public boolean hasEditorPermission(CommandSender sender, T permission) {
+        return XWarp.permissions.permission(sender, new WarpEditorPermission(this, permission));
+    }
+
+    public boolean hasSpecificPermission(String name, T permission) {
+        Player player = Bukkit.getServer().getPlayer(name);
+        return player != null && hasSpecificPermission(player, permission);
+    }
+
+    public boolean hasSpecificPermission(CommandSender sender, T permission) {
+        for (Entry<String, EditorPermissions<T>> permissionEntry : this.getEditorPermissions(Type.PERMISSIONS).entrySet()) {
+            if (XWarp.permissions.permission(sender, new BufferPermission(permissionEntry.getKey(), false)) && permissionEntry.getValue().get(permission)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean hasPermission(String name, T permission) {
+        Player player = Bukkit.getServer().getPlayer(name);
+        return this.hasPlayerPermission(name, permission) || this.hasGroupPermission(name, permission) || (player != null && (this.hasEditorPermission(player, permission) || this.hasSpecificPermission(player, permission)));
+    }
+
+    public void invite(String player) {
+        this.getEditorPermissions(player, Type.PLAYER).put(this.invitePermission, true);
+    }
+
     public static boolean canModify(CommandSender sender, boolean defaultModification, PermissionTypes defaultPermission, PermissionTypes adminPermission) {
         if (defaultPermission != null) {
-            return ((defaultModification && MyWarp.permissions.permission(sender, defaultPermission)) || MyWarp.permissions.permission(sender, adminPermission));
+            return ((defaultModification && XWarp.permissions.permission(sender, defaultPermission)) || XWarp.permissions.permission(sender, adminPermission));
         } else {
-            return (defaultModification || MyWarp.permissions.permission(sender, adminPermission));
+            return (defaultModification || XWarp.permissions.permission(sender, adminPermission));
         }
     }
 
@@ -159,7 +211,7 @@ public abstract class DefaultWarpObject<T extends Enum<T> & Editor> implements W
         if (ep != null && ep.get(permission)) {
             return true;
         }
-        String[] groups = MyWarp.permissions.getGroup(player.getWorld().getName(), player.getName());
+        String[] groups = XWarp.permissions.getGroup(player.getWorld().getName(), player.getName());
         for (String group : groups) {
             EditorPermissions<T> groupPerm = this.getEditorPermissions(group, Type.GROUP);
             if (groupPerm != null && groupPerm.get(permission)) {

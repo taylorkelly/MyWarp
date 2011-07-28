@@ -2,7 +2,6 @@ package de.xzise.xwarp.commands.warp;
 
 import java.util.Collection;
 
-import me.taylorkelly.mywarp.MyWarp;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Server;
@@ -15,7 +14,7 @@ import de.xzise.wrappers.economy.EconomyHandler;
 import de.xzise.xwarp.DefaultWarpObject.EditorPermissionEntry;
 import de.xzise.xwarp.Warp;
 import de.xzise.xwarp.WarpManager;
-import de.xzise.xwarp.commands.WarpCommand;
+import de.xzise.xwarp.XWarp;
 import de.xzise.xwarp.editors.WarpPermissions;
 import de.xzise.xwarp.lister.GenericLister;
 import de.xzise.xwarp.wrappers.permission.PermissionTypes;
@@ -42,7 +41,7 @@ public class InfoCommand extends WarpCommand {
 
     @Override
     protected boolean executeEdit(Warp warp, CommandSender sender, String[] parameters) {
-        if (!MyWarp.permissions.permission(sender, PermissionTypes.CMD_INFO)) {
+        if (!XWarp.permissions.permission(sender, PermissionTypes.CMD_INFO)) {
             sender.sendMessage(ChatColor.RED + "You have no permission to gather information to warps.");
             return true;
         }
@@ -62,15 +61,15 @@ public class InfoCommand extends WarpCommand {
         switch (warp.getVisibility()) {
         case GLOBAL:
             visibility = "Global";
-            basePrice = MyWarp.permissions.getDouble(sender, PricePermissions.WARP_PRICES_TO_GLOBAL);
+            basePrice = XWarp.permissions.getDouble(sender, PricePermissions.WARP_PRICES_TO_GLOBAL);
             break;
         case PUBLIC:
             visibility = "Public";
-            basePrice = MyWarp.permissions.getDouble(sender, PricePermissions.WARP_PRICES_TO_PUBLIC);
+            basePrice = XWarp.permissions.getDouble(sender, PricePermissions.WARP_PRICES_TO_PUBLIC);
             break;
         case PRIVATE:
             visibility = "Private";
-            basePrice = MyWarp.permissions.getDouble(sender, PricePermissions.WARP_PRICES_TO_PRIVATE);
+            basePrice = XWarp.permissions.getDouble(sender, PricePermissions.WARP_PRICES_TO_PRIVATE);
             break;
         }
         if (sender instanceof Player) {
@@ -122,7 +121,7 @@ public class InfoCommand extends WarpCommand {
 
     private static String getPlayerLine(String player, String world) {
         if (MinecraftUtil.isSet(player)) {
-            String[] groups = MyWarp.permissions.getGroup(world, player);
+            String[] groups = XWarp.permissions.getGroup(world, player);
 
             String groupText = "";
             if (groups != null && groups.length > 0) {

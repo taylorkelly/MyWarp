@@ -14,7 +14,7 @@ public class WarpEditorPermission implements Permission<Boolean> {
     
     private final String permission;
     
-    public WarpEditorPermission(WarpObject<?> warpObject, Editor permission) {
+    public <E extends Editor> WarpEditorPermission(WarpObject<E> warpObject, E permission) {
         this.permission = PREFIX + warpObject.getOwner() + "." + warpObject.getName() + "." + permission.getName();
     }
 

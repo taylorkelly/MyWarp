@@ -7,7 +7,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
-import me.taylorkelly.mywarp.MyWarp;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Server;
@@ -116,13 +115,13 @@ public class WarpManager implements Manager<Warp> {
         Warp globalWarp = (visibility == Visibility.GLOBAL ? this.list.getWarpObject(name) : null);
         if ((warp == null && globalWarp == null) || !this.properties.isCreationUpdating()) {
             if (globalWarp != warp && Visibility.GLOBAL == visibility)
-                MyWarp.logger.info("Everything okay! But inform the developer (xZise), that the global warp wasn't equals warp!");
+                XWarp.logger.info("Everything okay! But inform the developer (xZise), that the global warp wasn't equals warp!");
             PermissionTypes type = Groups.CREATE_GROUP.get(visibility);
             PermissionValues limit = Groups.LIMIT_GROUP.get(visibility);
             
             CommandSender sender = CommandSenderWrapper.getCommandSender(player);
             
-            if (MyWarp.permissions.permission(sender, type)) {
+            if (XWarp.permissions.permission(sender, type)) {
                 String creator = "";
                 String world = player.getLocation().getWorld().getName();
                 if (player instanceof Nameable) {
@@ -133,8 +132,8 @@ public class WarpManager implements Manager<Warp> {
     
                 int warpsByCreator = this.list.getNumberOfWarps(creator, visibility, world);
                 int totalWarpsByCreator = this.list.getNumberOfWarps(creator, null, world);
-                int allowedMaximum = MyWarp.permissions.getInteger(sender, limit);
-                int allowedTotalMaximum = MyWarp.permissions.getInteger(sender, PermissionValues.WARP_LIMIT_TOTAL);
+                int allowedMaximum = XWarp.permissions.getInteger(sender, limit);
+                int allowedTotalMaximum = XWarp.permissions.getInteger(sender, PermissionValues.WARP_LIMIT_TOTAL);
                 if (warpsByCreator >= allowedMaximum && allowedMaximum >= 0) {
                     player.sendMessage(ChatColor.RED + "You are allowed to create only " + allowedMaximum + " warps.");
                 } else if (totalWarpsByCreator >= allowedTotalMaximum && allowedTotalMaximum >= 0) {
@@ -146,7 +145,7 @@ public class WarpManager implements Manager<Warp> {
                         sender.sendMessage(ChatColor.RED + "Global warp called '" + name + "' already exists (" + globalWarp.getName() + ").");
                     } else {
                         List<String> inProtectionArea = new ArrayList<String>();
-                        boolean skipProtectionTest = MyWarp.permissions.permission(sender, PermissionTypes.ADMIN_IGNORE_PROTECTION_AREA);
+                        boolean skipProtectionTest = XWarp.permissions.permission(sender, PermissionTypes.ADMIN_IGNORE_PROTECTION_AREA);
                         if (!skipProtectionTest && this.wpaManager != null) {
                             for (WarpProtectionArea area : this.wpaManager.getWarpObjects()) {
                                 if (area.isWithIn(player) && creator != null && area.isAllowed(creator)) {
@@ -159,7 +158,7 @@ public class WarpManager implements Manager<Warp> {
                             //TODO: Tell which protection areas?
                             player.sendMessage(ChatColor.RED + "Here is a warp creation protection area.");
                         } else {
-                            double price = MyWarp.permissions.getDouble(sender, Groups.PRICES_CREATE_GROUP.get(visibility));
+                            double price = XWarp.permissions.getDouble(sender, Groups.PRICES_CREATE_GROUP.get(visibility));
         
                             switch (this.economy.pay(sender, price)) {
                             case PAID:
@@ -175,7 +174,7 @@ public class WarpManager implements Manager<Warp> {
                                     WarpManager.printPrivatizeMessage(sender, warp);
                                     break;
                                 case PUBLIC:
-                                    if (MyWarp.permissions.permissionOr(sender, PermissionTypes.CREATE_PRIVATE, PermissionTypes.ADMIN_PRIVATE)) {
+                                    if (XWarp.permissions.permissionOr(sender, PermissionTypes.CREATE_PRIVATE, PermissionTypes.ADMIN_PRIVATE)) {
                                         sender.sendMessage("If you'd like to privatize it, use:");
                                         sender.sendMessage(ChatColor.GREEN + "/warp private \"" + warp.getName() + "\" " + warp.getOwner());
                                     }
@@ -248,7 +247,7 @@ public class WarpManager implements Manager<Warp> {
 
     @Override
     public void setCreator(Warp warp, CommandSender sender, String newCreator) {
-        if (MyWarp.permissions.permission(sender, PermissionTypes.ADMIN_CHANGE_CREATOR)) {
+        if (XWarp.permissions.permission(sender, PermissionTypes.ADMIN_CHANGE_CREATOR)) {
             if (warp.isCreator(newCreator)) {
                 sender.sendMessage(ChatColor.RED + newCreator + " is already the creator.");
             } else {
@@ -365,7 +364,7 @@ public class WarpManager implements Manager<Warp> {
     @Override
     public void invite(Warp warp, CommandSender sender, String inviteeName) {
         if (warp.canModify(sender, WarpPermissions.INVITE)) {
-            if (warp.isInvited(inviteeName, true)) {
+            if (warp.hasPlayerPermission(inviteeName, WarpPermissions.WARP)) {
                 sender.sendMessage(ChatColor.RED + inviteeName + " is already invited to this warp.");
             } else if (warp.isOwn(inviteeName)) {
                 sender.sendMessage(ChatColor.RED + inviteeName + " is the creator, of course he's the invited!");
@@ -390,7 +389,7 @@ public class WarpManager implements Manager<Warp> {
     @Override
     public void uninvite(Warp warp, CommandSender sender, String inviteeName) {
         if (warp.canModify(sender, WarpPermissions.UNINVITE)) {
-            if (!warp.isInvited(inviteeName, true)) {
+            if (!warp.hasPlayerPermission(inviteeName, WarpPermissions.WARP)) {
                 sender.sendMessage(ChatColor.RED + inviteeName + " is not invited to this warp.");
             } else if (warp.isOwn(inviteeName)) {
                 sender.sendMessage(ChatColor.RED + "You can't uninvite yourself. You're the creator!");
@@ -522,13 +521,13 @@ public class WarpManager implements Manager<Warp> {
 
     public void warpTo(Warp warp, CommandSender warper, Warpable warped, boolean viaSign, boolean forced) {
         if (warp.getLocationWrapper().isValid()) {
-            if (warped.equals(warper) || MyWarp.permissions.permission(warper, PermissionTypes.ADMIN_WARP_OTHERS)) {
+            if (warped.equals(warper) || XWarp.permissions.permission(warper, PermissionTypes.ADMIN_WARP_OTHERS)) {
                 if (warp.playerCanWarp(warper, viaSign)) {
                     if (!forced && !warp.isSave()) {
                         warper.sendMessage(ChatColor.RED + "The selected warp is maybe not save!");
                         warper.sendMessage(ChatColor.RED + "To force warping use /warp force-to <warp> [owner].");
                     } else {
-                        double price = MyWarp.permissions.getDouble(warper, Groups.PRICES_TO_GROUP.get(warp.getVisibility()));
+                        double price = XWarp.permissions.getDouble(warper, Groups.PRICES_TO_GROUP.get(warp.getVisibility()));
 
                         if (this.coolDown.playerHasCooled(warper)) {
                             if (warp.isFree()) {

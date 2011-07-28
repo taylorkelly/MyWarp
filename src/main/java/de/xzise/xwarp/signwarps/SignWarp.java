@@ -3,7 +3,6 @@ package de.xzise.xwarp.signwarps;
 import java.util.ArrayList;
 import java.util.List;
 
-import me.taylorkelly.mywarp.MyWarp;
 
 import org.bukkit.Material;
 import org.bukkit.block.Sign;
@@ -12,6 +11,7 @@ import org.bukkit.inventory.ItemStack;
 
 import de.xzise.xwarp.WarpDestination;
 import de.xzise.xwarp.WarpManager;
+import de.xzise.xwarp.XWarp;
 import de.xzise.xwarp.warpable.WarperFactory;
 
 public class SignWarp {
@@ -53,7 +53,7 @@ public class SignWarp {
                 String name = destination.name;
                 name = replaceName(name, player.getName(), "Name", "N");
                 name = replaceName(name, player.getDisplayName(), "DName", "DN");
-                String[] groups = MyWarp.permissions.getGroup(player.getWorld().getName(), player.getName());
+                String[] groups = XWarp.permissions.getGroup(player.getWorld().getName(), player.getName());
                 if (groups.length > 0) {
                     name = replaceName(name, groups[0], "Group", "G");
                 }

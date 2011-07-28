@@ -20,6 +20,8 @@ public abstract class PersonalList<T extends WarpObject<?>, G extends GlobalMap<
     // Warps sorted by name
     private final Map<String, G> nameMap = new HashMap<String, G>();
     
+    private boolean ignoreCase;
+    
     public void loadList(Collection<T> warpObjects) {
         for (Map<?, ?> personalWarps : this.personalMap.values()) {
             personalWarps.clear();
@@ -109,19 +111,22 @@ public abstract class PersonalList<T extends WarpObject<?>, G extends GlobalMap<
     }
 
     public T getWarpObject(String name, String owner, String playerName) {
+        T warpObject = null;
         if (MinecraftUtil.isSet(owner)) {
             Map<String, T> ownerWarps = this.personalMap.get(owner.toLowerCase());
             if (ownerWarps != null) {
-                return ownerWarps.get(name.toLowerCase());
+                warpObject = ownerWarps.get(name.toLowerCase());
             }
-            return null;
         } else {
             GlobalMap<T> namedWarps = this.nameMap.get(name.toLowerCase());
             if (namedWarps != null) {
-                return namedWarps.getWarpObject(playerName);
-            } else {
-                return null;
+                warpObject = namedWarps.getWarpObject(playerName);
             }
+        }
+        if (warpObject != null && (this.ignoreCase || (warpObject.getName().equals(name) && (!MinecraftUtil.isSet(owner) || warpObject.getOwner().equals(owner))))) {
+            return warpObject;
+        } else {
+            return null;
         }
     }
 
@@ -190,6 +195,14 @@ public abstract class PersonalList<T extends WarpObject<?>, G extends GlobalMap<
     
     protected G getByName(String name) {
         return this.nameMap.get(name.toLowerCase());
+    }
+
+    public boolean isIgnoreCase() {
+        return this.ignoreCase;
+    }
+
+    public void setIgnoreCase(boolean ignoreCase) {
+        this.ignoreCase = ignoreCase;
     }
 
 }

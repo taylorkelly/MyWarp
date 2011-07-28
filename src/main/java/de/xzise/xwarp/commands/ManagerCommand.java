@@ -7,7 +7,6 @@ import org.bukkit.command.CommandSender;
 import de.xzise.MinecraftUtil;
 import de.xzise.xwarp.Manager;
 import de.xzise.xwarp.WarpObject;
-import de.xzise.xwarp.WarpProtectionArea;
 
 /**
  * Default command structure with a warp definition. The command structure is:
@@ -19,20 +18,6 @@ import de.xzise.xwarp.WarpProtectionArea;
  */
 public abstract class ManagerCommand<W extends WarpObject<?>, M extends Manager<W>> extends DefaultSubCommand<M> {
     
-    /* DUMMY CLASS! */
-    public abstract static class WPAManager implements Manager<WarpProtectionArea> {}
-    
-    public abstract static class WPACommand extends ManagerCommand<WarpProtectionArea, WPAManager> {
-
-        protected WPACommand(WPAManager manager, Server server, String[] parameters, String... commands) {
-            super(manager, server, "wpa", parameters, commands);
-        }
-
-        protected WPACommand(WPAManager manager, Server server, String parameterText, String... commands) {
-            super(manager, server, "wpa", parameterText, commands);
-        }
-    }
-
     private final String cmd;
     private final int length;
     private final String[] parametersText;

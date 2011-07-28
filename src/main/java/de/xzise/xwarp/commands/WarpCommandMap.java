@@ -4,7 +4,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import me.taylorkelly.mywarp.MyWarp;
 
 import org.bukkit.Server;
 
@@ -15,6 +14,8 @@ import de.xzise.wrappers.economy.EconomyHandler;
 import de.xzise.xwarp.PluginProperties;
 import de.xzise.xwarp.Warp;
 import de.xzise.xwarp.WarpManager;
+import de.xzise.xwarp.XWarp;
+import de.xzise.xwarp.commands.warp.CreateCommand;
 import de.xzise.xwarp.commands.warp.GlobalizeCommand;
 import de.xzise.xwarp.commands.warp.InfoCommand;
 import de.xzise.xwarp.commands.warp.ListCommand;
@@ -62,7 +63,7 @@ public class WarpCommandMap extends CommonCommandMap {
         subCommands.add(new InfoCommand(manager, server, economyWrapper));
         subCommands.add(new ListedCommand(manager, server));
         subCommands.add(new ReloadCommand(economyWrapper, properties, manager));
-        subCommands.add(new StatusCommand(manager, economyWrapper, MyWarp.permissions));
+        subCommands.add(new StatusCommand(manager, economyWrapper, XWarp.permissions));
         subCommands.add(new PermissionsCommand(manager, server));
         subCommands.add(new ExportCommand(manager, server, pluginPath));
         subCommands.add(new ImportCommand(manager, pluginPath, data, server));
