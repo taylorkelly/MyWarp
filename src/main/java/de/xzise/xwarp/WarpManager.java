@@ -301,12 +301,30 @@ public class WarpManager implements Manager<Warp> {
         }
     }
 
-    public void privatize(Warp warp, CommandSender sender) {
-        if (warp.canModify(sender, WarpPermissions.PRIVATE)) {
-            warp.setVisibility(Visibility.PRIVATE);
+    private boolean changeVisibility(CommandSender sender, Warp warp, Visibility visibility) {
+        double price = XWarp.permissions.getDouble(sender, Groups.PRICES_CREATE_GROUP.get(visibility));
+
+        switch (this.economy.pay(sender, price)) {
+        case PAID:
+            this.printPayMessage(sender, price);
+        case UNABLE:
+            warp.setVisibility(visibility);
             this.list.updateVisibility(warp);
             this.data.updateVisibility(warp);
-            WarpManager.printPrivatizeMessage(sender, warp);
+            return true;
+        case NOT_ENOUGH:
+            sender.sendMessage(ChatColor.RED + "You have not enough money to pay the change.");
+            break;
+        }
+
+        return false;
+    }
+
+    public void privatize(Warp warp, CommandSender sender) {
+        if (warp.canModify(sender, WarpPermissions.PRIVATE)) {
+            if (this.changeVisibility(sender, warp, Visibility.PRIVATE)) {
+                WarpManager.printPrivatizeMessage(sender, warp);
+            }
         } else {
             sender.sendMessage(ChatColor.RED + "You do not have permission to privatize '" + warp.getName() + "'");
         }
@@ -314,12 +332,28 @@ public class WarpManager implements Manager<Warp> {
 
     public void publicize(Warp warp, CommandSender sender) {
         if (warp.canModify(sender, WarpPermissions.PUBLIC)) {
-            warp.setVisibility(Visibility.PUBLIC);
-            this.list.updateVisibility(warp);
-            this.data.updateVisibility(warp);
-            sender.sendMessage(ChatColor.AQUA + "You have publicized '" + warp.getName() + "'");
+            if (this.changeVisibility(sender, warp, Visibility.PUBLIC)) {
+                sender.sendMessage(ChatColor.AQUA + "You have publicized '" + warp.getName() + "'");
+            }
         } else {
             sender.sendMessage(ChatColor.RED + "You do not have permission to publicize '" + warp.getName() + "'");
+        }
+    }
+
+    public void globalize(Warp warp, CommandSender sender) {
+        if (warp.canModify(sender, WarpPermissions.GLOBAL)) {
+            Warp existing = this.list.getWarpObject(warp.getName());
+            if (existing == null || existing.getVisibility() != Visibility.GLOBAL) {
+                if (this.changeVisibility(sender, warp, Visibility.GLOBAL)) {
+                    sender.sendMessage("You have globalized '" + ChatColor.GREEN + warp.getName() + ChatColor.WHITE + "'");
+                }
+            } else if (existing.equals(warp) && existing.getVisibility() == Visibility.GLOBAL) {
+                sender.sendMessage(ChatColor.RED + "This warp is already globalized.");
+            } else {
+                sender.sendMessage(ChatColor.RED + "One global warp with this name already exists.");
+            }
+        } else {
+            sender.sendMessage(ChatColor.RED + "You do not have permission to globalize '" + warp.getName() + "'");
         }
     }
 
@@ -340,24 +374,6 @@ public class WarpManager implements Manager<Warp> {
             }
         } else {
             sender.sendMessage(ChatColor.RED + "You do not have permission to change the price of '" + warp.getName() + "'");
-        }
-    }
-
-    public void globalize(Warp warp, CommandSender sender) {
-        if (warp.canModify(sender, WarpPermissions.GLOBAL)) {
-            Warp existing = this.list.getWarpObject(warp.getName());
-            if (existing == null || existing.getVisibility() != Visibility.GLOBAL) {
-                warp.setVisibility(Visibility.GLOBAL);
-                this.data.updateVisibility(warp);
-                this.list.updateVisibility(warp);
-                sender.sendMessage("You have globalized '" + ChatColor.GREEN + warp.getName() + ChatColor.WHITE + "'");
-            } else if (existing.equals(warp) && existing.getVisibility() == Visibility.GLOBAL) {
-                sender.sendMessage(ChatColor.RED + "This warp is already globalized.");
-            } else {
-                sender.sendMessage(ChatColor.RED + "One global warp with this name already exists.");
-            }
-        } else {
-            sender.sendMessage(ChatColor.RED + "You do not have permission to globalize '" + warp.getName() + "'");
         }
     }
 

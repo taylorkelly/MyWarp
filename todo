@@ -1,9 +1,9 @@
 3.0.0
   - testing
   - add "wpa" create command
-  - case sensitive check
-  - pay creation price for change visibility
-  - Bukkit permissions support
+  - --case-sensitive-check--
+  - --pay-creation-price-for-change-visibility--
+  - Bukkit permissions support (in Bukkit Plugin Utilities)
 
 3.1.0
   - auto completion
