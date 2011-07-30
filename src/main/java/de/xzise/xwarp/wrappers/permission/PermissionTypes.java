@@ -3,113 +3,86 @@ package de.xzise.xwarp.wrappers.permission;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.bukkit.permissions.PermissionDefault;
+import org.bukkit.plugin.PluginManager;
+
+import com.google.common.collect.ImmutableSet;
 
 import de.xzise.wrappers.permissions.Permission;
 import de.xzise.xwarp.Warp.Visibility;
 
 public enum PermissionTypes implements Permission<Boolean>, VisibilityPermission {
-    
-    // Warp to global warps
-    TO_GLOBAL("warp.to.global", true),
-    // Warp to own warps
-    TO_OWN("warp.to.own", true),
-    // Warp to invited warps
-    TO_INVITED("warp.to.invited", true),
-    // Warp to public warps
-    TO_OTHER("warp.to.other", true),
+    // Warp via command
+    TO_GLOBAL("to.global", true, "Warp to global warps via commands"),
+    TO_OWN("to.own", true, "Warp to own warps via commands"),
+    TO_INVITED("to.invited", true, "Warp to invited warp via commands"),
+    TO_OTHER("to.other", true, "Warp to public warps via commands"),
 
-    // Warp with sign to global
-    SIGN_WARP_GLOBAL("warp.sign.to.global", true),
-    // Warp to own warps
-    SIGN_WARP_OWN("warp.sign.to.own", true),
-    // Warp to invited warps
-    SIGN_WARP_INVITED("warp.sign.to.invited", true),
-    // Warp to public warps
-    SIGN_WARP_OTHER("warp.sign.to.other", true),
-    
-    // Create warp sign to private warp
-    CREATE_SIGN_PRIVATE("warp.sign.create.private", true, Visibility.PRIVATE),
-    // Create warp sign to public warp
-    CREATE_SIGN_PUBLIC("warp.sign.create.public", true, Visibility.PUBLIC),
-    // Create warp sign to global warp
-    CREATE_SIGN_GLOBAL("warp.sign.create.global", true, Visibility.GLOBAL),
-    // Create warp sign to warp which doesn't exists
-    SIGN_CREATE_UNKNOWN("warp.sign.create.unknown", true),
+    // Use warp signs
+    SIGN_WARP_GLOBAL("sign.to.global", true, "Warp to global warps via a warp sign"),
+    SIGN_WARP_OWN("sign.to.own", true, "Warp to global own via a warp sign"),
+    SIGN_WARP_INVITED("sign.to.invited", true, "Warp to invited warps via a warp sign"),
+    SIGN_WARP_OTHER("sign.to.other", true, "Warp to public warps via a warp sign"),
 
-    // Create/Edit private warps
-    CREATE_PRIVATE("warp.create.private", true, Visibility.PRIVATE),
-    // Create/Edit public warps
-    CREATE_PUBLIC("warp.create.public", true, Visibility.PUBLIC),
-    // Create/Edit global warps
-    CREATE_GLOBAL("warp.create.global", true, Visibility.GLOBAL),
-    
+    // Create warp signs
+    CREATE_SIGN_PRIVATE("sign.create.private", true, "Create warp signs to private warps", Visibility.PRIVATE),
+    CREATE_SIGN_PUBLIC("sign.create.public", true, "Create warp signs to public warps", Visibility.PUBLIC),
+    CREATE_SIGN_GLOBAL("sign.create.global", true, "Create warp signs to global warps", Visibility.GLOBAL),
+    SIGN_CREATE_UNKNOWN("sign.create.unknown", true, "Create warp signs to warps which doesn't exists"),
+
+    // Create warps
+    CREATE_PRIVATE("create.private", true, "Create private warps", Visibility.PRIVATE),
+    CREATE_PUBLIC("create.public", true, "Create public warps", Visibility.PUBLIC),
+    CREATE_GLOBAL("create.global", true, "Create global warps", Visibility.GLOBAL),
+
     // Edit own warps
-    EDIT_DELETE("warp.edit.delete", true),
-    EDIT_INVITE("warp.edit.invite.add", true),
-    EDIT_UNINVITE("warp.edit.invite.delete", true),
-    EDIT_MESSAGE("warp.edit.message", true),
-    EDIT_LOCATION("warp.edit.update", true),
-    EDIT_RENAME("warp.edit.rename", true),
+    EDIT_DELETE("edit.delete", true, "Delete own warps"),
+    EDIT_INVITE("edit.invite.add", true, "Invite to own warps"),
+    EDIT_UNINVITE("edit.invite.delete", true, "Uninvite from own warps"),
+    EDIT_MESSAGE("edit.message", true, "Change welcome message of own warps"),
+    EDIT_LOCATION("edit.update", true, "Relocate own warps"),
+    EDIT_RENAME("edit.rename", true, "Rename own warps"),
     // EDIT_(PRIVATE|PUBLIC|GLOBAL) == CREATE_*
-    EDIT_EDITORS_ADD("warp.edit.editors.add", true),
-    EDIT_EDITORS_REMOVE("warp.edit.editors.remove", true),
-    EDIT_CHANGE_OWNER("warp.edit.owner", true),
-    EDIT_CHANGE_CREATOR("warp.edit.creator", false),
-    EDIT_PRICE("warp.edit.price.set", true),
-    EDIT_FREE("warp.edit.price.free", false),
-    EDIT_LIST("warp.edit.list", false),
+    EDIT_EDITORS_ADD("edit.editors.add", true, "Add an editor to own warps"),
+    EDIT_EDITORS_REMOVE("edit.editors.remove", true, "Removes an editor from own warps"),
+    EDIT_CHANGE_OWNER("edit.owner", true, "Change owner of own warps"),
+    EDIT_CHANGE_CREATOR("edit.creator", false, "Change creator of own warps (Handle with care!)"),
+    EDIT_PRICE("edit.price.set", true, "Change price of own warps"),
+    EDIT_FREE("edit.price.free", false, "Make own warps completely free (Handle with care!)"),
+    EDIT_LIST("edit.list", false, "Change if owned warps are listed"),
 
     // Access to list
-    CMD_LIST("warp.command.list", true),
-    CMD_SEARCH("warp.command.search", true),
-    CMD_INFO("warp.command.info", true),
+    CMD_LIST("command.list", true, "Execute the warp list command"),
+    CMD_SEARCH("command.search", true, "Execute the warp search command"),
+    CMD_INFO("command.info", true, "Execute the warp info command"),
 
-    // Delete all warps
-    ADMIN_DELETE("warp.admin.delete", false),
-    // Invite to all warps
-    ADMIN_INVITE("warp.admin.invite", false),
-    // Uninvite to all warps
-    ADMIN_UNINVITE("warp.admin.uninvite", false),
-    // Edit the welcome message of all warps
-    ADMIN_MESSAGE("warp.admin.message", false),
-    // Update all warps
-    ADMIN_UPDATE("warp.admin.update", false),
-    // Rename all warps
-    ADMIN_RENAME("warp.admin.rename", false),
-    // Make other's warp privates
-    ADMIN_PRIVATE("warp.admin.private", false),
-    // Make other's warp public
-    ADMIN_PUBLIC("warp.admin.public", false),
-    // Make other's warps global
-    ADMIN_GLOBAL("warp.admin.global", false),
-    // Warp to all warps
-    ADMIN_TO_ALL("warp.admin.to.all", false),
-    // Reload database
-    ADMIN_RELOAD("warp.admin.reload", false),
-    // Converts from hmod file
-    ADMIN_CONVERT("warp.admin.convert", false),
-    // Export warps
-    ADMIN_EXPORT("warp.admin.export", false),
-    // Converts from hmod file
-    ADMIN_EDITORS_REMOVE("warp.admin.editors.remove", false),
-    // Converts from hmod file
-    ADMIN_EDITORS_ADD("warp.admin.editors.add", false),
-    // Give away all warps
-    ADMIN_CHANGE_OWNER("warp.admin.give.owner", false),
-    // Change the creator
-    ADMIN_CHANGE_CREATOR("warp.admin.changecreator", false),
-    // Warp other players
-    ADMIN_WARP_OTHERS("warp.admin.warp.others", false),
-    // Change the price
-    ADMIN_PRICE("warp.admin.price.set", false),
-    // Change the price to free
-    ADMIN_FREE("warp.admin.price.free", false),
-    // Hide from list/Show on list
-    ADMIN_LIST_CHANGE("warp.admin.list.change", false),
-    // Ignore listed status
-    ADMIN_LIST_VIEW("warp.admin.list.view", false), 
-    // Ignore protection areas
-    ADMIN_IGNORE_PROTECTION_AREA("warp.admin.area.ignore", false),
+    // Edit warp owned by others
+    ADMIN_DELETE("admin.delete", false, "Delete all warps"),
+    ADMIN_INVITE("admin.invite", false, "Invite to all warps"),
+    ADMIN_UNINVITE("admin.uninvite", false, "Uninvite to all warps"),
+    ADMIN_MESSAGE("admin.message", false, "Change welcome message of all warps"),
+    ADMIN_UPDATE("admin.update", false, "Relocate all warps"),
+    ADMIN_RENAME("admin.rename", false, "Rename all warps"),
+    ADMIN_PRIVATE("admin.private", false, "Change visibility to private to all warps"),
+    ADMIN_PUBLIC("admin.public", false, "Change visibility to public to all warps"),
+    ADMIN_GLOBAL("admin.global", false, "Change visibility to global to all warps"),
+    ADMIN_EDITORS_ADD("admin.editors.add", false, "Add editors to all warps"),
+    ADMIN_EDITORS_REMOVE("admin.editors.remove", false, "Remove editors from all warps"),
+    ADMIN_CHANGE_OWNER("admin.give.owner", false, "Change owner of all warps"),
+    ADMIN_CHANGE_CREATOR("admin.changecreator", false, "Change creator of all warps"),
+    ADMIN_LIST_CHANGE("admin.list.change", false, "Change if all warps are listed"),
+    ADMIN_PRICE("admin.price.set", false, "Change price of all warps"),
+    ADMIN_FREE("admin.price.free", false, "Make all warps completely free"),
+
+    ADMIN_TO_ALL("admin.to.all", false, "Warp to all warps"),
+    ADMIN_RELOAD("admin.reload", false, "Reload from database"),
+//    ADMIN_CONVERT("warp.admin.convert", false),
+    ADMIN_EXPORT("admin.export", false, "Export warps"),
+    ADMIN_IMPORT("admin.export", false, "Import warps"),
+    ADMIN_WARP_OTHERS("admin.warp.others", false, "Warp other players"),
+    ADMIN_LIST_VIEW("admin.list.view", false, "List also not listed warps"),
+
+    ADMIN_IGNORE_PROTECTION_AREA("admin.area.ignore", false, "Ignore warp protection areas"),
     ;
 
     // Maybe upcoming permissions:
@@ -118,33 +91,30 @@ public enum PermissionTypes implements Permission<Boolean>, VisibilityPermission
 
     public final String name;
     public final boolean def;
+    public final String description;
     public final Visibility visibility;
 
-    public final static List<Permission<Boolean>> WARP_TO_PERMISSIONS;
+    public final static ImmutableSet<PermissionTypes> WARP_TO_PERMISSIONS = ImmutableSet.of(ADMIN_TO_ALL, TO_GLOBAL, TO_INVITED, TO_OTHER, TO_OWN);
 
-    static {
-        WARP_TO_PERMISSIONS = new ArrayList<Permission<Boolean>>(5);
-        WARP_TO_PERMISSIONS.add(ADMIN_TO_ALL);
-        WARP_TO_PERMISSIONS.add(TO_INVITED);
-        WARP_TO_PERMISSIONS.add(TO_GLOBAL);
-        WARP_TO_PERMISSIONS.add(TO_OTHER);
-        WARP_TO_PERMISSIONS.add(TO_OWN);
-    }
-
-    private PermissionTypes(String name, boolean def) {
-        this(name, def, null);
+    private PermissionTypes(String name, boolean def, String description) {
+        this(name, def, description, null);
     }
     
-    private PermissionTypes(String name, boolean def, Visibility visibility) {
-        this.name = name;
+    private PermissionTypes(String name, boolean def, String description, Visibility visibility) {
+        this.name = "xwarp." + name;
         this.def = def;
+        this.description = description;
         this.visibility = visibility;
     }
-    
+
+    public void register(PluginManager pluginManager) throws ClassNotFoundException {
+        pluginManager.addPermission(new org.bukkit.permissions.Permission(this.name, this.description, this.def ? PermissionDefault.TRUE : PermissionDefault.OP));
+    }
+
     public Boolean getDefault() {
         return this.def;
     }
-    
+
     public static PermissionTypes getType(String name) {
         for (PermissionTypes type : PermissionTypes.values()) {
             if (type.name.equals(name)) {
@@ -163,7 +133,7 @@ public enum PermissionTypes implements Permission<Boolean>, VisibilityPermission
         }
         return permissions;
     }
-    
+
     @Override
     public String getName() {
         return this.name;

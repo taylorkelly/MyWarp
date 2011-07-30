@@ -1,18 +1,14 @@
 package de.xzise.xwarp;
 
-import java.io.BufferedInputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileWriter;
-import java.io.IOException;
 
 import org.bukkit.Server;
+import org.bukkit.util.config.Configuration;
 
-
-import de.xzise.MinecraftUtil;
 import de.xzise.xwarp.dataconnections.DataConnection;
 import de.xzise.xwarp.dataconnections.HModConnection;
 import de.xzise.xwarp.dataconnections.SQLiteConnection;
+import de.xzise.xwarp.dataconnections.YmlConnection;
 
 public class PluginProperties {
 
@@ -24,6 +20,8 @@ public class PluginProperties {
     private boolean cancelWarmUpOnDamage;
     private boolean cancelWarmUpOnMovement;
     private boolean createUpdates;
+    private boolean caseSensitive;
+    private String permissionsPlugin;
     private String economyPlugin;
     private String economyBaseAccount;
 
@@ -41,15 +39,23 @@ public class PluginProperties {
     public DataConnection getDataConnection() {
         return this.dataConnection;
     }
-    
-    public String getEconomyPlugin() {
-        if (this.economyPlugin.equalsIgnoreCase("none") || this.economyPlugin.equalsIgnoreCase("null")) {
+
+    private static String getPlugin(String value) {
+        if (value.equalsIgnoreCase("none") || value.equalsIgnoreCase("null")) {
             return null;
         } else {
-            return this.economyPlugin;
+            return value;
         }
     }
-    
+
+    public String getEconomyPlugin() {
+        return getPlugin(this.economyPlugin);
+    }
+
+    public String getPermissionsPlugin() {
+        return getPlugin(this.permissionsPlugin);
+    }
+
     public String getEconomyBaseAccount() {
         return this.economyBaseAccount;
     }
@@ -77,67 +83,66 @@ public class PluginProperties {
     public boolean showFreePriceMessage() {
         return this.showFreePriceMessage;
     }
-    
+
     public boolean isCreationUpdating() {
         return this.createUpdates;
     }
-    
+
+    public boolean isCaseSensitive() {
+        return this.caseSensitive;
+    }
+
     public void read() {
-        java.util.Properties properties = new java.util.Properties();
+        Configuration configuration = new Configuration(this.configFile);
         if (this.configFile.exists()) {
-            try {
-                BufferedInputStream stream = new BufferedInputStream(new FileInputStream(this.configFile));
-                properties.load(stream);
-                stream.close();
-            } catch (IOException e) {
-                XWarp.logger.warning("Unable to load properties file.", e);
-            }
+            configuration.load();
         } else {
-            try {
-                properties.setProperty("data-connection", "sqlite");
-                properties.setProperty("cooldown-notify", "true");
-                properties.setProperty("warmup-notify", "true");
-                properties.setProperty("use-force-to", "true");
-                properties.setProperty("show-free-price-message", "true");
-                properties.setProperty("cancel-warm-up-on-damage", "true");
-                properties.setProperty("cancel-warm-up-on-movement", "false");
-                properties.setProperty("economy", "");
-                properties.setProperty("economy-base-account", "");
-                properties.setProperty("update-if-exists", "false");
-                properties.store(new FileWriter(this.configFile), null);
-            } catch (IOException e) {
-                XWarp.logger.warning("Unable to create properties file.", e);
+            configuration.setProperty("data.connection", "sqlite");
+            configuration.setProperty("economy.plugin", "");
+            configuration.setProperty("economy.base-account", "");
+            configuration.setProperty("permissions.plugin", "");
+            configuration.setProperty("warmup.notify", true);
+            configuration.setProperty("warmup.cancel.movement", false);
+            configuration.setProperty("warmup.cancel.damage", true);
+            configuration.setProperty("cooldown.notify", true);
+            configuration.setProperty("case-sensitive", false);
+            configuration.setProperty("update-if-exists", false);
+            configuration.setProperty("use-force-to", false);
+            configuration.setProperty("show-free-price-message", false);
+            if (configuration.save()) {
+                XWarp.logger.info("Successfully created default configuration file.");
+            } else {
+                XWarp.logger.warning("Unable to create properties file.");
             }
         }
-        String dataConnectionProperty = properties.getProperty("data-connection", "sqlite");
 
-        if (dataConnectionProperty.equalsIgnoreCase("hmod")) {
+        String dataConnectionProperty = configuration.getString("data.connection");
+
+        if ("hmod".equalsIgnoreCase(dataConnectionProperty)) {
             this.dataConnection = new HModConnection(this.server);
+        } else if ("yml".equalsIgnoreCase(dataConnectionProperty)) {
+            this.dataConnection = new YmlConnection();
         } else {
-            if (!dataConnectionProperty.equalsIgnoreCase("sqlite")) {
+            if (!"sqlite".equalsIgnoreCase(dataConnectionProperty)) {
                 XWarp.logger.warning("Unrecognized data-connection selected (" + dataConnectionProperty + ")");
             }
             // Per default sqlite
             this.dataConnection = new SQLiteConnection(server);
         }
 
-        this.economyPlugin = properties.getProperty("economy", "");
-        this.economyBaseAccount = properties.getProperty("economy-base-account", "");
-        
-        this.cooldownNotify = parseString(properties.getProperty("cooldown-notify"), true);
-        this.warmupNotify = parseString(properties.getProperty("warmup-notify"), true);
-        this.useForceTo = parseString(properties.getProperty("use-force-to"), true);
-        this.showFreePriceMessage = parseString(properties.getProperty("show-free-price-message"), true);
-        this.cancelWarmUpOnDamage = parseString(properties.getProperty("cancel-warm-up-on-damage"), true);
-        this.cancelWarmUpOnMovement = parseString(properties.getProperty("cancel-warm-up-on-movement"), false);
-        this.createUpdates = parseString(properties.getProperty("update-if-exists"), false);
-    }
+        this.economyPlugin = configuration.getString("economy.plugin", "");
+        this.economyBaseAccount = configuration.getString("economy.base-account", "");
 
-    public static boolean parseString(String string, boolean def) {
-        if (MinecraftUtil.isSet(string)) {
-            return string.equalsIgnoreCase("true");
-        } else {
-            return def;
-        }
+        this.permissionsPlugin = configuration.getString("permissions.plugin", "");
+
+        this.cooldownNotify = configuration.getBoolean("cooldown.notify", true);
+
+        this.warmupNotify = configuration.getBoolean("warmup.notify", true);
+        this.cancelWarmUpOnDamage = configuration.getBoolean("warmup.cancel.damage", true);
+        this.cancelWarmUpOnMovement = configuration.getBoolean("warmup.cancel.movement", false);
+
+        this.useForceTo = configuration.getBoolean("use-force-to", false);
+        this.showFreePriceMessage = configuration.getBoolean("show-free-price-message", true);
+        this.createUpdates = configuration.getBoolean("update-if-exists", false);
     }
 }

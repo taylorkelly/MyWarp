@@ -16,13 +16,13 @@ import de.xzise.xwarp.editors.EditorPermissions.Type;
 import de.xzise.xwarp.list.NonGlobalList;
 import de.xzise.xwarp.wrappers.permission.PermissionTypes;
 
-public class WPAManager extends CommonManager<WarpProtectionArea> {
+public class WPAManager extends CommonManager<WarpProtectionArea, NonGlobalList<WarpProtectionArea>> {
 
     private Server server;
     private WarpProtectionConnection data;
     
-    public WPAManager(Plugin plugin, DataConnection data) {
-        super(new NonGlobalList<WarpProtectionArea>());
+    public WPAManager(Plugin plugin, DataConnection data, PluginProperties properties) {
+        super(new NonGlobalList<WarpProtectionArea>(), properties);
         this.server = plugin.getServer();
         this.data = saveCast(WarpProtectionConnection.class, data);
     }
@@ -37,6 +37,7 @@ public class WPAManager extends CommonManager<WarpProtectionArea> {
     
     @Override
     public void reload() {
+        super.reload();
         this.list.loadList(this.data.getProtectionAreas());
     }
     

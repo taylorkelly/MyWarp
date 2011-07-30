@@ -3,7 +3,8 @@
   - add "wpa" create command
   - --case-sensitive-check--
   - --pay-creation-price-for-change-visibility--
-  - Bukkit permissions support (in Bukkit Plugin Utilities)
+  - --Bukkit-permissions-support-(in-Bukkit-Plugin-Utilities)--
+  - Clean up permission names
 
 3.1.0
   - auto completion

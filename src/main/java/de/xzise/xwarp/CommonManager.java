@@ -1,13 +1,16 @@
 package de.xzise.xwarp;
 
-import de.xzise.xwarp.list.NonGlobalList;
+import de.xzise.xwarp.list.PersonalList;
 
-public abstract class CommonManager<T extends WarpObject<?>> implements Manager<T> {
+public abstract class CommonManager<T extends WarpObject<?>, L extends PersonalList<T, ?>> implements Manager<T> {
 
-    protected final NonGlobalList<T> list;
+    protected final L list;
+    protected final PluginProperties properties;
     
-    protected CommonManager(NonGlobalList<T> list) {
+    protected CommonManager(L list, PluginProperties properties) {
+        this.properties = properties;
         this.list = list;
+        this.list.setIgnoreCase(!properties.isCaseSensitive());
     }
 
     @Override
@@ -23,6 +26,11 @@ public abstract class CommonManager<T extends WarpObject<?>> implements Manager<
     @Override
     public T getWarpObject(String name, String owner, String playerName) {
         return this.list.getWarpObject(name, owner, playerName);
+    }
+
+    @Override
+    public void reload() {
+        this.list.setIgnoreCase(!properties.isCaseSensitive());
     }
 
     @SuppressWarnings("unchecked")

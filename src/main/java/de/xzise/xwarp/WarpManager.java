@@ -39,21 +39,18 @@ import de.xzise.xwarp.wrappers.permission.PermissionValues;
  * 
  * @author Fabian Neundorf
  */
-public class WarpManager implements Manager<Warp> {
+public class WarpManager extends CommonManager<Warp, WarpList<Warp>> {
 
-    private WarpList<Warp> list;
     private Server server;
     private DataConnection data;
     private CoolDown coolDown;
     private WarmUp warmUp;
     private EconomyHandler economy;
-    private PluginProperties properties;
     private Manager<WarpProtectionArea> wpaManager;
 
     public WarpManager(Plugin plugin, EconomyHandler economy, PluginProperties properties, DataConnection data) {
-        this.list = new WarpList<Warp>();
+        super(new WarpList<Warp>(), properties);
         this.server = plugin.getServer();
-        this.properties = properties;
         this.data = data;
         this.coolDown = new CoolDown(plugin, properties);
         this.warmUp = new WarmUp(plugin, properties, this.coolDown);
@@ -71,6 +68,7 @@ public class WarpManager implements Manager<Warp> {
     
     @Override
     public void reload() {
+        super.reload();
         this.list.loadList(this.data.getWarps());
     }
     
@@ -661,22 +659,6 @@ public class WarpManager implements Manager<Warp> {
         return this.list.getSize(sender, creator);
     }
 
-    /* (non-Javadoc)
-     * @see de.xzise.xwarp.Manager#isNameAvailable(de.xzise.xwarp.Warp)
-     */
-    @Override
-    public boolean isNameAvailable(Warp warp) {
-        return this.isNameAvailable(warp.getName(), warp.getOwner());
-    }
-
-    /* (non-Javadoc)
-     * @see de.xzise.xwarp.Manager#isNameAvailable(java.lang.String, java.lang.String)
-     */
-    @Override
-    public boolean isNameAvailable(String name, String owner) {
-        return this.list.getWarpObject(name, owner, null) == null;
-    }
-    
     @Override
     public void missing(String name, String owner, CommandSender sender) {
         sendMissingWarp(name, owner, sender);
@@ -704,10 +686,5 @@ public class WarpManager implements Manager<Warp> {
         } else {
             sender.sendMessage(ChatColor.RED + "You do not have permission to change the listed status from '" + warp.getName() + "'");
         }
-    }
-
-    @Override
-    public Warp[] getWarpObjects() {
-        return this.list.getWarpObjects().toArray(new Warp[0]);
     }
 }

@@ -21,6 +21,7 @@ import de.xzise.xwarp.listeners.XWBlockListener;
 import de.xzise.xwarp.listeners.XWEntityListener;
 import de.xzise.xwarp.listeners.XWPlayerListener;
 import de.xzise.xwarp.listeners.XWWorldListener;
+import de.xzise.xwarp.wrappers.permission.PermissionTypes;
 
 public class XWarp extends JavaPlugin {
 
@@ -50,8 +51,17 @@ public class XWarp extends JavaPlugin {
         this.version = this.getDescription().getVersion();
         logger = new XLogger(this);
 
+        // Register permissions
+        try {
+            for (PermissionTypes permission : PermissionTypes.values()) {
+                permission.register(this.getServer().getPluginManager());
+            }
+        } catch (ClassNotFoundException e) {
+            logger.info("SuperPerms not found, didn't register permissions.");
+        }
+
         if (!this.getDataFolder().exists()) {
-            this.getDataFolder().mkdir();
+            this.getDataFolder().mkdirs();
         }
 
         if (new File("MyWarp").exists() && new File("MyWarp", "warps.db").exists()) {
@@ -70,7 +80,7 @@ public class XWarp extends JavaPlugin {
         }
 
         PluginProperties properties = new PluginProperties(this.getDataFolder(), this.getServer());
-        
+
         this.dataConnection = properties.getDataConnection();
         try {
             if (!this.dataConnection.load(new File(this.getDataFolder(), this.dataConnection.getFilename()))) {
@@ -87,10 +97,10 @@ public class XWarp extends JavaPlugin {
         this.permissionsWrapper = new PermissionsHandler(this.getServer().getPluginManager(), "", logger);
         permissions = this.permissionsWrapper;
         this.economyWrapper = new EconomyHandler(this.getServer().getPluginManager(), properties.getEconomyPlugin(), properties.getEconomyBaseAccount(), logger);
-        
+
         WarpManager warpManager = new WarpManager(this, this.economyWrapper, properties, this.dataConnection);
-        WPAManager wpaManager = new WPAManager(this, this.dataConnection);
-        
+        WPAManager wpaManager = new WPAManager(this, this.dataConnection, properties);
+
         // Create commands
         WarpCommandMap wcm = null;
         WPACommandMap wpacm = null;
@@ -130,7 +140,7 @@ public class XWarp extends JavaPlugin {
         // Unless an event is called, to tell all enabled plugins
         this.permissionsWrapper.load();
         this.economyWrapper.load();
-        
+
         this.getServer().getPluginManager().registerEvent(Event.Type.WORLD_LOAD, new XWWorldListener(warpManager), Priority.Low, this);
         try {
             this.getServer().getPluginManager().registerEvent(Event.Type.WORLD_UNLOAD, new XWWorldListener(warpManager), Priority.Low, this);
