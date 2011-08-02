@@ -154,7 +154,7 @@ public abstract class PersonalList<T extends WarpObject<?>, G extends GlobalMap<
     /**
      * Returns the number of warps the player can modify/use.
      * 
-     * @param player
+     * @param sender
      *            The given player.
      * @return The number of warps the player can modify/use.
      */

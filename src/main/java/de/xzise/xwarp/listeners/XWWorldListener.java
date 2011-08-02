@@ -1,6 +1,5 @@
 package de.xzise.xwarp.listeners;
 
-
 import org.bukkit.event.world.WorldListener;
 import org.bukkit.event.world.WorldLoadEvent;
 import org.bukkit.event.world.WorldUnloadEvent;
@@ -20,7 +19,7 @@ public class XWWorldListener extends WorldListener {
     @Override
     public void onWorldLoad(WorldLoadEvent event) {
         int i = 0;
-        for (Warp warp : this.manager.getWarps()) {
+        for (Warp warp : this.manager.getWarpObjects()) {
             if (warp.getLocationWrapper().setWorld(event.getWorld())) {
                 i++;
             }
@@ -29,11 +28,11 @@ public class XWWorldListener extends WorldListener {
             XWarp.logger.info("Because world '" + event.getWorld().getName() + "' was loaded " + i + " warp" + (i == 1 ? "" : "s") + " get valid.");
         }
     }
-    
+
     @Override
     public void onWorldUnload(WorldUnloadEvent event) {
         int i = 0;
-        for (Warp warp : this.manager.getWarps()) {
+        for (Warp warp : this.manager.getWarpObjects()) {
             if (warp.getLocationWrapper().unsetWorld(event.getWorld())) {
                 i++;
             }

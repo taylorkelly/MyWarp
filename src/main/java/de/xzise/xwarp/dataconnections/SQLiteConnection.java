@@ -39,11 +39,44 @@ import de.xzise.xwarp.XWarp;
 public class SQLiteConnection implements WarpProtectionConnection {
 
     public final static String DATABASE = "jdbc:sqlite:homes-warps.db";
-    private final static String WARP_TABLE = "CREATE TABLE `warps` (" + "`id` INTEGER PRIMARY KEY," + "`name` varchar(32) NOT NULL," + "`creator` varchar(32) NOT NULL," + "`world` varchar(32) NOT NULL," + "`x` DOUBLE NOT NULL DEFAULT '0'," + "`y` DOUBLE NOT NULL DEFAULT '0'," + "`z` DOUBLE NOT NULL DEFAULT '0'," + "`yaw` smallint NOT NULL DEFAULT '0'," + "`pitch` smallint NOT NULL DEFAULT '0'," + "`publicLevel` smallint NOT NULL DEFAULT '1'," + "`welcomeMessage` varchar(100) DEFAULT NULL," + "`owner` varchar(32) NOT NULL DEFAULT '', " + "`price` DOUBLE NOT NULL DEFAULT '0', " + "`cooldown` INTEGER NOT NULL DEFAULT -1, " + "`warmup` INTEGER NOT NULL DEFAULT -1" + ");";
-    private final static String PERMISSIONS_TABLE = "CREATE TABLE `permissions` (" + "`id` INTEGER NOT NULL," + "`editor` varchar(32) NOT NULL," + "`value` INTEGER NOT NULL," + "`type` INTEGER NOT NULL," + "`table` INTEGER NOT NULL" + ");";
-    private final static String PROTECTION_AREA_TABLE = "CREATE TABLE `protectionAreas` (" + "`id` INTEGER PRIMARY KEY," + "`name` varchar(32) NOT NULL," + "`creator` varchar(32) NOT NULL," + "`world` varchar(32) NOT NULL," + "`x1` DOUBLE NOT NULL DEFAULT '0'," + "`y1` DOUBLE NOT NULL DEFAULT '0'," + "`z1` DOUBLE NOT NULL DEFAULT '0'," + "`x2` DOUBLE NOT NULL DEFAULT '0'," + "`y2` DOUBLE NOT NULL DEFAULT '0'," + "`z2` DOUBLE NOT NULL DEFAULT '0'," + "`owner` varchar(32) NOT NULL DEFAULT '', " + ");";
-    
+    //@formatter:off
+    private final static String WARP_TABLE = "CREATE TABLE `warps` ("
+                                                                      + "`id` INTEGER PRIMARY KEY,"
+                                                                      + "`name` varchar(32) NOT NULL,"
+                                                                      + "`creator` varchar(32) NOT NULL,"
+                                                                      + "`world` varchar(32) NOT NULL,"
+                                                                      + "`x` DOUBLE NOT NULL DEFAULT '0',"
+                                                                      + "`y` DOUBLE NOT NULL DEFAULT '0',"
+                                                                      + "`z` DOUBLE NOT NULL DEFAULT '0',"
+                                                                      + "`yaw` smallint NOT NULL DEFAULT '0',"
+                                                                      + "`pitch` smallint NOT NULL DEFAULT '0',"
+                                                                      + "`publicLevel` smallint NOT NULL DEFAULT '1',"
+                                                                      + "`welcomeMessage` varchar(100) DEFAULT NULL,"
+                                                                      + "`owner` varchar(32) NOT NULL DEFAULT '', "
+                                                                      + "`price` DOUBLE NOT NULL DEFAULT '0', "
+                                                                      + "`cooldown` INTEGER NOT NULL DEFAULT -1, "
+                                                                      + "`warmup` INTEGER NOT NULL DEFAULT -1" + ");";
+    private final static String PERMISSIONS_TABLE = "CREATE TABLE `permissions` ("
+                                                                                   + "`id` INTEGER NOT NULL,"
+                                                                                   + "`editor` varchar(32) NOT NULL,"
+                                                                                   + "`value` INTEGER NOT NULL,"
+                                                                                   + "`type` INTEGER NOT NULL,"
+                                                                                   + "`warpType` INTEGER NOT NULL" + ");";
+    private final static String PROTECTION_AREA_TABLE = "CREATE TABLE `protectionAreas` ("
+                                                                                           + "`id` INTEGER PRIMARY KEY,"
+                                                                                           + "`name` varchar(32) NOT NULL,"
+                                                                                           + "`creator` varchar(32) NOT NULL,"
+                                                                                           + "`world` varchar(32) NOT NULL,"
+                                                                                           + "`x1` DOUBLE NOT NULL DEFAULT '0',"
+                                                                                           + "`y1` DOUBLE NOT NULL DEFAULT '0',"
+                                                                                           + "`z1` DOUBLE NOT NULL DEFAULT '0',"
+                                                                                           + "`x2` DOUBLE NOT NULL DEFAULT '0',"
+                                                                                           + "`y2` DOUBLE NOT NULL DEFAULT '0',"
+                                                                                           + "`z2` DOUBLE NOT NULL DEFAULT '0',"
+                                                                                           + "`owner` varchar(32) NOT NULL DEFAULT ''" + ");";
+
     private final static String VERSION_TABLE = "CREATE TABLE `meta` (`name` varchar(32) NOT NULL, `value` int NOT NULL);";
+    //@formatter:on
 
     private final static int TARGET_VERSION = 5;
 
@@ -125,7 +158,7 @@ public class SQLiteConnection implements WarpProtectionConnection {
                 
                 if (tableExists("permissions_backup")) {
                     set = statement.executeQuery("SELECT * FROM permissions_backup");
-                    convertedPermissions = this.connection.prepareStatement("INSERT INTO permissions (id, editor, value, type, table) VALUES (?,?,?,?,?)");
+                    convertedPermissions = this.connection.prepareStatement("INSERT INTO permissions (id, editor, value, type, warpType) VALUES (?,?,?,?,?)");
                     while (set.next()) {
                         convertedPermissions.setInt(1, set.getInt("id"));
                         convertedPermissions.setString(2, set.getString("editor"));
@@ -135,7 +168,7 @@ public class SQLiteConnection implements WarpProtectionConnection {
                             convertedPermissions.setInt(5, EditorPermissions.Table.WARP.id);
                         } else {
                             convertedPermissions.setInt(4, set.getInt("type"));
-                            convertedPermissions.setInt(5, set.getInt("table"));
+                            convertedPermissions.setInt(5, set.getInt("warpType"));
                         }
                         convertedPermissions.executeUpdate();
                     }
@@ -242,6 +275,13 @@ public class SQLiteConnection implements WarpProtectionConnection {
                         } else {
                             convertedWarp.setDouble(13, set.getDouble("price"));
                         }
+                        if (version < 5) {
+                            convertedWarp.setInt(14, 0);
+                            convertedWarp.setInt(15, 0);
+                        } else {
+                            convertedWarp.setInt(14, set.getInt("cooldown"));
+                            convertedWarp.setInt(14, set.getInt("warmup"));
+                        }
                         convertedWarp.executeUpdate();
                     }
 
@@ -253,7 +293,7 @@ public class SQLiteConnection implements WarpProtectionConnection {
                         XWarp.logger.info("Adding permissions table");
 
                         if (list.size() > 0) {
-                            permissionsInsert = this.connection.prepareStatement("INSERT OR IGNORE INTO permissions (id, editor, value, type, table) VALUES (?,?,?,?,?)");
+                            permissionsInsert = this.connection.prepareStatement("INSERT OR IGNORE INTO permissions (id, editor, value, type, warpType) VALUES (?,?,?,?,?)");
 
                             for (WarpPermission warpPermission : list) {
                                 permissionsInsert.setInt(1, warpPermission.id);
@@ -427,7 +467,7 @@ public class SQLiteConnection implements WarpProtectionConnection {
             PreparedStatement insertPermissions = null;
             try {
                 ps = this.connection.prepareStatement("INSERT INTO warps (id, name, creator, world, x, y, z, yaw, pitch, publicLevel, welcomeMessage, owner, price) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)");
-                insertPermissions = this.connection.prepareStatement("INSERT INTO permissions (id, editor, value, type, table) VALUES (?,?,?,?,?)");
+                insertPermissions = this.connection.prepareStatement("INSERT INTO permissions (id, editor, value, type, warpType) VALUES (?,?,?,?,?)");
                 for (Warp warp : warps) {
                     ps.setInt(1, warp.index);
                     ps.setString(2, warp.getName());
@@ -612,7 +652,7 @@ public class SQLiteConnection implements WarpProtectionConnection {
         PreparedStatement ps = null;
         ResultSet set = null;
         try {
-            ps = this.connection.prepareStatement("DELETE FROM permissions WHERE id = ? AND editor = ? AND type = ? AND table = ?");
+            ps = this.connection.prepareStatement("DELETE FROM permissions WHERE id = ? AND editor = ? AND type = ? AND warpType = ?");
             ps.setInt(1, id);
             ps.setString(2, name.toLowerCase());
             ps.setInt(3, type.id);
@@ -620,7 +660,7 @@ public class SQLiteConnection implements WarpProtectionConnection {
             ps.executeUpdate();
 
             if (editorPerms != null) {
-                ps = this.connection.prepareStatement("INSERT OR IGNORE INTO permissions (id, editor, value, type, table) VALUES (?,?,?,?,?)");
+                ps = this.connection.prepareStatement("INSERT OR IGNORE INTO permissions (id, editor, value, type, warpType) VALUES (?,?,?,?,?)");
 
                 boolean permissionAdded = false;
                 
@@ -768,7 +808,7 @@ public class SQLiteConnection implements WarpProtectionConnection {
         }
 
         public static IdIdentification<WarpProtectionArea> create(WarpProtectionArea wpa) {
-            return new IdIdentification<WarpProtectionArea>(wpa.index);
+            return new IdIdentification<WarpProtectionArea>(wpa.getId());
         }
 
         @Override
@@ -783,7 +823,7 @@ public class SQLiteConnection implements WarpProtectionConnection {
         if (o instanceof Warp) {
             return ((Warp) o).index;
         } else if (o instanceof WarpProtectionArea) {
-            return ((WarpProtectionArea) o).index;
+            return ((WarpProtectionArea) o).getId();
         } else {
             return null;
         }
@@ -800,7 +840,7 @@ public class SQLiteConnection implements WarpProtectionConnection {
         ResultSet set = null;
         try {
             statement = this.connection.createStatement();
-            set = statement.executeQuery("SELECT * FROM permissions WHERE table = " + table.id);
+            set = statement.executeQuery("SELECT * FROM permissions WHERE warpType = " + table.id);
             Map<Integer, Map<EditorPermissions.Type, Map<String, EditorPermissions<T>>>> allPermissions = new HashMap<Integer, Map<EditorPermissions.Type, Map<String, EditorPermissions<T>>>>();
             while (set.next()) {
                 int index = set.getInt("id");
@@ -911,9 +951,9 @@ public class SQLiteConnection implements WarpProtectionConnection {
             PreparedStatement insertPermissions = null;
             try {
                 ps = this.connection.prepareStatement("INSERT INTO protectionAreas (id, name, owner, creator, world, x1, y1, z1, x2, y2, z2) VALUES (?,?,?,?,?,?,?,?,?,?,?)");
-                insertPermissions = this.connection.prepareStatement("INSERT INTO permissions (id, editor, value, type, table) VALUES (?,?,?,?,?)");
+                insertPermissions = this.connection.prepareStatement("INSERT INTO permissions (id, editor, value, type, warpType) VALUES (?,?,?,?,?)");
                 for (WarpProtectionArea area : areas) {
-                    ps.setInt(1, area.index);
+                    ps.setInt(1, area.getId());
                     ps.setString(2, area.getName());
                     ps.setString(3, area.getOwner());
                     ps.setString(4, area.getCreator());
@@ -930,7 +970,7 @@ public class SQLiteConnection implements WarpProtectionConnection {
 
                     for (EditorPermissionEntry<WarpProtectionAreaPermissions> editorPermissionEntry : area.getEditorPermissionsList()) {
                         for (WarpProtectionAreaPermissions p : editorPermissionEntry.editorPermissions.getByValue(true)) {
-                            insertPermissions.setInt(1, area.index);
+                            insertPermissions.setInt(1, area.getId());
                             insertPermissions.setString(2, editorPermissionEntry.name);
                             insertPermissions.setInt(3, p.id);
                             insertPermissions.setInt(4, editorPermissionEntry.type.id);
@@ -966,14 +1006,14 @@ public class SQLiteConnection implements WarpProtectionConnection {
 
             @Override
             public void fillStatement(WarpProtectionArea warp, PreparedStatement statement) throws SQLException {
-                statement.setInt(1, warp.index);
+                statement.setInt(1, warp.getId());
             }
         });
     }
 
     @Override
     public void updateEditor(WarpProtectionArea area, String name, Type type) {
-        this.updateEditor(area.index, name, "Warp protection area", area.getEditorPermissions(name, false, type), type, EditorPermissions.Table.PROTECTION_AREA);
+        this.updateEditor(area.getId(), name, "Warp protection area", area.getEditorPermissions(name, false, type), type, EditorPermissions.Table.PROTECTION_AREA);
     }
 
     @Override
@@ -983,7 +1023,7 @@ public class SQLiteConnection implements WarpProtectionConnection {
             @Override
             public void fillStatement(WarpProtectionArea warp, PreparedStatement statement) throws SQLException {
                 statement.setString(1, warp.getCreator());
-                statement.setInt(2, warp.index);
+                statement.setInt(2, warp.getId());
             }
         });        
     }
@@ -995,7 +1035,7 @@ public class SQLiteConnection implements WarpProtectionConnection {
             @Override
             public void fillStatement(WarpProtectionArea warp, PreparedStatement statement) throws SQLException {
                 statement.setString(1, warp.getOwner());
-                statement.setInt(2, warp.index);
+                statement.setInt(2, warp.getId());
             }
         });
     }
@@ -1007,7 +1047,7 @@ public class SQLiteConnection implements WarpProtectionConnection {
             @Override
             public void fillStatement(WarpProtectionArea warp, PreparedStatement statement) throws SQLException {
                 statement.setString(1, warp.getName());
-                statement.setInt(2, warp.index);
+                statement.setInt(2, warp.getId());
             }
         });
     }

@@ -14,6 +14,7 @@ import de.xzise.MinecraftUtil;
 import de.xzise.XLogger;
 import de.xzise.wrappers.permissions.PermissionsHandler;
 import de.xzise.wrappers.economy.EconomyHandler;
+import de.xzise.xwarp.commands.ManageCommandMap;
 import de.xzise.xwarp.commands.WPACommandMap;
 import de.xzise.xwarp.commands.WarpCommandMap;
 import de.xzise.xwarp.dataconnections.DataConnection;
@@ -28,8 +29,8 @@ public class XWarp extends JavaPlugin {
     public static PermissionsHandler permissions;
     public static XLogger logger;
 
-    private EconomyHandler economyWrapper;
-    private PermissionsHandler permissionsWrapper = permissions;
+    private EconomyHandler economyHandler;
+    private PermissionsHandler permissionHandler = permissions;
 
     private DataConnection dataConnection;
 
@@ -94,19 +95,21 @@ public class XWarp extends JavaPlugin {
             return;
         }
 
-        this.permissionsWrapper = new PermissionsHandler(this.getServer().getPluginManager(), "", logger);
-        permissions = this.permissionsWrapper;
-        this.economyWrapper = new EconomyHandler(this.getServer().getPluginManager(), properties.getEconomyPlugin(), properties.getEconomyBaseAccount(), logger);
+        this.permissionHandler = new PermissionsHandler(this.getServer().getPluginManager(), "", logger);
+        permissions = this.permissionHandler;
+        this.economyHandler = new EconomyHandler(this.getServer().getPluginManager(), properties.getEconomyPlugin(), properties.getEconomyBaseAccount(), logger);
 
-        WarpManager warpManager = new WarpManager(this, this.economyWrapper, properties, this.dataConnection);
+        WarpManager warpManager = new WarpManager(this, this.economyHandler, properties, this.dataConnection);
         WPAManager wpaManager = new WPAManager(this, this.dataConnection, properties);
 
         // Create commands
         WarpCommandMap wcm = null;
         WPACommandMap wpacm = null;
+        ManageCommandMap mcm = null;
         try {
-            wcm = new WarpCommandMap(warpManager, this.economyWrapper, this.getServer(), this.dataConnection, this.getDataFolder(), properties);
-            wpacm = new WPACommandMap(wpaManager, this.economyWrapper, this.getServer(), this.dataConnection, this.getDataFolder(), properties);
+            wcm = new WarpCommandMap(warpManager, this.economyHandler, this.getServer(), this.dataConnection, this.getDataFolder(), properties);
+            wpacm = new WPACommandMap(wpaManager, this.economyHandler, this.getServer(), this.dataConnection, this.getDataFolder(), properties);
+            mcm = new ManageCommandMap(this.economyHandler, properties, this.getServer(), this.getDataFolder(), warpManager, wpaManager);
         } catch (IllegalArgumentException iae) {
             XWarp.logger.severe("Couldn't initalize commands. Disabling " + this.name + "!", iae);
             this.getServer().getPluginManager().disablePlugin(this);
@@ -114,32 +117,33 @@ public class XWarp extends JavaPlugin {
         }
 
         this.getCommand("go").setExecutor(wcm.getCommand(""));
+        this.getCommand("xwarp").setExecutor(mcm);
         this.getCommand("warp").setExecutor(wcm);
         this.getCommand("wpa").setExecutor(wpacm);
 
-        XWPlayerListener playerListener = new XWPlayerListener(warpManager, properties);
+        XWPlayerListener playerListener = new XWPlayerListener(warpManager, properties, wpacm.createCommand);
         XWBlockListener blockListener = new XWBlockListener(warpManager);
         ServerListener serverListner = new ServerListener() {
             @Override
             public void onPluginEnable(PluginEnableEvent event) {
-                XWarp.this.permissionsWrapper.load(event.getPlugin());
-                XWarp.this.economyWrapper.load(event.getPlugin());
+                XWarp.this.permissionHandler.load(event.getPlugin());
+                XWarp.this.economyHandler.load(event.getPlugin());
             }
 
             @Override
             public void onPluginDisable(PluginDisableEvent event) {
-                if (XWarp.this.permissionsWrapper.unload(event.getPlugin())) {
-                    XWarp.this.permissionsWrapper.load();
+                if (XWarp.this.permissionHandler.unload(event.getPlugin())) {
+                    XWarp.this.permissionHandler.load();
                 }
-                if (XWarp.this.economyWrapper.unload(event.getPlugin())) {
-                    XWarp.this.economyWrapper.load();
+                if (XWarp.this.economyHandler.unload(event.getPlugin())) {
+                    XWarp.this.economyHandler.load();
                 }
             }
         };
 
         // Unless an event is called, to tell all enabled plugins
-        this.permissionsWrapper.load();
-        this.economyWrapper.load();
+        this.permissionHandler.load();
+        this.economyHandler.load();
 
         this.getServer().getPluginManager().registerEvent(Event.Type.WORLD_LOAD, new XWWorldListener(warpManager), Priority.Low, this);
         try {

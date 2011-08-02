@@ -2,6 +2,8 @@ package de.xzise.xwarp;
 
 import org.bukkit.command.CommandSender;
 
+import de.xzise.xwarp.WarpManager.WarpObjectGetter;
+import de.xzise.xwarp.dataconnections.DataConnection;
 import de.xzise.xwarp.editors.EditorPermissions;
 
 public interface Manager<T extends WarpObject<?>> {
@@ -24,7 +26,9 @@ public interface Manager<T extends WarpObject<?>> {
 
     T getWarpObject(String name, String owner, String playerName);
     T[] getWarpObjects();
-    
+    int getSize();
+
     void missing(String name, String owner, CommandSender sender);
 
+    void importWarpObjects(DataConnection connection, WarpObjectGetter<T> getter, CommandSender sender);
 }

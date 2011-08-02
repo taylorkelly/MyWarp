@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -42,6 +41,9 @@ public abstract class DefaultWarpObject<T extends Enum<T> & Editor> implements W
         this.invitePermission = invitePermission;
     }
 
+    // TODO: Restruct to objects with id and those without?
+    public abstract void assignNewId();
+
     public void setOwner(String owner) {
         this.owner = owner;
     }
@@ -53,7 +55,7 @@ public abstract class DefaultWarpObject<T extends Enum<T> & Editor> implements W
     public void setName(String name) {
         this.name = name;
     }
-    
+
     @Override
     public final String getName() {
         return this.name;
@@ -92,21 +94,33 @@ public abstract class DefaultWarpObject<T extends Enum<T> & Editor> implements W
     }
 
     /**
-     * Returns the editor permissions to the type and name. Doesn't create new if there are no permissions.
-     * @param name Name of the editor permissions holder.
-     * @param type Type of the editor permissions holder.
-     * @return The editor permissions. If there are no one to the name and type returns null.
+     * Returns the editor permissions to the type and name. Doesn't create new
+     * if there are no permissions.
+     * 
+     * @param name
+     *            Name of the editor permissions holder.
+     * @param type
+     *            Type of the editor permissions holder.
+     * @return The editor permissions. If there are no one to the name and type
+     *         returns null.
      */
     public EditorPermissions<T> getEditorPermissions(String name, EditorPermissions.Type type) {
         return this.getEditorPermissions(name, false, type);
     }
 
     /**
-     * Returns the editor permissions to the type and name. If <code>create</code> is set to true, creates a new, if there are no editor permissions. Otherwise null.
-     * @param name Name of the editor permissions holder.
-     * @param create Create new editor permissions, if doesn't exists.
-     * @param type Type of the editor permissions holder.
-     * @return The editor permissions. If there are no one to the name and type returns null.
+     * Returns the editor permissions to the type and name. If
+     * <code>create</code> is set to true, creates a new, if there are no editor
+     * permissions. Otherwise null.
+     * 
+     * @param name
+     *            Name of the editor permissions holder.
+     * @param create
+     *            Create new editor permissions, if doesn't exists.
+     * @param type
+     *            Type of the editor permissions holder.
+     * @return The editor permissions. If there are no one to the name and type
+     *         returns null.
      */
     public EditorPermissions<T> getEditorPermissions(String name, boolean create, EditorPermissions.Type type) {
         Map<String, EditorPermissions<T>> typePermissions = this.editors.get(type);
@@ -119,11 +133,11 @@ public abstract class DefaultWarpObject<T extends Enum<T> & Editor> implements W
     }
 
     public static class EditorPermissionEntry<T extends Enum<T> & Editor> {
-        
+
         public final EditorPermissions<T> editorPermissions;
         public final String name;
         public final EditorPermissions.Type type;
-        
+
         public EditorPermissionEntry(EditorPermissions<T> editorPermissions, String name, Type type) {
             this.editorPermissions = editorPermissions;
             this.name = name;
@@ -141,12 +155,28 @@ public abstract class DefaultWarpObject<T extends Enum<T> & Editor> implements W
         return allEntries;
     }
 
+    public static boolean isOwn(WarpObject<?> warpObject, String name) {
+        return warpObject.getOwner().equals(name);
+    }
+
     public boolean isOwn(String name) {
-        return this.getOwner().equals(name);
+        return isOwn(this, name);
+    }
+
+    public static boolean isCreator(WarpObject<?> warpObject, String name) {
+        return warpObject.getCreator().equals(name);
     }
 
     public boolean isCreator(String name) {
-        return this.getCreator().equals(name);
+        return isCreator(this, name);
+    }
+
+    public static <T extends Editor> boolean isInvited(WarpObject<T> warpObject, String name) {
+        return warpObject.hasPermission(name, warpObject.getInvitePermission());
+    }
+
+    public boolean isInvited(String name) {
+        return isInvited(this, name);
     }
 
     public boolean hasPlayerPermission(String name, T permission) {
@@ -187,6 +217,7 @@ public abstract class DefaultWarpObject<T extends Enum<T> & Editor> implements W
         return false;
     }
 
+    @Override
     public boolean hasPermission(String name, T permission) {
         Player player = Bukkit.getServer().getPlayer(name);
         return this.hasPlayerPermission(name, permission) || this.hasGroupPermission(name, permission) || (player != null && (this.hasEditorPermission(player, permission) || this.hasSpecificPermission(player, permission)));
@@ -194,6 +225,11 @@ public abstract class DefaultWarpObject<T extends Enum<T> & Editor> implements W
 
     public void invite(String player) {
         this.getEditorPermissions(player, Type.PLAYER).put(this.invitePermission, true);
+    }
+
+    @Override
+    public T getInvitePermission() {
+        return this.invitePermission;
     }
 
     public static boolean canModify(CommandSender sender, boolean defaultModification, PermissionTypes defaultPermission, PermissionTypes adminPermission) {
@@ -216,7 +252,7 @@ public abstract class DefaultWarpObject<T extends Enum<T> & Editor> implements W
             EditorPermissions<T> groupPerm = this.getEditorPermissions(group, Type.GROUP);
             if (groupPerm != null && groupPerm.get(permission)) {
                 return true;
-            }    
+            }
         }
         return false;
     }

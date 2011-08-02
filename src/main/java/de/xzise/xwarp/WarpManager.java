@@ -7,12 +7,13 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
-
 import org.bukkit.ChatColor;
 import org.bukkit.Server;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
+
+import com.google.common.collect.Lists;
 
 import de.xzise.MinecraftUtil;
 import de.xzise.metainterfaces.CommandSenderWrapper;
@@ -21,6 +22,7 @@ import de.xzise.metainterfaces.Nameable;
 import de.xzise.wrappers.economy.EconomyHandler;
 import de.xzise.xwarp.Warp.Visibility;
 import de.xzise.xwarp.dataconnections.DataConnection;
+import de.xzise.xwarp.dataconnections.HModConnection;
 import de.xzise.xwarp.dataconnections.IdentificationInterface;
 import de.xzise.xwarp.editors.EditorPermissions;
 import de.xzise.xwarp.editors.EditorPermissions.Type;
@@ -49,7 +51,7 @@ public class WarpManager extends CommonManager<Warp, WarpList<Warp>> {
     private Manager<WarpProtectionArea> wpaManager;
 
     public WarpManager(Plugin plugin, EconomyHandler economy, PluginProperties properties, DataConnection data) {
-        super(new WarpList<Warp>(), properties);
+        super(new WarpList<Warp>(), "warp", properties);
         this.server = plugin.getServer();
         this.data = data;
         this.coolDown = new CoolDown(plugin, properties);
@@ -57,7 +59,7 @@ public class WarpManager extends CommonManager<Warp, WarpList<Warp>> {
         this.economy = economy;
         this.reload();
     }
-    
+
     public WarmUp getWarmUp() {
         return this.warmUp;
     }
@@ -65,13 +67,13 @@ public class WarpManager extends CommonManager<Warp, WarpList<Warp>> {
     public void setWPAManager(Manager<WarpProtectionArea> manager) {
         this.wpaManager = manager;
     }
-    
+
     @Override
     public void reload() {
         super.reload();
         this.list.loadList(this.data.getWarps());
     }
-    
+
     /**
      * Returns the number of warps a player has created.
      * 
@@ -107,7 +109,7 @@ public class WarpManager extends CommonManager<Warp, WarpList<Warp>> {
             payee.sendMessage("Woooo! You got " + ChatColor.GREEN + this.economy.format(-amount) + ChatColor.WHITE + "!");
         }
     }
-    
+
     public void addWarp(String name, Positionable player, String newOwner, Visibility visibility) {
         Warp warp = this.list.getWarpObject(name, newOwner, null);
         Warp globalWarp = (visibility == Visibility.GLOBAL ? this.list.getWarpObject(name) : null);
@@ -116,9 +118,9 @@ public class WarpManager extends CommonManager<Warp, WarpList<Warp>> {
                 XWarp.logger.info("Everything okay! But inform the developer (xZise), that the global warp wasn't equals warp!");
             PermissionTypes type = Groups.CREATE_GROUP.get(visibility);
             PermissionValues limit = Groups.LIMIT_GROUP.get(visibility);
-            
+
             CommandSender sender = CommandSenderWrapper.getCommandSender(player);
-            
+
             if (XWarp.permissions.permission(sender, type)) {
                 String creator = "";
                 String world = player.getLocation().getWorld().getName();
@@ -127,7 +129,7 @@ public class WarpManager extends CommonManager<Warp, WarpList<Warp>> {
                 } else {
                     creator = MinecraftUtil.getPlayerName(player);
                 }
-    
+
                 int warpsByCreator = this.list.getNumberOfWarps(creator, visibility, world);
                 int totalWarpsByCreator = this.list.getNumberOfWarps(creator, null, world);
                 int allowedMaximum = XWarp.permissions.getInteger(sender, limit);
@@ -151,13 +153,13 @@ public class WarpManager extends CommonManager<Warp, WarpList<Warp>> {
                                 }
                             }
                         }
-                    
+
                         if (!skipProtectionTest && inProtectionArea.size() > 0) {
-                            //TODO: Tell which protection areas?
+                            // TODO: Tell which protection areas?
                             player.sendMessage(ChatColor.RED + "Here is a warp creation protection area.");
                         } else {
                             double price = XWarp.permissions.getDouble(sender, Groups.PRICES_CREATE_GROUP.get(visibility));
-        
+
                             switch (this.economy.pay(sender, price)) {
                             case PAID:
                                 this.printPayMessage(sender, price);
@@ -195,26 +197,6 @@ public class WarpManager extends CommonManager<Warp, WarpList<Warp>> {
         } else {
             this.updateLocation(warp, player);
         }
-    }
-
-    public void blindAdd(List<Warp> warps) {
-        this.blindAdd(warps.toArray(new Warp[0]));
-    }
-
-    public void blindAdd(Warp... warps) {
-        for (Warp warp : warps) {
-            this.list.addWarpObject(warp);
-        }
-        // if (this.getWarp(warp.name) == null) {
-        // this.global.put(warp.name.toLowerCase(), warp);
-        // } else if (warp.visibility == Visibility.GLOBAL) {
-        // throw new
-        // IllegalArgumentException("A global warp could not override an existing one.");
-        // }
-        // if (!putIntoPersonal(personal, warp)) {
-        // throw new
-        // IllegalArgumentException("A personal warp could not override an existing one.");
-        // }
     }
 
     public void deleteWarp(String name, String owner, CommandSender sender) {
@@ -300,19 +282,29 @@ public class WarpManager extends CommonManager<Warp, WarpList<Warp>> {
     }
 
     private boolean changeVisibility(CommandSender sender, Warp warp, Visibility visibility) {
-        double price = XWarp.permissions.getDouble(sender, Groups.PRICES_CREATE_GROUP.get(visibility));
+        int warpsByCreator = this.list.getNumberOfWarps(warp.getCreator(), visibility, warp.getWorld());
+        int totalWarpsByCreator = this.list.getNumberOfWarps(warp.getCreator(), null, warp.getWorld());
+        int allowedMaximum = XWarp.permissions.getInteger(sender, Groups.LIMIT_GROUP.get(visibility));
+        int allowedTotalMaximum = XWarp.permissions.getInteger(sender, PermissionValues.WARP_LIMIT_TOTAL);
+        if (warpsByCreator >= allowedMaximum && allowedMaximum >= 0) {
+            sender.sendMessage(ChatColor.RED + "The creator is allowed to create only " + allowedMaximum + " warps.");
+        } else if (totalWarpsByCreator >= allowedTotalMaximum && allowedTotalMaximum >= 0) {
+            sender.sendMessage(ChatColor.RED + "The creator is allowed to create only " + allowedTotalMaximum + " warps in total.");
+        } else {
+            double price = XWarp.permissions.getDouble(sender, Groups.PRICES_CREATE_GROUP.get(visibility));
 
-        switch (this.economy.pay(sender, price)) {
-        case PAID:
-            this.printPayMessage(sender, price);
-        case UNABLE:
-            warp.setVisibility(visibility);
-            this.list.updateVisibility(warp);
-            this.data.updateVisibility(warp);
-            return true;
-        case NOT_ENOUGH:
-            sender.sendMessage(ChatColor.RED + "You have not enough money to pay the change.");
-            break;
+            switch (this.economy.pay(sender, price)) {
+            case PAID:
+                this.printPayMessage(sender, price);
+            case UNABLE:
+                warp.setVisibility(visibility);
+                this.list.updateVisibility(warp);
+                this.data.updateVisibility(warp);
+                return true;
+            case NOT_ENOUGH:
+                sender.sendMessage(ChatColor.RED + "You have not enough money to pay the change.");
+                break;
+            }
         }
 
         return false;
@@ -469,19 +461,10 @@ public class WarpManager extends CommonManager<Warp, WarpList<Warp>> {
         }
     }
 
-    @Override
-    public Warp getWarpObject(String name, String owner, String playerName) {
-        return this.list.getWarpObject(name, owner, playerName);
-    }
-
-    public List<Warp> getWarps() {
-        return this.list.getWarpObjects();
-    }
-
     public MatchList getMatches(String name, CommandSender sender) {
         ArrayList<Warp> exactMatches = new ArrayList<Warp>();
         ArrayList<Warp> matches = new ArrayList<Warp>();
-        List<Warp> all = this.getWarps();
+        List<Warp> all = Lists.newArrayList(this.getWarpObjects());
 
         final Collator collator = Collator.getInstance();
         collator.setStrength(Collator.SECONDARY);
@@ -546,7 +529,7 @@ public class WarpManager extends CommonManager<Warp, WarpList<Warp>> {
                         if (this.coolDown.playerHasCooled(warper)) {
                             if (warp.isFree()) {
                                 this.printPayMessage(warper, 0);
-                                this.warmUp.addPlayer(warper, warped, warp);  
+                                this.warmUp.addPlayer(warper, warped, warp);
                             } else {
                                 switch (this.economy.pay(warper, warp.getOwner(), warp.getPrice(), price)) {
                                 case PAID:
@@ -574,15 +557,15 @@ public class WarpManager extends CommonManager<Warp, WarpList<Warp>> {
             warper.sendMessage(ChatColor.RED + "The location of the warp is invalid.");
         }
     }
-    
+
     private interface Tester<T> {
         boolean test(T t);
     }
-    
+
     private static class SimpleTester<T> implements Tester<T> {
-        
+
         private final boolean t;
-        
+
         public SimpleTester(boolean value) {
             this.t = value;
         }
@@ -593,11 +576,11 @@ public class WarpManager extends CommonManager<Warp, WarpList<Warp>> {
         }
 
     }
-    
+
     private static final class CollectionContainCheck<T> implements Tester<T> {
-        
+
         private final Collection<T> collection;
-        
+
         public CollectionContainCheck(Collection<T> collection) {
             this.collection = collection;
         }
@@ -606,9 +589,9 @@ public class WarpManager extends CommonManager<Warp, WarpList<Warp>> {
         public boolean test(T t) {
             return collection.contains(t);
         }
-        
+
     }
-    
+
     public static <T> Tester<T> getTester(Collection<T> collection) {
         if (MinecraftUtil.isSet(collection)) {
             return new CollectionContainCheck<T>(collection);
@@ -616,10 +599,10 @@ public class WarpManager extends CommonManager<Warp, WarpList<Warp>> {
             return new SimpleTester<T>(true);
         }
     }
-    
+
     public List<Warp> getWarps(CommandSender sender, Set<String> creators, Set<String> owners, Set<String> worlds, Set<Visibility> visibilites) {
         List<Warp> allWarps = new ArrayList<Warp>();
-        
+
         if (MinecraftUtil.isSet(owners)) {
             for (String owner : owners) {
                 allWarps.addAll(this.list.getWarps(owner));
@@ -627,21 +610,17 @@ public class WarpManager extends CommonManager<Warp, WarpList<Warp>> {
         } else {
             allWarps.addAll(this.list.getWarpObjects());
         }
-        
+
         ArrayList<Warp> validWarps = new ArrayList<Warp>(allWarps.size());
-        
+
         Tester<String> creatorTester = getTester(creators);
         Tester<String> ownerTester = getTester(owners);
         Tester<String> worldTester = getTester(worlds);
         Tester<Visibility> visibilityTester = getTester(visibilites);
-        
+
         for (int i = allWarps.size() - 1; i >= 0; i--) {
             Warp w = allWarps.get(i);
-            if ((creatorTester.test(w.getCreator().toLowerCase())) &&
-                (ownerTester.test(w.getOwner())) &&
-                (worldTester.test(w.getLocationWrapper().getWorld().toLowerCase())) &&
-                (visibilityTester.test(w.getVisibility())) &&
-                (w.list(sender))) {
+            if ((creatorTester.test(w.getCreator().toLowerCase())) && (ownerTester.test(w.getOwner())) && (worldTester.test(w.getLocationWrapper().getWorld().toLowerCase())) && (visibilityTester.test(w.getVisibility())) && (w.list(sender))) {
                 validWarps.add(w);
             }
         }
@@ -651,7 +630,7 @@ public class WarpManager extends CommonManager<Warp, WarpList<Warp>> {
             validWarps.trimToSize();
             Collections.sort(validWarps, Warp.WARP_NAME_COMPARATOR);
         }
-        
+
         return validWarps;
     }
 
@@ -686,5 +665,35 @@ public class WarpManager extends CommonManager<Warp, WarpList<Warp>> {
         } else {
             sender.sendMessage(ChatColor.RED + "You do not have permission to change the listed status from '" + warp.getName() + "'");
         }
+    }
+
+    public static interface WarpObjectGetter<W extends WarpObject<?>> {
+        List<W> get();
+    }
+    
+    public static class WarpGetter implements WarpObjectGetter<Warp> {
+
+        private final DataConnection connection;
+        private final String owner;
+        
+        public WarpGetter(DataConnection connection, String owner) {
+            this.connection = connection;
+            this.owner = owner;
+        }
+        
+        @Override
+        public List<Warp> get() {
+            if (this.connection instanceof HModConnection) {
+                return ((HModConnection) this.connection).getWarps(this.owner);
+            } else {
+                return this.connection.getWarps();
+            }
+        }
+        
+    }
+
+    @Override
+    protected void blindDataAdd(Warp... warps) {
+        this.data.addWarp(warps);
     }
 }

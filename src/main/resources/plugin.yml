@@ -6,15 +6,14 @@ authors:
   - 'xZise'
   - 'tkelly'
 commands:
-# Add this command in the future to handle all general managing commands.
-# For example /xwarp permissions, /xwarp status, /xwarp reload
-#  xwarp:
-#    description: xWarp managing commands
-#    usage: /<command> help - Displays the help for all xwarp commands.    
+  xwarp:
+    description: xWarp managing commands
+    usage: /<command> help - Displays the help for all xwarp commands.
+    aliases: [xman]
   warp:
     description: Warp commands
     usage: /<command> help - Displays the help for all warp commands.
-    aliases: [xwarp, w]
+    aliases: [xw, w]
   wpa:
     description: Warp protection area handling commands.
     usage: /<command> help - Displays the help for all wpa commands.

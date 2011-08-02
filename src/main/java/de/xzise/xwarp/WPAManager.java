@@ -1,5 +1,8 @@
 package de.xzise.xwarp;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.bukkit.ChatColor;
 import org.bukkit.Server;
 import org.bukkit.command.CommandSender;
@@ -7,6 +10,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 
 import de.xzise.MinecraftUtil;
+import de.xzise.xwarp.WarpManager.WarpObjectGetter;
 import de.xzise.xwarp.dataconnections.DataConnection;
 import de.xzise.xwarp.dataconnections.IdentificationInterface;
 import de.xzise.xwarp.dataconnections.WarpProtectionConnection;
@@ -22,7 +26,7 @@ public class WPAManager extends CommonManager<WarpProtectionArea, NonGlobalList<
     private WarpProtectionConnection data;
     
     public WPAManager(Plugin plugin, DataConnection data, PluginProperties properties) {
-        super(new NonGlobalList<WarpProtectionArea>(), properties);
+        super(new NonGlobalList<WarpProtectionArea>(), "warp protection area", properties);
         this.server = plugin.getServer();
         this.data = saveCast(WarpProtectionConnection.class, data);
     }
@@ -215,6 +219,32 @@ public class WPAManager extends CommonManager<WarpProtectionArea, NonGlobalList<
         } else {
             sender.sendMessage(ChatColor.RED + "Player '" + owner + "' doesn't own a protection area named '" + name + "'.");
         }
+    }
+    
+
+    
+    public static class WPAGetter implements WarpObjectGetter<WarpProtectionArea> {
+
+        private final WarpProtectionConnection connection;
+        
+        public WPAGetter(DataConnection connection) {
+            this.connection = MinecraftUtil.cast(WarpProtectionConnection.class, connection);
+        }
+        
+        @Override
+        public List<WarpProtectionArea> get() {
+            return connection == null ? new ArrayList<WarpProtectionArea>(0) : this.connection.getProtectionAreas();
+        }
+        
+    }
+
+    public void addWPA(WarpProtectionArea wpa) {
+        this.list.addWarpObject(wpa);
+    }
+
+    @Override
+    protected void blindDataAdd(WarpProtectionArea... areas) {
+        this.data.addProtectionArea(areas);
     }
 
 }

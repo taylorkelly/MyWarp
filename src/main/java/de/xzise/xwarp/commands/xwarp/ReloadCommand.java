@@ -1,4 +1,4 @@
-package de.xzise.xwarp.commands;
+package de.xzise.xwarp.commands.xwarp;
 
 import java.util.Collection;
 
@@ -13,7 +13,7 @@ import de.xzise.wrappers.economy.EconomyHandler;
 import de.xzise.xwarp.Manager;
 import de.xzise.xwarp.PluginProperties;
 import de.xzise.xwarp.XWarp;
-import de.xzise.xwarp.wrappers.permission.PermissionTypes;
+import de.xzise.xwarp.wrappers.permission.GeneralPermissions;
 
 public class ReloadCommand extends CommonHelpableSubCommand {
 
@@ -31,7 +31,7 @@ public class ReloadCommand extends CommonHelpableSubCommand {
     @Override
     public boolean execute(CommandSender sender, String[] parameters) {
         if (parameters.length == 1) {
-            if (XWarp.permissions.permission(sender, PermissionTypes.ADMIN_RELOAD)) {
+            if (XWarp.permissions.permission(sender, GeneralPermissions.RELOAD)) {
                 this.properties.read();
                 this.economy.reloadConfig(this.properties.getEconomyPlugin(), this.properties.getEconomyBaseAccount());
                 for (Manager<?> manager : this.managers) {
@@ -64,7 +64,7 @@ public class ReloadCommand extends CommonHelpableSubCommand {
 
     @Override
     public boolean listHelp(CommandSender sender) {
-        return XWarp.permissions.permission(sender, PermissionTypes.ADMIN_RELOAD);
+        return XWarp.permissions.permission(sender, GeneralPermissions.RELOAD);
     }
 
 }

@@ -15,6 +15,7 @@ import de.xzise.xwarp.DefaultWarpObject.EditorPermissionEntry;
 import de.xzise.xwarp.Warp;
 import de.xzise.xwarp.WarpManager;
 import de.xzise.xwarp.XWarp;
+import de.xzise.xwarp.commands.wpa.InfoCommand.EditorLines;
 import de.xzise.xwarp.editors.WarpPermissions;
 import de.xzise.xwarp.lister.GenericLister;
 import de.xzise.xwarp.wrappers.permission.PermissionTypes;
@@ -83,35 +84,9 @@ public class InfoCommand extends WarpCommand {
         }
 
         Collection<EditorPermissionEntry<WarpPermissions>> allEditorPermissions = warp.getEditorPermissionsList();
-        String editor = "";
-        String invitees = "";
-        if (allEditorPermissions.size() == 0) {
-            editor = "None";
-        } else {
-            int i = 0;
-            for (EditorPermissionEntry<WarpPermissions> editorPermissionEntry : allEditorPermissions) {
-                WarpPermissions[] pms = editorPermissionEntry.editorPermissions.getByValue(true);
-                if (pms.length > 0) {
-                    editor += ChatColor.GREEN + editorPermissionEntry.name + " ";
-                    char[] editorPermissions = new char[pms.length];
-                    for (int j = 0; j < pms.length; j++) {
-                        editorPermissions[j] = pms[j].value;
-                        if (pms[j] == WarpPermissions.WARP) {
-                            if (!invitees.isEmpty()) {
-                                invitees += ", ";
-                            }
-                            invitees += editorPermissionEntry.name;
-                        }
-                    }
-                    editor += new String(editorPermissions);
-                }
-                if (i++ < allEditorPermissions.size() - 1) {
-                    editor += ChatColor.WHITE + ", ";
-                }
-            }
-        }
-        sender.sendMessage("Invitees: " + (invitees.isEmpty() ? "None" : invitees));
-        sender.sendMessage("Editors: " + editor);
+        EditorLines lines = de.xzise.xwarp.commands.wpa.InfoCommand.getEditorLines(allEditorPermissions);
+        sender.sendMessage("Invitees: " + (lines.invitees.isEmpty() ? "None" : lines.invitees));
+        sender.sendMessage("Editors: " + lines.editors);
 
         FixedLocation location = warp.getLocation();
         sender.sendMessage("Location: World = " + ChatColor.GREEN + world + ChatColor.WHITE + ", x = " + ChatColor.GREEN + location.getBlockX() + ChatColor.WHITE + ", y = " + ChatColor.GREEN + location.getBlockY() + ChatColor.WHITE + ", z = " + ChatColor.GREEN + location.getBlockZ());
@@ -119,7 +94,7 @@ public class InfoCommand extends WarpCommand {
         return true;
     }
 
-    private static String getPlayerLine(String player, String world) {
+    public static String getPlayerLine(String player, String world) {
         if (MinecraftUtil.isSet(player)) {
             String[] groups = XWarp.permissions.getGroup(world, player);
 

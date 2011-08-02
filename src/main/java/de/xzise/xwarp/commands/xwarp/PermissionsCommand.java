@@ -1,5 +1,4 @@
-package de.xzise.xwarp.commands;
-
+package de.xzise.xwarp.commands.xwarp;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -9,7 +8,6 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import de.xzise.commands.CommonHelpableSubCommand;
-import de.xzise.xwarp.WarpManager;
 import de.xzise.xwarp.XWarp;
 import de.xzise.xwarp.wrappers.permission.PermissionTypes;
 import de.xzise.xwarp.wrappers.permission.PermissionValues;
@@ -20,7 +18,7 @@ public class PermissionsCommand extends CommonHelpableSubCommand {
 
     private final Server server = Bukkit.getServer();
     
-    public PermissionsCommand(WarpManager list, Server server) {
+    public PermissionsCommand(Server server) {
         super("permissions");
     }
 

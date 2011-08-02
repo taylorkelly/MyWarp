@@ -15,6 +15,7 @@ import org.bukkit.entity.Player;
 import de.xzise.metainterfaces.FixedLocation;
 import de.xzise.metainterfaces.LocationWrapper;
 import de.xzise.xwarp.Warp;
+import de.xzise.xwarp.Warp.Visibility;
 import de.xzise.xwarp.warpable.WarperFactory;
 
 public class GenericLister {
@@ -151,8 +152,15 @@ public class GenericLister {
     }
 
     public static ChatColor getColor(Warp warp, Player player) {
-        if (player != null && warp.isOwn(player.getName())) {
-            switch (warp.getVisibility()) {
+        return getColor(player != null && warp.isOwn(player.getName()), player != null && warp.playerCanWarp(WarperFactory.getWarpable(player)), warp.getVisibility(), player);
+    }
+
+    public static ChatColor getColor(boolean isOwn, boolean invited, Visibility visibility, Player player) {
+        if (visibility == null) {
+            visibility = Visibility.PUBLIC;
+        }
+        if (isOwn) {
+            switch (visibility) {
             case PRIVATE:
                 return GenericLister.PRIVATE_OWN;
             case PUBLIC:
@@ -161,9 +169,9 @@ public class GenericLister {
                 return GenericLister.GLOBAL_OWN;
             }
         } else {
-            switch (warp.getVisibility()) {
+            switch (visibility) {
             case PRIVATE:
-                if (player != null && warp.playerCanWarp(WarperFactory.getWarpable(player))) {
+                if (invited) {
                     return GenericLister.PRIVATE_INVITED;
                 } else {
                     return GenericLister.PRIVATE_OTHER;

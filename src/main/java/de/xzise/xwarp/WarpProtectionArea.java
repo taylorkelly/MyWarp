@@ -11,7 +11,7 @@ import de.xzise.xwarp.warpable.Positionable;
 
 public class WarpProtectionArea extends DefaultWarpObject<WarpProtectionAreaPermissions> {
 
-    public final int index;
+    private int index;
     private final WorldWrapper world;
     private final FixedLocation firstCorner;
     private final FixedLocation secondCorner;
@@ -37,7 +37,11 @@ public class WarpProtectionArea extends DefaultWarpObject<WarpProtectionAreaPerm
     public boolean isWithIn(Positionable positionable) {
         return this.isWithIn(new FixedLocation(positionable.getLocation()));
     }
-    
+
+    public void assignNewId() {
+        this.index = nextIndex++;
+    }
+
     public boolean isWithIn(FixedLocation location) {
         if (this.isValid() && location.world.equals(world.getWorld())) {
             double lowerX = Math.min(this.firstCorner.x, this.secondCorner.x);
@@ -71,7 +75,11 @@ public class WarpProtectionArea extends DefaultWarpObject<WarpProtectionAreaPerm
             return false;
         } 
     }
-    
+
+    public int getId() {
+        return this.index;
+    }
+
     public boolean isAllowed(String name) {
         //TODO: Allow positionable
         if (name.equals(this.getOwner())) {

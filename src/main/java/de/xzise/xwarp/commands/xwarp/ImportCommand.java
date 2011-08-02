@@ -1,30 +1,28 @@
-package de.xzise.xwarp.commands;
+package de.xzise.xwarp.commands.xwarp;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
-
 
 import org.bukkit.ChatColor;
 import org.bukkit.Server;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import de.xzise.MinecraftUtil;
-import de.xzise.xwarp.Warp;
+import de.xzise.xwarp.WPAManager;
 import de.xzise.xwarp.WarpManager;
+import de.xzise.xwarp.WarpManager.WarpGetter;
+import de.xzise.xwarp.commands.DefaultSubCommand;
 import de.xzise.xwarp.dataconnections.DataConnection;
 import de.xzise.xwarp.dataconnections.DataConnectionFactory;
 import de.xzise.xwarp.dataconnections.HModConnection;
 
 public class ImportCommand extends DefaultSubCommand<WarpManager> {
 
-    private final DataConnection data;
     private final File directory;
+    private final WPAManager wpaManager;
 
-    public ImportCommand(WarpManager manager, File directory, DataConnection data, Server server) {
+    public ImportCommand(WarpManager manager, WPAManager wpaManager, File directory, Server server) {
         super(manager, server, "import");
-        this.data = data;
+        this.wpaManager = wpaManager;
         this.directory = directory;
     }
 
@@ -51,48 +49,18 @@ public class ImportCommand extends DefaultSubCommand<WarpManager> {
                 connection.load(new File(this.directory, connection.getFilename()));
             }
 
-            List<Warp> warps;
+            String owner = null;
             if (connection instanceof HModConnection) {
-                String owner = null;
                 if (parameters.length == 4) {
                     owner = parameters[3];
                 } else if (sender instanceof Player) {
                     owner = ((Player) sender).getName();
                 }
-
-                warps = ((HModConnection) connection).getWarps(owner);
-            } else {
-                warps = connection.getWarps();
-            }
-            List<Warp> allowedWarps = new ArrayList<Warp>(warps.size());
-            List<Warp> notAllowedWarps = new ArrayList<Warp>(warps.size());
-            for (Warp warp : warps) {
-                if (this.manager.isNameAvailable(warp)) {
-                    allowedWarps.add(warp);
-                } else {
-                    notAllowedWarps.add(warp);
-                }
             }
 
-            for (Warp warp : allowedWarps) {
-                warp.assignNewId();
-            }
+            this.manager.importWarpObjects(connection, new WarpGetter(connection, owner), sender);
+            this.wpaManager.importWarpObjects(connection, new WPAManager.WPAGetter(connection), sender);
 
-            if (allowedWarps.size() > 0) {
-                this.manager.blindAdd(allowedWarps);
-                this.data.addWarp(allowedWarps.toArray(new Warp[0]));
-                sender.sendMessage("Imported " + ChatColor.GREEN + allowedWarps.size() + ChatColor.WHITE + " warps into the database.");
-            }
-
-            if (notAllowedWarps.size() > 0) {
-                sender.sendMessage(ChatColor.RED + "Found " + notAllowedWarps.size() + " which cause naming conflicts.");
-                // Max lines - 1 (for the header) - 1 (for the succeed message)
-                if (notAllowedWarps.size() < MinecraftUtil.getMaximumLines(sender) - 1) {
-                    for (Warp warp : notAllowedWarps) {
-                        sender.sendMessage(ChatColor.GREEN + warp.getName() + ChatColor.WHITE + " by " + ChatColor.GREEN + warp.getOwner());
-                    }
-                }
-            }
             connection.free();
             return true;
         } else {
