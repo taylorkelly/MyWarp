@@ -8,7 +8,7 @@ import de.xzise.wrappers.permissions.SuperPerm;
 public enum GeneralPermissions implements Permission<Boolean>, SuperPerm {
     RELOAD("reload", false, "Allows you to reload all warps and protection areas"),
     EXPORT("export", false, "Allows you to export all warps and protection areas"),
-    IMPORT("export", false, "Allows you to import all warps and protection areas"), 
+    IMPORT("import", false, "Allows you to import all warps and protection areas"), 
     ;
 
     public final String name;

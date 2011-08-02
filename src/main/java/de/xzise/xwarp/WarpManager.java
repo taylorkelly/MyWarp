@@ -146,6 +146,7 @@ public class WarpManager extends CommonManager<Warp, WarpList<Warp>> {
                     } else {
                         List<String> inProtectionArea = new ArrayList<String>();
                         boolean skipProtectionTest = XWarp.permissions.permission(sender, PermissionTypes.ADMIN_IGNORE_PROTECTION_AREA);
+
                         if (!skipProtectionTest && this.wpaManager != null) {
                             for (WarpProtectionArea area : this.wpaManager.getWarpObjects()) {
                                 if (area.isWithIn(player) && creator != null && area.isAllowed(creator)) {

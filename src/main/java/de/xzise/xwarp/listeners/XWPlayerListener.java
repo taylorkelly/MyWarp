@@ -1,13 +1,16 @@
 package de.xzise.xwarp.listeners;
 
 import org.bukkit.ChatColor;
+import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
+import org.bukkit.entity.Player;
 import org.bukkit.event.Event.Result;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerListener;
 import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.inventory.ItemStack;
 
 import de.xzise.metainterfaces.FixedLocation;
 import de.xzise.xwarp.PluginProperties;
@@ -30,18 +33,23 @@ public class XWPlayerListener extends PlayerListener {
     @Override
     public void onPlayerInteract(PlayerInteractEvent event) {
         Block block = event.getClickedBlock();
-        event.getPlayer().sendMessage("Hit! block == null ? " + (block == null) + " cancelled ? " + event.isCancelled());
+        Player player = event.getPlayer();
         if (block != null && !event.isCancelled()) {
             if (event.getAction() == Action.RIGHT_CLICK_BLOCK && block.getState() instanceof Sign) {
                 SignWarp signWarp = new SignWarp((Sign) block.getState());
                 if (signWarp.warp(this.manager, event.getPlayer())) {
                     event.setUseInteractedBlock(Result.DENY);
                     event.setCancelled(true);
-                }    
-            } else if (event.getAction() == Action.LEFT_CLICK_BLOCK) {
-                this.createCommand.hitBlock(event.getPlayer(), new FixedLocation(block.getLocation()));
+                }
+            } else if (event.getAction() == Action.LEFT_CLICK_BLOCK && inHand(player, Material.WOOD_SWORD)) {
+                this.createCommand.hitBlock(player, new FixedLocation(block.getLocation()));
             }
         }
+    }
+
+    public static boolean inHand(Player player, Material material) {
+        ItemStack stack = player.getItemInHand();
+        return stack == null ? material == null : stack.getType() == material;
     }
 
     @Override

@@ -4,8 +4,15 @@
   - --case-sensitive-check--
   - --pay-creation-price-for-change-visibility--
   - --Bukkit-permissions-support-(in-Bukkit-Plugin-Utilities)--
-  - Add wpa support for import/export
+  - --Add-wpa-support-for-import/export--
   - Clean up permission names
+  Bugs:
+  - list with owner doesn't work?
+  Tested:
+  - Warp creation within WPAs (check which is the actual border)
+  - Column extraction (-col:owner)
+  - WPA creation
+  - Left clicking with wooden sword after creation
 
 3.1.0
   - auto completion

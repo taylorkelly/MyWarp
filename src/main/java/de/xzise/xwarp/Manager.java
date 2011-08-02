@@ -2,6 +2,8 @@ package de.xzise.xwarp;
 
 import org.bukkit.command.CommandSender;
 
+import com.google.common.collect.ImmutableSet;
+
 import de.xzise.xwarp.WarpManager.WarpObjectGetter;
 import de.xzise.xwarp.dataconnections.DataConnection;
 import de.xzise.xwarp.editors.EditorPermissions;
@@ -25,7 +27,7 @@ public interface Manager<T extends WarpObject<?>> {
     boolean isNameAvailable(String name, String owner);
 
     T getWarpObject(String name, String owner, String playerName);
-    T[] getWarpObjects();
+    ImmutableSet<T> getWarpObjects();
     int getSize();
 
     void missing(String name, String owner, CommandSender sender);

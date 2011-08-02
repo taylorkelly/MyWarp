@@ -7,7 +7,9 @@ import org.bukkit.Server;
 import org.bukkit.command.CommandSender;
 
 import de.xzise.xwarp.WPAManager;
+import de.xzise.xwarp.Warp;
 import de.xzise.xwarp.WarpManager;
+import de.xzise.xwarp.WarpProtectionArea;
 import de.xzise.xwarp.XWarp;
 import de.xzise.xwarp.commands.DefaultSubCommand;
 import de.xzise.xwarp.dataconnections.DataConnection;
@@ -41,9 +43,9 @@ public class ExportCommand extends DefaultSubCommand<WarpManager> {
                     }
                     try {
                         connection.create(file);
-                        connection.addWarp(this.manager.getWarpObjects());
+                        connection.addWarp(this.manager.getWarpObjects().toArray(new Warp[0]));
                         if (connection instanceof WarpProtectionConnection) {
-                            ((WarpProtectionConnection) connection).addProtectionArea(this.wpaManager.getWarpObjects());
+                            ((WarpProtectionConnection) connection).addProtectionArea(this.wpaManager.getWarpObjects().toArray(new WarpProtectionArea[0]));
                         }
                         connection.free();
                         sender.sendMessage("Successfully xWarp database exported.");

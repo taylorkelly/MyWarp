@@ -5,6 +5,7 @@ import java.util.List;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 
 import de.xzise.MinecraftUtil;
@@ -79,10 +80,9 @@ public abstract class CommonManager<T extends DefaultWarpObject<?>, L extends Pe
         this.list.setIgnoreCase(!properties.isCaseSensitive());
     }
 
-    @SuppressWarnings("unchecked")
     @Override
-    public T[] getWarpObjects() {
-        return (T[]) this.list.getWarpObjects().toArray();
+    public ImmutableSet<T> getWarpObjects() {
+        return this.list.getWarpObjects();
     }
 
     @Override

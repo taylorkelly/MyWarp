@@ -34,7 +34,7 @@ public class InfoCommand extends WPACommand {
     @Override
     protected boolean executeEdit(WarpProtectionArea warp, CommandSender sender, String[] parameters) {
         if (!XWarp.permissions.permission(sender, WPAPermissions.CMD_INFO)) {
-            sender.sendMessage(ChatColor.RED + "You have no permission to gather information to warps.");
+            sender.sendMessage(ChatColor.RED + "You have no permission to gather information to warp protection areas.");
             return true;
         }
 

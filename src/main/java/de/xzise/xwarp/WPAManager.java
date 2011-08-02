@@ -24,27 +24,20 @@ public class WPAManager extends CommonManager<WarpProtectionArea, NonGlobalList<
 
     private Server server;
     private WarpProtectionConnection data;
-    
+
     public WPAManager(Plugin plugin, DataConnection data, PluginProperties properties) {
         super(new NonGlobalList<WarpProtectionArea>(), "warp protection area", properties);
         this.server = plugin.getServer();
-        this.data = saveCast(WarpProtectionConnection.class, data);
+        this.data = MinecraftUtil.cast(WarpProtectionConnection.class, data);
+        this.reload();
     }
-    
-    public static <T> T saveCast(Class<T> castClass, Object o) {
-        try {
-            return castClass.cast(o);
-        } catch (ClassCastException cce) {
-            return null;
-        }
-    }
-    
+
     @Override
     public void reload() {
         super.reload();
         this.list.loadList(this.data.getProtectionAreas());
     }
-    
+
     private boolean isWPAEnabled(CommandSender sender) {
         if (this.data != null) {
             return true;
@@ -220,26 +213,25 @@ public class WPAManager extends CommonManager<WarpProtectionArea, NonGlobalList<
             sender.sendMessage(ChatColor.RED + "Player '" + owner + "' doesn't own a protection area named '" + name + "'.");
         }
     }
-    
 
-    
     public static class WPAGetter implements WarpObjectGetter<WarpProtectionArea> {
 
         private final WarpProtectionConnection connection;
-        
+
         public WPAGetter(DataConnection connection) {
             this.connection = MinecraftUtil.cast(WarpProtectionConnection.class, connection);
         }
-        
+
         @Override
         public List<WarpProtectionArea> get() {
             return connection == null ? new ArrayList<WarpProtectionArea>(0) : this.connection.getProtectionAreas();
         }
-        
+
     }
 
     public void addWPA(WarpProtectionArea wpa) {
         this.list.addWarpObject(wpa);
+        this.blindDataAdd(wpa);
     }
 
     @Override

@@ -8,6 +8,9 @@ import java.util.Map;
 
 import org.bukkit.command.CommandSender;
 
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.ImmutableSet.Builder;
+
 import de.xzise.MinecraftUtil;
 import de.xzise.xwarp.WarpObject;
 
@@ -134,12 +137,12 @@ public abstract class PersonalList<T extends WarpObject<?>, G extends GlobalMap<
         return this.getWarpObject(name, null, null);
     }
 
-    public List<T> getWarpObjects() {
-        List<T> result = new ArrayList<T>();
+    public ImmutableSet<T> getWarpObjects() {
+        Builder<T> builder = ImmutableSet.builder();
         for (Map<String, T> map : this.personalMap.values()) {
-            result.addAll(map.values());
+            builder.addAll(map.values());
         }
-        return result;
+        return builder.build();
     }
 
     public List<T> getWarps(String owner) {

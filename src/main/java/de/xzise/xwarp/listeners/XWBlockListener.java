@@ -1,6 +1,5 @@
 package de.xzise.xwarp.listeners;
 
-
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -20,10 +19,10 @@ import de.xzise.xwarp.wrappers.permission.PermissionTypes;
 
 public class XWBlockListener extends BlockListener {
 
-    private WarpManager list;
+    private final WarpManager manager;
 
-    public XWBlockListener(WarpManager list) {
-        this.list = list;
+    public XWBlockListener(WarpManager manager) {
+        this.manager = manager;
     }
 
     @Override
@@ -32,7 +31,7 @@ public class XWBlockListener extends BlockListener {
         if (block.getState() instanceof Sign && !event.isCancelled() && event.getPlayer() != null) {
             WarpDestination destination = SignWarp.getDestination(SignWarp.getFilledLines(event.getLines()), event.getPlayer());
             if (destination != null) {
-                Warp warp = this.list.getWarpObject(destination.name, destination.owner, null);
+                Warp warp = this.manager.getWarpObject(destination.name, destination.owner, null);
                 PermissionTypes type = null;
                 if (warp == null) {
                     type = PermissionTypes.SIGN_CREATE_UNKNOWN;
@@ -60,7 +59,7 @@ public class XWBlockListener extends BlockListener {
                 } else {
                     // Return sign
                     event.getPlayer().sendMessage(ChatColor.RED + "You have no permission to create a warp sign.");
-                    
+
                     event.setCancelled(true);
                     block.getWorld().dropItem(block.getLocation(), new ItemStack(Material.SIGN, 1));
                     block.setTypeId(0);

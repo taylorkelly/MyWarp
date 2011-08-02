@@ -112,6 +112,7 @@ public class CreateCommand extends DefaultSubCommand<WPAManager> {
                     player.sendMessage("Added second location to new protection area.");
                     WarpProtectionArea wpa = data.build();
                     this.manager.addWPA(wpa);
+                    this.wpaData.remove(player.getName());
                     player.sendMessage("Successfully created protection area '" + ChatColor.GREEN + wpa.getName() + ChatColor.WHITE + "'.");
                 }
             } else {

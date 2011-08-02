@@ -22,7 +22,9 @@ import de.xzise.xwarp.listeners.XWBlockListener;
 import de.xzise.xwarp.listeners.XWEntityListener;
 import de.xzise.xwarp.listeners.XWPlayerListener;
 import de.xzise.xwarp.listeners.XWWorldListener;
+import de.xzise.xwarp.wrappers.permission.GeneralPermissions;
 import de.xzise.xwarp.wrappers.permission.PermissionTypes;
+import de.xzise.xwarp.wrappers.permission.WPAPermissions;
 
 public class XWarp extends JavaPlugin {
 
@@ -53,13 +55,7 @@ public class XWarp extends JavaPlugin {
         logger = new XLogger(this);
 
         // Register permissions
-        try {
-            for (PermissionTypes permission : PermissionTypes.values()) {
-                permission.register(this.getServer().getPluginManager());
-            }
-        } catch (ClassNotFoundException e) {
-            logger.info("SuperPerms not found, didn't register permissions.");
-        }
+        MinecraftUtil.register(this.getServer().getPluginManager(), logger, PermissionTypes.values(), WPAPermissions.values(), GeneralPermissions.values());
 
         if (!this.getDataFolder().exists()) {
             this.getDataFolder().mkdirs();
@@ -101,6 +97,8 @@ public class XWarp extends JavaPlugin {
 
         WarpManager warpManager = new WarpManager(this, this.economyHandler, properties, this.dataConnection);
         WPAManager wpaManager = new WPAManager(this, this.dataConnection, properties);
+
+        warpManager.setWPAManager(wpaManager);
 
         // Create commands
         WarpCommandMap wcm = null;
