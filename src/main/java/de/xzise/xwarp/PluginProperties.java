@@ -31,7 +31,7 @@ public class PluginProperties {
 
     public PluginProperties(File dataDirectory, Server server) {
         this.dataDirectory = dataDirectory;
-        this.configFile = new File(this.dataDirectory, "config.properties");
+        this.configFile = new File(this.dataDirectory, "config.yml");
         this.server = server;
         this.read();
     }

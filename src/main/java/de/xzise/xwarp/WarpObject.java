@@ -13,6 +13,7 @@ public interface WarpObject<T extends Editor> {
     String getOwner();
     String getCreator();
     String getWorld();
+    String getType();
     boolean list(CommandSender sender);
     boolean canModify(CommandSender sender, T permission);
     

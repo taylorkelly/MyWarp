@@ -36,9 +36,9 @@ import de.xzise.xwarp.editors.EditorPermissions.Type;
 import de.xzise.xwarp.editors.WarpPermissions;
 import de.xzise.xwarp.editors.WarpProtectionAreaPermissions;
 
-
 public class YmlConnection implements WarpProtectionConnection {
 
+    //@formatter:off
     /*
      * xwarp:
      *   version: 0
@@ -83,6 +83,7 @@ public class YmlConnection implements WarpProtectionConnection {
      *       welcome: 'Welcome!'
      * 
      */
+    //@formatter:on
 
     private static final Callback<Warp, ConfigurationNode> NODE_TO_WARP = new Callback<Warp, ConfigurationNode>() {
         @Override
@@ -90,31 +91,30 @@ public class YmlConnection implements WarpProtectionConnection {
             return getWarp(parameter);
         }
     };
-    
-    private static final Callback<WarpProtectionArea, ConfigurationNode>  NODE_TO_WPA = new Callback<WarpProtectionArea, ConfigurationNode>() {
+
+    private static final Callback<WarpProtectionArea, ConfigurationNode> NODE_TO_WPA = new Callback<WarpProtectionArea, ConfigurationNode>() {
 
         @Override
         public WarpProtectionArea call(ConfigurationNode parameter) {
             return getWarpProtectionArea(parameter);
         }
     };
-    
+
     private static final String WARP_PATH = "xwarp.warps";
     private static final String WPA_PATH = "xwarp.protectionareas";
-    
+
     private Configuration config;
     private File file;
-    
+
     @Override
     public boolean load(File file) {
         this.file = file;
-        this.config = new Configuration(file);
-        if (file.exists()) {
-            this.config.load();
-            return true;
-        } else {
-            return file.canWrite();
+        if (!file.exists()) {
+            this.clear();
         }
+        this.config = new Configuration(file);
+        this.config.load();
+        return file.canWrite();
     }
 
     @Override
@@ -142,10 +142,10 @@ public class YmlConnection implements WarpProtectionConnection {
         try {
             FileWriter writer = new FileWriter(this.file);
             try {
-                writer.write("xwarp:");
-                writer.write("  version: 0");
-                writer.write("  protectionareas: []");
-                writer.write("  warps: []");
+                writer.write("xwarp:\n");
+                writer.write("  version: 0\n");
+                writer.write("  protectionareas: []\n");
+                writer.write("  warps: []\n");
             } finally {
                 writer.close();
             }
@@ -153,7 +153,7 @@ public class YmlConnection implements WarpProtectionConnection {
             XWarp.logger.severe("Unable to write the file", e);
         }
     }
-    
+
     public <T extends WarpObject<?>> IdentificationInterface<T> createIdentification(T warp) {
         return NameIdentification.create(warp);
     }
@@ -167,9 +167,9 @@ public class YmlConnection implements WarpProtectionConnection {
         String name = node.getString("name");
         String owner = node.getString("owner");
         String creator = node.getString("creator");
-        
+
         List<ConfigurationNode> editorNodes = node.getNodeList("editors", null);
-        Map<EditorPermissions.Type, Map<String, EditorPermissions<WarpPermissions>>> allPermissions = getEditorPermissions(editorNodes, WarpPermissions.STRING_MAP, WarpPermissions.class); 
+        Map<EditorPermissions.Type, Map<String, EditorPermissions<WarpPermissions>>> allPermissions = getEditorPermissions(editorNodes, WarpPermissions.STRING_MAP, WarpPermissions.class);
 
         // Location:
         Double x = getDouble(node, "x");
@@ -179,7 +179,7 @@ public class YmlConnection implements WarpProtectionConnection {
         Float pitch = getFloat(node, "pitch");
         String world = node.getString("world");
         World worldObject = Bukkit.getServer().getWorld(world);
-        
+
         Visibility visibility = Visibility.parseString(node.getString("visibility"));
         boolean listed = node.getBoolean("listed", true);
         double price = node.getDouble("price", -1);
@@ -199,10 +199,10 @@ public class YmlConnection implements WarpProtectionConnection {
         warp.setPrice(price);
         warp.setCoolDown(cooldown);
         warp.setWarmUp(warmup);
-        
+
         return warp;
     }
-    
+
     @Override
     public List<Warp> getWarps() {
         return getList(WARP_PATH, NODE_TO_WARP);
@@ -216,7 +216,7 @@ public class YmlConnection implements WarpProtectionConnection {
             return null;
         }
     }
-    
+
     public static Float getFloat(ConfigurationNode node, String path) {
         Object o = node.getProperty(path);
         if (o instanceof Number) {
@@ -225,7 +225,7 @@ public class YmlConnection implements WarpProtectionConnection {
             return null;
         }
     }
-    
+
     private static <T extends Enum<T> & Editor> Map<String, Object> warpObjectToMap(DefaultWarpObject<T> object) {
         Map<String, Object> map = Maps.newHashMap();
         map.put("name", object.getName());
@@ -240,7 +240,7 @@ public class YmlConnection implements WarpProtectionConnection {
         map.put("editors", editorPermissionMaps);
         return map;
     }
-    
+
     private static <T extends Enum<T> & Editor> Map<String, Object> editorPermissionToMap(EditorPermissions<T> perm, String name, EditorPermissions.Type type) {
         Map<String, Object> map = Maps.newHashMap();
         map.put("name", name);
@@ -253,11 +253,11 @@ public class YmlConnection implements WarpProtectionConnection {
         map.put("permissions", permNames);
         return map;
     }
-    
+
     @Override
     public void addWarp(Warp... warps) {
-        List<Object> rawNodes = this.config.getList(WPA_PATH);
-        
+        List<Object> rawNodes = this.config.getList(WARP_PATH);
+
         for (Warp warp : warps) {
             Map<String, Object> warpMap = warpObjectToMap(warp);
             fixedLocToMap(warpMap, warp.getLocation(), false, true);
@@ -272,7 +272,7 @@ public class YmlConnection implements WarpProtectionConnection {
             }
             rawNodes.add(warpMap);
         }
-        
+
         this.config.save();
     }
 
@@ -283,13 +283,13 @@ public class YmlConnection implements WarpProtectionConnection {
         }
         return map;
     }
-    
+
     public static boolean bool(Boolean b, boolean nullIsTrue) {
         return b == null ? nullIsTrue : b;
     }
-    
+
     public static class WarpObjectCallback<T extends WarpObject<?>> implements Callback<Boolean, ConfigurationNode> {
-        
+
         public final IdentificationInterface<T> id;
         public final Callback<T, ConfigurationNode> warpObjectGetter;
 
@@ -297,7 +297,7 @@ public class YmlConnection implements WarpProtectionConnection {
             this.id = id;
             this.warpObjectGetter = warpObjectGetter;
         }
-        
+
         public static <T extends WarpObject<?>> WarpObjectCallback<T> create(IdentificationInterface<T> id, Callback<T, ConfigurationNode> warpObjectGetter) {
             return new WarpObjectCallback<T>(id, warpObjectGetter);
         }
@@ -306,20 +306,25 @@ public class YmlConnection implements WarpProtectionConnection {
         public Boolean call(ConfigurationNode parameter) {
             return !id.isIdentificated(warpObjectGetter.call(parameter));
         }
-        
+
     }
-    
+
     public static void removeFromList(ConfigurationNode node, String key, Callback<Boolean, ConfigurationNode> callback) {
         List<ConfigurationNode> nodes = node.getNodeList(key, null);
-        List<Map<String, Object>> mapList = new ArrayList<Map<String,Object>>(Math.max(nodes.size() - 1, 0));
+        System.out.println("Node size: " + nodes.size() + " @" + key);
+        List<Map<String, Object>> mapList = Lists.newArrayListWithCapacity(Math.max(nodes.size() - 1, 0));
         for (ConfigurationNode singleNode : nodes) {
+            Map<String, Object> a = nodeToMap(singleNode);
             if (bool(callback.call(singleNode), false)) {
-                mapList.add(nodeToMap(node));
+                mapList.add(a);
+                System.out.println("Added node #" + mapList.size() + " a.keySet() =>" + a.keySet());
+            } else {
+                System.out.println("Skiped node w/ a.keySet() =>" + a.keySet());
             }
         }
         node.setProperty(key, mapList);
     }
-    
+
     @Override
     public void deleteWarp(Warp warp) {
         removeFromList(this.config, WARP_PATH, WarpObjectCallback.create(NameIdentification.create(warp), NODE_TO_WARP));
@@ -335,32 +340,32 @@ public class YmlConnection implements WarpProtectionConnection {
         }
         return null;
     }
-    
+
     private ConfigurationNode getWarpNode(IdentificationInterface<Warp> id) {
         return getNode(id, WARP_PATH, NODE_TO_WARP);
     }
-    
+
     private ConfigurationNode getWarpProtectionAreaNode(IdentificationInterface<WarpProtectionArea> id) {
         return getNode(id, WPA_PATH, NODE_TO_WPA);
     }
-    
+
     private void updateField(ConfigurationNode node, String path, Object value) {
         node.setProperty(path, value);
         this.config.save();
     }
-    
+
     private void updateWarpField(IdentificationInterface<Warp> id, String path, Object value) {
         updateField(this.getWarpNode(id), path, value);
     }
-    
+
     private void updateWPAField(IdentificationInterface<WarpProtectionArea> id, String path, Object value) {
         updateField(this.getWarpProtectionAreaNode(id), path, value);
     }
-    
+
     private void updateWarpField(Warp warp, String path, Object value) {
         updateWarpField(NameIdentification.create(warp), path, value);
     }
-    
+
     @Override
     public void updateCreator(Warp warp) {
         this.updateWarpField(warp, "creator", warp.getCreator());
@@ -400,9 +405,9 @@ public class YmlConnection implements WarpProtectionConnection {
         node.setProperty("world", world);
         this.config.save();
     }
-    
+
     private <T extends Enum<T> & Editor> void updateEditor(ConfigurationNode warpObjectNode, DefaultWarpObject<T> warpObject, final String name, final EditorPermissions.Type type) {
-        
+
         final Callback<Boolean, ConfigurationNode> editorCheck = new Callback<Boolean, ConfigurationNode>() {
             @Override
             public Boolean call(ConfigurationNode parameter) {
@@ -410,8 +415,8 @@ public class YmlConnection implements WarpProtectionConnection {
                 String nodeType = parameter.getString("type");
                 return name.equalsIgnoreCase(nodeName) && type.equals(EditorPermissions.Type.parseName(nodeType));
             }
-        };  
-        
+        };
+
         EditorPermissions<T> perms = warpObject.getEditorPermissions(name, false, type);
         if (perms == null) {
             removeFromList(warpObjectNode, "editors", editorCheck);
@@ -431,7 +436,7 @@ public class YmlConnection implements WarpProtectionConnection {
                 }
             }
         }
-        
+
         this.config.save();
     }
 
@@ -445,35 +450,37 @@ public class YmlConnection implements WarpProtectionConnection {
     public void updatePrice(Warp warp) {
         this.updateWarpField(warp, "creator", warp.getPrice());
     }
-    
+
     private static <T extends Enum<T> & Editor> Map<EditorPermissions.Type, Map<String, EditorPermissions<T>>> getEditorPermissions(List<ConfigurationNode> editorNodes, Map<String, T> names, Class<T> clazz) {
         Map<EditorPermissions.Type, Map<String, EditorPermissions<T>>> editorPermissions = MinecraftUtil.createEnumMap(EditorPermissions.Type.class);
         for (ConfigurationNode editorNode : editorNodes) {
             String editorName = editorNode.getString("name");
             String editorType = editorNode.getString("type");
-            
+
             EditorPermissions<T> permissions = EditorPermissions.create(clazz);
-            
+
             List<String> editorPermissionPermssions = editorNode.getStringList("permissions", null);
             for (String editorPermission : editorPermissionPermssions) {
                 T perms = names.get(editorPermission.toLowerCase());
-                
+
                 if (perms == null) {
                     // Unknown permission
                 } else {
                     permissions.put(perms, true);
                 }
             }
-            
+
             EditorPermissions.Type type = null;
             if (editorType.equalsIgnoreCase("player")) {
                 type = Type.PLAYER;
             } else if (editorType.equalsIgnoreCase("group")) {
                 type = Type.GROUP;
+            } else if (editorType.equalsIgnoreCase("permission")){
+                type = Type.PERMISSIONS;
             } else {
-                // Unknown editor type
+                // Unknown type
             }
-            
+
             if (type != null) {
                 Map<String, EditorPermissions<T>> editor = editorPermissions.get(type);
                 if (editor == null) {
@@ -485,18 +492,18 @@ public class YmlConnection implements WarpProtectionConnection {
         }
         return editorPermissions;
     }
-    
+
     public static WarpProtectionArea getWarpProtectionArea(ConfigurationNode node) {
         String name = node.getString("name");
         String owner = node.getString("owner");
         String creator = node.getString("creator");
         WorldWrapper worldObject = new WorldWrapper(node.getString("world"));
-        
+
         List<ConfigurationNode> editorNodes = node.getNodeList("editors", null);
         Map<EditorPermissions.Type, Map<String, EditorPermissions<WarpProtectionAreaPermissions>>> editorPermissions = getEditorPermissions(editorNodes, WarpProtectionAreaPermissions.STRING_MAP, WarpProtectionAreaPermissions.class);
-        
+
         // Corners:
-        List<ConfigurationNode> cornerNodes = node.getNodeList("corner", null);
+        List<ConfigurationNode> cornerNodes = node.getNodeList("corners", null);
         FixedLocation[] corners = new FixedLocation[cornerNodes.size()];
         
         if (corners.length < 2) {
@@ -516,17 +523,17 @@ public class YmlConnection implements WarpProtectionConnection {
                 }
             }
         }
-        
+
         WarpProtectionArea warpProtectionArea = new WarpProtectionArea(worldObject, corners[0], corners[1], name, owner, creator);
         for (Entry<EditorPermissions.Type, Map<String, EditorPermissions<WarpProtectionAreaPermissions>>> allPermissionsEntry : editorPermissions.entrySet()) {
             for (Entry<String, EditorPermissions<WarpProtectionAreaPermissions>> editorEntry : allPermissionsEntry.getValue().entrySet()) {
                 warpProtectionArea.getEditorPermissions(editorEntry.getKey(), true, allPermissionsEntry.getKey()).putAll(editorEntry.getValue());
             }
         }
-        
+
         return warpProtectionArea;
     }
-    
+
     private <T> List<T> getList(String path, Callback<T, ConfigurationNode> converter) {
         List<ConfigurationNode> nodes = this.config.getNodeList(path, null);
         ArrayList<T> result = new ArrayList<T>(nodes.size());
@@ -538,7 +545,7 @@ public class YmlConnection implements WarpProtectionConnection {
         result.trimToSize();
         return result;
     }
-    
+
     @Override
     public List<WarpProtectionArea> getProtectionAreas() {
         return getList(WPA_PATH, NODE_TO_WPA);
@@ -556,17 +563,17 @@ public class YmlConnection implements WarpProtectionConnection {
             locMap.put("world", location.world.getName());
         }
     }
-    
+
     private static Map<String, Object> fixedLocToMap(FixedLocation location, boolean world, boolean direction) {
         Map<String, Object> locMap = Maps.newHashMap();
         fixedLocToMap(locMap, location, world, direction);
         return locMap;
     }
-    
+
     @Override
     public void addProtectionArea(WarpProtectionArea... areas) {
         List<Object> rawNodes = this.config.getList(WPA_PATH);
-        
+
         for (WarpProtectionArea wpa : areas) {
             Map<String, Object> wpaMap = warpObjectToMap(wpa);
             List<Map<String, Object>> corners = Lists.newArrayListWithCapacity(2);
@@ -575,11 +582,13 @@ public class YmlConnection implements WarpProtectionConnection {
             wpaMap.put("corners", corners);
             rawNodes.add(wpaMap);
         }
+        this.config.save();
     }
 
     @Override
     public void deleteProtectionArea(WarpProtectionArea area) {
         removeFromList(this.config, WPA_PATH, WarpObjectCallback.create(NameIdentification.create(area), NODE_TO_WPA));
+        this.config.save();
     }
 
     @Override

@@ -1,12 +1,9 @@
 package de.xzise.xwarp;
 
-
 import org.bukkit.command.CommandSender;
 
 import de.xzise.metainterfaces.FixedLocation;
-import de.xzise.xwarp.editors.EditorPermissions;
 import de.xzise.xwarp.editors.WarpProtectionAreaPermissions;
-import de.xzise.xwarp.editors.EditorPermissions.Type;
 import de.xzise.xwarp.warpable.Positionable;
 
 public class WarpProtectionArea extends DefaultWarpObject<WarpProtectionAreaPermissions> {
@@ -85,24 +82,8 @@ public class WarpProtectionArea extends DefaultWarpObject<WarpProtectionAreaPerm
         if (name.equals(this.getOwner())) {
             return true;
         } else {
-            EditorPermissions<WarpProtectionAreaPermissions> ep = this.getEditorPermissions(name, Type.PLAYER);
-            
-            if (ep != null && ep.get(WarpProtectionAreaPermissions.OVERWRITE)) {
-                return true;
-            }
-            
-            //TODO: Revisit the world parameter!
-            String[] groups = XWarp.permissions.getGroup(this.world.getWorldName(), name);
-            
-            for (String group : groups) {
-                EditorPermissions<WarpProtectionAreaPermissions> grpEp = this.getEditorPermissions(group, Type.GROUP);
-                if (grpEp != null && grpEp.get(WarpProtectionAreaPermissions.OVERWRITE)) {
-                    return true;
-                }   
-            }
+            return this.hasPermission(name, WarpProtectionAreaPermissions.OVERWRITE);
         }
-        
-        return false;
     }
 
     @Override
@@ -129,5 +110,10 @@ public class WarpProtectionArea extends DefaultWarpObject<WarpProtectionAreaPerm
         default :
             return null;
         }
+    }
+
+    @Override
+    public String getType() {
+        return "wpa";
     }
 }

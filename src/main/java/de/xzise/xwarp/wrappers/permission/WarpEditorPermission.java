@@ -6,16 +6,14 @@ import de.xzise.xwarp.editors.Editor;
 
 public class WarpEditorPermission implements Permission<Boolean> {
 
-    // xwarp.edit.warp.<owner>.<name>.<operation>
-    
-    //TODO: Maybe special permissions (e.g. permission to warp)
-    
+    // xwarp.<type>.edit.object.<owner>.<name>.<operation>
+
     public final static String PREFIX = "xwarp.edit.warp.";
-    
+
     private final String permission;
-    
+
     public <E extends Editor> WarpEditorPermission(WarpObject<E> warpObject, E permission) {
-        this.permission = PREFIX + warpObject.getOwner() + "." + warpObject.getName() + "." + permission.getName();
+        this.permission = "xwarp." + warpObject.getType() + ".edit.object." + warpObject.getOwner() + "." + warpObject.getName() + "." + permission.getName();
     }
 
     @Override
@@ -27,5 +25,5 @@ public class WarpEditorPermission implements Permission<Boolean> {
     public Boolean getDefault() {
         return false;
     }
-    
+
 }

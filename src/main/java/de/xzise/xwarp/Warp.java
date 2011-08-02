@@ -1,6 +1,5 @@
 package de.xzise.xwarp;
 
-import java.text.Collator;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
@@ -12,6 +11,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import de.xzise.MinecraftUtil;
+import de.xzise.StringComparator;
 import de.xzise.metainterfaces.FixedLocation;
 import de.xzise.metainterfaces.LocationWrapper;
 import de.xzise.xwarp.editors.EditorPermissions;
@@ -125,7 +125,7 @@ public class Warp extends DefaultWarpObject<WarpPermissions> {
         if (XWarp.permissions.permission(sender, new WarpEditorPermission(this, WarpPermissions.WARP))) {
             return true;
         }
-        
+
         Player player = WarperFactory.getPlayer(sender);
         Positionable pos = WarperFactory.getPositionable(sender);
         String name = null;
@@ -138,7 +138,7 @@ public class Warp extends DefaultWarpObject<WarpPermissions> {
                 worldPermission = WorldPermission.WITHIN_WORLD;
             }
         }
-        
+
         // If the player isn't allowed to warp to/within the world cancel here!
         if (!XWarp.permissions.permission(sender, worldPermission.getPermission(this.getLocationWrapper().getWorld(), true))) {
             return false;
@@ -382,25 +382,9 @@ public class Warp extends DefaultWarpObject<WarpPermissions> {
     public Visibility getVisibility() {
         return this.visibility;
     }
-}
 
-abstract class StringComparator<T> implements Comparator<T> {
-    
-    private final Collator collator;
-    
-    public StringComparator(Collator collator) {
-        this.collator = collator;
-    }
-    
-    public StringComparator() {
-        this(Collator.getInstance());
-        this.collator.setStrength(Collator.SECONDARY);
-    }
-    
-    protected abstract String getValue(T t);
-    
     @Override
-    public int compare(T t1, T t2) {
-        return this.collator.compare(this.getValue(t1), this.getValue(t2));
+    public String getType() {
+        return "warp";
     }
 }

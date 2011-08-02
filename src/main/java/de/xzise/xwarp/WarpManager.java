@@ -53,11 +53,10 @@ public class WarpManager extends CommonManager<Warp, WarpList<Warp>> {
     public WarpManager(Plugin plugin, EconomyHandler economy, PluginProperties properties, DataConnection data) {
         super(new WarpList<Warp>(), "warp", properties);
         this.server = plugin.getServer();
-        this.data = data;
         this.coolDown = new CoolDown(plugin, properties);
         this.warmUp = new WarmUp(plugin, properties, this.coolDown);
         this.economy = economy;
-        this.reload();
+        this.reload(data);
     }
 
     public WarmUp getWarmUp() {
@@ -69,8 +68,9 @@ public class WarpManager extends CommonManager<Warp, WarpList<Warp>> {
     }
 
     @Override
-    public void reload() {
-        super.reload();
+    public void reload(DataConnection data) {
+        super.reload(data);
+        this.data = data;
         this.list.loadList(this.data.getWarps());
     }
 
@@ -149,7 +149,7 @@ public class WarpManager extends CommonManager<Warp, WarpList<Warp>> {
 
                         if (!skipProtectionTest && this.wpaManager != null) {
                             for (WarpProtectionArea area : this.wpaManager.getWarpObjects()) {
-                                if (area.isWithIn(player) && creator != null && area.isAllowed(creator)) {
+                                if (area.isWithIn(player) && creator != null && !area.isAllowed(creator)) {
                                     inProtectionArea.add(area.getName());
                                 }
                             }
@@ -157,7 +157,7 @@ public class WarpManager extends CommonManager<Warp, WarpList<Warp>> {
 
                         if (!skipProtectionTest && inProtectionArea.size() > 0) {
                             // TODO: Tell which protection areas?
-                            player.sendMessage(ChatColor.RED + "Here is a warp creation protection area.");
+                            player.sendMessage(ChatColor.RED + "Here is at least one warp protection area.");
                         } else {
                             double price = XWarp.permissions.getDouble(sender, Groups.PRICES_CREATE_GROUP.get(visibility));
 
@@ -621,7 +621,7 @@ public class WarpManager extends CommonManager<Warp, WarpList<Warp>> {
 
         for (int i = allWarps.size() - 1; i >= 0; i--) {
             Warp w = allWarps.get(i);
-            if ((creatorTester.test(w.getCreator().toLowerCase())) && (ownerTester.test(w.getOwner())) && (worldTester.test(w.getLocationWrapper().getWorld().toLowerCase())) && (visibilityTester.test(w.getVisibility())) && (w.list(sender))) {
+            if ((creatorTester.test(w.getCreator().toLowerCase())) && (ownerTester.test(w.getOwner().toLowerCase())) && (worldTester.test(w.getLocationWrapper().getWorld().toLowerCase())) && (visibilityTester.test(w.getVisibility())) && (w.list(sender))) {
                 validWarps.add(w);
             }
         }

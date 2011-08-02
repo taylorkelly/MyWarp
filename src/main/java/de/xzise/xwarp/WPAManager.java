@@ -28,13 +28,13 @@ public class WPAManager extends CommonManager<WarpProtectionArea, NonGlobalList<
     public WPAManager(Plugin plugin, DataConnection data, PluginProperties properties) {
         super(new NonGlobalList<WarpProtectionArea>(), "warp protection area", properties);
         this.server = plugin.getServer();
-        this.data = MinecraftUtil.cast(WarpProtectionConnection.class, data);
-        this.reload();
+        this.reload(data);
     }
 
     @Override
-    public void reload() {
-        super.reload();
+    public void reload(DataConnection data) {
+        super.reload(data);
+        this.data = MinecraftUtil.cast(WarpProtectionConnection.class, data);
         this.list.loadList(this.data.getProtectionAreas());
     }
 

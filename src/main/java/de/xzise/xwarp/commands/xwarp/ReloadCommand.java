@@ -13,6 +13,7 @@ import de.xzise.wrappers.economy.EconomyHandler;
 import de.xzise.xwarp.Manager;
 import de.xzise.xwarp.PluginProperties;
 import de.xzise.xwarp.XWarp;
+import de.xzise.xwarp.dataconnections.DataConnection;
 import de.xzise.xwarp.wrappers.permission.GeneralPermissions;
 
 public class ReloadCommand extends CommonHelpableSubCommand {
@@ -33,9 +34,10 @@ public class ReloadCommand extends CommonHelpableSubCommand {
         if (parameters.length == 1) {
             if (XWarp.permissions.permission(sender, GeneralPermissions.RELOAD)) {
                 this.properties.read();
+                DataConnection data = this.properties.getDataConnection();
                 this.economy.reloadConfig(this.properties.getEconomyPlugin(), this.properties.getEconomyBaseAccount());
                 for (Manager<?> manager : this.managers) {
-                    manager.reload();
+                    manager.reload(data);
                 }
                 sender.sendMessage("Reload successfully!");
             } else {

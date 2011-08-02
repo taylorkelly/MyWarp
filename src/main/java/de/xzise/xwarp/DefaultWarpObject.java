@@ -12,6 +12,7 @@ import org.bukkit.entity.Player;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 
 import de.xzise.MinecraftUtil;
 import de.xzise.wrappers.permissions.BufferPermission;
@@ -89,7 +90,7 @@ public abstract class DefaultWarpObject<T extends Enum<T> & Editor> implements W
         if (typePermissions != null) {
             return ImmutableMap.copyOf(typePermissions);
         } else {
-            return null;
+            return ImmutableMap.of();
         }
     }
 
@@ -124,12 +125,21 @@ public abstract class DefaultWarpObject<T extends Enum<T> & Editor> implements W
      */
     public EditorPermissions<T> getEditorPermissions(String name, boolean create, EditorPermissions.Type type) {
         Map<String, EditorPermissions<T>> typePermissions = this.editors.get(type);
-        EditorPermissions<T> editorPermissions = typePermissions.get(name.toLowerCase());
-        if (editorPermissions == null && create) {
-            editorPermissions = new EditorPermissions<T>(this.editorPermissionClass);
-            typePermissions.put(name.toLowerCase(), editorPermissions);
+        if (typePermissions == null && create) {
+            typePermissions = Maps.newHashMap();
+            this.editors.put(type, typePermissions);
         }
-        return editorPermissions;
+
+        if (typePermissions != null) {
+            EditorPermissions<T> editorPermissions = typePermissions.get(name.toLowerCase());
+            if (editorPermissions == null && create) {
+                editorPermissions = new EditorPermissions<T>(this.editorPermissionClass);
+                typePermissions.put(name.toLowerCase(), editorPermissions);
+            }
+            return editorPermissions;
+        } else {
+            return null;
+        }
     }
 
     public static class EditorPermissionEntry<T extends Enum<T> & Editor> {

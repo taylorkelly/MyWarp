@@ -10,7 +10,7 @@ import de.xzise.xwarp.editors.EditorPermissions;
 
 public interface Manager<T extends WarpObject<?>> {
 
-    void reload();
+    void reload(DataConnection data);
 
     void delete(T warpObject, CommandSender sender);
     void setCreator(T warpObject, CommandSender sender, String creator);
