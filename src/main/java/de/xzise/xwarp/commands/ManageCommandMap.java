@@ -14,6 +14,7 @@ import de.xzise.xwarp.PluginProperties;
 import de.xzise.xwarp.WPAManager;
 import de.xzise.xwarp.WarpManager;
 import de.xzise.xwarp.XWarp;
+import de.xzise.xwarp.commands.xwarp.CDWUConvCommand;
 import de.xzise.xwarp.commands.xwarp.ExportCommand;
 import de.xzise.xwarp.commands.xwarp.ImportCommand;
 import de.xzise.xwarp.commands.xwarp.PermissionsCommand;
@@ -34,6 +35,7 @@ public class ManageCommandMap extends CommonCommandMap {
         subCommands.add(new PermissionsCommand(server));
         subCommands.add(new ExportCommand(warpManager, wpaManager, dataPath, server));
         subCommands.add(new ImportCommand(warpManager, wpaManager, dataPath, server));
+        subCommands.add(new CDWUConvCommand(warpManager)); // Only temporary
 
         this.populate(subCommands);
         this.setHelper(helper);

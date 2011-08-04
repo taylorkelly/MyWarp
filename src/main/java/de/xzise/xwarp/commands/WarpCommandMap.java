@@ -23,7 +23,10 @@ import de.xzise.xwarp.commands.warp.MessageCommand;
 import de.xzise.xwarp.commands.warp.PriceCommand;
 import de.xzise.xwarp.commands.warp.PrivatizeCommand;
 import de.xzise.xwarp.commands.warp.PublicizeCommand;
+import de.xzise.xwarp.commands.warp.SearchCommand;
 import de.xzise.xwarp.commands.warp.UpdateCommand;
+import de.xzise.xwarp.commands.warp.WarpForceToCommand;
+import de.xzise.xwarp.commands.warp.WarpToCommand;
 import de.xzise.xwarp.dataconnections.DataConnection;
 
 public class WarpCommandMap extends CommonCommandMap {

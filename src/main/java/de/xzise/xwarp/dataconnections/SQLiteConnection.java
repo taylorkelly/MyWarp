@@ -276,8 +276,8 @@ public class SQLiteConnection implements WarpProtectionConnection {
                             convertedWarp.setDouble(13, set.getDouble("price"));
                         }
                         if (version < 5) {
-                            convertedWarp.setInt(14, 0);
-                            convertedWarp.setInt(15, 0);
+                            convertedWarp.setInt(14, -1);
+                            convertedWarp.setInt(15, -1);
                         } else {
                             convertedWarp.setInt(14, set.getInt("cooldown"));
                             convertedWarp.setInt(14, set.getInt("warmup"));
@@ -771,6 +771,9 @@ public class SQLiteConnection implements WarpProtectionConnection {
             // Drop permissions → create new one
             statement.execute("DROP TABLE IF EXISTS permissions");
             statement.execute(PERMISSIONS_TABLE);
+            // Drop warp protection areas → create new one
+            statement.execute("DROP TABLE IF EXISTS protectionAreas");
+            statement.execute(PROTECTION_AREA_TABLE);
             if (version < 0) {
                 statement.executeUpdate("INSERT INTO meta (name, value) VALUES (\"version\", " + TARGET_VERSION + ")");
             } else {
@@ -925,9 +928,9 @@ public class SQLiteConnection implements WarpProtectionConnection {
                     invalidSize++;
                 }
             }
-            XWarp.logger.info(size + " warps loaded");
+            XWarp.logger.info(size + " warp protection areas loaded");
             if (invalidSize > 0) {
-                XWarp.logger.warning(invalidSize + " invalid warps found.");
+                XWarp.logger.warning(invalidSize + " invalid warp protection areas found.");
             }
         } catch (SQLException ex) {
             XWarp.logger.severe("Warp protection area load exception", ex);
@@ -1055,5 +1058,29 @@ public class SQLiteConnection implements WarpProtectionConnection {
     @Override
     public IdentificationInterface<WarpProtectionArea> createWarpProtectionAreaIdentification(WarpProtectionArea area) {
         return IdIdentification.create(area);
+    }
+
+    @Override
+    public void updateCoolDown(Warp warp) {
+        this.updateWarp(warp, "name", "UPDATE warps SET cooldown = ? WHERE id = ?", new UpdateFiller<Warp>() {
+
+            @Override
+            public void fillStatement(Warp warp, PreparedStatement statement) throws SQLException {
+                statement.setInt(1, warp.getCoolDown());
+                statement.setInt(2, warp.index);
+            }
+        });
+    }
+
+    @Override
+    public void updateWarmUp(Warp warp) {
+        this.updateWarp(warp, "name", "UPDATE warps SET warmup = ? WHERE id = ?", new UpdateFiller<Warp>() {
+
+            @Override
+            public void fillStatement(Warp warp, PreparedStatement statement) throws SQLException {
+                statement.setInt(1, warp.getWarmUp());
+                statement.setInt(2, warp.index);
+            }
+        });
     }
 }

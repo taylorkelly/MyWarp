@@ -116,4 +116,8 @@ public class WarpProtectionArea extends DefaultWarpObject<WarpProtectionAreaPerm
     public String getType() {
         return "wpa";
     }
+
+    public WorldWrapper getWorldWrapper() {
+        return this.world;
+    }
 }

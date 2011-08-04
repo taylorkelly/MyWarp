@@ -25,9 +25,9 @@ public class PluginProperties {
     private String economyPlugin;
     private String economyBaseAccount;
 
-    private File dataDirectory;
-    private File configFile;
-    private Server server;
+    private final File dataDirectory;
+    private final File configFile;
+    private final Server server;
 
     public PluginProperties(File dataDirectory, Server server) {
         this.dataDirectory = dataDirectory;
@@ -38,6 +38,10 @@ public class PluginProperties {
 
     public DataConnection getDataConnection() {
         return this.dataConnection;
+    }
+
+    public File getDataConnectionFile() {
+        return new File(this.dataDirectory, this.dataConnection.getFilename());
     }
 
     private static String getPlugin(String value) {
@@ -129,6 +133,8 @@ public class PluginProperties {
             // Per default sqlite
             this.dataConnection = new SQLiteConnection(server);
         }
+
+        this.caseSensitive = configuration.getBoolean("case-sensitive", false);
 
         this.economyPlugin = configuration.getString("economy.plugin", "");
         this.economyBaseAccount = configuration.getString("economy.base-account", "");

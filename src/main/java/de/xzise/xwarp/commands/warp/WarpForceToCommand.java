@@ -1,4 +1,4 @@
-package de.xzise.xwarp.commands;
+package de.xzise.xwarp.commands.warp;
 
 
 import org.bukkit.Server;
@@ -7,7 +7,6 @@ import org.bukkit.command.CommandSender;
 import de.xzise.xwarp.Warp;
 import de.xzise.xwarp.WarpManager;
 import de.xzise.xwarp.XWarp;
-import de.xzise.xwarp.commands.warp.WarpCommand;
 import de.xzise.xwarp.warpable.Warpable;
 import de.xzise.xwarp.warpable.WarperFactory;
 import de.xzise.xwarp.wrappers.permission.PermissionTypes;

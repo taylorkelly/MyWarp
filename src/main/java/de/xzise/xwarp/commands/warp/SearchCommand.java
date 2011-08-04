@@ -1,4 +1,4 @@
-package de.xzise.xwarp.commands;
+package de.xzise.xwarp.commands.warp;
 
 
 import org.bukkit.ChatColor;
@@ -9,6 +9,7 @@ import de.xzise.MinecraftUtil;
 import de.xzise.xwarp.Searcher;
 import de.xzise.xwarp.WarpManager;
 import de.xzise.xwarp.XWarp;
+import de.xzise.xwarp.commands.DefaultSubCommand;
 import de.xzise.xwarp.wrappers.permission.PermissionTypes;
 
 public class SearchCommand extends DefaultSubCommand<WarpManager> {

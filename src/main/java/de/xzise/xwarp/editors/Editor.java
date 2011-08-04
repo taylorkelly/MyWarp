@@ -1,6 +1,6 @@
 package de.xzise.xwarp.editors;
 
-import de.xzise.xwarp.wrappers.permission.PermissionTypes;
+import de.xzise.wrappers.permissions.Permission;
 
 public interface Editor {
 
@@ -10,8 +10,8 @@ public interface Editor {
 
     int getId();
     
-    PermissionTypes getDefault();
+    Permission<Boolean> getDefault();
     
-    PermissionTypes getAdmin();
+    Permission<Boolean> getAdmin();
 
 }

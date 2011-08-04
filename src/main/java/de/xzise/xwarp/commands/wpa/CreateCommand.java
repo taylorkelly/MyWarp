@@ -135,7 +135,7 @@ public class CreateCommand extends DefaultSubCommand<WPAManager> {
                 } else {
                     WPAData newWPA = new WPAData(parameters[1], playerName, player.getWorld());
                     this.wpaData.put(playerName, newWPA);
-                    sender.sendMessage("Started creation. Select the border with a wooden sword.");
+                    sender.sendMessage("Started creation. Hit the corners with a wooden sword.");
                 }
                 return true;
             } else {

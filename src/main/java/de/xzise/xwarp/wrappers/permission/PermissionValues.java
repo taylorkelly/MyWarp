@@ -9,20 +9,20 @@ public enum PermissionValues implements Permission<Integer>, VisibilityPermissio
      * VALUES
      */
     // Cooldown
-    WARP_COOLDOWN_PRIVATE("warp.timers.cooldown.private", Visibility.PRIVATE),
-    WARP_COOLDOWN_PUBLIC("warp.timers.cooldown.public", Visibility.PUBLIC),
-    WARP_COOLDOWN_GLOBAL("warp.timers.cooldown.global", Visibility.GLOBAL),
+    WARP_COOLDOWN_PRIVATE("xwarp.warp.timers.cooldown.private", Visibility.PRIVATE),
+    WARP_COOLDOWN_PUBLIC("xwarp.warp.timers.cooldown.public", Visibility.PUBLIC),
+    WARP_COOLDOWN_GLOBAL("xwarp.warp.timers.cooldown.global", Visibility.GLOBAL),
 
     // Warmup
-    WARP_WARMUP_PRIVATE("warp.timers.warmup.private", Visibility.PRIVATE),
-    WARP_WARMUP_PUBLIC("warp.timers.warmup.public", Visibility.PUBLIC),
-    WARP_WARMUP_GLOBAL("warp.timers.warmup.global", Visibility.GLOBAL),
+    WARP_WARMUP_PRIVATE("xwarp.warp.timers.warmup.private", Visibility.PRIVATE),
+    WARP_WARMUP_PUBLIC("xwarp.warp.timers.warmup.public", Visibility.PUBLIC),
+    WARP_WARMUP_GLOBAL("xwarp.warp.timers.warmup.global", Visibility.GLOBAL),
 
     // Limits
-    WARP_LIMIT_PRIVATE("warp.limit.private", -1, Visibility.PRIVATE),
-    WARP_LIMIT_PUBLIC("warp.limit.public", -1, Visibility.PUBLIC),
-    WARP_LIMIT_GLOBAL("warp.limit.global", -1, Visibility.GLOBAL),
-    WARP_LIMIT_TOTAL("warp.limit.total", -1),
+    WARP_LIMIT_PRIVATE("xwarp.warp.limit.private", -1, Visibility.PRIVATE),
+    WARP_LIMIT_PUBLIC("xwarp.warp.limit.public", -1, Visibility.PUBLIC),
+    WARP_LIMIT_GLOBAL("xwarp.warp.limit.global", -1, Visibility.GLOBAL),
+    WARP_LIMIT_TOTAL("xwarp.warp.limit.total", -1),
 
     ;
 

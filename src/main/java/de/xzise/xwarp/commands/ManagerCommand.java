@@ -60,9 +60,9 @@ public abstract class ManagerCommand<W extends WarpObject<?>, M extends Manager<
             parameters2[i] = parameters[i + parameterStartIndex];
         }
         
-        W wo = this.manager.getWarpObject(parameters[1], owner, MinecraftUtil.getPlayerName(sender));
-        if (wo != null) {
-            return this.executeEdit(wo, sender, parameters2);
+        W warpObject = this.manager.getWarpObject(parameters[1], owner, MinecraftUtil.getPlayerName(sender));
+        if (warpObject != null) {
+            return this.executeEdit(warpObject, sender, parameters2);
         } else {
             this.manager.missing(parameters[1], owner, sender);
             return true;

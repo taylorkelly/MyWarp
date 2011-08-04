@@ -16,11 +16,11 @@ import com.google.common.collect.Maps;
 
 import de.xzise.MinecraftUtil;
 import de.xzise.wrappers.permissions.BufferPermission;
+import de.xzise.wrappers.permissions.Permission;
 import de.xzise.xwarp.editors.Editor;
 import de.xzise.xwarp.editors.EditorPermissions;
 import de.xzise.xwarp.editors.EditorPermissions.Type;
 import de.xzise.xwarp.warpable.WarperFactory;
-import de.xzise.xwarp.wrappers.permission.PermissionTypes;
 import de.xzise.xwarp.wrappers.permission.WarpEditorPermission;
 
 public abstract class DefaultWarpObject<T extends Enum<T> & Editor> implements WarpObject<T> {
@@ -234,7 +234,7 @@ public abstract class DefaultWarpObject<T extends Enum<T> & Editor> implements W
     }
 
     public void invite(String player) {
-        this.getEditorPermissions(player, Type.PLAYER).put(this.invitePermission, true);
+        this.getEditorPermissions(player, true, Type.PLAYER).put(this.invitePermission, true);
     }
 
     @Override
@@ -242,7 +242,7 @@ public abstract class DefaultWarpObject<T extends Enum<T> & Editor> implements W
         return this.invitePermission;
     }
 
-    public static boolean canModify(CommandSender sender, boolean defaultModification, PermissionTypes defaultPermission, PermissionTypes adminPermission) {
+    public static boolean canModify(CommandSender sender, boolean defaultModification, Permission<Boolean> defaultPermission, Permission<Boolean> adminPermission) {
         if (defaultPermission != null) {
             return ((defaultModification && XWarp.permissions.permission(sender, defaultPermission)) || XWarp.permissions.permission(sender, adminPermission));
         } else {

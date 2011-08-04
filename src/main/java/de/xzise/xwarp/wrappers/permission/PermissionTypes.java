@@ -79,8 +79,6 @@ public enum PermissionTypes implements Permission<Boolean>, VisibilityPermission
     ADMIN_LIST_VIEW("admin.list.view", false, "Allows you to list also not listed warps"),
     ADMIN_TO_ALL("admin.to.all", false, "Allows you to warp any warp"),
     ADMIN_WARP_OTHERS("admin.warp.others", false, "Allows you to warp other players"),
-
-    ADMIN_IGNORE_PROTECTION_AREA("admin.area.ignore", false, "Allows you to ignore warp protection areas"),
     ;
 
     // Maybe upcoming permissions:

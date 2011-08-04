@@ -6,14 +6,14 @@ import de.xzise.xwarp.Warp.Visibility;
 public enum PricePermissions implements Permission<Double>, VisibilityPermission {
 
     // Prices (warp)
-    WARP_PRICES_TO_PRIVATE("warp.prices.to.private", Visibility.PRIVATE),
-    WARP_PRICES_TO_PUBLIC("warp.prices.to.public", Visibility.PUBLIC),
-    WARP_PRICES_TO_GLOBAL("warp.prices.to.global", Visibility.GLOBAL),
+    WARP_PRICES_TO_PRIVATE("xwarp.warp.prices.to.private", Visibility.PRIVATE),
+    WARP_PRICES_TO_PUBLIC("xwarp.warp.prices.to.public", Visibility.PUBLIC),
+    WARP_PRICES_TO_GLOBAL("xwarp.warp.prices.to.global", Visibility.GLOBAL),
 
     // Prices (create)
-    WARP_PRICES_CREATE_PRIVATE("warp.prices.create.private", Visibility.PRIVATE),
-    WARP_PRICES_CREATE_PUBLIC("warp.prices.create.public", Visibility.PUBLIC),
-    WARP_PRICES_CREATE_GLOBAL("warp.prices.create.global", Visibility.GLOBAL),
+    WARP_PRICES_CREATE_PRIVATE("xwarp.warp.prices.create.private", Visibility.PRIVATE),
+    WARP_PRICES_CREATE_PUBLIC("xwarp.warp.prices.create.public", Visibility.PUBLIC),
+    WARP_PRICES_CREATE_GLOBAL("xwarp.warp.prices.create.global", Visibility.GLOBAL),
     ;
     
     public final String name;

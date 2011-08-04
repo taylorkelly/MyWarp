@@ -1,5 +1,6 @@
 package de.xzise.xwarp;
 
+import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 
 import com.google.common.collect.ImmutableSet;
@@ -33,4 +34,7 @@ public interface Manager<T extends WarpObject<?>> {
     void missing(String name, String owner, CommandSender sender);
 
     void importWarpObjects(DataConnection connection, WarpObjectGetter<T> getter, CommandSender sender);
+
+    int setWorld(World world);
+    int unsetWorld(World world);
 }

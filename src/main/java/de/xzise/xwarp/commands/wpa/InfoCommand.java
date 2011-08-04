@@ -6,12 +6,13 @@ import org.bukkit.ChatColor;
 import org.bukkit.Server;
 import org.bukkit.command.CommandSender;
 
+import com.google.common.collect.ImmutableSet;
+
 import de.xzise.xwarp.Manager;
 import de.xzise.xwarp.WarpProtectionArea;
 import de.xzise.xwarp.XWarp;
 import de.xzise.xwarp.DefaultWarpObject.EditorPermissionEntry;
 import de.xzise.xwarp.editors.Editor;
-import de.xzise.xwarp.editors.WarpPermissions;
 import de.xzise.xwarp.editors.WarpProtectionAreaPermissions;
 import de.xzise.xwarp.wrappers.permission.WPAPermissions;
 
@@ -48,7 +49,7 @@ public class InfoCommand extends WPACommand {
         sender.sendMessage("Owner: " + de.xzise.xwarp.commands.warp.InfoCommand.getPlayerLine(warp.getOwner(), world));
 
         Collection<EditorPermissionEntry<WarpProtectionAreaPermissions>> allEditorPermissions = warp.getEditorPermissionsList();
-        EditorLines editorLines = getEditorLines(allEditorPermissions);
+        EditorLines editorLines = getEditorLines(allEditorPermissions, WarpProtectionAreaPermissions.OVERWRITE);
         sender.sendMessage("Invitees: " + (editorLines.invitees.isEmpty() ? "None" : editorLines.invitees));
         sender.sendMessage("Editors: " + editorLines.editors);
 
@@ -68,23 +69,24 @@ public class InfoCommand extends WPACommand {
         }
     }
     
-    public static <T extends Enum<T> & Editor> EditorLines getEditorLines(Collection<EditorPermissionEntry<T>> allPermissions) {
+    public static <T extends Enum<T> & Editor> EditorLines getEditorLines(Collection<EditorPermissionEntry<T>> allPermissions, T invitePermission) {
         String editor = "";
         String invitees = "";
         if (allPermissions.size() == 0) {
             editor = "None";
         } else {
             for (EditorPermissionEntry<T> editorPermissionEntry : allPermissions) {
-                T[] permissions = editorPermissionEntry.editorPermissions.getByValue(true);
-                if (permissions.length > 0) {
+                ImmutableSet<T> permissions = editorPermissionEntry.editorPermissions.getByValue(true);
+                if (permissions.size() > 0) {
                     if (!editor.isEmpty()) {
                         editor += ChatColor.WHITE + ", ";
                     }
                     editor += ChatColor.GREEN + editorPermissionEntry.name + " ";
-                    char[] editorPermissions = new char[permissions.length];
-                    for (int j = 0; j < permissions.length; j++) {
-                        editorPermissions[j] = permissions[j].getValue();
-                        if (permissions[j] == WarpPermissions.WARP) {
+                    char[] editorPermissions = new char[permissions.size()];
+                    int j = 0;
+                    for (T t : permissions) {
+                        editorPermissions[j++] = t.getValue();
+                        if (t == invitePermission) {
                             if (!invitees.isEmpty()) {
                                 invitees += ", ";
                             }

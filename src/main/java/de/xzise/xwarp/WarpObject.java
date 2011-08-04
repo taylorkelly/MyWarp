@@ -16,10 +16,11 @@ public interface WarpObject<T extends Editor> {
     String getType();
     boolean list(CommandSender sender);
     boolean canModify(CommandSender sender, T permission);
-    
+    boolean isValid();
+
     void addEditor(String name, EditorPermissions.Type type, ImmutableSet<T> permissions);
     void removeEditor(String name, EditorPermissions.Type type);
-    
+
     T getInvitePermission();
     boolean hasPermission(String name, T permission);
 }

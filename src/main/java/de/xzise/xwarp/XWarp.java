@@ -3,6 +3,7 @@ package de.xzise.xwarp;
 import java.io.File;
 import java.io.IOException;
 
+import org.bukkit.World;
 import org.bukkit.event.Event;
 import org.bukkit.event.Event.Priority;
 import org.bukkit.event.server.PluginDisableEvent;
@@ -25,6 +26,7 @@ import de.xzise.xwarp.listeners.XWWorldListener;
 import de.xzise.xwarp.wrappers.permission.GeneralPermissions;
 import de.xzise.xwarp.wrappers.permission.PermissionTypes;
 import de.xzise.xwarp.wrappers.permission.WPAPermissions;
+import de.xzise.xwarp.wrappers.permission.WorldPermission;
 
 public class XWarp extends JavaPlugin {
 
@@ -46,6 +48,7 @@ public class XWarp extends JavaPlugin {
     @Override
     public void onDisable() {
         this.dataConnection.free();
+        XWarp.logger.disableMsg();
     }
 
     @Override
@@ -80,7 +83,7 @@ public class XWarp extends JavaPlugin {
 
         this.dataConnection = properties.getDataConnection();
         try {
-            if (!this.dataConnection.load(new File(this.getDataFolder(), this.dataConnection.getFilename()))) {
+            if (!this.dataConnection.load(properties.getDataConnectionFile())) {
                 XWarp.logger.severe("Could not load data. Disabling " + this.name + "!");
                 this.getServer().getPluginManager().disablePlugin(this);
                 return;
@@ -91,7 +94,7 @@ public class XWarp extends JavaPlugin {
             return;
         }
 
-        this.permissionHandler = new PermissionsHandler(this.getServer().getPluginManager(), "", logger);
+        this.permissionHandler = new PermissionsHandler(this.getServer().getPluginManager(), properties.getPermissionsPlugin(), logger);
         permissions = this.permissionHandler;
         this.economyHandler = new EconomyHandler(this.getServer().getPluginManager(), properties.getEconomyPlugin(), properties.getEconomyBaseAccount(), logger);
 
@@ -138,14 +141,20 @@ public class XWarp extends JavaPlugin {
                 }
             }
         };
+        XWWorldListener worldListener = new XWWorldListener(this.getServer().getPluginManager(), warpManager, wpaManager);
 
         // Unless an event is called, to tell all enabled plugins
         this.permissionHandler.load();
         this.economyHandler.load();
 
-        this.getServer().getPluginManager().registerEvent(Event.Type.WORLD_LOAD, new XWWorldListener(warpManager), Priority.Low, this);
+        // All worlds loaded before this plugin have to registered manually.
+        for (World world : this.getServer().getWorlds()) {
+            WorldPermission.register(world.getName(), this.getServer().getPluginManager());
+        }
+
+        this.getServer().getPluginManager().registerEvent(Event.Type.WORLD_LOAD, worldListener, Priority.Low, this);
         try {
-            this.getServer().getPluginManager().registerEvent(Event.Type.WORLD_UNLOAD, new XWWorldListener(warpManager), Priority.Low, this);
+            this.getServer().getPluginManager().registerEvent(Event.Type.WORLD_UNLOAD, worldListener, Priority.Low, this);
         } catch (NoSuchFieldError e) {
             // No unload on server: No problem at all. Since 834/835 there.
         }
@@ -155,7 +164,7 @@ public class XWarp extends JavaPlugin {
         this.getServer().getPluginManager().registerEvent(Event.Type.SIGN_CHANGE, blockListener, Priority.Low, this);
         this.getServer().getPluginManager().registerEvent(Event.Type.PLUGIN_ENABLE, serverListner, Priority.Low, this);
         this.getServer().getPluginManager().registerEvent(Event.Type.PLUGIN_DISABLE, serverListner, Priority.Low, this);
-        XWarp.logger.info(name + " " + version + " enabled");
+        XWarp.logger.enableMsg();
     }
 
     private void updateFiles() {

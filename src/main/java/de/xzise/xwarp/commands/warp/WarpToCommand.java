@@ -1,4 +1,4 @@
-package de.xzise.xwarp.commands;
+package de.xzise.xwarp.commands.warp;
 
 
 import org.bukkit.ChatColor;
@@ -8,6 +8,7 @@ import org.bukkit.entity.Player;
 
 import de.xzise.xwarp.WarpManager;
 import de.xzise.xwarp.XWarp;
+import de.xzise.xwarp.commands.DefaultSubCommand;
 import de.xzise.xwarp.warpable.Warpable;
 import de.xzise.xwarp.warpable.WarpablePlayer;
 import de.xzise.xwarp.warpable.WarperFactory;

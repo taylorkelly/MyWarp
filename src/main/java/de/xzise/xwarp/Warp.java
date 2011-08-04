@@ -1,5 +1,6 @@
 package de.xzise.xwarp;
 
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
@@ -7,6 +8,8 @@ import java.util.Map;
 
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
@@ -100,6 +103,8 @@ public class Warp extends DefaultWarpObject<WarpPermissions> {
         this.visibility = visibility;
         this.welcomeMessage = welcomeMessage;
         this.listed = true;
+        this.warmup = -1;
+        this.cooldown = -1;
         if (index > nextIndex)
             nextIndex = index;
         nextIndex++;
@@ -122,10 +127,6 @@ public class Warp extends DefaultWarpObject<WarpPermissions> {
     }
 
     public boolean playerCanWarp(CommandSender sender, boolean viaSign) {
-        if (XWarp.permissions.permission(sender, new WarpEditorPermission(this, WarpPermissions.WARP))) {
-            return true;
-        }
-
         Player player = WarperFactory.getPlayer(sender);
         Positionable pos = WarperFactory.getPositionable(sender);
         String name = null;
@@ -144,6 +145,8 @@ public class Warp extends DefaultWarpObject<WarpPermissions> {
             return false;
         }
 
+        if (XWarp.permissions.permission(sender, new WarpEditorPermission(this, WarpPermissions.WARP)))
+            return true;
         if (name != null && this.getOwner().equals(name) && XWarp.permissions.permission(sender, viaSign ? PermissionTypes.SIGN_WARP_OWN : PermissionTypes.TO_OWN))
             return true;
         if (name != null && this.hasPermission(name, WarpPermissions.WARP) && XWarp.permissions.permission(sender, viaSign ? PermissionTypes.SIGN_WARP_INVITED : PermissionTypes.TO_INVITED))
@@ -168,26 +171,37 @@ public class Warp extends DefaultWarpObject<WarpPermissions> {
         
         if (this.location.isValid()) {
             Location location = this.getLocation().toLocation();
-            Material lower = location.getBlock().getType();
-            LocationWrapper.moveX(location, 1.0D);
-            Material higher = location.getBlock().getType();
-            LocationWrapper.moveX(location, 1.0D);
-            Material top = location.getBlock().getType();
-            
+            Block block = location.getBlock().getRelative(BlockFace.UP, 2);
+
+            Material[] materials = new Material[7];
+            int i = 0;
+            while (i < materials.length) {
+                materials[i++] = block.getType();
+                block = block.getRelative(BlockFace.DOWN);
+            }
+
+            Material top = materials[0];
+            Material higher = materials[1];
+            Material lower = materials[2];
+
             Boolean save = null;
             double comma = MinecraftUtil.getDecimalPlaces(location.getY());
-            
+
             if (save == null) {
-                if (comma <= 0.05D) {
+                if (comma < 0.05D) {
                     save = checkOpaqueMaterials(lower, higher);
                 } else {
-                    if (comma > 0.5D) {
-                        save = checkMaterials(lower, Material.STEP);
-                    }
-                    save = ((comma > 0.5D && checkMaterials(lower, Material.STEP)) || checkOpaqueMaterials(lower)) && checkOpaqueMaterials(higher, top);
+                    save = ((comma >= 0.49D && checkMaterials(lower, Material.STEP)) || checkOpaqueMaterials(lower)) && checkOpaqueMaterials(higher, top);
                 }
             }
 
+            if (save == null) {
+                System.out.println("save is null");
+            }
+
+            if (save == null || !save) {
+                System.out.println("!save(" + this.getName() + "): " + Arrays.toString(materials));
+            }
             return save;
         } else {
             return false;
@@ -201,9 +215,11 @@ public class Warp extends DefaultWarpObject<WarpPermissions> {
                 // "Solids" blocks
                 Material.AIR, Material.WATER, Material.STATIONARY_WATER, Material.SNOW,
                 // Plants
-                Material.SAPLING, Material.YELLOW_FLOWER, Material.RED_ROSE, Material.BROWN_MUSHROOM, Material.RED_MUSHROOM, Material.SUGAR_CANE_BLOCK, Material.CROPS,
+                Material.SAPLING, Material.YELLOW_FLOWER, Material.RED_ROSE, Material.BROWN_MUSHROOM, Material.RED_MUSHROOM, Material.SUGAR_CANE_BLOCK, Material.CROPS, Material.LONG_GRASS, Material.DEAD_BUSH,
                 // Torches/Redstone
                 Material.TORCH, Material.REDSTONE_TORCH_ON, Material.REDSTONE_TORCH_OFF, Material.REDSTONE_WIRE,
+                // Diodes
+                Material.DIODE_BLOCK_OFF, Material.DIODE_BLOCK_ON,
                 // Signs
                 Material.SIGN_POST, Material.WALL_SIGN,
                 // Rails
@@ -211,8 +227,9 @@ public class Warp extends DefaultWarpObject<WarpPermissions> {
                 // Switches
                 Material.LEVER, Material.STONE_PLATE, Material.WOOD_PLATE, Material.STONE_BUTTON,
                 // Doors
-                Material.WOODEN_DOOR, Material.IRON_DOOR,
+                Material.WOODEN_DOOR, Material.IRON_DOOR, Material.TRAP_DOOR,
                 Material.LADDER,
+                Material.LEVER, Material.STONE_BUTTON,
                 Material.PORTAL,
                 Material.CAKE_BLOCK);
         // @formatter:on
@@ -386,5 +403,10 @@ public class Warp extends DefaultWarpObject<WarpPermissions> {
     @Override
     public String getType() {
         return "warp";
+    }
+
+    @Override
+    public boolean isValid() {
+        return this.location.isValid();
     }
 }

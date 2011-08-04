@@ -84,7 +84,7 @@ public class InfoCommand extends WarpCommand {
         }
 
         Collection<EditorPermissionEntry<WarpPermissions>> allEditorPermissions = warp.getEditorPermissionsList();
-        EditorLines lines = de.xzise.xwarp.commands.wpa.InfoCommand.getEditorLines(allEditorPermissions);
+        EditorLines lines = de.xzise.xwarp.commands.wpa.InfoCommand.getEditorLines(allEditorPermissions, WarpPermissions.WARP);
         sender.sendMessage("Invitees: " + (lines.invitees.isEmpty() ? "None" : lines.invitees));
         sender.sendMessage("Editors: " + lines.editors);
 

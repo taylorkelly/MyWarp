@@ -35,11 +35,22 @@ public class ReloadCommand extends CommonHelpableSubCommand {
             if (XWarp.permissions.permission(sender, GeneralPermissions.RELOAD)) {
                 this.properties.read();
                 DataConnection data = this.properties.getDataConnection();
-                this.economy.reloadConfig(this.properties.getEconomyPlugin(), this.properties.getEconomyBaseAccount());
-                for (Manager<?> manager : this.managers) {
-                    manager.reload(data);
+                try {
+                    if (!data.load(this.properties.getDataConnectionFile())) {
+                        XWarp.logger.severe("Could not load data!");
+                        sender.sendMessage(ChatColor.RED + "Reload failed!");
+                    } else {
+                        this.economy.reloadConfig(this.properties.getEconomyPlugin(), this.properties.getEconomyBaseAccount());
+                        XWarp.permissions.setPluginName(this.properties.getPermissionsPlugin());
+                        XWarp.permissions.load();
+                        for (Manager<?> manager : this.managers) {
+                            manager.reload(data);
+                        }
+                        sender.sendMessage(ChatColor.GREEN + "Reload successfully!");
+                    }
+                } catch (Exception e) {
+                    XWarp.logger.severe("Exception while reloading!", e);
                 }
-                sender.sendMessage("Reload successfully!");
             } else {
                 sender.sendMessage(ChatColor.RED + "You have no permission to reload.");
             }

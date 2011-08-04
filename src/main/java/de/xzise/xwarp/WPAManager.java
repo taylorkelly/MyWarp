@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Server;
+import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
@@ -237,6 +238,28 @@ public class WPAManager extends CommonManager<WarpProtectionArea, NonGlobalList<
     @Override
     protected void blindDataAdd(WarpProtectionArea... areas) {
         this.data.addProtectionArea(areas);
+    }
+
+    @Override
+    public int setWorld(World world) {
+        int result = 0;
+        for (WarpProtectionArea wpa : this.getWarpObjects()) {
+            if (wpa.getWorldWrapper().setWorld(world)) {
+                result++;
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public int unsetWorld(World world) {
+        int result = 0;
+        for (WarpProtectionArea wpa : this.getWarpObjects()) {
+            if (wpa.getWorldWrapper().unsetWorld(world)) {
+                result++;
+            }
+        }
+        return result;
     }
 
 }

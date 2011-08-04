@@ -44,9 +44,9 @@ public class HModConnection implements DataConnection {
     // Gen2 + Price
     /** Minimum length of third generation map. */
     private static final int GEN_3_LENGTH = GEN_2_LENGTH + 1;
-    // Length of Gen3 (only other editors layout)
+    // Gen3 + Cooldown, Warmup + other editors layout
     /** Minimum length of forth generation map. */
-    private static final int GEN_4_LENGTH = GEN_3_LENGTH;
+    private static final int GEN_4_LENGTH = GEN_3_LENGTH + 2;
 
     public HModConnection(Server server) {
         this.server = server;
@@ -370,6 +370,8 @@ public class HModConnection implements DataConnection {
                     String msg = segments[9];
                     warp.setWelcomeMessage(msg.equals("null") ? null : msg);
                     warp.setPrice(Integer.parseInt(segments[11]));
+                    warp.setCoolDown(Integer.parseInt(segments[12]));
+                    warp.setWarmUp(Integer.parseInt(segments[13]));
                     for (int i = GEN_4_LENGTH; i < segments.length - 1; i += 3) {
                         EditorPermissions.Type type = null;
                         if (segments[i + 2].equalsIgnoreCase("group") || segments[i + 2].equalsIgnoreCase("g")) {
@@ -414,9 +416,9 @@ public class HModConnection implements DataConnection {
         try {
             FileWriter writer = new FileWriter(this.file);
             try {
-                writer.write("!version 3\n");
+                writer.write("!version 4\n");
                 for (Warp warp : warps) {
-                    writeWarp(warp, writer, 3);
+                    writeWarp(warp, writer, 4);
                 }
             } finally {
                 writer.close();
@@ -447,8 +449,10 @@ public class HModConnection implements DataConnection {
                     warpLine.append(makeParsable(warp.getPrice()) + SEPARATOR);
                 }
                 if (version >= 4) {
+                    warpLine.append(makeParsable(warp.getCoolDown()) + SEPARATOR);
+                    warpLine.append(makeParsable(warp.getWarmUp()) + SEPARATOR);
                     for (EditorPermissions.Type type : EditorPermissions.Type.values()) {
-                        appendEditorPermissions(warpLine, warp.getEditorPermissions(type), type.name[0]);
+                        appendEditorPermissions(warpLine, warp.getEditorPermissions(type), type.name);
                     }
                 } else {
                     appendEditorPermissions(warpLine, warp.getEditorPermissions(Type.PLAYER), null);
@@ -640,5 +644,21 @@ public class HModConnection implements DataConnection {
     @Override
     public IdentificationInterface<Warp> createWarpIdentification(Warp warp) {
         return NameIdentification.create(warp);
+    }
+
+    @Override
+    public void updateCoolDown(Warp warp) {
+        List<Warp> warps = this.getWarps();
+        Warp updated = warps.get(warps.indexOf(warp));
+        updated.setCoolDown(warp.getCoolDown());
+        this.writeWarps(warps);
+    }
+
+    @Override
+    public void updateWarmUp(Warp warp) {
+        List<Warp> warps = this.getWarps();
+        Warp updated = warps.get(warps.indexOf(warp));
+        updated.setWarmUp(warp.getWarmUp());
+        this.writeWarps(warps);
     }
 }

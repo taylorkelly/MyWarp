@@ -15,6 +15,7 @@ import org.bukkit.World;
 import org.bukkit.util.config.Configuration;
 import org.bukkit.util.config.ConfigurationNode;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
@@ -241,16 +242,20 @@ public class YmlConnection implements WarpProtectionConnection {
         return map;
     }
 
-    private static <T extends Enum<T> & Editor> Map<String, Object> editorPermissionToMap(EditorPermissions<T> perm, String name, EditorPermissions.Type type) {
-        Map<String, Object> map = Maps.newHashMap();
-        map.put("name", name);
-        map.put("type", type.name[0]);
-        T[] perms = perm.getByValue(true);
-        List<String> permNames = Lists.newArrayListWithCapacity(perms.length);
+    private static <T extends Enum<T> & Editor> List<String> getPermissionsList(EditorPermissions<T> editorPermissions) {
+        ImmutableSet<T> perms = editorPermissions.getByValue(true);
+        List<String> permNames = Lists.newArrayListWithCapacity(perms.size());
         for (T p : perms) {
             permNames.add(p.getName());
         }
-        map.put("permissions", permNames);
+        return permNames;
+    }
+
+    private static <T extends Enum<T> & Editor> Map<String, Object> editorPermissionToMap(EditorPermissions<T> perm, String name, EditorPermissions.Type type) {
+        Map<String, Object> map = Maps.newHashMap();
+        map.put("name", name);
+        map.put("type", type.name);
+        map.put("permissions", getPermissionsList(perm));
         return map;
     }
 
@@ -398,7 +403,7 @@ public class YmlConnection implements WarpProtectionConnection {
         String world = locWrap.getWorld();
         FixedLocation loc = locWrap.getLocation();
         node.setProperty("x", loc.x);
-        node.setProperty("x", loc.y);
+        node.setProperty("y", loc.y);
         node.setProperty("z", loc.z);
         node.setProperty("yaw", loc.yaw);
         node.setProperty("pitch", loc.pitch);
@@ -421,20 +426,26 @@ public class YmlConnection implements WarpProtectionConnection {
         if (perms == null) {
             removeFromList(warpObjectNode, "editors", editorCheck);
         } else {
+            boolean found = false;
             List<ConfigurationNode> editorNodes = warpObjectNode.getNodeList("editors", null);
+            List<Map<String, Object>> rawEditorNodes = Lists.newArrayListWithExpectedSize(editorNodes.size());
             for (ConfigurationNode editorNode : editorNodes) {
                 if (editorCheck.call(editorNode)) {
-                    // Got it!
-                    T[] warpPermissions = perms.getByValue(true);
-                    String[] warpPermissionsNames = new String[warpPermissions.length];
-                    // Fill
-                    int i = 0;
-                    for (T warpPerm : warpPermissions) {
-                        warpPermissionsNames[i++] = warpPerm.getName();
+                    if (found) {
+                        XWarp.logger.severe("Found at least two editor entries for name '" + name + "' and type '" + type + "'!");
+                    } else {
+                        // Got it!
+                        editorNode.setProperty("permissions", getPermissionsList(perms));
+                        found = true;
                     }
-                    editorNode.setProperty("permissions", warpPermissionsNames);
                 }
+                rawEditorNodes.add(nodeToMap(editorNode));
             }
+            // Add entry
+            if (!found) {
+                rawEditorNodes.add(editorPermissionToMap(perms, name, type));
+            }
+            warpObjectNode.setProperty("editors", rawEditorNodes);
         }
 
         this.config.save();
@@ -470,16 +481,7 @@ public class YmlConnection implements WarpProtectionConnection {
                 }
             }
 
-            EditorPermissions.Type type = null;
-            if (editorType.equalsIgnoreCase("player")) {
-                type = Type.PLAYER;
-            } else if (editorType.equalsIgnoreCase("group")) {
-                type = Type.GROUP;
-            } else if (editorType.equalsIgnoreCase("permission")){
-                type = Type.PERMISSIONS;
-            } else {
-                // Unknown type
-            }
+            EditorPermissions.Type type = Type.parseName(editorType);
 
             if (type != null) {
                 Map<String, EditorPermissions<T>> editor = editorPermissions.get(type);
@@ -615,6 +617,16 @@ public class YmlConnection implements WarpProtectionConnection {
     @Override
     public IdentificationInterface<WarpProtectionArea> createWarpProtectionAreaIdentification(WarpProtectionArea area) {
         return NameIdentification.create(area);
+    }
+
+    @Override
+    public void updateCoolDown(Warp warp) {
+        this.updateWarpField(warp, "cooldown", warp.getCoolDown());
+    }
+
+    @Override
+    public void updateWarmUp(Warp warp) {
+        this.updateWarpField(warp, "warmup", warp.getWarmUp());
     }
 
 }

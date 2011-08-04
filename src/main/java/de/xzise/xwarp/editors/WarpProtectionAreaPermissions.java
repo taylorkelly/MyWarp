@@ -3,34 +3,33 @@ package de.xzise.xwarp.editors;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 
-import de.xzise.xwarp.wrappers.permission.PermissionTypes;
+import de.xzise.xwarp.wrappers.permission.WPAPermissions;
 
 public enum WarpProtectionAreaPermissions implements Editor {
-    UPDATE('l', 0, "update", PermissionTypes.ADMIN_UPDATE, PermissionTypes.EDIT_LOCATION),
-    RENAME('m', 1, "rename", PermissionTypes.ADMIN_RENAME, PermissionTypes.EDIT_RENAME),
-    UNINVITE('u', 2, "uninvite", PermissionTypes.ADMIN_UNINVITE, PermissionTypes.EDIT_UNINVITE),
-    INVITE('i', 3, "invite", PermissionTypes.ADMIN_INVITE, PermissionTypes.EDIT_INVITE),
-    GIVE('g', 7, "give", PermissionTypes.ADMIN_CHANGE_OWNER, PermissionTypes.EDIT_CHANGE_OWNER),
-    DELETE('d', 8, "delete", PermissionTypes.ADMIN_DELETE, PermissionTypes.EDIT_DELETE),
-    OVERWRITE('o', 9, "overwrite", PermissionTypes.ADMIN_TO_ALL, null),
-    ADD_EDITOR('a', 10, "add editor", PermissionTypes.ADMIN_EDITORS_ADD, PermissionTypes.EDIT_EDITORS_ADD),
-    REMOVE_EDITOR('r', 11, "remove editor", PermissionTypes.ADMIN_EDITORS_REMOVE, PermissionTypes.EDIT_EDITORS_REMOVE),
-    LIST('v', 15, "list", PermissionTypes.ADMIN_LIST_CHANGE, PermissionTypes.EDIT_LIST),
+    RENAME('m', 1, "rename", WPAPermissions.ADMIN_RENAME, WPAPermissions.EDIT_RENAME),
+    UNINVITE('u', 2, "uninvite", WPAPermissions.ADMIN_UNINVITE, WPAPermissions.EDIT_UNINVITE),
+    INVITE('i', 3, "invite", WPAPermissions.ADMIN_INVITE, WPAPermissions.EDIT_INVITE),
+    GIVE('g', 7, "give", WPAPermissions.ADMIN_CHANGE_OWNER, WPAPermissions.EDIT_CHANGE_OWNER),
+    DELETE('d', 8, "delete", WPAPermissions.ADMIN_DELETE, WPAPermissions.EDIT_DELETE),
+    OVERWRITE('o', 9, "overwrite", WPAPermissions.ADMIN_IGNORE_PROTECTION_AREA, null),
+    ADD_EDITOR('a', 10, "add editor", WPAPermissions.ADMIN_EDITORS_ADD, WPAPermissions.EDIT_EDITORS_ADD),
+    REMOVE_EDITOR('r', 11, "remove editor", WPAPermissions.ADMIN_EDITORS_REMOVE, WPAPermissions.EDIT_EDITORS_REMOVE),
+    LIST('v', 15, "list", WPAPermissions.ADMIN_LIST_CHANGE, WPAPermissions.EDIT_LIST),
 
     ;
     
     public final char value;
     public final int id;
     public final String name;
-    public final PermissionTypes adminPermission;
-    public final PermissionTypes defaultPermission;
+    public final WPAPermissions adminPermission;
+    public final WPAPermissions defaultPermission;
     
     public static final ImmutableSet<WarpProtectionAreaPermissions> DEFAULT;
     public static final ImmutableMap<Character, WarpProtectionAreaPermissions> CHARACTER_MAP = EditorPermissionUtil.createEnumMap(WarpProtectionAreaPermissions.class, EditorPermissionUtil.VALUE_CALLBACK);
     public static final ImmutableMap<Integer, WarpProtectionAreaPermissions> ID_MAP = EditorPermissionUtil.createEnumMap(WarpProtectionAreaPermissions.class, EditorPermissionUtil.ID_CALLBACK);
     public static final ImmutableMap<String, WarpProtectionAreaPermissions> STRING_MAP = EditorPermissionUtil.createEnumMap(WarpProtectionAreaPermissions.class, EditorPermissionUtil.NAME_CALLBACK);
     
-    private WarpProtectionAreaPermissions(char value, int id, String name, PermissionTypes adminPermission, PermissionTypes defaultPermission) {
+    private WarpProtectionAreaPermissions(char value, int id, String name, WPAPermissions adminPermission, WPAPermissions defaultPermission) {
         this.value = value;
         this.id = id;
         this.name = name;
@@ -39,7 +38,7 @@ public enum WarpProtectionAreaPermissions implements Editor {
     }
 
     static {
-        DEFAULT = ImmutableSet.of(UPDATE, RENAME, UNINVITE, INVITE, OVERWRITE);
+        DEFAULT = ImmutableSet.of(RENAME, UNINVITE, INVITE, OVERWRITE);
     }
 
     public static ImmutableSet<WarpProtectionAreaPermissions> parseString(String permissions) {
@@ -47,12 +46,12 @@ public enum WarpProtectionAreaPermissions implements Editor {
     }
 
     @Override
-    public PermissionTypes getDefault() {
+    public WPAPermissions getDefault() {
         return this.defaultPermission;
     }
 
     @Override
-    public PermissionTypes getAdmin() {
+    public WPAPermissions getAdmin() {
         return this.adminPermission;
     }
 

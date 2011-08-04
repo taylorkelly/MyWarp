@@ -77,7 +77,7 @@ public abstract class CommonManager<T extends DefaultWarpObject<?>, L extends Pe
 
     @Override
     public void reload(DataConnection data) {
-        this.list.setIgnoreCase(!properties.isCaseSensitive());
+        this.list.setIgnoreCase(!this.properties.isCaseSensitive());
     }
 
     @Override

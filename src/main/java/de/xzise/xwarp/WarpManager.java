@@ -9,6 +9,7 @@ import java.util.Set;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Server;
+import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
@@ -35,6 +36,7 @@ import de.xzise.xwarp.warpable.Warpable;
 import de.xzise.xwarp.wrappers.permission.Groups;
 import de.xzise.xwarp.wrappers.permission.PermissionTypes;
 import de.xzise.xwarp.wrappers.permission.PermissionValues;
+import de.xzise.xwarp.wrappers.permission.WPAPermissions;
 
 /**
  * Wraps around {@link WarpList} to provide permissions support.
@@ -110,6 +112,45 @@ public class WarpManager extends CommonManager<Warp, WarpList<Warp>> {
         }
     }
 
+    private boolean isInProtectionArea(Positionable sender) {
+        return this.isInProtectionArea(sender, sender instanceof Nameable ? ((Nameable) sender).getName() : MinecraftUtil.getPlayerName(sender));
+    }
+
+    private boolean isInProtectionArea(Positionable sender, String creator) {
+        List<String> inProtectionArea = new ArrayList<String>();
+        boolean skipProtectionTest = XWarp.permissions.permission(CommandSenderWrapper.getCommandSender(sender), WPAPermissions.ADMIN_IGNORE_PROTECTION_AREA);
+
+        if (!skipProtectionTest && this.wpaManager != null) {
+            for (WarpProtectionArea area : this.wpaManager.getWarpObjects()) {
+                if (area.isWithIn(sender) && creator != null && !area.isAllowed(creator)) {
+                    inProtectionArea.add(area.getName());
+                }
+            }
+        }
+
+        if (!skipProtectionTest && inProtectionArea.size() > 0) {
+            switch (inProtectionArea.size()) {
+            case 1:
+                sender.sendMessage(ChatColor.RED + "Here is the warp protection area '" + inProtectionArea.get(0) + "'.");
+                break;
+            case 2:
+            case 3:
+            case 4:
+                sender.sendMessage(ChatColor.RED + "Here are following warp protection areas:");
+                for (String areaName : inProtectionArea) {
+                    sender.sendMessage(ChatColor.RED + "- '" + areaName + "'");
+                }
+                break;
+            default :
+                sender.sendMessage(ChatColor.RED + "Here are " + inProtectionArea.size() + " warp protection areas.");
+                break;
+            }
+            return true;
+        } else {
+            return false;
+        }
+    }
+
     public void addWarp(String name, Positionable player, String newOwner, Visibility visibility) {
         Warp warp = this.list.getWarpObject(name, newOwner, null);
         Warp globalWarp = (visibility == Visibility.GLOBAL ? this.list.getWarpObject(name) : null);
@@ -122,7 +163,7 @@ public class WarpManager extends CommonManager<Warp, WarpList<Warp>> {
             CommandSender sender = CommandSenderWrapper.getCommandSender(player);
 
             if (XWarp.permissions.permission(sender, type)) {
-                String creator = "";
+                final String creator;
                 String world = player.getLocation().getWorld().getName();
                 if (player instanceof Nameable) {
                     creator = ((Nameable) player).getName();
@@ -144,21 +185,7 @@ public class WarpManager extends CommonManager<Warp, WarpList<Warp>> {
                     } else if (visibility == Visibility.GLOBAL && globalWarp != null) {
                         sender.sendMessage(ChatColor.RED + "Global warp called '" + name + "' already exists (" + globalWarp.getName() + ").");
                     } else {
-                        List<String> inProtectionArea = new ArrayList<String>();
-                        boolean skipProtectionTest = XWarp.permissions.permission(sender, PermissionTypes.ADMIN_IGNORE_PROTECTION_AREA);
-
-                        if (!skipProtectionTest && this.wpaManager != null) {
-                            for (WarpProtectionArea area : this.wpaManager.getWarpObjects()) {
-                                if (area.isWithIn(player) && creator != null && !area.isAllowed(creator)) {
-                                    inProtectionArea.add(area.getName());
-                                }
-                            }
-                        }
-
-                        if (!skipProtectionTest && inProtectionArea.size() > 0) {
-                            // TODO: Tell which protection areas?
-                            player.sendMessage(ChatColor.RED + "Here is at least one warp protection area.");
-                        } else {
+                        if (!isInProtectionArea(player, creator)) {
                             double price = XWarp.permissions.getDouble(sender, Groups.PRICES_CREATE_GROUP.get(visibility));
 
                             switch (this.economy.pay(sender, price)) {
@@ -500,9 +527,11 @@ public class WarpManager extends CommonManager<Warp, WarpList<Warp>> {
 
     public void updateLocation(Warp warp, Positionable player) {
         if (warp.canModify(player, WarpPermissions.UPDATE)) {
-            warp.setLocation(player);
-            this.data.updateLocation(warp);
-            player.sendMessage("You have updated '" + ChatColor.GREEN + warp.getName() + ChatColor.WHITE + "'.");
+            if (!this.isInProtectionArea(player)) {
+                warp.setLocation(player);
+                this.data.updateLocation(warp);
+                player.sendMessage("You have updated '" + ChatColor.GREEN + warp.getName() + ChatColor.WHITE + "'.");
+            }
         } else {
             player.sendMessage(ChatColor.RED + "You do not have permission to change the position from '" + warp.getName() + "'");
         }
@@ -696,5 +725,32 @@ public class WarpManager extends CommonManager<Warp, WarpList<Warp>> {
     @Override
     protected void blindDataAdd(Warp... warps) {
         this.data.addWarp(warps);
+    }
+
+    @Override
+    public int setWorld(World world) {
+        int result = 0;
+        for (Warp warp : this.getWarpObjects()) {
+            if (warp.getLocationWrapper().setWorld(world)) {
+                result++;
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public int unsetWorld(World world) {
+        int result = 0;
+        for (Warp warp : this.getWarpObjects()) {
+            if (warp.getLocationWrapper().unsetWorld(world)) {
+                result++;
+            }
+        }
+        return result;
+    }
+
+    // DO NOT CALL! ONLY CALLED BY CDWUConvCommand!
+    public DataConnection save() {
+        return this.data;
     }
 }

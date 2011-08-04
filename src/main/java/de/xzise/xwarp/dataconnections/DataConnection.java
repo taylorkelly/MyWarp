@@ -50,4 +50,7 @@ public interface DataConnection {
     void updateEditor(Warp warp, String name, EditorPermissions.Type type);
 
     void updatePrice(Warp warp);
+
+    void updateCoolDown(Warp warp);
+    void updateWarmUp(Warp warp);
 }
