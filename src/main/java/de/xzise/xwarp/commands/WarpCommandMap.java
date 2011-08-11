@@ -23,6 +23,7 @@ import de.xzise.xwarp.commands.warp.MessageCommand;
 import de.xzise.xwarp.commands.warp.PriceCommand;
 import de.xzise.xwarp.commands.warp.PrivatizeCommand;
 import de.xzise.xwarp.commands.warp.PublicizeCommand;
+import de.xzise.xwarp.commands.warp.SafetyCheckCommand;
 import de.xzise.xwarp.commands.warp.SearchCommand;
 import de.xzise.xwarp.commands.warp.UpdateCommand;
 import de.xzise.xwarp.commands.warp.WarpForceToCommand;
@@ -63,6 +64,7 @@ public class WarpCommandMap extends CommonCommandMap {
         subCommands.add(new ListCommand(manager, server));
         subCommands.add(new ChangeCreatorCommand<Warp, WarpManager>(manager, server, LABEL));
         subCommands.add(new InfoCommand(manager, server, economyWrapper));
+        subCommands.add(new SafetyCheckCommand(manager, server));
         subCommands.add(new ListedCommand(manager, server));
         subCommands.add(new WarpForceToCommand(manager, server));
         

@@ -5,6 +5,7 @@ import org.bukkit.command.CommandSender;
 import de.xzise.metainterfaces.FixedLocation;
 import de.xzise.xwarp.editors.WarpProtectionAreaPermissions;
 import de.xzise.xwarp.warpable.Positionable;
+import de.xzise.xwarp.wrappers.permission.WPAPermissions;
 
 public class WarpProtectionArea extends DefaultWarpObject<WarpProtectionAreaPermissions> {
 
@@ -78,7 +79,6 @@ public class WarpProtectionArea extends DefaultWarpObject<WarpProtectionAreaPerm
     }
 
     public boolean isAllowed(String name) {
-        //TODO: Allow positionable
         if (name.equals(this.getOwner())) {
             return true;
         } else {
@@ -91,16 +91,23 @@ public class WarpProtectionArea extends DefaultWarpObject<WarpProtectionAreaPerm
         return this.world.getWorldName();
     }
 
+    public boolean isListed() {
+        return true; //TODO: Add listed support.
+    }
+
     @Override
-    public boolean list(CommandSender sender) {
-        // TODO Auto-generated method stub
-        return false;
+    public boolean isListed(CommandSender sender) {
+        if (!this.isListed() && !XWarp.permissions.permission(sender, WPAPermissions.ADMIN_LIST_VIEW)) {
+            return false;
+        }
+
+        return true;
     }
 
     public boolean isValid() {
         return this.world.isValid();
     }
-    
+
     public FixedLocation getCorner(int index) {
         switch (index) {
         case 0 :

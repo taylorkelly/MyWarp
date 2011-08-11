@@ -18,6 +18,8 @@ import de.xzise.xwarp.XWarp;
 import de.xzise.xwarp.commands.wpa.InfoCommand.EditorLines;
 import de.xzise.xwarp.editors.WarpPermissions;
 import de.xzise.xwarp.lister.GenericLister;
+import de.xzise.xwarp.timer.CoolDown;
+import de.xzise.xwarp.timer.WarmUp;
 import de.xzise.xwarp.wrappers.permission.PermissionTypes;
 import de.xzise.xwarp.wrappers.permission.PricePermissions;
 
@@ -82,6 +84,8 @@ public class InfoCommand extends WarpCommand {
         } else if (warp.getPrice() != 0) {
             sender.sendMessage("Price: " + ChatColor.GREEN + this.getPrice(warp.getPrice(), basePrice) + ChatColor.RED + " (Inactive)");
         }
+
+        sender.sendMessage("Cooldown: " + CoolDown.getCooldownTime(warp, sender) + " sec   Warmup: " + WarmUp.getWarmupTime(warp, sender) + " sec");
 
         Collection<EditorPermissionEntry<WarpPermissions>> allEditorPermissions = warp.getEditorPermissionsList();
         EditorLines lines = de.xzise.xwarp.commands.wpa.InfoCommand.getEditorLines(allEditorPermissions, WarpPermissions.WARP);

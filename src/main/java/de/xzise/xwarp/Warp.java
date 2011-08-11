@@ -161,12 +161,16 @@ public class Warp extends DefaultWarpObject<WarpPermissions> {
     public boolean playerCanWarp(Warpable player) {
         return playerCanWarp(player, true) || playerCanWarp(player, false);
     }
-    
+
+    public boolean isSave() {
+        return this.isSave(null);
+    }
+
     /**
      * Returns if the location is save.
      * @return if the location is save. Is false if invalid.
      */
-    public boolean isSave() {
+    public boolean isSave(CommandSender sender) {
         //TODO: Check if the player can fall through: Check below if there is a torch (not on ground), wall sign
         
         if (this.location.isValid()) {
@@ -187,6 +191,7 @@ public class Warp extends DefaultWarpObject<WarpPermissions> {
             Boolean save = null;
             double comma = MinecraftUtil.getDecimalPlaces(location.getY());
 
+            msg(sender, "Comma: " + comma);
             if (save == null) {
                 if (comma < 0.05D) {
                     save = checkOpaqueMaterials(lower, higher);
@@ -195,19 +200,24 @@ public class Warp extends DefaultWarpObject<WarpPermissions> {
                 }
             }
 
-            if (save == null) {
-                System.out.println("save is null");
+            if (save == null && sender != null) {
+                sender.sendMessage("The save value is null!");
+                save = false;
             }
+            msg(sender, "Materials: " + Arrays.toString(materials));
 
-            if (save == null || !save) {
-                System.out.println("!save(" + this.getName() + "): " + Arrays.toString(materials));
-            }
             return save;
         } else {
             return false;
         }
     }
-    
+
+    private static void msg(CommandSender sender, String msg) {
+        if (sender != null) {
+            sender.sendMessage(msg);
+        }
+    }
+
     private static boolean checkOpaqueMaterials(Material... materials) {
         //TODO: Move to Minecraft Util?
         // @formatter:off
@@ -256,7 +266,7 @@ public class Warp extends DefaultWarpObject<WarpPermissions> {
         this.getEditorPermissions(inviteeName, Type.PLAYER).put(WarpPermissions.WARP, false);
     }
 
-    public boolean list(CommandSender sender) {
+    public boolean isListed(CommandSender sender) {
         if (!this.isListed() && !XWarp.permissions.permission(sender, PermissionTypes.ADMIN_LIST_VIEW)) {
             return false;
         }

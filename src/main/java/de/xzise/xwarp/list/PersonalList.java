@@ -184,7 +184,7 @@ public abstract class PersonalList<T extends WarpObject<?>, G extends GlobalMap<
         } else {
             int size = 0;
             for (T warp : map.values()) {
-                if (warp.list(sender)) {
+                if (warp.isListed(sender)) {
                     size++;
                 }
             }

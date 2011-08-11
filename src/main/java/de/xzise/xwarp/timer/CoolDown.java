@@ -26,7 +26,7 @@ public class CoolDown {
     }
     
     public void addPlayer(Warp warp, CommandSender sender) {
-        int time = this.cooldownTime(warp, sender);
+        int time = getCooldownTime(warp, sender);
         if (time > 0) {
             if (this.players.containsKey(sender)) {
                 this.plugin.getServer().getScheduler().cancelTask(this.players.get(sender).id);
@@ -55,8 +55,8 @@ public class CoolDown {
             return 0;
         }
     }
-    
-    public int cooldownTime(Warp warp, CommandSender sender) {
+
+    public static int getCooldownTime(Warp warp, CommandSender sender) {
         int time = warp.getCoolDown();
         if (time < 0) {
             return XWarp.permissions.getInteger(sender, Groups.TIMERS_COOLDOWN_GROUP.get(warp.getVisibility()));
@@ -64,7 +64,7 @@ public class CoolDown {
             return time;
         }
     }
-    
+
     public void cooledDown(CommandSender warpable) {
         if (this.properties.isCooldownNotify()) {
             warpable.sendMessage(ChatColor.AQUA + "You have cooled down, feel free to warp.");

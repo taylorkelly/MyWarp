@@ -500,7 +500,7 @@ public class WarpManager extends CommonManager<Warp, WarpList<Warp>> {
 
         for (int i = 0; i < all.size(); i++) {
             Warp warp = all.get(i);
-            if (warp.list(sender)) {
+            if (warp.isListed(sender)) {
                 if (warp.getName().equalsIgnoreCase(name)) {
                     exactMatches.add(warp);
                 } else if (warp.getName().toLowerCase().contains(name.toLowerCase())) {
@@ -574,7 +574,7 @@ public class WarpManager extends CommonManager<Warp, WarpList<Warp>> {
                                 }
                             }
                         } else {
-                            warper.sendMessage(ChatColor.RED + "You need to wait for the cooldown of " + this.coolDown.cooldownTime(warp, warper) + " s");
+                            warper.sendMessage(ChatColor.RED + "You need to wait for the cooldown of " + CoolDown.getCooldownTime(warp, warper) + " s");
                         }
                     }
                 } else {
@@ -650,7 +650,7 @@ public class WarpManager extends CommonManager<Warp, WarpList<Warp>> {
 
         for (int i = allWarps.size() - 1; i >= 0; i--) {
             Warp w = allWarps.get(i);
-            if ((creatorTester.test(w.getCreator().toLowerCase())) && (ownerTester.test(w.getOwner().toLowerCase())) && (worldTester.test(w.getLocationWrapper().getWorld().toLowerCase())) && (visibilityTester.test(w.getVisibility())) && (w.list(sender))) {
+            if ((creatorTester.test(w.getCreator().toLowerCase())) && (ownerTester.test(w.getOwner().toLowerCase())) && (worldTester.test(w.getLocationWrapper().getWorld().toLowerCase())) && (visibilityTester.test(w.getVisibility())) && (w.isListed(sender))) {
                 validWarps.add(w);
             }
         }

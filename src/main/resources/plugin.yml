@@ -1,5 +1,5 @@
 name: xWarp
-version: 3.0.0 b6
+version: 3.0.0
 main: de.xzise.xwarp.XWarp
 description: Implementation to create warp points!
 order: postworld

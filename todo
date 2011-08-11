@@ -25,6 +25,7 @@ In 3.0.?
   - wpa list command
   - Move warps/wpas into other world
   - Export hmod compatible warps
+  - Set the default message in the settings
 
 3.2.0
   - auto completion

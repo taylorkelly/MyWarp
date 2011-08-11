@@ -29,7 +29,7 @@ public class WarmUp {
     }
 
     public void addPlayer(CommandSender warper, Warpable warped, Warp warp) {
-        int warmup = this.warmupTime(warp, warper);
+        int warmup = getWarmupTime(warp, warper);
         if (warmup > 0) {
             if (this.properties.isWarmupNotify()) {
                 warper.sendMessage(ChatColor.AQUA + "You will have to warm up for " + warmup + " secs");
@@ -52,7 +52,7 @@ public class WarmUp {
         }
     }
 
-    public int warmupTime(Warp warp, CommandSender warper) {
+    public static int getWarmupTime(Warp warp, CommandSender warper) {
         int time = warp.getWarmUp();
         if (time < 0) {
             return XWarp.permissions.getInteger(warper, Groups.TIMERS_WARMUP_GROUP.get(warp.getVisibility()));

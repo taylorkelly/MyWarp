@@ -14,7 +14,7 @@ public interface WarpObject<T extends Editor> {
     String getCreator();
     String getWorld();
     String getType();
-    boolean list(CommandSender sender);
+    boolean isListed(CommandSender sender);
     boolean canModify(CommandSender sender, T permission);
     boolean isValid();
 
