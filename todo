@@ -1,27 +1,18 @@
 == DONE ==
 
-3.0.0 b2
-  - testing
-  - add "wpa" create command
-  - case sensitive check
-  - pay creation price for change visibility
-  - Bukkit permissions support (in Bukkit Plugin Utilities)
-  - Add wpa support for import/export
-  - Clean up permission names
-
-3.0.0 b3
-  - status command show invalid warp/wpa count
-  - register world permissions for worlds loaded before the plugin was loaded
+3.0.1
+  - command to set cooldown/warmup of warps
 
 == TO BE DONE ==
-3.0.0
-  - Only fixes for 3.0.0 all previous builds
 
 In 3.0.?
-  - command to set cooldown/warmup of warps
   - fix search command
 
-3.1.0
+3.A.0
+  - dynmap marker support
+
+3.B.0
+  - regex parameter for warp list
   - wpa list command
   - Move warps/wpas into other world
   - Export hmod compatible warps

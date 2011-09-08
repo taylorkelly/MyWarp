@@ -17,18 +17,18 @@ public enum WarpProtectionAreaPermissions implements Editor {
     LIST('v', 15, "list", WPAPermissions.ADMIN_LIST_CHANGE, WPAPermissions.EDIT_LIST),
 
     ;
-    
+
     public final char value;
     public final int id;
     public final String name;
     public final WPAPermissions adminPermission;
     public final WPAPermissions defaultPermission;
-    
+
     public static final ImmutableSet<WarpProtectionAreaPermissions> DEFAULT;
     public static final ImmutableMap<Character, WarpProtectionAreaPermissions> CHARACTER_MAP = EditorPermissionUtil.createEnumMap(WarpProtectionAreaPermissions.class, EditorPermissionUtil.VALUE_CALLBACK);
     public static final ImmutableMap<Integer, WarpProtectionAreaPermissions> ID_MAP = EditorPermissionUtil.createEnumMap(WarpProtectionAreaPermissions.class, EditorPermissionUtil.ID_CALLBACK);
     public static final ImmutableMap<String, WarpProtectionAreaPermissions> STRING_MAP = EditorPermissionUtil.createEnumMap(WarpProtectionAreaPermissions.class, EditorPermissionUtil.NAME_CALLBACK);
-    
+
     private WarpProtectionAreaPermissions(char value, int id, String name, WPAPermissions adminPermission, WPAPermissions defaultPermission) {
         this.value = value;
         this.id = id;

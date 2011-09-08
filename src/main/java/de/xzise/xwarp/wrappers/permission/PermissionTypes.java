@@ -52,6 +52,8 @@ public enum PermissionTypes implements Permission<Boolean>, VisibilityPermission
     EDIT_PRICE("edit.price.set", true, "Allows you to change the price of own warps"),
     EDIT_FREE("edit.price.free", false, "Allows you to make your warps completely free"),
     EDIT_LIST("edit.list", false, "Allows you to change if your warps are listed"),
+    EDIT_COOLDOWN("edit.cooldown", true, "Allows you to set the cooldown of your warps"),
+    EDIT_WARMUP("edit.warmup", true, "Allows you to set the warmup of your warps"),
 
     // Access to list
     CMD_LIST("command.list", true, "Allows you to execute the warp list command"),
@@ -75,6 +77,8 @@ public enum PermissionTypes implements Permission<Boolean>, VisibilityPermission
     ADMIN_PRICE("admin.price.set", false, "Allows you to change the price of any warp"),
     ADMIN_FREE("admin.price.free", false, "Allows you to make any warp completely free"),
     ADMIN_LIST_CHANGE("admin.list.change", false, "Allows you to change if any warp is listed"),
+    ADMIN_COOLDOWN("admin.cooldown", false, "Allows you to set the cooldown of any warp"),
+    ADMIN_WARMUP("admin.warmup", false, "Allows you to set the warmup of any warp"),
 
     ADMIN_LIST_VIEW("admin.list.view", false, "Allows you to list also not listed warps"),
     ADMIN_TO_ALL("admin.to.all", false, "Allows you to warp any warp"),

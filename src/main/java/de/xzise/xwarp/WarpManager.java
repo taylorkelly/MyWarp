@@ -749,6 +749,26 @@ public class WarpManager extends CommonManager<Warp, WarpList<Warp>> {
         return result;
     }
 
+    public void setCooldown(Warp warp, CommandSender sender, int time) {
+        if (warp.canModify(sender, WarpPermissions.COOLDOWN)) {
+            warp.setCoolDown(time);
+            this.data.updateCoolDown(warp);
+            sender.sendMessage("You have successfully changed the cooldown.");
+        } else {
+            sender.sendMessage(ChatColor.RED + "You do not have permission to set the cooldown of '" + warp.getName() + "'");
+        }
+    }
+
+    public void setWarmup(Warp warp, CommandSender sender, int time) {
+        if (warp.canModify(sender, WarpPermissions.WARMUP)) {
+            warp.setWarmUp(time);
+            this.data.updateWarmUp(warp);
+            sender.sendMessage("You have successfully changed the warmup.");
+        } else {
+            sender.sendMessage(ChatColor.RED + "You do not have permission to set the warmup of '" + warp.getName() + "'");
+        }
+    }
+
     // DO NOT CALL! ONLY CALLED BY CDWUConvCommand!
     public DataConnection save() {
         return this.data;
