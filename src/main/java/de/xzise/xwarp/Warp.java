@@ -12,6 +12,7 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.dynmap.markers.Marker;
 
 import de.xzise.MinecraftUtil;
 import de.xzise.StringComparator;
@@ -93,7 +94,10 @@ public class Warp extends DefaultWarpObject<WarpPermissions> {
     private boolean listed;
     private String welcomeMessage;
     private Visibility visibility;
+    private Marker marker;
+    private MarkerManager manager;
 
+    private static int markerId = 0;
     public static int nextIndex = 1;
 
     public Warp(int index, String name, String creator, String owner, LocationWrapper wrapper, Visibility visibility, Map<EditorPermissions.Type, Map<String, EditorPermissions<WarpPermissions>>> editorPermissions, String welcomeMessage) {
@@ -306,6 +310,10 @@ public class Warp extends DefaultWarpObject<WarpPermissions> {
     
     public void setLocation(FixedLocation location) {
         this.location = new LocationWrapper(location);
+        if (this.marker != null) {
+            FixedLocation loc = this.getLocation();
+            this.marker.setLocation(this.getWorld(), loc.x, loc.y, loc.z);
+        }
     }
 
     public void setWelcomeMessage(String message) {
@@ -404,6 +412,7 @@ public class Warp extends DefaultWarpObject<WarpPermissions> {
     
     public void setVisibility(Visibility visibility) {
         this.visibility = visibility;
+        this.checkMarker();
     }
 
     public Visibility getVisibility() {
@@ -418,5 +427,26 @@ public class Warp extends DefaultWarpObject<WarpPermissions> {
     @Override
     public boolean isValid() {
         return this.location.isValid();
+    }
+
+    private void checkMarker() {
+        if (this.manager != null) {
+            final boolean visible = this.manager.getMarkerSet() != null && this.manager.getMarkerIcon() != null && this.manager.getMarkerVisibilities().contains(this.getVisibility()); 
+            if (marker != null && !visible) {
+                System.out.println("Marker deleted: " + this.marker.getMarkerID() + " (Label: " + this.marker.getLabel() + ")");
+                this.marker.deleteMarker();
+                this.marker = null;
+            }
+            if (marker == null && visible) {
+                FixedLocation loc = this.getLocation();
+                this.marker = this.manager.getMarkerSet().createMarker("xwarp.warp.obj" + markerId++, this.getName(), this.getWorld(), loc.x, loc.y, loc.z, this.manager.getMarkerIcon(), false);
+                System.out.println("New marker: " + this.marker.getMarkerID() + " (Label: " + this.marker.getLabel() + ")");
+            }
+        }
+    }
+
+    public void setMarkerManager(MarkerManager manager) {
+        this.manager = manager;
+        this.checkMarker();
     }
 }

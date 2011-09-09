@@ -10,6 +10,7 @@ import org.bukkit.event.server.PluginDisableEvent;
 import org.bukkit.event.server.PluginEnableEvent;
 import org.bukkit.event.server.ServerListener;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.dynmap.DynmapPlugin;
 
 import de.xzise.MinecraftUtil;
 import de.xzise.XLogger;
@@ -37,6 +38,7 @@ public class XWarp extends JavaPlugin {
     private PermissionsHandler permissionHandler = permissions;
 
     private DataConnection dataConnection;
+    private WarpManager warpManager;
 
     public String name;
     public String version;
@@ -53,6 +55,8 @@ public class XWarp extends JavaPlugin {
 
     @Override
     public void onEnable() {
+        System.out.println(new File("/home/xzise/xWarp.jar").exists());
+        
         this.name = this.getDescription().getName();
         this.version = this.getDescription().getVersion();
         logger = new XLogger(this);
@@ -98,17 +102,17 @@ public class XWarp extends JavaPlugin {
         permissions = this.permissionHandler;
         this.economyHandler = new EconomyHandler(this.getServer().getPluginManager(), properties.getEconomyPlugin(), properties.getEconomyBaseAccount(), logger);
 
-        WarpManager warpManager = new WarpManager(this, this.economyHandler, properties, this.dataConnection);
+        this.warpManager = new WarpManager(this, this.economyHandler, properties, this.dataConnection);
         WPAManager wpaManager = new WPAManager(this, this.dataConnection, properties);
 
-        warpManager.setWPAManager(wpaManager);
+        this.warpManager.setWPAManager(wpaManager);
 
         // Create commands
         WarpCommandMap wcm = null;
         WPACommandMap wpacm = null;
         ManageCommandMap mcm = null;
         try {
-            wcm = new WarpCommandMap(warpManager, this.economyHandler, this.getServer(), this.dataConnection, this.getDataFolder(), properties);
+            wcm = new WarpCommandMap(this.warpManager, this.economyHandler, this.getServer(), this.dataConnection, this.getDataFolder(), properties);
             wpacm = new WPACommandMap(wpaManager, this.economyHandler, this.getServer(), this.dataConnection, this.getDataFolder(), properties);
             mcm = new ManageCommandMap(this.economyHandler, properties, this.getServer(), this.getDataFolder(), warpManager, wpaManager);
         } catch (IllegalArgumentException iae) {
@@ -122,13 +126,21 @@ public class XWarp extends JavaPlugin {
         this.getCommand("warp").setExecutor(wcm);
         this.getCommand("wpa").setExecutor(wpacm);
 
-        XWPlayerListener playerListener = new XWPlayerListener(warpManager, properties, wpacm.createCommand);
-        XWBlockListener blockListener = new XWBlockListener(warpManager);
+        XWPlayerListener playerListener = new XWPlayerListener(this.warpManager, properties, wpacm.createCommand);
+        XWBlockListener blockListener = new XWBlockListener(this.warpManager);
         ServerListener serverListner = new ServerListener() {
             @Override
             public void onPluginEnable(PluginEnableEvent event) {
                 XWarp.this.permissionHandler.load(event.getPlugin());
                 XWarp.this.economyHandler.load(event.getPlugin());
+                try {
+                    if (event.getPlugin() instanceof DynmapPlugin) {
+                        DynmapPlugin p = (DynmapPlugin) event.getPlugin();
+                        XWarp.this.warpManager.setMarkerAPI(p.getMarkerAPI());
+                    }
+                } catch (NoSuchMethodError e) {
+                    XWarp.logger.info("No dynmap marker API found.");
+                }
             }
 
             @Override

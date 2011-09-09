@@ -1,6 +1,9 @@
 package de.xzise.xwarp;
 
-import java.text.Collator;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -13,7 +16,10 @@ import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
+import org.dynmap.markers.MarkerAPI;
+import org.dynmap.markers.MarkerIcon;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 
 import de.xzise.MinecraftUtil;
@@ -47,10 +53,15 @@ public class WarpManager extends CommonManager<Warp, WarpList<Warp>> {
 
     private Server server;
     private DataConnection data;
-    private CoolDown coolDown;
-    private WarmUp warmUp;
+    private final CoolDown coolDown;
+    private final WarmUp warmUp;
+    private final PluginProperties properties;
+    private final File dataDirectory;
+    private final MarkerManager manager;
     private EconomyHandler economy;
     private Manager<WarpProtectionArea> wpaManager;
+    
+    private static int markerSetId = 0;
 
     public WarpManager(Plugin plugin, EconomyHandler economy, PluginProperties properties, DataConnection data) {
         super(new WarpList<Warp>(), "warp", properties);
@@ -58,6 +69,9 @@ public class WarpManager extends CommonManager<Warp, WarpList<Warp>> {
         this.coolDown = new CoolDown(plugin, properties);
         this.warmUp = new WarmUp(plugin, properties, this.coolDown);
         this.economy = economy;
+        this.properties = properties;
+        this.dataDirectory = plugin.getDataFolder();
+        this.manager = new MarkerManager(properties);
         this.reload(data);
     }
 
@@ -194,6 +208,7 @@ public class WarpManager extends CommonManager<Warp, WarpList<Warp>> {
                             case UNABLE:
                                 warp = new Warp(name, creator, newOwner, new LocationWrapper(player.getLocation()));
                                 warp.setVisibility(visibility);
+                                warp.setMarkerManager(this.manager);
                                 this.list.addWarpObject(warp);
                                 this.data.addWarp(warp);
                                 sender.sendMessage("Successfully created '" + ChatColor.GREEN + warp.getName() + ChatColor.WHITE + "'.");
@@ -512,6 +527,7 @@ public class WarpManager extends CommonManager<Warp, WarpList<Warp>> {
 
     public void blindAdd(Warp warp) {
         this.list.addWarpObject(warp);
+        warp.setMarkerManager(this.manager);
         // if (this.getWarp(warp.name) == null) {
         // this.global.put(warp.name.toLowerCase(), warp);
         // } else if (warp.visibility == Visibility.GLOBAL) {
@@ -768,8 +784,34 @@ public class WarpManager extends CommonManager<Warp, WarpList<Warp>> {
         }
     }
 
-    // DO NOT CALL! ONLY CALLED BY CDWUConvCommand!
-    public DataConnection save() {
-        return this.data;
+    private void updateMarkerAPI() {
+        for (Warp warp : this.getWarpObjects()) {
+            warp.setMarkerManager(this.manager);
+        }
+    }
+    
+    public void setMarkerAPI(MarkerAPI api) {
+        if (api == null) {
+            this.manager.setMarkerSet(null);
+            this.manager.setMarkerIcon(null);
+            this.updateMarkerAPI();
+        } else {
+            try {
+                InputStream is = new FileInputStream(new File(this.dataDirectory, this.properties.getMarkerPNG()));
+                MarkerIcon icon = api.getMarkerIcon("xwarp.warp.icon");
+                if (icon == null) {
+                    icon = api.createMarkerIcon("xwarp.warp.icon", "Warps Icon", is);
+                }
+                if (icon != null) {
+                    this.manager.setMarkerIcon(icon);
+                    this.manager.setMarkerSet(api.createMarkerSet("xwarp.warp.set" + markerSetId++, "Warps", ImmutableSet.of(icon), false));
+                    this.updateMarkerAPI();
+                } else {
+                    XWarp.logger.severe("Marker icon isn't set.");
+                }
+            } catch (FileNotFoundException e) {
+                XWarp.logger.severe("Unable to load marker file.", e);
+            }
+        }
     }
 }

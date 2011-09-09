@@ -5,12 +5,16 @@ import java.io.File;
 import org.bukkit.Server;
 import org.bukkit.util.config.Configuration;
 
+import com.google.common.collect.ImmutableList;
+
 import de.xzise.xwarp.dataconnections.DataConnection;
 import de.xzise.xwarp.dataconnections.HModConnection;
 import de.xzise.xwarp.dataconnections.SQLiteConnection;
 import de.xzise.xwarp.dataconnections.YmlConnection;
 
 public class PluginProperties {
+    
+    private static final ImmutableList<String> DEFAULT_VISIBILITIES = ImmutableList.of("public", "global");
 
     private DataConnection dataConnection;
     private boolean cooldownNotify;
@@ -22,8 +26,12 @@ public class PluginProperties {
     private boolean createUpdates;
     private boolean caseSensitive;
     private String permissionsPlugin;
+    
     private String economyPlugin;
     private String economyBaseAccount;
+    
+    private String markerPNG;
+    private ImmutableList<String> markerVisibilities;
 
     private final File dataDirectory;
     private final File configFile;
@@ -96,6 +104,14 @@ public class PluginProperties {
         return this.caseSensitive;
     }
 
+    public String getMarkerPNG() {
+        return this.markerPNG;
+    }
+    
+    public ImmutableList<String> getMarkerVisibilities() {
+        return this.markerVisibilities;
+    }
+
     public void read() {
         Configuration configuration = new Configuration(this.configFile);
         if (this.configFile.exists()) {
@@ -113,6 +129,9 @@ public class PluginProperties {
             configuration.setProperty("update-if-exists", false);
             configuration.setProperty("use-force-to", false);
             configuration.setProperty("show-free-price-message", false);
+            configuration.setProperty("marker.png", "marker.png");
+            configuration.setProperty("marker.visibilities", DEFAULT_VISIBILITIES);
+//            configuration.setProperty("marker.enabled", true);
             if (configuration.save()) {
                 XWarp.logger.info("Successfully created default configuration file.");
             } else {
@@ -150,5 +169,8 @@ public class PluginProperties {
         this.useForceTo = configuration.getBoolean("use-force-to", false);
         this.showFreePriceMessage = configuration.getBoolean("show-free-price-message", true);
         this.createUpdates = configuration.getBoolean("update-if-exists", false);
+        
+        this.markerPNG = configuration.getString("marker.png", "marker.png");
+        this.markerVisibilities = ImmutableList.copyOf(configuration.getStringList("marker.visibilities", DEFAULT_VISIBILITIES));
     }
 }
