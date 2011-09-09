@@ -23,7 +23,7 @@ public enum WarpPermissions implements Editor {
     FREE('c', 14, "free", PermissionTypes.ADMIN_FREE, PermissionTypes.EDIT_FREE),
     LIST('v', 15, "list", PermissionTypes.ADMIN_LIST_CHANGE, PermissionTypes.EDIT_LIST),
     COOLDOWN('t', 16, "cooldown", PermissionTypes.ADMIN_COOLDOWN, PermissionTypes.EDIT_COOLDOWN), // t as time (-.-)
-    WARMUP('b', 16, "cooldown", PermissionTypes.ADMIN_WARMUP, PermissionTypes.EDIT_WARMUP), // b as "before"
+    WARMUP('b', 17, "warmup", PermissionTypes.ADMIN_WARMUP, PermissionTypes.EDIT_WARMUP), // b as "before"
 
     ;
 

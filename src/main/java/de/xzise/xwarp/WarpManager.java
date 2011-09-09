@@ -494,10 +494,6 @@ public class WarpManager extends CommonManager<Warp, WarpList<Warp>> {
         ArrayList<Warp> matches = new ArrayList<Warp>();
         List<Warp> all = Lists.newArrayList(this.getWarpObjects());
 
-        final Collator collator = Collator.getInstance();
-        collator.setStrength(Collator.SECONDARY);
-        Collections.sort(all, Warp.WARP_NAME_COMPARATOR);
-
         for (int i = 0; i < all.size(); i++) {
             Warp warp = all.get(i);
             if (warp.isListed(sender)) {
@@ -508,6 +504,9 @@ public class WarpManager extends CommonManager<Warp, WarpList<Warp>> {
                 }
             }
         }
+        
+        Collections.sort(exactMatches, Warp.WARP_NAME_COMPARATOR);
+        Collections.sort(matches, Warp.WARP_NAME_COMPARATOR);
         return new MatchList(exactMatches, matches);
     }
 

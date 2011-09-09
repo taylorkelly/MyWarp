@@ -26,6 +26,7 @@ import de.xzise.xwarp.commands.warp.PrivatizeCommand;
 import de.xzise.xwarp.commands.warp.PublicizeCommand;
 import de.xzise.xwarp.commands.warp.SafetyCheckCommand;
 import de.xzise.xwarp.commands.warp.SearchCommand;
+import de.xzise.xwarp.commands.warp.SearchTestCmd;
 import de.xzise.xwarp.commands.warp.UpdateCommand;
 import de.xzise.xwarp.commands.warp.WarmUpCommand;
 import de.xzise.xwarp.commands.warp.WarpForceToCommand;
@@ -71,6 +72,7 @@ public class WarpCommandMap extends CommonCommandMap {
         subCommands.add(new SafetyCheckCommand(manager, server));
         subCommands.add(new ListedCommand(manager, server));
         subCommands.add(new WarpForceToCommand(manager, server));
+        subCommands.add(new SearchTestCmd(manager, server));
         
         this.populate(subCommands);
         
