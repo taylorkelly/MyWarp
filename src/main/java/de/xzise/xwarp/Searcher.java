@@ -69,7 +69,7 @@ public class Searcher {
         } else {
             List<ListSection> sections = new ArrayList<ListSection>(2);
 
-            final int exactMatchesPages = Math.max((int) Math.ceil(this.exactMatches.size() / ((double) elementsPerPage - 1)), 1); 
+            final int exactMatchesPages = Math.max((int) Math.ceil(this.exactMatches.size() / ((double) elementsPerPage)), 1);
             if (exactMatchesPages >= page) {
                 ListSection section = new ListSection("Exact matches for search: " + ChatColor.GREEN + this.query, MinecraftUtil.getMaximumLines(sender));
                 elementsLeft--;
