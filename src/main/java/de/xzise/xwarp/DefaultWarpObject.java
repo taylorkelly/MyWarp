@@ -220,7 +220,7 @@ public abstract class DefaultWarpObject<T extends Enum<T> & Editor> implements W
 
     public boolean hasSpecificPermission(CommandSender sender, T permission) {
         for (Entry<String, EditorPermissions<T>> permissionEntry : this.getEditorPermissions(Type.PERMISSIONS).entrySet()) {
-            if (XWarp.permissions.permission(sender, new BufferPermission(permissionEntry.getKey(), false)) && permissionEntry.getValue().get(permission)) {
+            if (XWarp.permissions.permission(sender, new BufferPermission<Boolean>(permissionEntry.getKey(), false)) && permissionEntry.getValue().get(permission)) {
                 return true;
             }
         }

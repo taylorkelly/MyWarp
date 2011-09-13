@@ -360,15 +360,19 @@ public class YmlConnection implements WarpProtectionConnection {
     }
 
     private void updateWarpField(IdentificationInterface<Warp> id, String path, Object value) {
-        updateField(this.getWarpNode(id), path, value);
+        this.updateField(this.getWarpNode(id), path, value);
     }
 
     private void updateWPAField(IdentificationInterface<WarpProtectionArea> id, String path, Object value) {
-        updateField(this.getWarpProtectionAreaNode(id), path, value);
+        this.updateField(this.getWarpProtectionAreaNode(id), path, value);
+    }
+
+    private void updateWPAField(WarpProtectionArea area, String path, Object value) {
+        this.updateWPAField(NameIdentification.create(area), path, value);
     }
 
     private void updateWarpField(Warp warp, String path, Object value) {
-        updateWarpField(NameIdentification.create(warp), path, value);
+        this.updateWarpField(NameIdentification.create(warp), path, value);
     }
 
     @Override
@@ -388,7 +392,7 @@ public class YmlConnection implements WarpProtectionConnection {
 
     @Override
     public void updateMessage(Warp warp) {
-        this.updateWarpField(warp, "creator", warp.getWelcomeMessage());
+        this.updateWarpField(warp, "creator", warp.getRawWelcomeMessage());
     }
 
     @Override
@@ -601,17 +605,22 @@ public class YmlConnection implements WarpProtectionConnection {
 
     @Override
     public void updateCreator(WarpProtectionArea area) {
-        updateWPAField(NameIdentification.create(area), "creator", area.getCreator());
+        this.updateWPAField(NameIdentification.create(area), "creator", area.getCreator());
     }
 
     @Override
     public void updateOwner(WarpProtectionArea warp, IdentificationInterface<WarpProtectionArea> identification) {
-        updateWPAField(identification, "owner", warp.getOwner());
+        this.updateWPAField(identification, "owner", warp.getOwner());
     }
 
     @Override
     public void updateName(WarpProtectionArea warp, IdentificationInterface<WarpProtectionArea> identification) {
-        updateWPAField(identification, "name", warp.getName());
+        this.updateWPAField(identification, "name", warp.getName());
+    }
+
+    @Override
+    public void updateWorld(WarpProtectionArea area) {
+        this.updateWPAField(area, "world", area.getWorld());
     }
 
     @Override

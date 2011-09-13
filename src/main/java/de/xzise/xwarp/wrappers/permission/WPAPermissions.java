@@ -40,7 +40,7 @@ public enum WPAPermissions implements Permission<Boolean>, SuperPerm {
     ADMIN_LIST_VIEW("admin.list.view", false, "List also not listed warps"),
 
     ADMIN_IGNORE_PROTECTION_AREA("admin.area.ignore", false, "Ignore warp protection areas"),
-
+    ADMIN_CHANGE_WORLD("admin.changeworld", false, "Allows you to change the world of all warps in a specific world.");
     ;
 
     public final String name;

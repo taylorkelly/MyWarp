@@ -27,6 +27,7 @@ import de.xzise.xwarp.commands.warp.PublicizeCommand;
 import de.xzise.xwarp.commands.warp.SafetyCheckCommand;
 import de.xzise.xwarp.commands.warp.SearchCommand;
 import de.xzise.xwarp.commands.warp.SearchTestCmd;
+import de.xzise.xwarp.commands.warp.ShowMessageCommand;
 import de.xzise.xwarp.commands.warp.UpdateCommand;
 import de.xzise.xwarp.commands.warp.WarmUpCommand;
 import de.xzise.xwarp.commands.warp.WarpForceToCommand;
@@ -35,7 +36,7 @@ import de.xzise.xwarp.dataconnections.DataConnection;
 
 public class WarpCommandMap extends CommonCommandMap {
 
-    private static final String LABEL = "warp";
+    public static final String LABEL = "warp";
     
     public WarpCommandMap(WarpManager manager, EconomyHandler economyWrapper, Server server, DataConnection data, File pluginPath, PluginProperties properties) {
         super();
@@ -57,6 +58,7 @@ public class WarpCommandMap extends CommonCommandMap {
         subCommands.add(new InviteCommand<Warp, WarpManager>(manager, server, LABEL));
         subCommands.add(new GiveCommand<Warp, WarpManager>(manager, server, LABEL));
         subCommands.add(new MessageCommand(manager, server));
+        subCommands.add(new ShowMessageCommand(manager, server, properties));
         subCommands.add(new AddEditorCommand<Warp, WarpManager>(manager, server, LABEL));
         subCommands.add(new RemoveEditorCommand<Warp, WarpManager>(manager, server, LABEL));
         subCommands.add(new PrivatizeCommand(manager, server));
@@ -66,7 +68,8 @@ public class WarpCommandMap extends CommonCommandMap {
         subCommands.add(new CooldownCommand(manager, server));
         subCommands.add(new PriceCommand(manager, server));
         subCommands.add(new SearchCommand(manager, server));
-        subCommands.add(new ListCommand(manager, server));
+        subCommands.add(new ListCommand(manager, server, properties));
+        subCommands.add(new ChangeWorldCommand(manager, server, LABEL));
         subCommands.add(new ChangeCreatorCommand<Warp, WarpManager>(manager, server, LABEL));
         subCommands.add(new InfoCommand(manager, server, economyWrapper));
         subCommands.add(new SafetyCheckCommand(manager, server));

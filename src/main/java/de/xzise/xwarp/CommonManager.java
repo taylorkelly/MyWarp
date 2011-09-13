@@ -3,12 +3,15 @@ package de.xzise.xwarp;
 import java.util.List;
 
 import org.bukkit.ChatColor;
+import org.bukkit.Server;
+import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 
 import de.xzise.MinecraftUtil;
+import de.xzise.wrappers.permissions.Permission;
 import de.xzise.xwarp.WarpManager.WarpObjectGetter;
 import de.xzise.xwarp.dataconnections.DataConnection;
 import de.xzise.xwarp.list.PersonalList;
@@ -18,19 +21,21 @@ public abstract class CommonManager<T extends DefaultWarpObject<?>, L extends Pe
     protected final L list;
     protected final PluginProperties properties;
     protected final String typeName;
-    
-    protected CommonManager(L list, String typeName, PluginProperties properties) {
+    protected final Server server;
+
+    protected CommonManager(L list, String typeName, PluginProperties properties, Server server) {
         this.properties = properties;
         this.typeName = typeName;
         this.list = list;
         this.list.setIgnoreCase(!properties.isCaseSensitive());
+        this.server = server;
     }
 
     @SuppressWarnings("unchecked")
     public void blindAdd(boolean database, List<T> warpObjects) {
         this.blindAdd(database, (T[]) warpObjects.toArray());
     }
-    
+
     public void blindAdd(List<T> warpObjects) {
         this.blindAdd(false, warpObjects);
     }
@@ -57,7 +62,7 @@ public abstract class CommonManager<T extends DefaultWarpObject<?>, L extends Pe
         // IllegalArgumentException("A personal warp could not override an existing one.");
         // }
     }
-    
+
     protected abstract void blindDataAdd(T... warpObjects);
 
     @Override
@@ -117,10 +122,34 @@ public abstract class CommonManager<T extends DefaultWarpObject<?>, L extends Pe
             }
         }
     }
-    
 
     @Override
     public int getSize() {
         return this.list.getSize(null);
+    }
+
+    protected abstract void setWorld(T warpObject, World world, String worldName);
+
+    public void changeWorld(CommandSender sender, String oldWorld, String newWorld, Permission<Boolean> permission) {
+        if (XWarp.permissions.permission(sender, permission)) {
+            World newWorldObject = this.server.getWorld(newWorld);
+            int count = 0;
+            for (T warp : this.getWarpObjects()) {
+                if (warp.getWorld().equals(oldWorld)) {
+                    this.setWorld(warp, newWorldObject, newWorld);
+                    count++;
+                }
+            }
+            if (count == 0) {
+                sender.sendMessage("No warp objects in world '" + ChatColor.GREEN + oldWorld + ChatColor.WHITE + "'!");
+            } else {
+                sender.sendMessage("Moved " + ChatColor.GREEN + count + ChatColor.WHITE + " warp object(s) from world '" + ChatColor.GREEN + oldWorld + ChatColor.WHITE + "' to '" + ChatColor.GREEN + newWorld + ChatColor.WHITE + "'!");
+                if (newWorldObject == null) {
+                    sender.sendMessage("Please note that there is no world '" + ChatColor.GREEN + newWorld + ChatColor.WHITE + "' loaded at the moment. So they are invalid for now.");
+                }
+            }
+        } else {
+            sender.sendMessage(ChatColor.RED + "You don't have the permission, to change the worlds.");
+        }
     }
 }

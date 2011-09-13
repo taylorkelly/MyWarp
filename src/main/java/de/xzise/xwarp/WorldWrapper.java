@@ -6,7 +6,7 @@ import org.bukkit.World;
 public class WorldWrapper {
 
     private World world;
-    private final String worldName;
+    private String worldName;
     
     public WorldWrapper(String world) {
         this.worldName = world;
@@ -42,6 +42,11 @@ public class WorldWrapper {
     
     public String getWorldName() {
         return this.worldName;
+    }
+
+    public void setWorld(String worldName, World world) {
+        this.worldName = worldName;
+        this.world = world;
     }
 
     public boolean isValid() {

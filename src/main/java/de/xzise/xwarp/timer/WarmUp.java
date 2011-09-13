@@ -61,29 +61,18 @@ public class WarmUp {
         }
     }
 
-    // public static boolean warmupNeeded(Warp warp, Player player) {
-    // if (!WarpSettings.adminsObeyWarmsCools && player.isOp())
-    // return false;
-    //
-    // if (warp.visibility == Visibility.GLOBAL && WarpSettings.WarmUpForGlobal)
-    // return true;
-    // if (warp.visibility == Visibility.PRIVATE &&
-    // WarpSettings.WarmUpForPrivate)
-    // return true;
-    // if (warp.visibility == Visibility.PUBLIC && WarpSettings.WarmUpForPublic)
-    // return true;
-    // return false;
-    // }
-
     public boolean playerHasWarmed(CommandSender warper) {
         return this.players.containsKey(warper);
     }
 
     private void sendPlayer(CommandSender warper, Warpable warped, Warp warp) {
         if (warped.teleport(warp.getLocation().toLocation())) {
-            String msg = warp.getWelcomeMessage();
-            if (MinecraftUtil.isSet(msg)) {
-                warped.sendMessage(ChatColor.AQUA + msg);
+            String rawMsg = warp.getRawWelcomeMessage();
+            if (rawMsg == null) {
+                rawMsg = this.properties.getDefaultMessage().replace("{NAME}", warp.getName());
+            }
+            if (MinecraftUtil.isSet(rawMsg)) {
+                warped.sendMessage(ChatColor.AQUA + rawMsg);
             }
             this.down.addPlayer(warp, warper);
             this.players.remove(warper);

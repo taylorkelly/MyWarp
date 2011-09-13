@@ -55,8 +55,6 @@ public class XWarp extends JavaPlugin {
 
     @Override
     public void onEnable() {
-        System.out.println(new File("/home/xzise/xWarp.jar").exists());
-        
         this.name = this.getDescription().getName();
         this.version = this.getDescription().getVersion();
         logger = new XLogger(this);
@@ -138,6 +136,8 @@ public class XWarp extends JavaPlugin {
                         DynmapPlugin p = (DynmapPlugin) event.getPlugin();
                         XWarp.this.warpManager.setMarkerAPI(p.getMarkerAPI());
                     }
+                } catch (NoClassDefFoundError e) {
+                    XWarp.logger.info("No dynmap found. Dynmap support disabled.");
                 } catch (NoSuchMethodError e) {
                     XWarp.logger.info("No dynmap marker API found.");
                 }

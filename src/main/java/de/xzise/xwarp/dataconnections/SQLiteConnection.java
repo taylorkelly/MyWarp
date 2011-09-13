@@ -474,7 +474,7 @@ public class SQLiteConnection implements WarpProtectionConnection {
                     ps.setString(3, warp.getCreator());
                     setLocation(warp.getLocationWrapper(), 4, ps);
                     ps.setInt(10, warp.getVisibility().getInt(warp.isListed()));
-                    ps.setString(11, warp.getWelcomeMessage());
+                    ps.setString(11, warp.getRawWelcomeMessage());
                     ps.setString(12, warp.getOwner());
                     ps.setDouble(13, warp.getPrice());
                     ps.addBatch();
@@ -1080,6 +1080,18 @@ public class SQLiteConnection implements WarpProtectionConnection {
             public void fillStatement(Warp warp, PreparedStatement statement) throws SQLException {
                 statement.setInt(1, warp.getWarmUp());
                 statement.setInt(2, warp.index);
+            }
+        });
+    }
+
+    @Override
+    public void updateWorld(WarpProtectionArea area) {
+        this.updateWarpObject(area, "Warp protection area", "owner", "UPDATE protectionAreas SET world = ? WHERE id = ?", new UpdateFiller<WarpProtectionArea>() {
+
+            @Override
+            public void fillStatement(WarpProtectionArea warp, PreparedStatement statement) throws SQLException {
+                statement.setString(1, warp.getWorld());
+                statement.setInt(2, warp.getId());
             }
         });
     }

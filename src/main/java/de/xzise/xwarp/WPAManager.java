@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.bukkit.ChatColor;
-import org.bukkit.Server;
 import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -20,15 +19,14 @@ import de.xzise.xwarp.editors.WarpProtectionAreaPermissions;
 import de.xzise.xwarp.editors.EditorPermissions.Type;
 import de.xzise.xwarp.list.NonGlobalList;
 import de.xzise.xwarp.wrappers.permission.PermissionTypes;
+import de.xzise.xwarp.wrappers.permission.WPAPermissions;
 
 public class WPAManager extends CommonManager<WarpProtectionArea, NonGlobalList<WarpProtectionArea>> {
 
-    private Server server;
     private WarpProtectionConnection data;
 
     public WPAManager(Plugin plugin, DataConnection data, PluginProperties properties) {
-        super(new NonGlobalList<WarpProtectionArea>(), "warp protection area", properties);
-        this.server = plugin.getServer();
+        super(new NonGlobalList<WarpProtectionArea>(), "warp protection area", properties, plugin.getServer());
         this.reload(data);
     }
 
@@ -262,4 +260,14 @@ public class WPAManager extends CommonManager<WarpProtectionArea, NonGlobalList<
         return result;
     }
 
+    @Override
+    public void changeWorld(CommandSender sender, String oldWorld, String newWorld) {
+        this.changeWorld(sender, oldWorld, newWorld, WPAPermissions.ADMIN_CHANGE_WORLD);
+    }
+
+    @Override
+    protected void setWorld(WarpProtectionArea wpa, World world, String worldName) {
+        wpa.setWorld(worldName, world);
+        this.data.updateWorld(wpa);
+    }
 }

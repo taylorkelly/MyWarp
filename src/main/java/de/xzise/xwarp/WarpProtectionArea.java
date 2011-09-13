@@ -1,5 +1,6 @@
 package de.xzise.xwarp;
 
+import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 
 import de.xzise.metainterfaces.FixedLocation;
@@ -126,5 +127,9 @@ public class WarpProtectionArea extends DefaultWarpObject<WarpProtectionAreaPerm
 
     public WorldWrapper getWorldWrapper() {
         return this.world;
+    }
+
+    public void setWorld(String worldName, World world) {
+        this.world.setWorld(worldName, world);
     }
 }

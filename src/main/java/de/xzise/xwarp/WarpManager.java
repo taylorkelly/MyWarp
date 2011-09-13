@@ -5,13 +5,10 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 
 import org.bukkit.ChatColor;
-import org.bukkit.Server;
 import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -28,6 +25,11 @@ import de.xzise.metainterfaces.LocationWrapper;
 import de.xzise.metainterfaces.Nameable;
 import de.xzise.wrappers.economy.EconomyHandler;
 import de.xzise.xwarp.Warp.Visibility;
+import de.xzise.xwarp.commands.warp.ListCommand.CreatorOptions;
+import de.xzise.xwarp.commands.warp.ListCommand.OwnerOptions;
+import de.xzise.xwarp.commands.warp.ListCommand.VisibilityOptions;
+import de.xzise.xwarp.commands.warp.ListCommand.WhiteBlackList;
+import de.xzise.xwarp.commands.warp.ListCommand.WorldOptions;
 import de.xzise.xwarp.dataconnections.DataConnection;
 import de.xzise.xwarp.dataconnections.HModConnection;
 import de.xzise.xwarp.dataconnections.IdentificationInterface;
@@ -51,7 +53,6 @@ import de.xzise.xwarp.wrappers.permission.WPAPermissions;
  */
 public class WarpManager extends CommonManager<Warp, WarpList<Warp>> {
 
-    private Server server;
     private DataConnection data;
     private final CoolDown coolDown;
     private final WarmUp warmUp;
@@ -64,8 +65,7 @@ public class WarpManager extends CommonManager<Warp, WarpList<Warp>> {
     private static int markerSetId = 0;
 
     public WarpManager(Plugin plugin, EconomyHandler economy, PluginProperties properties, DataConnection data) {
-        super(new WarpList<Warp>(), "warp", properties);
-        this.server = plugin.getServer();
+        super(new WarpList<Warp>(), "warp", properties, plugin.getServer());
         this.coolDown = new CoolDown(plugin, properties);
         this.warmUp = new WarmUp(plugin, properties, this.coolDown);
         this.economy = economy;
@@ -88,6 +88,7 @@ public class WarpManager extends CommonManager<Warp, WarpList<Warp>> {
         super.reload(data);
         this.data = data;
         this.list.loadList(this.data.getWarps());
+        this.updateMarkerAPI();
     }
 
     /**
@@ -246,6 +247,7 @@ public class WarpManager extends CommonManager<Warp, WarpList<Warp>> {
         Warp warp = this.getWarpObject(name, owner, MinecraftUtil.getPlayerName(sender));
         if (warp != null) {
             if (warp.canModify(sender, WarpPermissions.DELETE)) {
+                warp.setMarkerManager(null);
                 this.list.deleteWarpObject(warp);
                 this.data.deleteWarp(warp);
                 sender.sendMessage("You have deleted '" + ChatColor.GREEN + warp.getName() + ChatColor.WHITE + "'.");
@@ -603,53 +605,25 @@ public class WarpManager extends CommonManager<Warp, WarpList<Warp>> {
         }
     }
 
-    private interface Tester<T> {
-        boolean test(T t);
+    private static boolean getWhiteBlackListed(Boolean... booleans) {
+        for (Boolean b : booleans) {
+            if (b != null && !b) {
+                return false;
+            }
+        }
+        return true;
     }
 
-    private static class SimpleTester<T> implements Tester<T> {
-
-        private final boolean t;
-
-        public SimpleTester(boolean value) {
-            this.t = value;
-        }
-
-        @Override
-        public boolean test(T o) {
-            return t;
-        }
-
+    private static boolean isSet(WhiteBlackList<?, ?> whiteBlackList) {
+        return !whiteBlackList.isEmpty();
     }
 
-    private static final class CollectionContainCheck<T> implements Tester<T> {
-
-        private final Collection<T> collection;
-
-        public CollectionContainCheck(Collection<T> collection) {
-            this.collection = collection;
-        }
-
-        @Override
-        public boolean test(T t) {
-            return collection.contains(t);
-        }
-
-    }
-
-    public static <T> Tester<T> getTester(Collection<T> collection) {
-        if (MinecraftUtil.isSet(collection)) {
-            return new CollectionContainCheck<T>(collection);
-        } else {
-            return new SimpleTester<T>(true);
-        }
-    }
-
-    public List<Warp> getWarps(CommandSender sender, Set<String> creators, Set<String> owners, Set<String> worlds, Set<Visibility> visibilites) {
+    public List<Warp> getWarps(CommandSender sender, CreatorOptions creators, OwnerOptions owners, WorldOptions worlds, VisibilityOptions visibilities) {
         List<Warp> allWarps = new ArrayList<Warp>();
 
-        if (MinecraftUtil.isSet(owners)) {
-            for (String owner : owners) {
+        //TODO: Update MU.isSet() for "setable" interface
+        if (MinecraftUtil.isSet(owners.getWhitelist())) {
+            for (String owner : owners.getWhitelist()) {
                 allWarps.addAll(this.list.getWarps(owner));
             }
         } else {
@@ -658,14 +632,10 @@ public class WarpManager extends CommonManager<Warp, WarpList<Warp>> {
 
         ArrayList<Warp> validWarps = new ArrayList<Warp>(allWarps.size());
 
-        Tester<String> creatorTester = getTester(creators);
-        Tester<String> ownerTester = getTester(owners);
-        Tester<String> worldTester = getTester(worlds);
-        Tester<Visibility> visibilityTester = getTester(visibilites);
-
+        boolean noOptions = !(isSet(creators) || isSet(owners) || isSet(worlds) || isSet(visibilities));
         for (int i = allWarps.size() - 1; i >= 0; i--) {
             Warp w = allWarps.get(i);
-            if ((creatorTester.test(w.getCreator().toLowerCase())) && (ownerTester.test(w.getOwner().toLowerCase())) && (worldTester.test(w.getLocationWrapper().getWorld().toLowerCase())) && (visibilityTester.test(w.getVisibility())) && (w.isListed(sender))) {
+            if ((noOptions || getWhiteBlackListed(creators.call(w), owners.call(w), worlds.call(w), visibilities.call(w))) && w.isListed(sender)) {
                 validWarps.add(w);
             }
         }
@@ -813,5 +783,16 @@ public class WarpManager extends CommonManager<Warp, WarpList<Warp>> {
                 XWarp.logger.severe("Unable to load marker file.", e);
             }
         }
+    }
+
+    @Override
+    public void changeWorld(CommandSender sender, String oldWorld, String newWorld) {
+        this.changeWorld(sender, oldWorld, newWorld, PermissionTypes.ADMIN_CHANGE_WORLD);
+    }
+
+    @Override
+    protected void setWorld(Warp warp, World newWorldObject, String newWorld) {
+        warp.setWorld(newWorld, newWorldObject);
+        this.data.updateLocation(warp);
     }
 }

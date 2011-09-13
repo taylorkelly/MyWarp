@@ -6,15 +6,19 @@ import org.bukkit.Server;
 import org.bukkit.util.config.Configuration;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.ImmutableSet.Builder;
 
 import de.xzise.xwarp.dataconnections.DataConnection;
 import de.xzise.xwarp.dataconnections.HModConnection;
 import de.xzise.xwarp.dataconnections.SQLiteConnection;
 import de.xzise.xwarp.dataconnections.YmlConnection;
+import de.xzise.xwarp.lister.GenericLister.Column;
 
 public class PluginProperties {
-    
+
     private static final ImmutableList<String> DEFAULT_VISIBILITIES = ImmutableList.of("public", "global");
+    private static final ImmutableList<String> DEFAULT_COLUMNS = ImmutableList.of("owner", "world", "location");
 
     private DataConnection dataConnection;
     private boolean cooldownNotify;
@@ -25,13 +29,17 @@ public class PluginProperties {
     private boolean cancelWarmUpOnMovement;
     private boolean createUpdates;
     private boolean caseSensitive;
+    private String defaultMessage;
+
     private String permissionsPlugin;
-    
+
     private String economyPlugin;
     private String economyBaseAccount;
-    
+
     private String markerPNG;
     private ImmutableList<String> markerVisibilities;
+
+    private ImmutableSet<Column> defaultColumns;
 
     private final File dataDirectory;
     private final File configFile;
@@ -107,9 +115,13 @@ public class PluginProperties {
     public String getMarkerPNG() {
         return this.markerPNG;
     }
-    
+
     public ImmutableList<String> getMarkerVisibilities() {
         return this.markerVisibilities;
+    }
+
+    public ImmutableSet<Column> getListColumns() {
+        return this.defaultColumns;
     }
 
     public void read() {
@@ -129,9 +141,10 @@ public class PluginProperties {
             configuration.setProperty("update-if-exists", false);
             configuration.setProperty("use-force-to", false);
             configuration.setProperty("show-free-price-message", false);
+            configuration.setProperty("warp.defaultmsg", "Welcome to '{NAME}'!");
             configuration.setProperty("marker.png", "marker.png");
             configuration.setProperty("marker.visibilities", DEFAULT_VISIBILITIES);
-//            configuration.setProperty("marker.enabled", true);
+            configuration.setProperty("list.columns", DEFAULT_COLUMNS);
             if (configuration.save()) {
                 XWarp.logger.info("Successfully created default configuration file.");
             } else {
@@ -169,8 +182,30 @@ public class PluginProperties {
         this.useForceTo = configuration.getBoolean("use-force-to", false);
         this.showFreePriceMessage = configuration.getBoolean("show-free-price-message", true);
         this.createUpdates = configuration.getBoolean("update-if-exists", false);
-        
+
         this.markerPNG = configuration.getString("marker.png", "marker.png");
         this.markerVisibilities = ImmutableList.copyOf(configuration.getStringList("marker.visibilities", DEFAULT_VISIBILITIES));
+
+        Builder<Column> columnsBuilder = ImmutableSet.builder();
+        for (String column : configuration.getStringList("list.columns", DEFAULT_COLUMNS)) {
+            if (column.equalsIgnoreCase("owner")) {
+                columnsBuilder.add(Column.OWNER);
+            } else if (column.equalsIgnoreCase("world")) {
+                columnsBuilder.add(Column.WORLD);
+            } else if (column.equalsIgnoreCase("location")) {
+                columnsBuilder.add(Column.LOCATION);
+            }
+        }
+        this.defaultColumns = columnsBuilder.build();
+
+        this.defaultMessage = configuration.getString("warp.defaultmsg", "Welcome to '{NAME}'!");
+    }
+
+    public String getDefaultMessage() {
+        return this.defaultMessage;
+    }
+
+    public ImmutableSet<Column> getDefaultColumns() {
+        return this.defaultColumns;
     }
 }

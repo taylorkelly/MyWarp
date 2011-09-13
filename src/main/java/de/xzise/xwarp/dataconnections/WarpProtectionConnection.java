@@ -18,4 +18,6 @@ public interface WarpProtectionConnection extends DataConnection {
     void updateCreator(WarpProtectionArea area);
     void updateOwner(WarpProtectionArea area, IdentificationInterface<WarpProtectionArea> identification);
     void updateName(WarpProtectionArea area, IdentificationInterface<WarpProtectionArea> identification);
+
+    void updateWorld(WarpProtectionArea area);
 }

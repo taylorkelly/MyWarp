@@ -37,4 +37,6 @@ public interface Manager<T extends WarpObject<?>> {
 
     int setWorld(World world);
     int unsetWorld(World world);
+
+    void changeWorld(CommandSender sender, String oldWorld, String newWorld);
 }

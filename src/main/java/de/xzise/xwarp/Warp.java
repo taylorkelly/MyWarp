@@ -5,9 +5,9 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 
-
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.command.CommandSender;
@@ -31,16 +31,18 @@ import de.xzise.xwarp.wrappers.permission.WorldPermission;
 public class Warp extends DefaultWarpObject<WarpPermissions> {
 
     public enum Visibility {
-        PRIVATE((byte) 0, "private"), PUBLIC((byte) 1, "public"), GLOBAL((byte) 2, "global");
+        PRIVATE((byte) 0, "private"),
+        PUBLIC((byte) 1, "public"),
+        GLOBAL((byte) 2, "global");
 
         private static final Map<String, Visibility> names = new HashMap<String, Warp.Visibility>();
-        
+
         static {
             for (Visibility v : Visibility.values()) {
                 names.put(v.name, v);
             }
         }
-        
+
         public final byte level;
         public final String name;
 
@@ -48,7 +50,7 @@ public class Warp extends DefaultWarpObject<WarpPermissions> {
             this.level = level;
             this.name = name;
         }
-        
+
         public byte getInt(boolean listed) {
             byte v = (byte) (this.level & 0x7F);
             if (listed) {
@@ -60,7 +62,7 @@ public class Warp extends DefaultWarpObject<WarpPermissions> {
         public static Visibility parseString(String string) {
             return names.get(string);
         }
-        
+
         private static Visibility parseCleanedLevel(byte level) {
             for (Visibility visibility : Visibility.values()) {
                 if (visibility.level == level) {
@@ -72,14 +74,14 @@ public class Warp extends DefaultWarpObject<WarpPermissions> {
 
         public static Visibility parseLevel(int level) {
             // Bit 31 - 08 = unused
-            // Bit      07 = !listed (→ bit set = not listed)
+            // Bit 07 = !listed (→ bit set = not listed)
             // Bit 06 - 00 = visibility
             return parseCleanedLevel((byte) (level & 0x7F));
         }
-        
+
         public static boolean isListed(int level) {
             // Bit 31 - 08 = unused
-            // Bit      07 = !listed (→ bit set = not listed)
+            // Bit 07 = !listed (→ bit set = not listed)
             // Bit 06 - 00 = visibility
             return (level & 0x80) == 0;
         }
@@ -136,7 +138,7 @@ public class Warp extends DefaultWarpObject<WarpPermissions> {
         String name = null;
         WorldPermission worldPermission = WorldPermission.TO_WORLD;
         if (player != null) {
-            name = player.getName();   
+            name = player.getName();
         }
         if (pos != null) {
             if (pos.getLocation().getWorld().getName().equals(this.getLocationWrapper().getWorld())) {
@@ -172,11 +174,13 @@ public class Warp extends DefaultWarpObject<WarpPermissions> {
 
     /**
      * Returns if the location is save.
+     * 
      * @return if the location is save. Is false if invalid.
      */
     public boolean isSave(CommandSender sender) {
-        //TODO: Check if the player can fall through: Check below if there is a torch (not on ground), wall sign
-        
+        // TODO: Check if the player can fall through: Check below if there is a
+        // torch (not on ground), wall sign
+
         if (this.location.isValid()) {
             Location location = this.getLocation().toLocation();
             Block block = location.getBlock().getRelative(BlockFace.UP, 2);
@@ -223,7 +227,7 @@ public class Warp extends DefaultWarpObject<WarpPermissions> {
     }
 
     private static boolean checkOpaqueMaterials(Material... materials) {
-        //TODO: Move to Minecraft Util?
+        // TODO: Move to Minecraft Util?
         // @formatter:off
         return checkMaterials(materials,
                 // "Solids" blocks
@@ -248,11 +252,11 @@ public class Warp extends DefaultWarpObject<WarpPermissions> {
                 Material.CAKE_BLOCK);
         // @formatter:on
     }
-    
+
     private static boolean checkMaterials(Material material, Material... allowed) {
         return MinecraftUtil.contains(material, allowed);
     }
-    
+
     private static boolean checkMaterials(Material[] materials, Material... allowed) {
         for (Material material : materials) {
             if (!MinecraftUtil.contains(material, allowed)) {
@@ -274,7 +278,7 @@ public class Warp extends DefaultWarpObject<WarpPermissions> {
         if (!this.isListed() && !XWarp.permissions.permission(sender, PermissionTypes.ADMIN_LIST_VIEW)) {
             return false;
         }
-        
+
         // Admin permissions
         if (XWarp.permissions.permissionOr(sender, PermissionTypes.getDefaultPermissions(false)))
             return true;
@@ -299,7 +303,7 @@ public class Warp extends DefaultWarpObject<WarpPermissions> {
     public FixedLocation getLocation() {
         return this.location.getLocation();
     }
-    
+
     public LocationWrapper getLocationWrapper() {
         return this.location;
     }
@@ -307,31 +311,21 @@ public class Warp extends DefaultWarpObject<WarpPermissions> {
     public void setLocation(Location location) {
         this.setLocation(new FixedLocation(location));
     }
-    
+
     public void setLocation(FixedLocation location) {
         this.location = new LocationWrapper(location);
-        if (this.marker != null) {
-            FixedLocation loc = this.getLocation();
-            this.marker.setLocation(this.getWorld(), loc.x, loc.y, loc.z);
-        }
+        this.updateMarker();
     }
 
     public void setWelcomeMessage(String message) {
         this.welcomeMessage = message;
     }
-    
-    public String getWelcomeMessage() {
-        if (this.welcomeMessage == null) {
-            return "Welcome to '" + this.getName() + "'!";
-        } else {
-            return this.welcomeMessage;
-        }
-    }
-    
+
     /**
      * Returns the raw welcome message. If the message is null, it shall return
      * the default message. If not null the warp specific message. If set to
      * nothing (result.isEmpty() is true) it show no message at all.
+     * 
      * @return the raw welcome message.
      */
     public String getRawWelcomeMessage() {
@@ -393,23 +387,36 @@ public class Warp extends DefaultWarpObject<WarpPermissions> {
     public String getWorld() {
         return this.location.getWorld();
     }
-    
+
+    public void setWorld(String worldName, World world) {
+        this.location.setWorld(worldName, world);
+        this.updateMarker();
+    }
+
+    public void updateMarker() {
+        if (this.marker != null) {
+            this.marker.setLabel(this.getName());
+            FixedLocation loc = this.getLocation();
+            this.marker.setLocation(this.getWorld(), loc.x, loc.y, loc.z);
+        }
+    }
+
     public void setWarmUp(int warmup) {
         this.warmup = warmup;
     }
-    
+
     public int getWarmUp() {
         return this.warmup;
     }
-    
+
     public void setCoolDown(int cooldown) {
         this.cooldown = cooldown;
     }
-    
+
     public int getCoolDown() {
         return this.cooldown;
     }
-    
+
     public void setVisibility(Visibility visibility) {
         this.visibility = visibility;
         this.checkMarker();
@@ -431,17 +438,18 @@ public class Warp extends DefaultWarpObject<WarpPermissions> {
 
     private void checkMarker() {
         if (this.manager != null) {
-            final boolean visible = this.manager.getMarkerSet() != null && this.manager.getMarkerIcon() != null && this.manager.getMarkerVisibilities().contains(this.getVisibility()); 
+            final boolean visible = this.manager.getMarkerSet() != null && this.manager.getMarkerIcon() != null && this.manager.getMarkerVisibilities().contains(this.getVisibility());
             if (marker != null && !visible) {
-                System.out.println("Marker deleted: " + this.marker.getMarkerID() + " (Label: " + this.marker.getLabel() + ")");
                 this.marker.deleteMarker();
                 this.marker = null;
             }
             if (marker == null && visible) {
                 FixedLocation loc = this.getLocation();
                 this.marker = this.manager.getMarkerSet().createMarker("xwarp.warp.obj" + markerId++, this.getName(), this.getWorld(), loc.x, loc.y, loc.z, this.manager.getMarkerIcon(), false);
-                System.out.println("New marker: " + this.marker.getMarkerID() + " (Label: " + this.marker.getLabel() + ")");
             }
+        } else if (marker != null) {
+            this.marker.deleteMarker();
+            this.marker = null;
         }
     }
 
