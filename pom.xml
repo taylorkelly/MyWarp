@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>de.xzise.bukkit</groupId>
 	<artifactId>xWarp</artifactId>
-	<version>3.1.0</version>
+	<version>3.1.1</version>
 	<name>xWarp</name>
 	<dependencies>
 		<dependency>
@@ -28,7 +28,7 @@
 		<dependency>
 			<groupId>org.dynmap</groupId>
 			<artifactId>dynmap</artifactId>
-			<version>0.22</version>
+			<version>[0.22,)</version>
 			<type>jar</type>
 			<scope>compile</scope>
 		</dependency>

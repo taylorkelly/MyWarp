@@ -33,8 +33,12 @@ public class ReloadCommand extends CommonHelpableSubCommand {
     public boolean execute(CommandSender sender, String[] parameters) {
         if (parameters.length == 1) {
             if (XWarp.permissions.permission(sender, GeneralPermissions.RELOAD)) {
-                this.properties.read();
                 DataConnection data = this.properties.getDataConnection();
+                if (data != null) {
+                    data.free();
+                }
+                this.properties.read();
+                data = this.properties.getDataConnection();
                 try {
                     if (!data.load(this.properties.getDataConnectionFile())) {
                         XWarp.logger.severe("Could not load data!");

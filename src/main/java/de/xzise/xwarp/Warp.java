@@ -245,7 +245,7 @@ public class Warp extends DefaultWarpObject<WarpPermissions> {
                 // Switches
                 Material.LEVER, Material.STONE_PLATE, Material.WOOD_PLATE, Material.STONE_BUTTON,
                 // Doors
-                Material.WOODEN_DOOR, Material.IRON_DOOR, Material.TRAP_DOOR,
+                Material.WOODEN_DOOR, Material.IRON_DOOR_BLOCK, Material.TRAP_DOOR,
                 Material.LADDER,
                 Material.LEVER, Material.STONE_BUTTON,
                 Material.PORTAL,
@@ -439,11 +439,11 @@ public class Warp extends DefaultWarpObject<WarpPermissions> {
     private void checkMarker() {
         if (this.manager != null) {
             final boolean visible = this.manager.getMarkerSet() != null && this.manager.getMarkerIcon() != null && this.manager.getMarkerVisibilities().contains(this.getVisibility());
-            if (marker != null && !visible) {
+            if (marker != null) {
                 this.marker.deleteMarker();
                 this.marker = null;
             }
-            if (marker == null && visible) {
+            if (visible) {
                 FixedLocation loc = this.getLocation();
                 this.marker = this.manager.getMarkerSet().createMarker("xwarp.warp.obj" + markerId++, this.getName(), this.getWorld(), loc.x, loc.y, loc.z, this.manager.getMarkerIcon(), false);
             }

@@ -243,25 +243,10 @@ public class WarpManager extends CommonManager<Warp, WarpList<Warp>> {
         }
     }
 
-    public void deleteWarp(String name, String owner, CommandSender sender) {
-        Warp warp = this.getWarpObject(name, owner, MinecraftUtil.getPlayerName(sender));
-        if (warp != null) {
-            if (warp.canModify(sender, WarpPermissions.DELETE)) {
-                warp.setMarkerManager(null);
-                this.list.deleteWarpObject(warp);
-                this.data.deleteWarp(warp);
-                sender.sendMessage("You have deleted '" + ChatColor.GREEN + warp.getName() + ChatColor.WHITE + "'.");
-            } else {
-                sender.sendMessage(ChatColor.RED + "You do not have permission to delete '" + warp.getName() + "'");
-            }
-        } else {
-            WarpManager.sendMissingWarp(name, owner, sender);
-        }
-    }
-
     @Override
     public void delete(Warp warp, CommandSender sender) {
         if (warp.canModify(sender, WarpPermissions.DELETE)) {
+            warp.setMarkerManager(null);
             this.list.deleteWarpObject(warp);
             this.data.deleteWarp(warp);
             sender.sendMessage("You have deleted '" + ChatColor.GREEN + warp.getName() + ChatColor.WHITE + "'.");
@@ -755,33 +740,45 @@ public class WarpManager extends CommonManager<Warp, WarpList<Warp>> {
     }
 
     private void updateMarkerAPI() {
-        for (Warp warp : this.getWarpObjects()) {
-            warp.setMarkerManager(this.manager);
-        }
-    }
-    
-    public void setMarkerAPI(MarkerAPI api) {
-        if (api == null) {
-            this.manager.setMarkerSet(null);
-            this.manager.setMarkerIcon(null);
-            this.updateMarkerAPI();
-        } else {
+        MarkerAPI api = this.manager.getMarkerAPI();
+        if (api != null) {
             try {
                 InputStream is = new FileInputStream(new File(this.dataDirectory, this.properties.getMarkerPNG()));
                 MarkerIcon icon = api.getMarkerIcon("xwarp.warp.icon");
                 if (icon == null) {
                     icon = api.createMarkerIcon("xwarp.warp.icon", "Warps Icon", is);
+                } else {
+                    try {
+                        icon.setMarkerIconImage(is);
+                    } catch (NoSuchMethodError e) {
+                        XWarp.logger.info("Couldn't update icon, because dynmap isn't supporting this.");
+                    }
                 }
                 if (icon != null) {
                     this.manager.setMarkerIcon(icon);
                     this.manager.setMarkerSet(api.createMarkerSet("xwarp.warp.set" + markerSetId++, "Warps", ImmutableSet.of(icon), false));
-                    this.updateMarkerAPI();
                 } else {
                     XWarp.logger.severe("Marker icon isn't set.");
                 }
             } catch (FileNotFoundException e) {
                 XWarp.logger.severe("Unable to load marker file.", e);
             }
+        }
+        this.updateWarpMarkers();
+    }
+
+    private void updateWarpMarkers() {
+        for (Warp warp : this.getWarpObjects()) {
+            warp.setMarkerManager(this.manager);
+        }
+    }
+
+    public void setMarkerAPI(MarkerAPI api) {
+        this.manager.setMarkerAPI(api);
+        if (api != null) {
+            this.updateMarkerAPI();
+        } else {
+            this.updateWarpMarkers();
         }
     }
 

@@ -1,5 +1,6 @@
 package de.xzise.xwarp;
 
+import org.dynmap.markers.MarkerAPI;
 import org.dynmap.markers.MarkerIcon;
 import org.dynmap.markers.MarkerSet;
 
@@ -10,6 +11,7 @@ import de.xzise.xwarp.Warp.Visibility;
 
 public class MarkerManager {
 
+    private MarkerAPI markerAPI;
     private MarkerSet markerSet;
     private MarkerIcon markerIcon;
     private final PluginProperties properties;
@@ -38,6 +40,18 @@ public class MarkerManager {
     public void setMarkerIcon(MarkerIcon markerIcon) {
         if (this.markerIcon != markerIcon) {
             this.markerIcon = markerIcon;
+        }
+    }
+
+    public MarkerAPI getMarkerAPI() {
+        return this.markerAPI;
+    }
+
+    public void setMarkerAPI(MarkerAPI markerAPI) {
+        this.markerAPI = markerAPI;
+        if (this.markerAPI == null) {
+            this.setMarkerSet(null);
+            this.setMarkerIcon(null);
         }
     }
 

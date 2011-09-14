@@ -11,7 +11,7 @@ public class ChangeWorldCommand extends DefaultSubCommand<Manager<? extends Warp
 
     private final String label;
 
-    protected ChangeWorldCommand(Manager<? extends WarpObject<? extends Editor>> manager, Server server, String label) {
+    public ChangeWorldCommand(Manager<? extends WarpObject<? extends Editor>> manager, Server server, String label) {
         super(manager, server, "change-world", "chwrld");
         this.label = label;
     }

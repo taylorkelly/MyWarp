@@ -44,6 +44,7 @@ public class WPACommandMap extends CommonCommandMap {
         subCommands.add(RemoveEditorCommand.create(manager, server, LABEL));
         // subCommands.add(new SearchCommand(manager, server));
         // subCommands.add(new ListCommand(manager, server));
+        subCommands.add(new ChangeWorldCommand(manager, server, LABEL));
         subCommands.add(ChangeCreatorCommand.create(manager, server, LABEL));
         subCommands.add(new InfoCommand(manager, server));
         // subCommands.add(new ListedCommand(manager, server));
