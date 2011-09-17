@@ -16,7 +16,7 @@
 == TO BE DONE ==
 
 3.2.0
-  - regex parameter for warp list
+  - wpa list command
   - Export hmod compatible warps
   - auto completion
   - pay only difference for change visibility (maybe 3.1.0)
@@ -24,9 +24,10 @@
   - Permissions pools (like xwarp.warp.edit.default) with BPU 1.3.0
 
 3.3.0
-  - wpa list command
+  - regex parameter for warp list
   - warp list like options for warp search
-  - positive/negative options for warp list
+  - command to remove all warps matching specific options (options like in /w ls)
+  - info in the list to show if a warp is save
 
 Undetermined
   - separated permission for warp.create.private.set/warp.create.private.change

@@ -15,6 +15,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
 import de.xzise.MinecraftUtil;
+import de.xzise.metainterfaces.CommandSenderWrapper;
 import de.xzise.wrappers.permissions.BufferPermission;
 import de.xzise.wrappers.permissions.Permission;
 import de.xzise.xwarp.editors.Editor;
@@ -269,12 +270,13 @@ public abstract class DefaultWarpObject<T extends Enum<T> & Editor> implements W
 
     @Override
     public boolean canModify(CommandSender sender, T permission) {
-        Player player = WarperFactory.getPlayer(sender);
+        CommandSender realSender = CommandSenderWrapper.getCommandSender(sender);
+        Player player = WarperFactory.getPlayer(realSender);
         boolean canModify = false;
         if (player != null) {
             canModify = this.playerCanModify(player, permission);
         }
 
-        return canModify(sender, canModify, permission.getDefault(), permission.getAdmin());
+        return canModify(realSender, canModify, permission.getDefault(), permission.getAdmin());
     }
 }

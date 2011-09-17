@@ -20,7 +20,7 @@ import de.xzise.xwarp.WarpObject;
  * @author Fabian Neundorf
  */
 public abstract class ManagerCommand<W extends WarpObject<?>, M extends Manager<W>> extends DefaultSubCommand<M> {
-    
+
     private final String cmd;
     private final int minLength;
     private final int maxLength;
@@ -47,7 +47,7 @@ public abstract class ManagerCommand<W extends WarpObject<?>, M extends Manager<
         } else {
             this.minLength = this.maxLength - 1;
         }
-        
+
         StringBuilder commandLine = new StringBuilder(label);
         commandLine.append(" ");
         commandLine.append(this.commands[0]);
@@ -77,9 +77,10 @@ public abstract class ManagerCommand<W extends WarpObject<?>, M extends Manager<
             owner = this.getPlayer(parameters[2]);
             parameterStartIndex++;
         }
+
         final String[] cmdParameters;
         if (parameters.length > parameterStartIndex) {
-            cmdParameters = Arrays.copyOfRange(parameters, parameterStartIndex, parameters.length - 1);
+            cmdParameters = Arrays.copyOfRange(parameters, parameterStartIndex, parameters.length);
         } else {
             cmdParameters = DefaultArrays.EMPTY_STRING_ARRAY;
         }

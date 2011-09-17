@@ -5,19 +5,19 @@ import java.util.Map;
 
 import de.xzise.xwarp.WarpObject;
 
-public class GlobalMap<globalMapObject extends WarpObject<?>> {
+public class GlobalMap<T extends WarpObject<?>> {
 
-    private final Map<String, globalMapObject> all = new HashMap<String, globalMapObject>();
+    private final Map<String, T> all = new HashMap<String, T>();
 
-    public void put(globalMapObject warpObject) {
-        this.all.put(warpObject.getCreator().toLowerCase(), warpObject);
+    public void put(T warpObject) {
+        this.all.put(warpObject.getOwner().toLowerCase(), warpObject);
     }
 
-    public void delete(globalMapObject warp) {
-        this.all.remove(warp.getCreator().toLowerCase());
+    public void delete(T warp) {
+        this.all.remove(warp.getOwner().toLowerCase());
     }
 
-    public globalMapObject getWarpObject(String playerName) {
+    public T getWarpObject(String playerName) {
         if (this.all.size() == 1) {
             return this.all.values().iterator().next();
         } else if (playerName != null && !playerName.isEmpty()) {
