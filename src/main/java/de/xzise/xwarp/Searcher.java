@@ -38,27 +38,10 @@ public class Searcher {
     }
 
     public void search(int page) {
-        // DEBUG
-        final boolean testOut = page < 0;
-        if (page < 0) page = -page;
-        // EDBUG END
-
         final int elementsPerPage = MinecraftUtil.getMaximumLines(this.sender) - 2;
         final int elementsLeftOnMixedPage = elementsPerPage - this.exactMatches.size() % elementsPerPage - 1;
         final int maxPages = (int) (elementsLeftOnMixedPage > 1 ? Math.ceil((this.exactMatches.size() + this.matches.size() + 1) / (double) elementsPerPage) : Math.ceil(this.exactMatches.size() / (double) elementsPerPage) + Math.ceil(this.matches.size() / (double) elementsPerPage));
         int elementsLeft = elementsPerPage + 1;
-
-        if (testOut && page == 1) {
-            this.sender.sendMessage("Exact matches: " + this.exactMatches.size());
-            for (Warp w : this.exactMatches) {
-                this.sender.sendMessage("'" + w.getName() + "' by " + w.getOwner());
-            }
-            this.sender.sendMessage("Partitial matches: " + this.matches.size());
-            for (Warp w : this.matches) {
-                this.sender.sendMessage("'" + w.getName() + "' by " + w.getOwner());
-            }
-            this.sender.sendMessage("Maximum page number: " + maxPages);
-        }
 
         if (exactMatches.size() == 0 && matches.size() == 0) {
             this.sender.sendMessage(ChatColor.RED + "No warp matches for search: " + ChatColor.GRAY + query);
@@ -81,9 +64,6 @@ public class Searcher {
             }
 
             final int offset = (elementsLeftOnMixedPage > 1 && page > exactMatchesPages? elementsLeftOnMixedPage : 0) + Math.max((page - Math.max(exactMatchesPages, 1) - 1) * elementsPerPage, 0);
-            // DEBUG
-            if (testOut) this.sender.sendMessage("elementsPerPage: " + elementsPerPage + " exactMatchesPages: " + exactMatchesPages + " elementsLeftOnMixedPage: " + elementsLeftOnMixedPage + " offset: " + offset);
-            // DEBUG END
 
             if (this.matches.size() > offset && elementsLeft > 2) {
                 ListSection section = new ListSection("Partial matches for search: " + ChatColor.GREEN + this.query);

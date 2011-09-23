@@ -4,7 +4,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 
-
 import org.bukkit.Server;
 
 import de.xzise.commands.CommonCommandMap;
@@ -26,7 +25,6 @@ import de.xzise.xwarp.commands.warp.PrivatizeCommand;
 import de.xzise.xwarp.commands.warp.PublicizeCommand;
 import de.xzise.xwarp.commands.warp.SafetyCheckCommand;
 import de.xzise.xwarp.commands.warp.SearchCommand;
-import de.xzise.xwarp.commands.warp.SearchTestCmd;
 import de.xzise.xwarp.commands.warp.ShowMessageCommand;
 import de.xzise.xwarp.commands.warp.UpdateCommand;
 import de.xzise.xwarp.commands.warp.WarmUpCommand;
@@ -37,7 +35,7 @@ import de.xzise.xwarp.dataconnections.DataConnection;
 public class WarpCommandMap extends CommonCommandMap {
 
     public static final String LABEL = "warp";
-    
+
     public WarpCommandMap(WarpManager manager, EconomyHandler economyWrapper, Server server, DataConnection data, File pluginPath, PluginProperties properties) {
         super();
 
@@ -75,10 +73,9 @@ public class WarpCommandMap extends CommonCommandMap {
         subCommands.add(new SafetyCheckCommand(manager, server));
         subCommands.add(new ListedCommand(manager, server));
         subCommands.add(new WarpForceToCommand(manager, server));
-        subCommands.add(new SearchTestCmd(manager, server));
-        
+
         this.populate(subCommands);
-        
+
         this.setDefault(warper);
         this.setHelper(helper);
     }

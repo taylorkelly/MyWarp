@@ -14,6 +14,7 @@ import de.xzise.xwarp.Manager;
 import de.xzise.xwarp.PluginProperties;
 import de.xzise.xwarp.XWarp;
 import de.xzise.xwarp.dataconnections.DataConnection;
+import de.xzise.xwarp.listeners.XWServerListener;
 import de.xzise.xwarp.wrappers.permission.GeneralPermissions;
 
 public class ReloadCommand extends CommonHelpableSubCommand {
@@ -21,12 +22,14 @@ public class ReloadCommand extends CommonHelpableSubCommand {
     private final Collection<Manager<?>> managers;
     private final PluginProperties properties;
     private final EconomyHandler economy;
+    private final XWServerListener serverListener;
 
-    public ReloadCommand(EconomyHandler economy, PluginProperties properties, Manager<?>... manager) {
+    public ReloadCommand(EconomyHandler economy, XWServerListener serverListener, PluginProperties properties, Manager<?>... manager) {
         super("reload");
         this.managers = ImmutableList.copyOf(manager);
         this.properties = properties;
         this.economy = economy;
+        this.serverListener = serverListener;
     }
 
     @Override
@@ -38,6 +41,7 @@ public class ReloadCommand extends CommonHelpableSubCommand {
                     data.free();
                 }
                 this.properties.read();
+                this.serverListener.load();
                 data = this.properties.getDataConnection();
                 try {
                     if (!data.load(this.properties.getDataConnectionFile())) {

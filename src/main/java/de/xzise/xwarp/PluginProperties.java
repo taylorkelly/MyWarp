@@ -36,6 +36,7 @@ public class PluginProperties {
     private String economyPlugin;
     private String economyBaseAccount;
 
+    private boolean markerEnabled;
     private String markerPNG;
     private ImmutableList<String> markerVisibilities;
 
@@ -120,6 +121,10 @@ public class PluginProperties {
         return this.markerVisibilities;
     }
 
+    public boolean isMarkerEnabled() {
+        return this.markerEnabled;
+    }
+
     public ImmutableSet<Column> getListColumns() {
         return this.defaultColumns;
     }
@@ -144,6 +149,7 @@ public class PluginProperties {
             configuration.setProperty("warp.defaultmsg", "Welcome to '{NAME}'!");
             configuration.setProperty("marker.png", "marker.png");
             configuration.setProperty("marker.visibilities", DEFAULT_VISIBILITIES);
+            configuration.setProperty("marker.enabled", false);
             configuration.setProperty("list.columns", DEFAULT_COLUMNS);
             if (configuration.save()) {
                 XWarp.logger.info("Successfully created default configuration file.");
@@ -185,6 +191,7 @@ public class PluginProperties {
 
         this.markerPNG = configuration.getString("marker.png", "marker.png");
         this.markerVisibilities = ImmutableList.copyOf(configuration.getStringList("marker.visibilities", DEFAULT_VISIBILITIES));
+        this.markerEnabled = configuration.getBoolean("marker.enabled", false);
 
         Builder<Column> columnsBuilder = ImmutableSet.builder();
         for (String column : configuration.getStringList("list.columns", DEFAULT_COLUMNS)) {

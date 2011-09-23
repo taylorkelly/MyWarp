@@ -15,7 +15,6 @@ import de.xzise.xwarp.WPAManager;
 import de.xzise.xwarp.commands.wpa.CreateCommand;
 import de.xzise.xwarp.commands.wpa.InfoCommand;
 import de.xzise.xwarp.commands.wpa.StopCreateCommand;
-import de.xzise.xwarp.commands.xwarp.ReloadCommand;
 import de.xzise.xwarp.dataconnections.DataConnection;
 
 public class WPACommandMap extends CommonCommandMap {
@@ -48,7 +47,6 @@ public class WPACommandMap extends CommonCommandMap {
         subCommands.add(ChangeCreatorCommand.create(manager, server, LABEL));
         subCommands.add(new InfoCommand(manager, server));
         // subCommands.add(new ListedCommand(manager, server));
-        subCommands.add(new ReloadCommand(economyWrapper, properties, manager));
 
         this.populate(subCommands);
 

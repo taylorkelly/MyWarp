@@ -51,8 +51,32 @@
 				</excludes>
 			</resource>
 		</resources>
-		<finalName>${project.name}</finalName>
+		<!--finalName>${project.name}</finalName -->
 		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<configuration>
+					<descriptors>
+						<descriptor>src/main/assembly/package.xml</descriptor>
+					</descriptors>
+					<!-- Hack for bug in maven-assembly: http://jira.codehaus.org/browse/MASSEMBLY-449 -->
+					<archiverConfig>
+						<fileMode>420</fileMode> <!-- 420(dec) = 644(oct) -->
+						<directoryMode>493</directoryMode> <!-- 493(dec) = 755(oct) -->
+						<defaultDirectoryMode>493</defaultDirectoryMode>
+					</archiverConfig>
+				</configuration>
+				<executions>
+					<execution>
+						<id>build</id>
+						<phase>package</phase>
+						<goals>
+							<goal>single</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>

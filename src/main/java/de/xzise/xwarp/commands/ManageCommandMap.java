@@ -19,17 +19,18 @@ import de.xzise.xwarp.commands.xwarp.ImportCommand;
 import de.xzise.xwarp.commands.xwarp.PermissionsCommand;
 import de.xzise.xwarp.commands.xwarp.ReloadCommand;
 import de.xzise.xwarp.commands.xwarp.StatusCommand;
+import de.xzise.xwarp.listeners.XWServerListener;
 
 public class ManageCommandMap extends CommonCommandMap {
 
-    public ManageCommandMap(EconomyHandler economyHandler, PluginProperties properties, Server server, File dataPath, WarpManager warpManager, WPAManager wpaManager) {
+    public ManageCommandMap(EconomyHandler economyHandler, XWServerListener serverListener, PluginProperties properties, Server server, File dataPath, WarpManager warpManager, WPAManager wpaManager) {
         super();
 
         CommonHelpCommand helper = new CommonHelpCommand("xWarp");
 
         Collection<SubCommand> subCommands = new ArrayList<SubCommand>();
         subCommands.add(helper);
-        subCommands.add(new ReloadCommand(economyHandler, properties, warpManager, wpaManager));
+        subCommands.add(new ReloadCommand(economyHandler, serverListener, properties, warpManager, wpaManager));
         subCommands.add(new StatusCommand(economyHandler, XWarp.permissions, warpManager, wpaManager));
         subCommands.add(new PermissionsCommand(server));
         subCommands.add(new ExportCommand(warpManager, wpaManager, dataPath, server));

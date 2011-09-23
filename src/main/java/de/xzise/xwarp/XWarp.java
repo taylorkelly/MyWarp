@@ -6,11 +6,7 @@ import java.io.IOException;
 import org.bukkit.World;
 import org.bukkit.event.Event;
 import org.bukkit.event.Event.Priority;
-import org.bukkit.event.server.PluginDisableEvent;
-import org.bukkit.event.server.PluginEnableEvent;
-import org.bukkit.event.server.ServerListener;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.dynmap.DynmapPlugin;
 
 import de.xzise.MinecraftUtil;
 import de.xzise.XLogger;
@@ -23,6 +19,7 @@ import de.xzise.xwarp.dataconnections.DataConnection;
 import de.xzise.xwarp.listeners.XWBlockListener;
 import de.xzise.xwarp.listeners.XWEntityListener;
 import de.xzise.xwarp.listeners.XWPlayerListener;
+import de.xzise.xwarp.listeners.XWServerListener;
 import de.xzise.xwarp.listeners.XWWorldListener;
 import de.xzise.xwarp.wrappers.permission.GeneralPermissions;
 import de.xzise.xwarp.wrappers.permission.PermissionTypes;
@@ -99,6 +96,7 @@ public class XWarp extends JavaPlugin {
         this.permissionHandler = new PermissionsHandler(this.getServer().getPluginManager(), properties.getPermissionsPlugin(), logger);
         permissions = this.permissionHandler;
         this.economyHandler = new EconomyHandler(this.getServer().getPluginManager(), properties.getEconomyPlugin(), properties.getEconomyBaseAccount(), logger);
+        XWServerListener serverListener = new XWServerListener(properties, this.getServer().getPluginManager(), this.warpManager, this.permissionHandler, this.economyHandler);
 
         this.warpManager = new WarpManager(this, this.economyHandler, properties, this.dataConnection);
         WPAManager wpaManager = new WPAManager(this, this.dataConnection, properties);
@@ -112,7 +110,7 @@ public class XWarp extends JavaPlugin {
         try {
             wcm = new WarpCommandMap(this.warpManager, this.economyHandler, this.getServer(), this.dataConnection, this.getDataFolder(), properties);
             wpacm = new WPACommandMap(wpaManager, this.economyHandler, this.getServer(), this.dataConnection, this.getDataFolder(), properties);
-            mcm = new ManageCommandMap(this.economyHandler, properties, this.getServer(), this.getDataFolder(), warpManager, wpaManager);
+            mcm = new ManageCommandMap(this.economyHandler, serverListener, properties, this.getServer(), this.getDataFolder(), warpManager, wpaManager);
         } catch (IllegalArgumentException iae) {
             XWarp.logger.severe("Couldn't initalize commands. Disabling " + this.name + "!", iae);
             this.getServer().getPluginManager().disablePlugin(this);
@@ -126,38 +124,12 @@ public class XWarp extends JavaPlugin {
 
         XWPlayerListener playerListener = new XWPlayerListener(this.warpManager, properties, wpacm.createCommand);
         XWBlockListener blockListener = new XWBlockListener(this.warpManager);
-        ServerListener serverListner = new ServerListener() {
-            @Override
-            public void onPluginEnable(PluginEnableEvent event) {
-                XWarp.this.permissionHandler.load(event.getPlugin());
-                XWarp.this.economyHandler.load(event.getPlugin());
-                try {
-                    if (event.getPlugin() instanceof DynmapPlugin) {
-                        DynmapPlugin p = (DynmapPlugin) event.getPlugin();
-                        XWarp.this.warpManager.setMarkerAPI(p.getMarkerAPI());
-                    }
-                } catch (NoClassDefFoundError e) {
-                    XWarp.logger.info("No dynmap found. Dynmap support disabled.");
-                } catch (NoSuchMethodError e) {
-                    XWarp.logger.info("No dynmap marker API found.");
-                }
-            }
-
-            @Override
-            public void onPluginDisable(PluginDisableEvent event) {
-                if (XWarp.this.permissionHandler.unload(event.getPlugin())) {
-                    XWarp.this.permissionHandler.load();
-                }
-                if (XWarp.this.economyHandler.unload(event.getPlugin())) {
-                    XWarp.this.economyHandler.load();
-                }
-            }
-        };
         XWWorldListener worldListener = new XWWorldListener(this.getServer().getPluginManager(), warpManager, wpaManager);
 
         // Unless an event is called, to tell all enabled plugins
         this.permissionHandler.load();
         this.economyHandler.load();
+        serverListener.load();
 
         // All worlds loaded before this plugin have to registered manually.
         for (World world : this.getServer().getWorlds()) {
@@ -174,8 +146,8 @@ public class XWarp extends JavaPlugin {
         this.getServer().getPluginManager().registerEvent(Event.Type.PLAYER_MOVE, playerListener, Priority.Normal, this);
         this.getServer().getPluginManager().registerEvent(Event.Type.ENTITY_DAMAGE, new XWEntityListener(properties, warpManager.getWarmUp()), Priority.Normal, this);
         this.getServer().getPluginManager().registerEvent(Event.Type.SIGN_CHANGE, blockListener, Priority.Low, this);
-        this.getServer().getPluginManager().registerEvent(Event.Type.PLUGIN_ENABLE, serverListner, Priority.Low, this);
-        this.getServer().getPluginManager().registerEvent(Event.Type.PLUGIN_DISABLE, serverListner, Priority.Low, this);
+        this.getServer().getPluginManager().registerEvent(Event.Type.PLUGIN_ENABLE, serverListener, Priority.Low, this);
+        this.getServer().getPluginManager().registerEvent(Event.Type.PLUGIN_DISABLE, serverListener, Priority.Low, this);
         XWarp.logger.enableMsg();
     }
 
