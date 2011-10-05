@@ -35,7 +35,6 @@ public class XWarp extends JavaPlugin {
     private PermissionsHandler permissionHandler = permissions;
 
     private DataConnection dataConnection;
-    private WarpManager warpManager;
 
     public String name;
     public String version;
@@ -96,19 +95,20 @@ public class XWarp extends JavaPlugin {
         this.permissionHandler = new PermissionsHandler(this.getServer().getPluginManager(), properties.getPermissionsPlugin(), logger);
         permissions = this.permissionHandler;
         this.economyHandler = new EconomyHandler(this.getServer().getPluginManager(), properties.getEconomyPlugin(), properties.getEconomyBaseAccount(), logger);
-        XWServerListener serverListener = new XWServerListener(properties, this.getServer().getPluginManager(), this.warpManager, this.permissionHandler, this.economyHandler);
 
-        this.warpManager = new WarpManager(this, this.economyHandler, properties, this.dataConnection);
+        WarpManager warpManager = new WarpManager(this, this.economyHandler, properties, this.dataConnection);
         WPAManager wpaManager = new WPAManager(this, this.dataConnection, properties);
 
-        this.warpManager.setWPAManager(wpaManager);
+        warpManager.setWPAManager(wpaManager);
+
+        XWServerListener serverListener = new XWServerListener(properties, this.getServer().getPluginManager(), warpManager, this.permissionHandler, this.economyHandler);
 
         // Create commands
         WarpCommandMap wcm = null;
         WPACommandMap wpacm = null;
         ManageCommandMap mcm = null;
         try {
-            wcm = new WarpCommandMap(this.warpManager, this.economyHandler, this.getServer(), this.dataConnection, this.getDataFolder(), properties);
+            wcm = new WarpCommandMap(warpManager, this.economyHandler, this.getServer(), this.dataConnection, this.getDataFolder(), properties);
             wpacm = new WPACommandMap(wpaManager, this.economyHandler, this.getServer(), this.dataConnection, this.getDataFolder(), properties);
             mcm = new ManageCommandMap(this.economyHandler, serverListener, properties, this.getServer(), this.getDataFolder(), warpManager, wpaManager);
         } catch (IllegalArgumentException iae) {
@@ -122,8 +122,8 @@ public class XWarp extends JavaPlugin {
         this.getCommand("warp").setExecutor(wcm);
         this.getCommand("wpa").setExecutor(wpacm);
 
-        XWPlayerListener playerListener = new XWPlayerListener(this.warpManager, properties, wpacm.createCommand);
-        XWBlockListener blockListener = new XWBlockListener(this.warpManager);
+        XWPlayerListener playerListener = new XWPlayerListener(warpManager, properties, wpacm.createCommand);
+        XWBlockListener blockListener = new XWBlockListener(warpManager);
         XWWorldListener worldListener = new XWWorldListener(this.getServer().getPluginManager(), warpManager, wpaManager);
 
         // Unless an event is called, to tell all enabled plugins
