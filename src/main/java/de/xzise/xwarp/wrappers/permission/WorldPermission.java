@@ -12,12 +12,8 @@ public enum WorldPermission {
     TO_WORLD("xwarp.warp.world.to.", "Allows you to warp into the world "),
     WITHIN_WORLD("xwarp.warp.world.within.", "Allows you to warp within the world ");
 
-    public SuperPermBufferPermission getPermission(String world, boolean def) {
-        return new SuperPermBufferPermission(this.getName(world), this.description + world, def);
-    }
-
     public SuperPermBufferPermission getPermission(String world) {
-        return getPermission(world, true);
+        return new SuperPermBufferPermission(this.getName(world), this.description + world, true);
     }
 
     public String getName(String world) {

@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>de.xzise.bukkit</groupId>
 	<artifactId>xWarp</artifactId>
-	<version>3.1.4</version>
+	<version>3.1.5</version>
 	<name>xWarp</name>
 	<dependencies>
 		<dependency>

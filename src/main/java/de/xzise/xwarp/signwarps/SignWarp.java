@@ -40,8 +40,10 @@ public class SignWarp {
     }
     
     private static String replaceName(String text, String value, String... placeHolders) {
-        for (String placeHolder : placeHolders) {
-            text = text.replace("{" + placeHolder + "}", value);
+        if (value != null) {
+            for (String placeHolder : placeHolders) {
+                text = text.replace("{" + placeHolder + "}", value);
+            }
         }
         return text;
     }

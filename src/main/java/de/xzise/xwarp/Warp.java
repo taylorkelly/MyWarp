@@ -147,7 +147,7 @@ public class Warp extends DefaultWarpObject<WarpPermissions> {
         }
 
         // If the player isn't allowed to warp to/within the world cancel here!
-        if (!XWarp.permissions.permission(sender, worldPermission.getPermission(this.getLocationWrapper().getWorld(), true))) {
+        if (!XWarp.permissions.permission(sender, worldPermission.getPermission(this.getLocationWrapper().getWorld()))) {
             return false;
         }
 
@@ -275,29 +275,33 @@ public class Warp extends DefaultWarpObject<WarpPermissions> {
     }
 
     public boolean isListed(CommandSender sender) {
-        if (!this.isListed() && !XWarp.permissions.permission(sender, PermissionTypes.ADMIN_LIST_VIEW)) {
-            return false;
-        }
-
+        boolean accessable = false;
         // Admin permissions
         if (XWarp.permissions.permissionOr(sender, PermissionTypes.getDefaultPermissions(false)))
-            return true;
+            accessable = true;
 
         Warpable warpable = WarperFactory.getWarpable(sender);
 
+        boolean own = false;
         if (warpable != null) {
             // Can warp
             if (this.playerCanWarp(warpable))
-                return true;
+                accessable = true;
             Player player = WarperFactory.getPlayer(warpable);
             if (player != null) {
                 // Creator permissions
-                if (this.isOwn(player.getName()))
-                    return true;
+                if (this.isOwn(player.getName())) {
+                    own = true;
+                    accessable = true;
+                }
             }
         }
 
-        return false;
+        if (this.isListed() || XWarp.permissions.permission(sender, PermissionTypes.ADMIN_LIST_VIEW) || (own && XWarp.permissions.permission(sender, PermissionTypes.LIST_OWN))) {
+            return accessable;
+        } else {
+            return false;
+        }
     }
 
     public FixedLocation getLocation() {

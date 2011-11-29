@@ -98,7 +98,7 @@ public class PermissionsCommand extends CommonHelpableSubCommand {
         int count = 0;
         String worlds = "";
         for (World world : this.server.getWorlds()) {
-            if (XWarp.permissions.permission(sender, permission.getPermission(world.getName(), false))) {
+            if (XWarp.permissions.permission(sender, permission.getPermission(world.getName()))) {
                 if (count > 0) {
                     worlds += ", ";
                 }

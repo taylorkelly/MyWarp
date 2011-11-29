@@ -13,6 +13,12 @@
   - Move warps/wpas into other world
   - list options could be added/removed
 
+3.1.5
+  - Permission to show own unlisted warps.
+  - Check permission "change owner" if create warp with other owner (done)
+  - All world permissions are now by default true.
+  - Info command shows if the warp is (not) listed.
+
 == TO BE DONE ==
 
 3.2.0

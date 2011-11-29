@@ -55,6 +55,8 @@ public enum PermissionTypes implements Permission<Boolean>, VisibilityPermission
     EDIT_COOLDOWN("edit.cooldown", true, "Allows you to set the cooldown of your warps"),
     EDIT_WARMUP("edit.warmup", true, "Allows you to set the warmup of your warps"),
 
+    LIST_OWN("list.own", true, "Allows you to view your own unlisted warps"),
+
     // Access to list
     CMD_LIST("command.list", true, "Allows you to execute the warp list command"),
     CMD_SEARCH("command.search", true, "Allows you to execute the warp search command"),

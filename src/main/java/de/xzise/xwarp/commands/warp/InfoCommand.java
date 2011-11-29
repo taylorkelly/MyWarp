@@ -78,7 +78,7 @@ public class InfoCommand extends WarpCommand {
         if (sender instanceof Player) {
             visibility = GenericLister.getColor(warp, (Player) sender) + visibility;
         }
-        sender.sendMessage("Visibility: " + visibility);
+        sender.sendMessage("Visibility: " + visibility + " (" + (warp.isListed() ? "Listed" : "Unlisted") + ")");
         if (this.wrapper.isActive()) {
             sender.sendMessage("Price: " + ChatColor.GREEN + this.getPrice(warp.getPrice(), basePrice));
         } else if (warp.getPrice() != 0) {
