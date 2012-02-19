@@ -4,7 +4,7 @@ import org.bukkit.event.server.PluginDisableEvent;
 import org.bukkit.event.server.PluginEnableEvent;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
-import org.dynmap.DynmapPlugin;
+import org.dynmap.DynmapCommonAPI;
 
 import de.xzise.wrappers.Handler;
 import de.xzise.xwarp.PluginProperties;
@@ -54,7 +54,7 @@ public class XWServerListener extends BPUServerListener {
     }
 
     public void load(Plugin plugin) {
-        DynmapPlugin p = (DynmapPlugin) plugin;
+        DynmapCommonAPI p = (DynmapCommonAPI) plugin;
         this.warpManager.setMarkerAPI(p.getMarkerAPI());
     }
 }

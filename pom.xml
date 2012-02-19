@@ -27,10 +27,8 @@
 		</dependency>
 		<dependency>
 			<groupId>org.dynmap</groupId>
-			<artifactId>dynmap</artifactId>
-			<version>[0.22,)</version>
-			<type>jar</type>
-			<scope>compile</scope>
+			<artifactId>DynmapCoreAPI</artifactId>
+			<version>0.33</version>
 		</dependency>
 	</dependencies>
 
