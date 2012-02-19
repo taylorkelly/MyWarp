@@ -13,7 +13,7 @@ import de.xzise.xwarp.WarpProtectionArea;
 import de.xzise.xwarp.XWarp;
 import de.xzise.xwarp.commands.DefaultSubCommand;
 import de.xzise.xwarp.dataconnections.DataConnection;
-import de.xzise.xwarp.dataconnections.DataConnectionFactory;
+import de.xzise.xwarp.dataconnections.DataConnections;
 import de.xzise.xwarp.dataconnections.WarpProtectionConnection;
 import de.xzise.xwarp.wrappers.permission.GeneralPermissions;
 
@@ -32,7 +32,7 @@ public class ExportCommand extends DefaultSubCommand<WarpManager> {
     public boolean execute(CommandSender sender, String[] parameters) {
         if (parameters.length > 1) {
             if (XWarp.permissions.permission(sender, GeneralPermissions.EXPORT)) {
-                DataConnection connection = DataConnectionFactory.getConnection(this.server, parameters[1]);
+                DataConnection connection = DataConnections.getConnection(this.server, parameters[1]);
 
                 if (connection != null) {
                     File file;

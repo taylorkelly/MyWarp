@@ -6,9 +6,11 @@ import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event.Result;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.event.player.PlayerListener;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.inventory.ItemStack;
 
@@ -18,7 +20,7 @@ import de.xzise.xwarp.WarpManager;
 import de.xzise.xwarp.commands.wpa.CreateCommand;
 import de.xzise.xwarp.signwarps.SignWarp;
 
-public class XWPlayerListener extends PlayerListener {
+public class XWPlayerListener implements Listener {
 
     private final WarpManager manager;
     private final PluginProperties properties;
@@ -30,7 +32,7 @@ public class XWPlayerListener extends PlayerListener {
         this.createCommand = createCommand;
     }
 
-    @Override
+    @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
     public void onPlayerInteract(PlayerInteractEvent event) {
         Block block = event.getClickedBlock();
         Player player = event.getPlayer();
@@ -52,9 +54,9 @@ public class XWPlayerListener extends PlayerListener {
         return stack == null ? material == null : stack.getType() == material;
     }
 
-    @Override
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onPlayerMove(PlayerMoveEvent event) {
-        if (this.properties.isCancelWarmUpOnMovement()) {
+        if (!event.isCancelled() && this.properties.isCancelWarmUpOnMovement()) {
             if (this.manager.getWarmUp().cancelWarmUp(event.getPlayer())) {
                 event.getPlayer().sendMessage(ChatColor.RED + "WarmUp was canceled due to movement!");
             }

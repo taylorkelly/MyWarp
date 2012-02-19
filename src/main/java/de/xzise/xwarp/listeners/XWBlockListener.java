@@ -4,7 +4,9 @@ import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
-import org.bukkit.event.block.BlockListener;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
 import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.inventory.ItemStack;
 
@@ -17,7 +19,7 @@ import de.xzise.xwarp.signwarps.SignWarp;
 import de.xzise.xwarp.wrappers.permission.Groups;
 import de.xzise.xwarp.wrappers.permission.PermissionTypes;
 
-public class XWBlockListener extends BlockListener {
+public class XWBlockListener implements Listener {
 
     private final WarpManager manager;
 
@@ -25,7 +27,7 @@ public class XWBlockListener extends BlockListener {
         this.manager = manager;
     }
 
-    @Override
+    @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
     public void onSignChange(SignChangeEvent event) {
         Block block = event.getBlock();
         if (block.getState() instanceof Sign && !event.isCancelled() && event.getPlayer() != null) {

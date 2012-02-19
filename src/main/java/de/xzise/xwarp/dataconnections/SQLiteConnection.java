@@ -425,8 +425,8 @@ public class SQLiteConnection implements WarpProtectionConnection {
                 float pitch = set.getFloat("pitch");
                 LocationWrapper loc = new LocationWrapper(new FixedLocation(world, x, y, z, yaw, pitch), worldName);
                 int publicLevel = set.getInt("publicLevel");
-                Visibility visibility = Visibility.parseLevel(publicLevel);
-                boolean listed = Visibility.isListed(publicLevel);
+                Visibility visibility = DataConnections.parseVisibility(publicLevel);
+                boolean listed = DataConnections.isListed(publicLevel);
                 String welcomeMessage = set.getString("welcomeMessage");
                 String owner = set.getString("owner");
                 int cooldown = set.getInt("cooldown");
@@ -473,7 +473,7 @@ public class SQLiteConnection implements WarpProtectionConnection {
                     ps.setString(2, warp.getName());
                     ps.setString(3, warp.getCreator());
                     setLocation(warp.getLocationWrapper(), 4, ps);
-                    ps.setInt(10, warp.getVisibility().getInt(warp.isListed()));
+                    ps.setInt(10, DataConnections.getPublicLevel(warp.isListed(), warp.getVisibility()));
                     ps.setString(11, warp.getRawWelcomeMessage());
                     ps.setString(12, warp.getOwner());
                     ps.setDouble(13, warp.getPrice());
@@ -618,7 +618,7 @@ public class SQLiteConnection implements WarpProtectionConnection {
 
             @Override
             public void fillStatement(Warp warp, PreparedStatement statement) throws SQLException {
-                statement.setInt(1, warp.getVisibility().getInt(warp.isListed()));
+                statement.setInt(1, DataConnections.getPublicLevel(warp.isListed(), warp.getVisibility()));
                 statement.setInt(2, warp.index);
             }
         });

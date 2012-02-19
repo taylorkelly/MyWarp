@@ -205,10 +205,10 @@ public class HModConnection implements DataConnection {
                     }
 
                     int visibilityValue = Integer.parseInt(segments[8]);
-                    Visibility v = Visibility.parseLevel(visibilityValue);
+                    Visibility v = DataConnections.parseVisibility(visibilityValue);
                     if (v != null) {
                         warp.setVisibility(v);
-                        warp.setListed(Visibility.isListed(visibilityValue));
+                        warp.setListed(DataConnections.isListed(visibilityValue));
                     } else {
                         XWarp.logger.warning("Illegal visibilty found (" + warp.getName() + " by " + warp.getOwner() + ")");
                         valid = false;
@@ -260,10 +260,10 @@ public class HModConnection implements DataConnection {
                     }
 
                     int visibilityValue = Integer.parseInt(segments[8]);
-                    Visibility v = Visibility.parseLevel(visibilityValue);
+                    Visibility v = DataConnections.parseVisibility(visibilityValue);
                     if (v != null) {
                         warp.setVisibility(v);
-                        warp.setListed(Visibility.isListed(visibilityValue));
+                        warp.setListed(DataConnections.isListed(visibilityValue));
                     } else {
                         XWarp.logger.warning("Illegal visibilty found (" + warp.getName() + " by " + warp.getOwner() + ")");
                         valid = false;
@@ -317,10 +317,10 @@ public class HModConnection implements DataConnection {
                     }
 
                     int visibilityValue = Integer.parseInt(segments[8]);
-                    Visibility v = Visibility.parseLevel(visibilityValue);
+                    Visibility v = DataConnections.parseVisibility(visibilityValue);
                     if (v != null) {
                         warp.setVisibility(v);
-                        warp.setListed(Visibility.isListed(visibilityValue));
+                        warp.setListed(DataConnections.isListed(visibilityValue));
                     } else {
                         XWarp.logger.warning("Illegal visibility found (" + warp.getName() + " by " + warp.getOwner() + ")");
                         valid = false;
@@ -386,10 +386,10 @@ public class HModConnection implements DataConnection {
                     }
 
                     int visibilityValue = Integer.parseInt(segments[8]);
-                    Visibility v = Visibility.parseLevel(visibilityValue);
+                    Visibility v = DataConnections.parseVisibility(visibilityValue);
                     if (v != null) {
                         warp.setVisibility(v);
-                        warp.setListed(Visibility.isListed(visibilityValue));
+                        warp.setListed(DataConnections.isListed(visibilityValue));
                     } else {
                         XWarp.logger.warning("Illegal visibility found (" + warp.getName() + " by " + warp.getOwner() + ")");
                         valid = false;
@@ -442,7 +442,7 @@ public class HModConnection implements DataConnection {
             if (version >= 1) {
                 warpLine.append(makeParsable(l.getWorld()) + SEPARATOR);
                 warpLine.append(makeParsable(warp.getOwner()) + SEPARATOR);
-                warpLine.append(makeParsable(warp.getVisibility().getInt(warp.isListed())) + SEPARATOR);
+                warpLine.append(makeParsable(DataConnections.getPublicLevel(warp.isListed(), warp.getVisibility())) + SEPARATOR);
                 warpLine.append(makeNullsParsable(warp.getRawWelcomeMessage()) + SEPARATOR);
                 if (version >= 3) {
                     warpLine.append(makeParsable(warp.getCreator()) + SEPARATOR);

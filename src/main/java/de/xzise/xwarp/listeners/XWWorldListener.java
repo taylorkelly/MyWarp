@@ -1,7 +1,9 @@
 package de.xzise.xwarp.listeners;
 
 import org.bukkit.World;
-import org.bukkit.event.world.WorldListener;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
 import org.bukkit.event.world.WorldLoadEvent;
 import org.bukkit.event.world.WorldUnloadEvent;
 import org.bukkit.plugin.PluginManager;
@@ -12,7 +14,7 @@ import de.xzise.xwarp.Manager;
 import de.xzise.xwarp.XWarp;
 import de.xzise.xwarp.wrappers.permission.WorldPermission;
 
-public class XWWorldListener extends WorldListener {
+public class XWWorldListener implements Listener {
 
     private final ImmutableSet<Manager<?>> managers;
     private final PluginManager pm;
@@ -22,7 +24,7 @@ public class XWWorldListener extends WorldListener {
         this.pm = pm;
     }
 
-    @Override
+    @EventHandler(priority = EventPriority.MONITOR)
     public void onWorldLoad(WorldLoadEvent event) {
         int validCount = 0;
         World world = event.getWorld();
@@ -35,16 +37,18 @@ public class XWWorldListener extends WorldListener {
         WorldPermission.register(world.getName(), this.pm);
     }
 
-    @Override
+    @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
     public void onWorldUnload(WorldUnloadEvent event) {
-        int invalidCount = 0;
-        World world = event.getWorld();
-        for (Manager<?> manager : this.managers) {
-            invalidCount += manager.unsetWorld(world);
+        if (!event.isCancelled()) {
+            int invalidCount = 0;
+            World world = event.getWorld();
+            for (Manager<?> manager : this.managers) {
+                invalidCount += manager.unsetWorld(world);
+            }
+            if (invalidCount > 0) {
+                XWarp.logger.info("Because world '" + event.getWorld().getName() + "' was unloaded " + invalidCount + " warp object" + (invalidCount == 1 ? "" : "s") + " get invalid.");
+            }
+            WorldPermission.unregister(world.getName(), this.pm);
         }
-        if (invalidCount > 0) {
-            XWarp.logger.info("Because world '" + event.getWorld().getName() + "' was unloaded " + invalidCount + " warp object" + (invalidCount == 1 ? "" : "s") + " get invalid.");
-        }
-        WorldPermission.unregister(world.getName(), this.pm);
     }
 }

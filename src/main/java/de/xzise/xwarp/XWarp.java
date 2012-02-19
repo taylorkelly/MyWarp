@@ -6,6 +6,8 @@ import java.io.IOException;
 import org.bukkit.World;
 import org.bukkit.event.Event;
 import org.bukkit.event.Event.Priority;
+import org.bukkit.event.Listener;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import de.xzise.MinecraftUtil;
@@ -136,19 +138,14 @@ public class XWarp extends JavaPlugin {
             WorldPermission.register(world.getName(), this.getServer().getPluginManager());
         }
 
-        this.getServer().getPluginManager().registerEvent(Event.Type.WORLD_LOAD, worldListener, Priority.Low, this);
-        try {
-            this.getServer().getPluginManager().registerEvent(Event.Type.WORLD_UNLOAD, worldListener, Priority.Low, this);
-        } catch (NoSuchFieldError e) {
-            // No unload on server: No problem at all. Since 834/835 there.
-        }
-        this.getServer().getPluginManager().registerEvent(Event.Type.PLAYER_INTERACT, playerListener, Priority.Normal, this);
-        this.getServer().getPluginManager().registerEvent(Event.Type.PLAYER_MOVE, playerListener, Priority.Normal, this);
-        this.getServer().getPluginManager().registerEvent(Event.Type.ENTITY_DAMAGE, new XWEntityListener(properties, warpManager.getWarmUp()), Priority.Normal, this);
-        this.getServer().getPluginManager().registerEvent(Event.Type.SIGN_CHANGE, blockListener, Priority.Low, this);
-        this.getServer().getPluginManager().registerEvent(Event.Type.PLUGIN_ENABLE, serverListener, Priority.Low, this);
-        this.getServer().getPluginManager().registerEvent(Event.Type.PLUGIN_DISABLE, serverListener, Priority.Low, this);
+        registerEvents(this, worldListener, playerListener, blockListener, serverListener, new XWEntityListener(properties, warpManager.getWarmUp()));
         XWarp.logger.enableMsg();
+    }
+
+    private static void registerEvents(final Plugin plugin, final Listener... listeners) {
+        for (Listener listener : listeners) {
+            plugin.getServer().getPluginManager().registerEvents(listener, plugin);
+        }
     }
 
     private void updateFiles() {

@@ -1,7 +1,7 @@
 package de.xzise.xwarp.commands.warp;
 
+import java.text.DecimalFormat;
 import java.util.Collection;
-
 
 import org.bukkit.ChatColor;
 import org.bukkit.Server;
@@ -26,6 +26,7 @@ import de.xzise.xwarp.wrappers.permission.PricePermissions;
 public class InfoCommand extends WarpCommand {
 
     private final EconomyHandler wrapper;
+    private static final DecimalFormat FORMAT = new DecimalFormat("#0.0");
 
     public InfoCommand(WarpManager list, Server server, EconomyHandler wrapper) {
         super(list, server, "", "info");
@@ -93,7 +94,11 @@ public class InfoCommand extends WarpCommand {
         sender.sendMessage("Editors: " + lines.editors);
 
         FixedLocation location = warp.getLocation();
-        sender.sendMessage("Location: World = " + ChatColor.GREEN + world + ChatColor.WHITE + ", x = " + ChatColor.GREEN + location.getBlockX() + ChatColor.WHITE + ", y = " + ChatColor.GREEN + location.getBlockY() + ChatColor.WHITE + ", z = " + ChatColor.GREEN + location.getBlockZ());
+        double distance = -1;
+        if (sender instanceof Player) {
+            distance = ((Player) sender).getLocation().distance(location.toLocation());
+        }
+        sender.sendMessage("Location: World = " + ChatColor.GREEN + world + ChatColor.WHITE + ", x = " + ChatColor.GREEN + location.getBlockX() + ChatColor.WHITE + ", y = " + ChatColor.GREEN + location.getBlockY() + ChatColor.WHITE + ", z = " + ChatColor.GREEN + location.getBlockZ() + (distance < 0 ? "" : " distance = " + FORMAT.format(distance) + " m"));
 
         return true;
     }

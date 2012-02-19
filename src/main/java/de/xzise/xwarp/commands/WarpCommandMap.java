@@ -13,6 +13,7 @@ import de.xzise.wrappers.economy.EconomyHandler;
 import de.xzise.xwarp.PluginProperties;
 import de.xzise.xwarp.Warp;
 import de.xzise.xwarp.WarpManager;
+import de.xzise.xwarp.commands.warp.ChangeAllListedCommand;
 import de.xzise.xwarp.commands.warp.CooldownCommand;
 import de.xzise.xwarp.commands.warp.CreateCommand;
 import de.xzise.xwarp.commands.warp.GlobalizeCommand;
@@ -73,6 +74,7 @@ public class WarpCommandMap extends CommonCommandMap {
         subCommands.add(new SafetyCheckCommand(manager, server));
         subCommands.add(new ListedCommand(manager, server));
         subCommands.add(new WarpForceToCommand(manager, server));
+        subCommands.add(new ChangeAllListedCommand(manager, server));
 
         this.populate(subCommands);
 

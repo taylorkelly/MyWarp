@@ -1,9 +1,14 @@
 package de.xzise.xwarp;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.List;
 
 import org.bukkit.Server;
-import org.bukkit.util.config.Configuration;
+import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.configuration.InvalidConfigurationException;
+import org.bukkit.configuration.file.YamlConfiguration;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
@@ -130,31 +135,40 @@ public class PluginProperties {
     }
 
     public void read() {
-        Configuration configuration = new Configuration(this.configFile);
+        YamlConfiguration configuration = new YamlConfiguration();
         if (this.configFile.exists()) {
-            configuration.load();
+            try {
+                configuration.load(this.configFile);
+            } catch (FileNotFoundException e) {
+                XWarp.logger.warning("Unable to load configuration because the file doesn't exists: " + e.getMessage());
+            } catch (IOException e) {
+                XWarp.logger.warning("Unable to load configuration!", e);
+            } catch (InvalidConfigurationException e) {
+                XWarp.logger.warning("Unable to load configuration because it is an invalid configuration!", e);
+            }
         } else {
-            configuration.setProperty("data.connection", "sqlite");
-            configuration.setProperty("economy.plugin", "");
-            configuration.setProperty("economy.base-account", "");
-            configuration.setProperty("permissions.plugin", "");
-            configuration.setProperty("warmup.notify", true);
-            configuration.setProperty("warmup.cancel.movement", false);
-            configuration.setProperty("warmup.cancel.damage", true);
-            configuration.setProperty("cooldown.notify", true);
-            configuration.setProperty("case-sensitive", false);
-            configuration.setProperty("update-if-exists", false);
-            configuration.setProperty("use-force-to", false);
-            configuration.setProperty("show-free-price-message", false);
-            configuration.setProperty("warp.defaultmsg", "Welcome to '{NAME}'!");
-            configuration.setProperty("marker.png", "marker.png");
-            configuration.setProperty("marker.visibilities", DEFAULT_VISIBILITIES);
-            configuration.setProperty("marker.enabled", false);
-            configuration.setProperty("list.columns", DEFAULT_COLUMNS);
-            if (configuration.save()) {
+            configuration.set("data.connection", "sqlite");
+            configuration.set("economy.plugin", "");
+            configuration.set("economy.base-account", "");
+            configuration.set("permissions.plugin", "");
+            configuration.set("warmup.notify", true);
+            configuration.set("warmup.cancel.movement", false);
+            configuration.set("warmup.cancel.damage", true);
+            configuration.set("cooldown.notify", true);
+            configuration.set("case-sensitive", false);
+            configuration.set("update-if-exists", false);
+            configuration.set("use-force-to", false);
+            configuration.set("show-free-price-message", false);
+            configuration.set("warp.defaultmsg", "Welcome to '{NAME}'!");
+            configuration.set("marker.png", "marker.png");
+            configuration.set("marker.visibilities", DEFAULT_VISIBILITIES);
+            configuration.set("marker.enabled", false);
+            configuration.set("list.columns", DEFAULT_COLUMNS);
+            try {
+                configuration.save(this.configFile);
                 XWarp.logger.info("Successfully created default configuration file.");
-            } else {
-                XWarp.logger.warning("Unable to create properties file.");
+            } catch (IOException e) {
+                XWarp.logger.warning("Unable to create properties file!", e);
             }
         }
 
@@ -190,11 +204,11 @@ public class PluginProperties {
         this.createUpdates = configuration.getBoolean("update-if-exists", false);
 
         this.markerPNG = configuration.getString("marker.png", "marker.png");
-        this.markerVisibilities = ImmutableList.copyOf(configuration.getStringList("marker.visibilities", DEFAULT_VISIBILITIES));
+        this.markerVisibilities = ImmutableList.copyOf(getStringList(configuration, "marker.visibilities", DEFAULT_VISIBILITIES));
         this.markerEnabled = configuration.getBoolean("marker.enabled", false);
 
         Builder<Column> columnsBuilder = ImmutableSet.builder();
-        for (String column : configuration.getStringList("list.columns", DEFAULT_COLUMNS)) {
+        for (String column : getStringList(configuration, "list.columns", DEFAULT_COLUMNS)) {
             if (column.equalsIgnoreCase("owner")) {
                 columnsBuilder.add(Column.OWNER);
             } else if (column.equalsIgnoreCase("world")) {
@@ -206,6 +220,15 @@ public class PluginProperties {
         this.defaultColumns = columnsBuilder.build();
 
         this.defaultMessage = configuration.getString("warp.defaultmsg", "Welcome to '{NAME}'!");
+    }
+
+    private static List<String> getStringList(final ConfigurationSection configurationSection, final String name, final List<String> def) {
+        List<String> list = configurationSection.getStringList(name);
+        if (list == null) {
+            return def;
+        } else {
+            return list;
+        }
     }
 
     public String getDefaultMessage() {

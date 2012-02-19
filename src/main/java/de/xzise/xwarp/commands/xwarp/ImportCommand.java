@@ -12,7 +12,7 @@ import de.xzise.xwarp.WarpManager;
 import de.xzise.xwarp.WarpManager.WarpGetter;
 import de.xzise.xwarp.commands.DefaultSubCommand;
 import de.xzise.xwarp.dataconnections.DataConnection;
-import de.xzise.xwarp.dataconnections.DataConnectionFactory;
+import de.xzise.xwarp.dataconnections.DataConnections;
 import de.xzise.xwarp.dataconnections.HModConnection;
 
 public class ImportCommand extends DefaultSubCommand<WarpManager> {
@@ -29,7 +29,7 @@ public class ImportCommand extends DefaultSubCommand<WarpManager> {
     @Override
     public boolean execute(CommandSender sender, String[] parameters) {
         if (parameters.length >= 2) {
-            DataConnection connection = DataConnectionFactory.getConnection(this.server, parameters[1]);
+            DataConnection connection = DataConnections.getConnection(this.server, parameters[1]);
             if (connection == null) {
                 sender.sendMessage(ChatColor.RED + "Unrecognized import type.");
                 return true;

@@ -14,6 +14,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.dynmap.markers.Marker;
 
+import de.xzise.Callback;
 import de.xzise.MinecraftUtil;
 import de.xzise.StringComparator;
 import de.xzise.metainterfaces.FixedLocation;
@@ -35,13 +36,17 @@ public class Warp extends DefaultWarpObject<WarpPermissions> {
         PUBLIC((byte) 1, "public"),
         GLOBAL((byte) 2, "global");
 
-        private static final Map<String, Visibility> names = new HashMap<String, Warp.Visibility>();
-
-        static {
-            for (Visibility v : Visibility.values()) {
-                names.put(v.name, v);
+        private static final Map<String, Visibility> NAMES = MinecraftUtil.createReverseEnumMap(Visibility.class, new Callback<String, Visibility>() {
+            public String call(Visibility visibility) {
+                return visibility.name;
             }
-        }
+        });
+        private static final Map<Byte, Visibility> LEVELS = MinecraftUtil.createReverseEnumMap(Visibility.class, new Callback<Byte, Visibility>() {
+            @Override
+            public Byte call(Visibility visibility) {
+                return visibility.level;
+            }
+        });
 
         public final byte level;
         public final String name;
@@ -51,39 +56,12 @@ public class Warp extends DefaultWarpObject<WarpPermissions> {
             this.name = name;
         }
 
-        public byte getInt(boolean listed) {
-            byte v = (byte) (this.level & 0x7F);
-            if (listed) {
-                v |= 1 << 7;
-            }
-            return v;
-        }
-
         public static Visibility parseString(String string) {
-            return names.get(string);
+            return NAMES.get(string);
         }
 
-        private static Visibility parseCleanedLevel(byte level) {
-            for (Visibility visibility : Visibility.values()) {
-                if (visibility.level == level) {
-                    return visibility;
-                }
-            }
-            return null;
-        }
-
-        public static Visibility parseLevel(int level) {
-            // Bit 31 - 08 = unused
-            // Bit 07 = !listed (→ bit set = not listed)
-            // Bit 06 - 00 = visibility
-            return parseCleanedLevel((byte) (level & 0x7F));
-        }
-
-        public static boolean isListed(int level) {
-            // Bit 31 - 08 = unused
-            // Bit 07 = !listed (→ bit set = not listed)
-            // Bit 06 - 00 = visibility
-            return (level & 0x80) == 0;
+        public static Visibility getByLevel(byte level) {
+            return LEVELS.get(level);
         }
     }
 
