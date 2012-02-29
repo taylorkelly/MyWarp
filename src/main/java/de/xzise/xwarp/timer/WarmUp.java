@@ -3,9 +3,9 @@ package de.xzise.xwarp.timer;
 import java.util.HashMap;
 import java.util.Map;
 
-
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
 import org.bukkit.plugin.Plugin;
 
 import de.xzise.MinecraftUtil;
@@ -40,9 +40,9 @@ public class WarmUp {
             this.sendPlayer(warper, warped, warp);
         }
     }
-    
+
     public boolean cancelWarmUp(CommandSender warper) {
-        //TODO: Only remove, if warp itself?
+        // TODO: Only remove, if warp itself?
         if (this.players.containsKey(warper)) {
             this.plugin.getServer().getScheduler().cancelTask(this.players.get(warper));
             this.players.remove(warper);
@@ -66,7 +66,7 @@ public class WarmUp {
     }
 
     private void sendPlayer(CommandSender warper, Warpable warped, Warp warp) {
-        if (warped.teleport(warp.getLocation().toLocation())) {
+        if (warped.teleport(warp.getLocation().toLocation(), TeleportCause.COMMAND)) {
             String rawMsg = warp.getRawWelcomeMessage();
             if (rawMsg == null) {
                 rawMsg = this.properties.getDefaultMessage().replace("{NAME}", warp.getName());
