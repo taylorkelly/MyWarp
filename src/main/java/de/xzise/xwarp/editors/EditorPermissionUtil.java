@@ -8,7 +8,7 @@ import java.util.Set;
 import com.google.common.collect.ImmutableMap.Builder;
 import com.google.common.collect.ImmutableSet;
 
-import de.xzise.Callback;
+import de.xzise.bukkit.util.callback.Callback;
 
 public class EditorPermissionUtil {
 

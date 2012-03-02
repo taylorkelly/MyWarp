@@ -2,7 +2,6 @@ package de.xzise.xwarp;
 
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.Map;
 
 import org.bukkit.Location;
@@ -14,9 +13,10 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.dynmap.markers.Marker;
 
-import de.xzise.Callback;
 import de.xzise.MinecraftUtil;
 import de.xzise.StringComparator;
+import de.xzise.bukkit.util.callback.Callback;
+import de.xzise.collections.ArrayReferenceList;
 import de.xzise.metainterfaces.FixedLocation;
 import de.xzise.metainterfaces.LocationWrapper;
 import de.xzise.xwarp.editors.EditorPermissions;
@@ -232,12 +232,12 @@ public class Warp extends DefaultWarpObject<WarpPermissions> {
     }
 
     private static boolean checkMaterials(Material material, Material... allowed) {
-        return MinecraftUtil.contains(material, allowed);
+        return ArrayReferenceList.contains(material, allowed);
     }
 
     private static boolean checkMaterials(Material[] materials, Material... allowed) {
         for (Material material : materials) {
-            if (!MinecraftUtil.contains(material, allowed)) {
+            if (!ArrayReferenceList.contains(material, allowed)) {
                 return false;
             }
         }

@@ -271,7 +271,7 @@ public class YmlConnection implements WarpProtectionConnection {
 
     @Override
     public void addWarp(Warp... warps) {
-        List<Object> rawNodes = this.config.getList(WARP_PATH);
+        List<Map<?, ?>> rawNodes = this.config.getMapList(WARP_PATH);
 
         for (Warp warp : warps) {
             Map<String, Object> warpMap = warpObjectToMap(warp);
@@ -326,15 +326,11 @@ public class YmlConnection implements WarpProtectionConnection {
 
     public static void removeFromList(MemorySection node, String key, Callback<Boolean, MemorySection> callback) {
         List<? extends MemorySection> nodes = MemorySectionFromMap.getSectionList(node, key);
-        System.out.println("Node size: " + nodes.size() + " @" + key);
         List<Map<String, Object>> mapList = Lists.newArrayListWithCapacity(Math.max(nodes.size() - 1, 0));
         for (MemorySection singleNode : nodes) {
             Map<String, Object> a = nodeToMap(singleNode);
             if (bool(callback.call(singleNode), false)) {
                 mapList.add(a);
-                System.out.println("Added node #" + mapList.size() + " a.keySet() =>" + a.keySet());
-            } else {
-                System.out.println("Skiped node w/ a.keySet() =>" + a.keySet());
             }
         }
         node.set(key, mapList);
@@ -598,7 +594,7 @@ public class YmlConnection implements WarpProtectionConnection {
 
     @Override
     public void addProtectionArea(WarpProtectionArea... areas) {
-        List<Object> rawNodes = this.config.getList(WPA_PATH);
+        List<Map<?, ?>> rawNodes = this.config.getMapList(WPA_PATH);
 
         for (WarpProtectionArea wpa : areas) {
             Map<String, Object> wpaMap = warpObjectToMap(wpa);

@@ -10,8 +10,8 @@ import org.bukkit.Server;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import de.xzise.Callback;
 import de.xzise.MinecraftUtil;
+import de.xzise.bukkit.util.callback.Callback;
 import de.xzise.xwarp.PluginProperties;
 import de.xzise.xwarp.Warp;
 import de.xzise.xwarp.WarpManager;
@@ -285,11 +285,6 @@ public class ListCommand extends DefaultSubCommand<WarpManager> {
                         sender.sendMessage(ChatColor.RED + "Found more than one page definition. Selecting first: " + buffer);
                     }
                 }
-            }
-
-            System.out.println(columns.getWhitelist().size() + " " + columns.getBlacklist().size());
-            for (Column c : columns.getSelected()) {
-                System.out.println(c);
             }
 
             if (page == null) {

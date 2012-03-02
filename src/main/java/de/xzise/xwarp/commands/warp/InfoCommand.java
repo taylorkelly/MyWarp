@@ -94,11 +94,13 @@ public class InfoCommand extends WarpCommand {
         sender.sendMessage("Editors: " + lines.editors);
 
         FixedLocation location = warp.getLocation();
-        double distance = -1;
+        final String distanceText;
         if (sender instanceof Player) {
-            distance = ((Player) sender).getLocation().distance(location.toLocation());
+            distanceText = ", distance = " + MinecraftUtil.getSIPrefixValue(((Player) sender).getLocation().distance(location.toLocation()), FORMAT) + "m";
+        } else {
+            distanceText = "";
         }
-        sender.sendMessage("Location: World = " + ChatColor.GREEN + world + ChatColor.WHITE + ", x = " + ChatColor.GREEN + location.getBlockX() + ChatColor.WHITE + ", y = " + ChatColor.GREEN + location.getBlockY() + ChatColor.WHITE + ", z = " + ChatColor.GREEN + location.getBlockZ() + (distance < 0 ? "" : " distance = " + FORMAT.format(distance) + " m"));
+        sender.sendMessage("Location: World = " + ChatColor.GREEN + world + ChatColor.WHITE + ", x = " + ChatColor.GREEN + location.getBlockX() + ChatColor.WHITE + ", y = " + ChatColor.GREEN + location.getBlockY() + ChatColor.WHITE + ", z = " + ChatColor.GREEN + location.getBlockZ() + distanceText);
 
         return true;
     }

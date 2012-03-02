@@ -8,8 +8,8 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.common.collect.ImmutableSet.Builder;
 
-import de.xzise.Callback;
 import de.xzise.MinecraftUtil;
+import de.xzise.bukkit.util.callback.Callback;
 
 public class EditorPermissions<T extends Enum<T> & Editor> {
 
