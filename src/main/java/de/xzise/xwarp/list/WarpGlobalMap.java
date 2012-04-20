@@ -45,4 +45,9 @@ class WarpGlobalMap<T extends Warp> extends GlobalMap<T> {
         super.clear();
         this.global = null;
     }
+
+    @Override
+    public boolean isAmbiguous() {
+        return !(this.global != null || !super.isAmbiguous());
+    }
 }

@@ -50,8 +50,9 @@ public class ChangeAllListedCommand extends DefaultSubCommand<WarpManager> {
                     sender.sendMessage(ChatColor.RED + "Invalid listed state!");
                 } else {
                     for (Warp warp : this.manager.getWarpObjects()) {
-                        warp.setListed(listed);
+                        this.manager.setListed(warp, listed);
                     }
+                    sender.sendMessage("Set all warps to: " + ChatColor.GREEN + (listed ? "listed" : "not listed"));
                 }
             } else {
                 sender.sendMessage(ChatColor.RED + "You don't have the permission to change the listed state of somebody elses warps.");

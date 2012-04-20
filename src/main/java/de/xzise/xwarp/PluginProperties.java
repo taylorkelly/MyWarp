@@ -41,7 +41,7 @@ public class PluginProperties {
     private String economyPlugin;
     private String economyBaseAccount;
 
-    private boolean markerEnabled;
+    private String markerPlugin;
     private String markerPNG;
     private ImmutableList<String> markerVisibilities;
 
@@ -67,7 +67,7 @@ public class PluginProperties {
     }
 
     private static String getPlugin(String value) {
-        if (value.equalsIgnoreCase("none") || value.equalsIgnoreCase("null")) {
+        if ("none".equalsIgnoreCase(value) || "null".equalsIgnoreCase(value)) {
             return null;
         } else {
             return value;
@@ -126,8 +126,8 @@ public class PluginProperties {
         return this.markerVisibilities;
     }
 
-    public boolean isMarkerEnabled() {
-        return this.markerEnabled;
+    public String getMarkerPlugin() {
+        return getPlugin(this.markerPlugin);
     }
 
     public ImmutableSet<Column> getListColumns() {
@@ -160,9 +160,9 @@ public class PluginProperties {
             configuration.set("use-force-to", false);
             configuration.set("show-free-price-message", false);
             configuration.set("warp.defaultmsg", "Welcome to '{NAME}'!");
+            configuration.set("marker.plugin", "null");
             configuration.set("marker.png", "marker.png");
             configuration.set("marker.visibilities", DEFAULT_VISIBILITIES);
-            configuration.set("marker.enabled", false);
             configuration.set("list.columns", DEFAULT_COLUMNS);
             try {
                 configuration.save(this.configFile);
@@ -172,7 +172,7 @@ public class PluginProperties {
             }
         }
 
-        String dataConnectionProperty = configuration.getString("data.connection");
+        final String dataConnectionProperty = configuration.getString("data.connection");
 
         if ("hmod".equalsIgnoreCase(dataConnectionProperty)) {
             this.dataConnection = new HModConnection(this.server);
@@ -183,7 +183,7 @@ public class PluginProperties {
                 XWarp.logger.warning("Unrecognized data-connection selected (" + dataConnectionProperty + ")");
             }
             // Per default sqlite
-            this.dataConnection = new SQLiteConnection(server);
+            this.dataConnection = new SQLiteConnection(this.server);
         }
 
         this.caseSensitive = configuration.getBoolean("case-sensitive", false);
@@ -205,7 +205,14 @@ public class PluginProperties {
 
         this.markerPNG = configuration.getString("marker.png", "marker.png");
         this.markerVisibilities = ImmutableList.copyOf(getStringList(configuration, "marker.visibilities", DEFAULT_VISIBILITIES));
-        this.markerEnabled = configuration.getBoolean("marker.enabled", false);
+        if (configuration.isSet("marker.enabled")) {
+            XWarp.logger.info("Please note, that 'marker.enabled' in the plugin configuration is now obsoleted by 'marker.plugin'.");
+        }
+        if (!configuration.isSet("marker.plugin")) {
+            this.markerPlugin = configuration.getBoolean("marker.enabled", false) ? "dynmap" : "null";
+        } else {
+            this.markerPlugin = configuration.getString("marker.plugin", "null");
+        }
 
         Builder<Column> columnsBuilder = ImmutableSet.builder();
         for (String column : getStringList(configuration, "list.columns", DEFAULT_COLUMNS)) {

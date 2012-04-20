@@ -10,7 +10,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Scanner;
 
 import org.bukkit.Location;
 import org.bukkit.Server;
@@ -25,7 +24,6 @@ import de.xzise.xwarp.Warp.Visibility;
 import de.xzise.xwarp.editors.EditorPermissions;
 import de.xzise.xwarp.editors.WarpPermissions;
 import de.xzise.xwarp.editors.EditorPermissions.Type;
-
 
 public class HModConnection implements DataConnection {
 
@@ -47,6 +45,8 @@ public class HModConnection implements DataConnection {
     // Gen3 + Cooldown, Warmup + other editors layout
     /** Minimum length of forth generation map. */
     private static final int GEN_4_LENGTH = GEN_3_LENGTH + 2;
+
+    private static final int VERSION = 4;
 
     public HModConnection(Server server) {
         this.server = server;
@@ -80,61 +80,64 @@ public class HModConnection implements DataConnection {
 
     public List<Warp> getWarps(String owner) {
         List<Warp> result = new ArrayList<Warp>();
-        Scanner scanner;
+        final List<String> rawLines = new ArrayList<String>(0);
         try {
-            List<String> lines = new ArrayList<String>();
-            Integer version = null;
-            int lineNum = 0;
-            scanner = new Scanner(this.file);
-            try {
-                while (scanner.hasNext()) {
-                    String line = scanner.nextLine();
-                    lineNum++;
-                    if (line.length() > 0 && !line.startsWith("#")) {
-                        if (line.matches("!version\\s*\\d+\\s*")) {
-                            int tempVersion = 0;
-                            try {
-                                tempVersion = Integer.parseInt(line.substring(8).trim());
-                            } catch (NumberFormatException nfe) {
-                                XWarp.logger.severe("Version tag is invalid number.");
-                            }
-                            if (version == null) {
-                                version = tempVersion;
-                            } else if (version != tempVersion) {
-                                XWarp.logger.severe("Different version tags found (line: " + lineNum + "), choose first found: " + version);
-                            }
-                        } else {
-                            lines.add(line);
-                        }
-                    }
-                }
-            } finally {
-                scanner.close();
-            }
-
-            if (version == null) {
-                version = 0;
-                XWarp.logger.severe("No version tag found: " + version);
-            }
-            switch (version) {
-            case 0:
-                return getWarpsVersion0(lines, this.server.getWorlds().get(0));
-            case 1:
-                return getWarpsVersion1(lines, this.server);
-            case 2:
-                return getWarpsVersion2(lines, this.server);
-            case 3:
-                return getWarpsVersion3(lines, this.server);
-            case 4:
-                return getWarpsVersion4(lines, this.server);
-            default:
-                XWarp.logger.severe("Unknown version tag: " + version);
-                break;
-            }
+            rawLines.addAll(MinecraftUtil.readLines(this.file));
         } catch (FileNotFoundException e) {
             XWarp.logger.info("hmod file not found!");
+        } catch (IOException e) {
+            XWarp.logger.severe("Unable to read hmod file '" + this.file.getAbsolutePath() + "'.");
+        }
+
+        Integer version = processLines(rawLines);
+        if (version == null) {
+            version = 0;
+            XWarp.logger.severe("No version tag in hmod file '" + this.file.getAbsolutePath() + "' found.");
+        }
+        switch (version) {
+        case 0:
+            return getWarpsVersion0(rawLines, this.server.getWorlds().get(0));
+        case 1:
+            return getWarpsVersion1(rawLines, this.server);
+        case 2:
+            return getWarpsVersion2(rawLines, this.server);
+        case 3:
+            return getWarpsVersion3(rawLines, this.server);
+        case 4:
+            return getWarpsVersion4(rawLines, this.server);
+        default:
+            XWarp.logger.severe("Unknown version tag: " + version);
+            break;
         }
         return result;
+    }
+
+    private static Integer processLines(List<String> lines) {
+        List<String> rawLines = new ArrayList<String>(lines);
+        lines.clear();
+        Integer version = null;
+        int lineNum = -1;
+        for (String rawLine : rawLines) {
+            lineNum++;
+            if (rawLine.length() > 0 && !rawLine.startsWith("#")) {
+                if (rawLine.matches("!version\\s*\\d+\\s*")) {
+                    int tempVersion = 0;
+                    try {
+                        tempVersion = Integer.parseInt(rawLine.substring(8).trim());
+                    } catch (NumberFormatException nfe) {
+                        XWarp.logger.severe("Version tag is an invalid number.");
+                    }
+                    if (version == null) {
+                        version = tempVersion;
+                    } else if (version != tempVersion) {
+                        XWarp.logger.severe("Different version tags found (line: " + lineNum + "), choose first found: " + version);
+                    }
+                } else {
+                    lines.add(rawLine);
+                }
+            }
+        }
+        return version;
     }
 
     private static List<Warp> getWarpsVersion0(List<String> lines, World def) {
@@ -413,12 +416,16 @@ public class HModConnection implements DataConnection {
     }
 
     private void writeWarps(List<Warp> warps) {
+        this.writeWarps(warps, VERSION);
+    }
+
+    private void writeWarps(final List<Warp> warps, final int version) {
         try {
             FileWriter writer = new FileWriter(this.file);
             try {
-                writer.write("!version 4\n");
+                writer.write("!version " + version + "\n");
                 for (Warp warp : warps) {
-                    writeWarp(warp, writer, 4);
+                    writeWarp(warp, writer, version);
                 }
             } finally {
                 writer.close();
@@ -462,7 +469,7 @@ public class HModConnection implements DataConnection {
                     }
                 }
             }
-            writer.append(warpLine + "\n");
+            writer.append(warpLine.append("\n"));
         } catch (IOException ioe) {
             throw ioe;
         } catch (Exception e) {
@@ -523,11 +530,20 @@ public class HModConnection implements DataConnection {
     @Override
     public void addWarp(Warp... warps) {
         if (warps.length > 0) {
+            Integer version = null;
+            try {
+                processLines(MinecraftUtil.readLines(this.file));
+            } catch (FileNotFoundException e) {
+                XWarp.logger.info("Unable to determine version of the hmod file, because the file doesn't exists '" + this.file.getAbsolutePath() + "'.");
+            } catch (IOException e) {
+                XWarp.logger.severe("Unable to determine version while writing to hmod file '" + this.file.getAbsolutePath() + "'.");
+            }
+            if (version == null) {
+                version = VERSION;
+            }
             try {
                 FileWriter writer = new FileWriter(this.file, true);
                 try {
-                    // TODO: Determine version
-                    int version = 3;
                     for (Warp warp : warps) {
                         writeWarp(warp, writer, version);
                     }

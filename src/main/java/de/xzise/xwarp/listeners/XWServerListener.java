@@ -6,12 +6,12 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
 import org.dynmap.DynmapCommonAPI;
 
+import de.xzise.bukkit.util.wrappers.WrapperServerListener;
 import de.xzise.wrappers.Handler;
 import de.xzise.xwarp.PluginProperties;
 import de.xzise.xwarp.WarpManager;
-import de.xzise.xwarp.XWarp;
 
-public class XWServerListener extends BPUServerListener {
+public class XWServerListener extends WrapperServerListener {
 
     private final PluginProperties properties;
     private final WarpManager warpManager;
@@ -27,34 +27,34 @@ public class XWServerListener extends BPUServerListener {
     @Override
     public void onPluginEnable(PluginEnableEvent event) {
         super.onPluginEnable(event);
-        if (this.properties.isMarkerEnabled()) {
-            try {
-                if ("dynmap".equals(event.getPlugin().getDescription().getName())) {
-                    this.load(event.getPlugin());
-                }
-            } catch (NoSuchMethodError e) {
-                XWarp.logger.info("No dynmap marker API found.");
-            }
+        if (checkPlugin(event.getPlugin(), this.properties.getMarkerPlugin())) {
+            this.warpManager.setMarkerAPI(((DynmapCommonAPI) event.getPlugin()).getMarkerAPI());
         }
     }
 
     @Override
     public void onPluginDisable(PluginDisableEvent event) {
         super.onPluginDisable(event);
-        if (this.warpManager != null && "dynmap".equals(event.getPlugin().getDescription().getName())) {
+        if (checkPlugin(event.getPlugin(), this.properties.getMarkerPlugin())) {
             this.warpManager.setMarkerAPI(null);
         }
     }
 
-    public void load() {
-        Plugin p = this.manager.getPlugin("dynmap");
-        if (p != null && p.isEnabled()) {
-            this.load(p);
+    private static boolean checkPlugin(final Plugin plugin, final String markerPluginName) {
+        try {
+            return plugin.getDescription().getName().equalsIgnoreCase(markerPluginName) && plugin instanceof DynmapCommonAPI;
+        } catch (NoClassDefFoundError e) {
+            return false;
         }
     }
 
-    public void load(Plugin plugin) {
-        DynmapCommonAPI p = (DynmapCommonAPI) plugin;
-        this.warpManager.setMarkerAPI(p.getMarkerAPI());
+    public void load() {
+        super.load();
+        final String markerPluginName = this.properties.getMarkerPlugin();
+        for (Plugin plugin : this.manager.getPlugins()) {
+            if (plugin.isEnabled() && checkPlugin(plugin, markerPluginName)) {
+                this.warpManager.setMarkerAPI(((DynmapCommonAPI) plugin).getMarkerAPI());
+            }
+        }
     }
 }

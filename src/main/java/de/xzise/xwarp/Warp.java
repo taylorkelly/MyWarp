@@ -102,10 +102,6 @@ public class Warp extends DefaultWarpObject<WarpPermissions> {
         this(name, creator.getName(), creator.getName(), new LocationWrapper(creator.getLocation()));
     }
 
-    public Warp(String name, Location location) {
-        this(name, "", "No Player", new LocationWrapper(location));
-    }
-
     public void assignNewId() {
         this.index = nextIndex++;
     }
@@ -361,6 +357,12 @@ public class Warp extends DefaultWarpObject<WarpPermissions> {
         return listed;
     }
 
+    @Override
+    public void setName(String name) {
+        super.setName(name);
+        this.updateMarker();
+    }
+
     public boolean isFree() {
         return this.price < 0;
     }
@@ -380,6 +382,13 @@ public class Warp extends DefaultWarpObject<WarpPermissions> {
             this.marker.setLabel(this.getName());
             FixedLocation loc = this.getLocation();
             this.marker.setLocation(this.getWorld(), loc.x, loc.y, loc.z);
+            this.updateAdditionalMarkerData();
+        }
+    }
+
+    private void updateAdditionalMarkerData() {
+        if (this.marker != null) {
+            this.marker.setDescription("<strong>Owner:</strong> " + this.getOwner() + "<br><strong>Creator</strong>: " + this.getCreator());
         }
     }
 
@@ -418,20 +427,25 @@ public class Warp extends DefaultWarpObject<WarpPermissions> {
         return this.location.isValid();
     }
 
+    private void deleteMarker() {
+        // marker == null -> nothing to delete, markerset == null -> already invalid
+        if (this.marker != null && this.marker.getMarkerSet() != null) {
+            this.marker.deleteMarker();
+        }
+        this.marker = null;
+    }
+
     private void checkMarker() {
         if (this.manager != null) {
             final boolean visible = this.manager.getMarkerSet() != null && this.manager.getMarkerIcon() != null && this.manager.getMarkerVisibilities().contains(this.getVisibility());
-            if (marker != null) {
-                this.marker.deleteMarker();
-                this.marker = null;
-            }
+            this.deleteMarker();
             if (visible) {
                 FixedLocation loc = this.getLocation();
                 this.marker = this.manager.getMarkerSet().createMarker("xwarp.warp.obj" + markerId++, this.getName(), this.getWorld(), loc.x, loc.y, loc.z, this.manager.getMarkerIcon(), false);
+                this.updateAdditionalMarkerData();
             }
-        } else if (marker != null) {
-            this.marker.deleteMarker();
-            this.marker = null;
+        } else {
+            this.deleteMarker();
         }
     }
 

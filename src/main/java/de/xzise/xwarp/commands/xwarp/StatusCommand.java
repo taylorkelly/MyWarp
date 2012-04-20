@@ -33,6 +33,11 @@ public class StatusCommand extends CommonHelpableSubCommand {
             sender.sendMessage("Number of warp protection areas: " + managerSize(this.wpaManager));
             sender.sendMessage("Economy: " + this.economy.getWrapperName());
             sender.sendMessage("Permissions: " + this.permissions.getWrapperName());
+            if (this.warpManager.isLinkedWithMarkerAPI()) {
+                sender.sendMessage("Linked with dynmap marker API");
+            } else {
+                sender.sendMessage("Not linked with dynmap marker API");
+            }
             return true;
         } else {
             return false;

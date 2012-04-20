@@ -547,7 +547,7 @@ public class WarpManager extends CommonManager<Warp, WarpList<Warp>> {
         if (warp != null) {
             this.warpTo(warp, warper, warped, viaSign, this.properties.isForceToUsed());
         } else {
-            WarpManager.sendMissingWarp(name, owner, warped);
+            this.missing(name, owner, warped);
         }
     }
 
@@ -643,9 +643,22 @@ public class WarpManager extends CommonManager<Warp, WarpList<Warp>> {
 
     @Override
     public void missing(String name, String owner, CommandSender sender) {
-        sendMissingWarp(name, owner, sender);
+        if (owner == null || owner.isEmpty()) {
+            if (this.list.isAmbiguous(name)) {
+                sender.sendMessage(ChatColor.RED + "The warp name '" + name + "' is ambiguous.");
+            } else {
+                sender.sendMessage(ChatColor.RED + "Warp named '" + name + "' doesn't exist.");
+            }
+        } else {
+            sender.sendMessage(ChatColor.RED + "Player '" + owner + "' doesn't own a warp named '" + name + "'.");
+        }
     }
 
+    public int getNumberOfWarpsByName(final String warpName) {
+        return this.list.getNumberOfWarpsByName(warpName);
+    }
+
+    @Deprecated
     public static void sendMissingWarp(String name, String owner, CommandSender sender) {
         if (owner == null || owner.isEmpty()) {
             sender.sendMessage(ChatColor.RED + "Global warp '" + name + "' doesn't exist.");
@@ -660,10 +673,14 @@ public class WarpManager extends CommonManager<Warp, WarpList<Warp>> {
         sender.sendMessage(ChatColor.GREEN + "/warp invite \"" + warp.getName() + "\" " + warp.getOwner() + " <player>");
     }
 
-    public void setListed(Warp warp, CommandSender sender, Boolean listed) {
+    public void setListed(final Warp warp, final boolean listed) {
+        warp.setListed(listed);
+        this.data.updateVisibility(warp);
+    }
+
+    public void setListed(Warp warp, CommandSender sender, final boolean listed) {
         if (warp.canModify(sender, WarpPermissions.LIST)) {
-            warp.setListed(listed);
-            this.data.updateVisibility(warp);
+            this.setListed(warp, listed);
             sender.sendMessage("You have " + (listed ? "listed" : "unlisted") + " '" + ChatColor.GREEN + warp.getName() + ChatColor.WHITE + "'.");
         } else {
             sender.sendMessage(ChatColor.RED + "You do not have permission to change the listed status from '" + warp.getName() + "'");
@@ -783,6 +800,10 @@ public class WarpManager extends CommonManager<Warp, WarpList<Warp>> {
         } else {
             this.updateWarpMarkers();
         }
+    }
+
+    public boolean isLinkedWithMarkerAPI() {
+        return this.manager.getMarkerAPI() != null;
     }
 
     @Override

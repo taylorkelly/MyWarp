@@ -30,4 +30,12 @@ public class GlobalMap<T extends WarpObject<?>> {
     public void clear() {
         this.all.clear();
     }
+
+    public int size() {
+        return this.all.size();
+    }
+
+    public boolean isAmbiguous() {
+        return this.size() > 1;
+    }
 }

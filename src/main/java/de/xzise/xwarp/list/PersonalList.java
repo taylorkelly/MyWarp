@@ -137,6 +137,16 @@ public abstract class PersonalList<T extends WarpObject<?>, G extends GlobalMap<
         return this.getWarpObject(name, null, null);
     }
 
+    public boolean isAmbiguous(final String warpName) {
+        final G namedWarps = this.getByName(warpName);
+        return namedWarps != null && namedWarps.isAmbiguous();
+    }
+
+    public int getNumberOfWarpsByName(final String warpName) {
+        final G namedWarps = this.getByName(warpName);
+        return namedWarps == null ? 0 : namedWarps.size();
+    }
+
     public ImmutableSet<T> getWarpObjects() {
         Builder<T> builder = ImmutableSet.builder();
         for (Map<String, T> map : this.personalMap.values()) {

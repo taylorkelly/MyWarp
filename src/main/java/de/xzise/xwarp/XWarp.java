@@ -38,6 +38,7 @@ public class XWarp extends JavaPlugin {
 
     public String name;
     public String version;
+    private boolean enableCanceled = true;
 
     public XWarp() {
         super();
@@ -45,12 +46,33 @@ public class XWarp extends JavaPlugin {
 
     @Override
     public void onDisable() {
-        this.dataConnection.free();
-        XWarp.logger.disableMsg();
+        if (!this.enableCanceled) {
+            this.dataConnection.free();
+            XWarp.logger.disableMsg();
+        }
+    }
+
+    private void disable(String message) {
+        this.enableCanceled = true;
+        this.getServer().getLogger().severe("[" + this.getDescription().getName() + "] " + message);
+        this.getServer().getPluginManager().disablePlugin(this);
     }
 
     @Override
     public void onEnable() {
+        try {
+            if (MinecraftUtil.needUpdate(1, 3)) {
+                this.disable("You need to update Bukkit Plugin Utilities to at least 1.3.0!");
+                return;
+            }
+        } catch (NoSuchMethodError e) {
+            this.disable("You need to update Bukkit Plugin Utilities to at least 1.3.0!");
+            return;
+        } catch (NoClassDefFoundError e) {
+            this.disable("No Bukkit Plugin Utilities found!");
+            return;
+        }
+        this.enableCanceled = false;
         this.name = this.getDescription().getName();
         this.version = this.getDescription().getVersion();
         logger = new XLogger(this);
@@ -92,9 +114,9 @@ public class XWarp extends JavaPlugin {
             return;
         }
 
-        this.permissionHandler = new PermissionsHandler(this.getServer().getPluginManager(), properties.getPermissionsPlugin(), logger);
+        this.permissionHandler = new PermissionsHandler(this.getServer().getPluginManager(), this.getServer().getServicesManager(), properties.getPermissionsPlugin(), logger);
         permissions = this.permissionHandler;
-        this.economyHandler = new EconomyHandler(this.getServer().getPluginManager(), properties.getEconomyPlugin(), properties.getEconomyBaseAccount(), logger);
+        this.economyHandler = new EconomyHandler(this.getServer().getPluginManager(), this.getServer().getServicesManager(), properties.getEconomyPlugin(), properties.getEconomyBaseAccount(), logger);
 
         WarpManager warpManager = new WarpManager(this, this.economyHandler, properties, this.dataConnection);
         WPAManager wpaManager = new WPAManager(this, this.dataConnection, properties);
@@ -127,8 +149,6 @@ public class XWarp extends JavaPlugin {
         XWWorldListener worldListener = new XWWorldListener(this.getServer().getPluginManager(), warpManager, wpaManager);
 
         // Unless an event is called, to tell all enabled plugins
-        this.permissionHandler.load();
-        this.economyHandler.load();
         serverListener.load();
 
         // All worlds loaded before this plugin have to registered manually.
@@ -136,7 +156,8 @@ public class XWarp extends JavaPlugin {
             WorldPermission.register(world.getName(), this.getServer().getPluginManager());
         }
 
-        registerEvents(this, worldListener, playerListener, blockListener, serverListener, new XWEntityListener(properties, warpManager.getWarmUp()));
+        serverListener.register(this);
+        registerEvents(this, worldListener, playerListener, blockListener, new XWEntityListener(properties, warpManager.getWarmUp()));
         XWarp.logger.enableMsg();
     }
 

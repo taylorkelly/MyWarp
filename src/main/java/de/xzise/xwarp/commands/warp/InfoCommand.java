@@ -50,7 +50,8 @@ public class InfoCommand extends WarpCommand {
             return true;
         }
 
-        sender.sendMessage("Warp info: " + ChatColor.GREEN + warp.getName());
+        final int numberOfWarps = this.manager.getNumberOfWarpsByName(warp.getName());
+        sender.sendMessage("Warp info: '" + ChatColor.GREEN + warp.getName() + ChatColor.WHITE + "'" + (numberOfWarps > 1 ? " (" + ChatColor.GREEN + (numberOfWarps - 1) + ChatColor.WHITE + " warp(s) have the same name)" : ""));
         String world = warp.getLocationWrapper().getWorld();
         if (!warp.getLocationWrapper().isValid()) {
             sender.sendMessage(ChatColor.RED + "The location is invalid!");
@@ -96,11 +97,11 @@ public class InfoCommand extends WarpCommand {
         FixedLocation location = warp.getLocation();
         final String distanceText;
         if (sender instanceof Player) {
-            distanceText = ", distance = " + MinecraftUtil.getSIPrefixValue(((Player) sender).getLocation().distance(location.toLocation()), FORMAT) + "m";
+            distanceText = ", distance = " + ChatColor.GREEN + MinecraftUtil.getSIPrefixValue(((Player) sender).getLocation().distance(location.toLocation()), FORMAT) + "m";
         } else {
             distanceText = "";
         }
-        sender.sendMessage("Location: World = " + ChatColor.GREEN + world + ChatColor.WHITE + ", x = " + ChatColor.GREEN + location.getBlockX() + ChatColor.WHITE + ", y = " + ChatColor.GREEN + location.getBlockY() + ChatColor.WHITE + ", z = " + ChatColor.GREEN + location.getBlockZ() + distanceText);
+        sender.sendMessage("Location: World = " + ChatColor.GREEN + world + ChatColor.WHITE + ", x = " + ChatColor.GREEN + location.getBlockX() + ChatColor.WHITE + ", y = " + ChatColor.GREEN + location.getBlockY() + ChatColor.WHITE + ", z = " + ChatColor.GREEN + location.getBlockZ() + ChatColor.WHITE + distanceText);
 
         return true;
     }
